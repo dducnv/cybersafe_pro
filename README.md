@@ -1,3 +1,2 @@
 # cybersafe_pro
-
-A new Flutter project.
+PASSWORD MANAGER LOCAL APP - NO USE INTERNET, NO CLOUD SAVE
