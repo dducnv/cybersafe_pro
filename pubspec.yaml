@@ -1,0 +1,54 @@
+name: cybersafe_pro
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  #provider
+  provider: ^6.1.2
+  path_provider: ^2.1.5
+  path: ^1.9.1
+  #database
+  csv: ^6.0.0
+  objectbox: ^4.1.0
+  objectbox_flutter_libs: ^4.1.0
+  #security
+  crypto: ^3.0.6
+  envied: ^1.1.1
+  encrypt: ^5.0.3
+  local_auth: ^2.3.0
+  url_launcher: ^6.3.1
+  flutter_secure_storage: ^9.2.4
+  #util
+  intl: ^0.20.2
+  lottie: ^3.3.1
+  timezone: ^0.10.0
+  pie_chart: ^5.4.0
+  share_plus: ^10.1.4
+  flutter_svg: ^2.0.17
+  image_picker: ^1.1.2
+  image_cropper: ^9.0.0
+  in_app_review: ^2.0.10
+  permission_handler: ^11.4.0
+  pin_code_fields: ^8.0.1
+  qr_code_scanner: ^1.0.1
+  package_info_plus: ^8.3.0
+  flutter_native_splash: ^2.4.5
+  password_strength_checker: ^1.2.4
+  scrollable_positioned_list: ^0.3.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  envied_generator: ^1.1.1
+  build_runner: ^2.4.15
+  objectbox_generator: ^4.1.0
+
+flutter:
+  uses-material-design: true
