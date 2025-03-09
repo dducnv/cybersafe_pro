@@ -1,32 +1,80 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import '../../../providers/theme_provider.dart';
 
-class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const HomeAppBar({super.key});
+class HomeAppBarCustom extends StatefulWidget implements PreferredSizeWidget {
+  final bool isDesktop;
+  final GlobalKey<ScaffoldState>? scaffoldKey;
+  @override
+  final Size preferredSize;
+
+  const HomeAppBarCustom({
+    super.key,
+    this.isDesktop = false,
+    this.scaffoldKey,
+  }) : preferredSize = const Size.fromHeight(kToolbarHeight);
 
   @override
+  State<HomeAppBarCustom> createState() => _HomeAppBarCustomState();
+}
+
+class _HomeAppBarCustomState extends State<HomeAppBarCustom> {
+  @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = themeProvider.isDarkMode;
+
     return AppBar(
-      title: const Text('CyberSafe Pro'),
+      elevation: 0,
+      leading: widget.scaffoldKey != null ? IconButton(
+        icon: const Icon(Icons.menu),
+        onPressed: () {
+          widget.scaffoldKey?.currentState?.openDrawer();
+        },
+      ) : null,
+      title: const Text(
+        "CyberSafe PRO",
+        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      ),
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Theme.of(context).colorScheme.surface,
+        statusBarIconBrightness: Theme.of(context).brightness,
+      ),
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      scrolledUnderElevation: 0,
       actions: [
-        // Notification button
+        // Theme toggle button
         IconButton(
-          icon: const Icon(Icons.notifications),
-          onPressed: () {
-            // Handle notifications
-          },
+          icon: Icon(
+            isDark ? Icons.light_mode : Icons.dark_mode,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          onPressed: () => themeProvider.toggleTheme(),
         ),
-        // Profile button
         IconButton(
-          icon: const Icon(Icons.account_circle),
-          onPressed: () {
-            // Handle profile
-          },
+          icon: Icon(
+            Icons.update_rounded,
+            color: Theme.of(context).colorScheme.primary,
+            size: 24,
+          ),
+          onPressed: () {},
         ),
-        const SizedBox(width: 16),
+        Visibility(
+          visible: !widget.isDesktop,
+          child: IconButton(
+            icon: const Icon(Icons.search_rounded, size: 24),
+            onPressed: () {},
+          ),
+        ),
+        Visibility(
+          visible: !widget.isDesktop,
+          child: IconButton(
+            icon: const Icon(Icons.settings_rounded, size: 24),
+            onPressed: () {},
+          ),
+        ),
       ],
     );
   }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-} 
+}

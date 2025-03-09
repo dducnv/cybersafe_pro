@@ -1,0 +1,344 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "2:2383928923318499737",
+      "lastPropertyId": "6:5630134015553611220",
+      "name": "AccountCustomFieldOjbModel",
+      "properties": [
+        {
+          "id": "1:4090243857449051327",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8108096208718074723",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:8130378122510920081",
+          "name": "value",
+          "type": 9
+        },
+        {
+          "id": "4:195803133803081672",
+          "name": "hintText",
+          "type": 9
+        },
+        {
+          "id": "5:1528464119627355137",
+          "name": "typeField",
+          "type": 9
+        },
+        {
+          "id": "6:5630134015553611220",
+          "name": "accountId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "1:3516835503781729309",
+          "relationTarget": "AccountOjbModel"
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "3:1878628315045204891",
+      "lastPropertyId": "12:2840453311877770067",
+      "name": "AccountOjbModel",
+      "properties": [
+        {
+          "id": "1:1372285699841932207",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4300649734842015689",
+          "name": "title",
+          "type": 9
+        },
+        {
+          "id": "3:8825276413177178007",
+          "name": "email",
+          "type": 9
+        },
+        {
+          "id": "4:2443423335981930991",
+          "name": "password",
+          "type": 9
+        },
+        {
+          "id": "5:4271078033416534245",
+          "name": "notes",
+          "type": 9
+        },
+        {
+          "id": "6:3461382277341645239",
+          "name": "icon",
+          "type": 9
+        },
+        {
+          "id": "7:2096088798621611869",
+          "name": "passwordUpdatedAt",
+          "type": 10
+        },
+        {
+          "id": "8:3636003688389024147",
+          "name": "createdAt",
+          "type": 10
+        },
+        {
+          "id": "9:7012549897201973190",
+          "name": "updatedAt",
+          "type": 10
+        },
+        {
+          "id": "10:6070888810759960578",
+          "name": "categoryId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "2:1428949723357222232",
+          "relationTarget": "CategoryOjbModel"
+        },
+        {
+          "id": "11:7392309477732683641",
+          "name": "iconCustomId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "3:2785332030754345948",
+          "relationTarget": "IconCustomModel"
+        },
+        {
+          "id": "12:2840453311877770067",
+          "name": "totpId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "4:5902132704694811328",
+          "relationTarget": "TOTPOjbModel"
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "4:7418765908887414954",
+      "lastPropertyId": "7:5516788290996013881",
+      "name": "CategoryOjbModel",
+      "properties": [
+        {
+          "id": "1:3137172756682708238",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8885917553095961023",
+          "name": "categoryName",
+          "type": 9
+        },
+        {
+          "id": "3:8159939972600516598",
+          "name": "icon",
+          "type": 9
+        },
+        {
+          "id": "4:1818112331230895039",
+          "name": "color",
+          "type": 6
+        },
+        {
+          "id": "5:5584116146259932664",
+          "name": "indexPos",
+          "type": 6
+        },
+        {
+          "id": "6:3896970218096645113",
+          "name": "createdAt",
+          "type": 10
+        },
+        {
+          "id": "7:5516788290996013881",
+          "name": "updatedAt",
+          "type": 10
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "5:3055995045590780828",
+      "lastPropertyId": "6:4362901113340552298",
+      "name": "IconCustomModel",
+      "properties": [
+        {
+          "id": "1:6294659331695565505",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2757664982512354282",
+          "name": "path",
+          "type": 9
+        },
+        {
+          "id": "3:7015245297783846823",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "4:8233014793896729974",
+          "name": "color",
+          "type": 6
+        },
+        {
+          "id": "5:4115719657313187141",
+          "name": "createdAt",
+          "type": 10
+        },
+        {
+          "id": "6:4362901113340552298",
+          "name": "updatedAt",
+          "type": 10
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "6:2551119760188800600",
+      "lastPropertyId": "5:6986931833305867789",
+      "name": "PasswordHistory",
+      "properties": [
+        {
+          "id": "1:3077352258078751429",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4186192472090827493",
+          "name": "password",
+          "type": 9
+        },
+        {
+          "id": "3:1488242565971585751",
+          "name": "createdAt",
+          "type": 10
+        },
+        {
+          "id": "4:5826854046891571145",
+          "name": "updatedAt",
+          "type": 10
+        },
+        {
+          "id": "5:6986931833305867789",
+          "name": "accountId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "5:7939173635836407566",
+          "relationTarget": "AccountOjbModel"
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "8:7120869973844560665",
+      "lastPropertyId": "9:7340138041424992946",
+      "name": "TOTPOjbModel",
+      "properties": [
+        {
+          "id": "1:7287059395120116218",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1233602503582447821",
+          "name": "secretKey",
+          "type": 9,
+          "flags": 2048,
+          "indexId": "7:5998668159314400233"
+        },
+        {
+          "id": "3:1904737723347952021",
+          "name": "algorithm",
+          "type": 9,
+          "flags": 2048,
+          "indexId": "8:5371294220000771482"
+        },
+        {
+          "id": "4:6206671128466549134",
+          "name": "digits",
+          "type": 6
+        },
+        {
+          "id": "5:1733067822921561598",
+          "name": "period",
+          "type": 6
+        },
+        {
+          "id": "6:9218111210333108305",
+          "name": "isShowToHome",
+          "type": 1
+        },
+        {
+          "id": "7:2249178839472043866",
+          "name": "createdAt",
+          "type": 10
+        },
+        {
+          "id": "8:3039338650922470844",
+          "name": "updatedAt",
+          "type": 10
+        },
+        {
+          "id": "9:7340138041424992946",
+          "name": "accountId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "9:3150162145201670091",
+          "relationTarget": "AccountOjbModel"
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "8:7120869973844560665",
+  "lastIndexId": "9:3150162145201670091",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [
+    4576241909475943585,
+    6213000607887385064
+  ],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [
+    2342124192628778866,
+    3504522657512904849,
+    3078649058524668291,
+    4374515946613989280,
+    7006581877455254584,
+    2274224845818563168,
+    5993330135503332106,
+    3251973262211811324,
+    8847343354232474621,
+    3223109459863103305,
+    5418969512423873346,
+    1473061717587223460,
+    5751746544805988232,
+    5284008716632940634,
+    5508023974651288282,
+    2179601716462441340,
+    9157959535894620892,
+    4155842190920700882,
+    6711675260948032995,
+    8055032713108837086,
+    8096244496920815466
+  ],
+  "retiredRelationUids": [],
+  "version": 1
+}

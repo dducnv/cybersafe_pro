@@ -19,7 +19,7 @@ class HomeDesktopLayout extends StatelessWidget {
           Expanded(
             child: Column(
               children: [
-                const HomeAppBar(),
+                const HomeAppBarCustom(),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(24.0),

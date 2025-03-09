@@ -52,13 +52,10 @@ class LocalAuthConfig {
     if (_canCheckBiometrics != null) {
       return _canCheckBiometrics!;
     }
-    bool canCheckBiometrics = false;
     try {
-      canCheckBiometrics = await auth.canCheckBiometrics;
-      final bool canAuthenticateWithBiometrics = await auth.canCheckBiometrics;
-      final bool canAuthenticate = await auth.isDeviceSupported();
-      _canCheckBiometrics = canAuthenticateWithBiometrics && canAuthenticate;
+      _canCheckBiometrics = await auth.canCheckBiometrics;
     } on PlatformException catch (e) {
+      // customLogger(msg: "canCheckBiometrics: $e", typeLogger: TypeLogger.error);
       _canCheckBiometrics = false;
     }
     return _canCheckBiometrics!;
@@ -66,7 +63,7 @@ class LocalAuthConfig {
 
   Future<void> openUseBiometric() async {
     String? enableLocalAuth = await SecureStorage.instance
-        .read(SecureStorageKeys.isEnableLocalAuth.name);
+        .read(key: SecureStorageKeys.isEnableLocalAuth.name);
     if (enableLocalAuth == null || enableLocalAuth == "false") {
       _isOpenUseBiometric = false;
     } else {
@@ -135,8 +132,8 @@ class LocalAuthConfig {
   // Lưu trạng thái sử dụng sinh trắc học
   Future<void> setUseBiometric(bool enable) async {
     await SecureStorage.instance.save(
-      SecureStorageKeys.isEnableLocalAuth.name,
-      enable.toString(),
+      key: SecureStorageKeys.isEnableLocalAuth.name,
+      value: enable.toString(),
     );
     _isOpenUseBiometric = enable;
   }

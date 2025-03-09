@@ -1,0 +1,108 @@
+import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
+import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
+import '../../objectbox.g.dart';
+import '../objectbox.dart';
+
+class AccountBox {
+  static final box = ObjectBox.instance.store.box<AccountOjbModel>();
+
+  // Lấy tất cả tài khoản
+  static List<AccountOjbModel> getAll() => box.getAll();
+  
+  // Lấy tài khoản theo category
+  static List<AccountOjbModel> getByCategory(CategoryOjbModel category) {
+    return box.query(AccountOjbModel_.category.equals(category.id))
+             .order(AccountOjbModel_.title)
+             .build()
+             .find();
+  }
+
+  // Lấy tài khoản theo ID
+  static AccountOjbModel? getById(int id) => box.get(id);
+
+  // Tìm kiếm tài khoản theo title
+  static List<AccountOjbModel> searchByTitle(String keyword) {
+    return box.query(AccountOjbModel_.title.contains(keyword, caseSensitive: false))
+             .order(AccountOjbModel_.title)
+             .build()
+             .find();
+  }
+
+  // Tìm kiếm tài khoản theo email
+  static List<AccountOjbModel> searchByEmail(String email) {
+    return box.query(AccountOjbModel_.email.contains(email, caseSensitive: false))
+             .order(AccountOjbModel_.email)
+             .build()
+             .find();
+  }
+
+  // Lấy tài khoản được tạo gần đây
+  static List<AccountOjbModel> getRecentAccounts({int limit = 10}) {
+    final results = box.query()
+             .order(AccountOjbModel_.createdAt, flags: Order.descending)
+             .build()
+             .find();
+    return results.take(limit).toList();
+  }
+
+  // Lấy tài khoản được cập nhật gần đây
+  static List<AccountOjbModel> getRecentlyUpdated({int limit = 10}) {
+    final results = box.query()
+             .order(AccountOjbModel_.updatedAt, flags: Order.descending)
+             .build()
+             .find();
+    return results.take(limit).toList();
+  }
+
+  // Lấy số lượng tài khoản
+  static int count() => box.count();
+
+  // Lấy số lượng tài khoản theo category
+  static int countByCategory(CategoryOjbModel category) {
+    return box.query(AccountOjbModel_.category.equals(category.id))
+             .build()
+             .count();
+  }
+
+  // Thêm hoặc cập nhật tài khoản
+  static int put(AccountOjbModel account) {
+    account.updatedAt = DateTime.now();
+    return box.put(account);
+  }
+
+  // Thêm hoặc cập nhật nhiều tài khoản
+  static List<int> putMany(List<AccountOjbModel> accounts) {
+    for (var account in accounts) {
+      account.updatedAt = DateTime.now();
+    }
+    return box.putMany(accounts);
+  }
+
+  // Xóa tài khoản theo ID
+  static bool delete(int id) => box.remove(id);
+
+  // Xóa tất cả tài khoản
+  static void deleteAll() => box.removeAll();
+
+  // Theo dõi thay đổi tất cả tài khoản
+  static Stream<List<AccountOjbModel>> watchAll() {
+    return box.query()
+             .order(AccountOjbModel_.title)
+             .watch(triggerImmediately: true)
+             .map((query) => query.find());
+  }
+
+  // Theo dõi thay đổi tài khoản theo category
+  static Stream<List<AccountOjbModel>> watchByCategory(CategoryOjbModel category) {
+    return box.query(AccountOjbModel_.category.equals(category.id))
+             .order(AccountOjbModel_.title)
+             .watch(triggerImmediately: true)
+             .map((query) => query.find());
+  }
+
+  // Theo dõi số lượng tài khoản
+  static Stream<int> watchCount() {
+    return box.query().watch(triggerImmediately: true)
+             .map((query) => query.count());
+  }
+} 
