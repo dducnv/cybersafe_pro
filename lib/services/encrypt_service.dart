@@ -10,8 +10,8 @@ class EncryptData {
   EncryptData._internal();
 
   static const int _keyLength = 32; // 256 bits
-  static const int _ivLength = 16; // 128 bits
-  static const int _iterations = 16000;
+  static const int _ivLength = 12; // 96 bits for GCM
+  static const int _iterations = 20000;
   
   // Cache cho các encrypter để tránh tạo lại nhiều lần
   final Map<String, encrypt.Encrypter> _encrypterCache = {};
@@ -51,7 +51,7 @@ class EncryptData {
     final keyString = base64.encode(key.bytes);
     if (!_encrypterCache.containsKey(keyString)) {
       _encrypterCache[keyString] = encrypt.Encrypter(
-        encrypt.AES(key, mode: encrypt.AESMode.cbc, padding: 'PKCS7')
+        encrypt.AES(key, mode: encrypt.AESMode.gcm) // Changed to GCM mode
       );
     }
     return _encrypterCache[keyString]!;
@@ -120,7 +120,7 @@ class EncryptData {
     
     // Tạo encrypter và IV
     final encrypter = encrypt.Encrypter(
-      encrypt.AES(derivedKey, mode: encrypt.AESMode.cbc, padding: 'PKCS7')
+      encrypt.AES(derivedKey, mode: encrypt.AESMode.gcm) // Changed to GCM mode
     );
     final iv = encrypt.IV(Uint8List.fromList(ivBytes));
     
@@ -139,7 +139,6 @@ class EncryptData {
 
   // Giải mã dữ liệu
   String decryptFernet({required String value, required String key}) {
-    final stopwatch = Stopwatch()..start();
     try {
       if (key.isEmpty || value.isEmpty) return value;
       
@@ -166,12 +165,10 @@ class EncryptData {
         final derivedKey = encrypt.Key(Uint8List.fromList(keyBytes));
         
         final encrypter = encrypt.Encrypter(
-          encrypt.AES(derivedKey, mode: encrypt.AESMode.cbc, padding: 'PKCS7')
+          encrypt.AES(derivedKey, mode: encrypt.AESMode.gcm) // Changed to GCM mode
         );
         
         final result = encrypter.decrypt(data, iv: iv);
-        final elapsedTime = stopwatch.elapsed;
-        debugPrint('decryptFernetFast: ${result.length} chars - Thao tác hoàn thành trong: ${elapsedTime.inMilliseconds}ms');
         
         // Lưu kết quả vào cache
         _decryptionResultCache[resultCacheKey] = result;
@@ -204,10 +201,6 @@ class EncryptData {
       // Lấy encrypter từ cache
       final encrypter = _getEncrypter(derivedKey);
       final result = encrypter.decrypt(data, iv: iv);
-      
-      final elapsedTime = stopwatch.elapsed;
-      debugPrint('decryptFernet: ${result.length} chars - Thao tác hoàn thành trong: ${elapsedTime.inMilliseconds}ms');
-      
       // Lưu kết quả vào cache
       _decryptionResultCache[resultCacheKey] = result;
       
@@ -217,31 +210,7 @@ class EncryptData {
       return value;
     }
   }
-
-  // Hàm giải mã trong isolate
-  static String _decryptInIsolate(Map<String, dynamic> params) {
-    final encryptedBase64 = params['data'] as String;
-    final key = params['key'] as String;
-    final salt = params['salt'] as List<int>;
-    final ivBase64 = params['iv'] as String;
-    
-    // Tạo key từ password và salt
-    final generator = pc.PBKDF2KeyDerivator(pc.HMac(pc.SHA256Digest(), 64));
-    generator.init(pc.Pbkdf2Parameters(Uint8List.fromList(salt), _iterations, _keyLength));
-    final derivedKeyBytes = generator.process(Uint8List.fromList(utf8.encode(key)));
-    final derivedKey = encrypt.Key(derivedKeyBytes);
-    
-    // Tạo encrypter và IV
-    final encrypter = encrypt.Encrypter(
-      encrypt.AES(derivedKey, mode: encrypt.AESMode.cbc, padding: 'PKCS7')
-    );
-    final iv = encrypt.IV(base64.decode(ivBase64));
-    final data = encrypt.Encrypted.fromBase64(encryptedBase64);
-    
-    // Giải mã
-    return encrypter.decrypt(data, iv: iv);
-  }
-
+  
   List<int> encryptFernetBytes({required List<int> data, required String key}) {
     try {
       if (data.isEmpty) return [];
@@ -327,7 +296,7 @@ class EncryptData {
       // Tạo IV
       final iv = _generateIV();
       final encrypter = encrypt.Encrypter(
-        encrypt.AES(derivedKey, mode: encrypt.AESMode.cbc, padding: 'PKCS7')
+        encrypt.AES(derivedKey, mode: encrypt.AESMode.gcm) // Changed to GCM mode
       );
       
       final encrypted = encrypter.encrypt(value, iv: iv);
@@ -363,4 +332,3 @@ class EncryptData {
     }
   }
 }
-

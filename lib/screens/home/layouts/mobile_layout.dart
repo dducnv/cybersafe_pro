@@ -1,9 +1,11 @@
+import 'dart:io';
+
 import 'package:cybersafe_pro/components/bottom_sheets/create_category_bottom_sheet.dart';
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
-import 'package:cybersafe_pro/screens/create_account/create_account_screen.dart';
+import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/account_list_tile_widgets.dart';
 import 'package:cybersafe_pro/widgets/card_item.dart';
@@ -24,11 +26,37 @@ class HomeMobileLayout extends StatefulWidget {
 class _HomeMobileLayoutState extends State<HomeMobileLayout> {
   final ItemScrollController itemScrollController = ItemScrollController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final ScrollController _scrollController = ScrollController();
+  final ValueNotifier<bool> _showScrollToTopNotifier = ValueNotifier<bool>(false);
 
   @override
   void initState() {
     super.initState();
-    // Load accounts khi màn hình được khởi tạo
+    // Thêm listener để theo dõi vị trí cuộn
+    _scrollController.addListener(_scrollListener);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
+    _showScrollToTopNotifier.dispose();
+    super.dispose();
+  }
+
+  // Hàm theo dõi vị trí cuộn để hiển thị/ẩn nút đẩy lên đầu trang
+  void _scrollListener() {
+    // Hiển thị nút khi cuộn xuống quá 300 pixel
+    if (_scrollController.offset >= 300 && !_showScrollToTopNotifier.value) {
+      _showScrollToTopNotifier.value = true;
+    } else if (_scrollController.offset < 300 && _showScrollToTopNotifier.value) {
+      _showScrollToTopNotifier.value = false;
+    }
+  }
+
+  // Hàm cuộn lên đầu trang
+  void _scrollToTop() {
+    _scrollController.animateTo(0, duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
   }
 
   @override
@@ -38,6 +66,7 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
 
     return Scaffold(
       key: _scaffoldKey,
+      extendBody: true,
       appBar: HomeAppBarCustom(scaffoldKey: _scaffoldKey),
       drawer: Drawer(
         child: Column(
@@ -107,13 +136,45 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
           child: FloatingActionButton(
             shape: const CircleBorder(),
             onPressed: () async {
-              await Navigator.of(context).push(MaterialPageRoute(builder: (context) => CreateAccountScreen()));
+              await AppRoutes.navigateTo(context, AppRoutes.createAccount);
             },
             child: Icon(Icons.add, size: 18.sp),
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        height: 60.h,
+        padding: EdgeInsets.zero,
+        color: Theme.of(context).colorScheme.surface,
+        notchMargin: 8,
+        elevation: 8,
+        shape: const CircularNotchedRectangle(),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            SizedBox(width: 16),
+            // Nút Home
+            Expanded(child: _buildNavItem(icon: Icons.key_rounded, onTap: () {})),
+            // Nút Danh mục
+            Expanded(
+              child: _buildNavItem(
+                icon: Icons.password_rounded,
+                onTap: () {
+                  AppRoutes.navigateTo(context, AppRoutes.passwordGenerator);
+                },
+              ),
+            ),
+            // Khoảng trống cho FAB
+            const SizedBox(width: 80),
+            // Nút Tìm kiếm
+            Expanded(child: _buildNavItem(icon: Icons.search_outlined, onTap: () {})),
+            // Nút cuộn lên đầu trang
+            Expanded(child: _buildNavItem(icon: Icons.settings_rounded, onTap: () {})),
+            SizedBox(width: 16),
+          ],
+        ),
+      ),
       body: Column(
         children: [
           Expanded(
@@ -123,27 +184,66 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                 clipBehavior: Clip.antiAlias,
                 borderRadius: BorderRadius.circular(25),
                 child: RefreshIndicator(
-                  onRefresh: () => context.read<AccountProvider>().getAccounts(),
-                  child: Selector<AccountProvider, Map<int, List<AccountOjbModel>>>(
-                    selector: (_, provider) => provider.groupedAccounts,
-                    builder: (context, groupedAccounts, child) {
+                  onRefresh: () {
+                    return Future.wait([context.read<CategoryProvider>().getCategories(), context.read<AccountProvider>().refreshAccounts(resetExpansion: true)]);
+                  },
+                  child: Consumer<AccountProvider>(
+                    builder: (context, accountProvider, child) {
+                      final groupedAccounts = accountProvider.groupedAccounts;
+
                       if (groupedAccounts.isEmpty) {
-                        return const Center(child: Text('Chưa có tài khoản nào'));
+                        return _buildEmptyData();
                       }
 
                       return ListView.builder(
+                        controller: _scrollController, // Sử dụng ScrollController
                         itemCount: groupedAccounts.length,
                         shrinkWrap: true,
                         itemBuilder: (context, index) {
-                          final category = context.read<CategoryProvider>().categories[groupedAccounts.keys.toList()[index]];
-                          final accounts = groupedAccounts[category?.id]??[];
+                          final categoryKeys = groupedAccounts.keys.toList();
+                          final categoryId = categoryKeys[index];
+                          final category = context.read<CategoryProvider>().categories[categoryId];
+                          final accounts = groupedAccounts[categoryId] ?? [];
+
                           return CardItem<AccountOjbModel>(
                             items: accounts,
-                            title:category?.categoryName ?? "",
+                            title: category?.categoryName ?? "",
+                            totalItems: accountProvider.getTotalAccountsInCategory(categoryId),
+                            showSeeMore: accountProvider.canExpandCategory(categoryId),
+                            onSeeMoreItems: () {
+                              accountProvider.loadMoreAccountsForCategory(categoryId);
+                            },
                             itemBuilder: (account, itemIndex) {
                               return AccountItemWidget(
                                 accountModel: account,
                                 isLastItem: itemIndex == accounts.length - 1,
+                                onLongPress: () {},
+                                onCallBackPop: () {},
+                                onTapSubButton: () {
+                                  showDialog(
+                                    context: context,
+                                    builder:
+                                        (context) => AlertDialog(
+                                          title: Text('Xóa tài khoản'),
+                                          content: Text('Bạn có chắc chắn muốn xóa tài khoản này không?'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () async {
+                                               Navigator.pop(context);
+                                               await context.read<AccountProvider>().deleteAccount(account);
+                                              },
+                                              child: Text('Xóa'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: Text('Hủy'),
+                                            ),
+                                          ],
+                                        ),
+                                  );
+                                },
                                 onSelect: () {
                                   // Xử lý khi tap vào account
                                 },
@@ -158,54 +258,103 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
               ),
             ),
           ),
-          Padding(padding: EdgeInsets.only(top: 16.h, bottom: 65 + 16 + 40 + 16), child: _buildCategory()),
+          Padding(padding: EdgeInsets.only(top: 16, bottom: Platform.isIOS ? 148 : 113), child: _buildCategory()),
         ],
       ),
     );
   }
 
   Widget _buildCategory() {
-    return SizedBox(
-      height: 40.h,
-      child: Row(
-        children: [
-          IconButton(
-            style: ButtonStyle(minimumSize: WidgetStateProperty.all(Size(40.w, 40.h))),
-            onPressed: () {
-              showCreateCategoryBottomSheet(context);
-            },
-            icon: Center(child: Icon(Icons.add, size: 20.sp)),
-          ),
-          Flexible(
-            child: SizedBox(
-              height: 35.h,
-              child: Selector<CategoryProvider, List<CategoryOjbModel>>(
-                selector: (context, provider) => provider.categoryList,
-                builder: (context, value, child) {
-                  return ScrollablePositionedList.separated(
-                    separatorBuilder: (context, index) => const SizedBox(width: 10),
-                    scrollDirection: Axis.horizontal,
-                    itemScrollController: itemScrollController,
-                    itemCount: value.length,
-                    itemBuilder: (context, index) {
-                      return Material(
-                        child: Ink(
-                          decoration: BoxDecoration(color: Colors.grey.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(25)),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(25),
-                            onTap: () {},
-                            child: Padding(padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 2.h), child: Center(child: Text(value[index].categoryName, style: TextStyle(fontSize: 14.sp)))),
-                          ),
-                        ),
+    return Column(
+      children: [
+        // Padding(
+        //   padding: const EdgeInsets.symmetric(horizontal:16).copyWith(bottom:10),
+        //   child: CustomTextField(
+        //     borderRadius: BorderRadius.circular(50),
+        //     controller: TextEditingController(),
+        //     prefixIcon:Icon(Icons.search),
+        //     readOnly:true,
+        //     hintText:"Tìm kiêm",
+        //     onTap:(){},
+        //     textInputAction: TextInputAction.search,
+        //     textAlign: TextAlign.start),
+        // ),
+        SizedBox(
+          height: 40.h,
+          child: Row(
+            children: [
+              IconButton(
+                style: ButtonStyle(minimumSize: WidgetStateProperty.all(Size(40.w, 40.h))),
+                onPressed: () {
+                  showCreateCategoryBottomSheet(context);
+                },
+                icon: Center(child: Icon(Icons.add, size: 20.sp)),
+              ),
+              Flexible(
+                child: SizedBox(
+                  height: 35.h,
+                  child: Selector<CategoryProvider, List<CategoryOjbModel>>(
+                    selector: (context, provider) => provider.categoryList,
+                    builder: (context, value, child) {
+                      return ScrollablePositionedList.separated(
+                        separatorBuilder: (context, index) => const SizedBox(width: 10),
+                        scrollDirection: Axis.horizontal,
+                        itemScrollController: itemScrollController,
+                        itemCount: value.length,
+                        padding: EdgeInsets.only(right: 16),
+                        itemBuilder: (context, index) {
+                          return Material(
+                            child: Ink(
+                              decoration: BoxDecoration(color: Colors.grey.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(25)),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(25),
+                                onTap: () {},
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 2.h),
+                                  child: Center(child: Text(value[index].categoryName, style: TextStyle(fontSize: 14.sp))),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       );
                     },
-                  );
-                },
+                  ),
+                ),
               ),
-            ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyData() {
+    return Center(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(height: 100),
+          Image.asset("assets/images/exclamation-mark.png", width: 60.w, height: 60.h),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Nhấn", style: TextStyle(fontSize: 16.sp)),
+              const SizedBox(width: 5),
+              CircleAvatar(child: Icon(Icons.add, size: 21.sp)),
+              const SizedBox(width: 5),
+              Text("để thêm tài khoản", style: TextStyle(fontSize: 16.sp)),
+            ],
           ),
         ],
       ),
     );
+  }
+
+  // Helper method để tạo các mục trong thanh điều hướng
+  Widget _buildNavItem({required IconData icon, required VoidCallback? onTap}) {
+    return InkWell(onTap: onTap, borderRadius: BorderRadius.circular(16), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), child: Icon(icon, size: 24.sp)));
   }
 }

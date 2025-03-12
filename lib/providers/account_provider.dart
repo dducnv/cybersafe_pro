@@ -3,9 +3,12 @@ import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
 import 'package:cybersafe_pro/database/models/totp_ojb_model.dart';
 import 'package:cybersafe_pro/database/boxes/account_box.dart';
-import 'package:cybersafe_pro/services/enscrypt_app_data.dart';
+import 'package:cybersafe_pro/database/boxes/category_box.dart';
+import 'package:cybersafe_pro/services/encrypt_app_data.dart';
+import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:flutter/material.dart';
 import 'package:cybersafe_pro/providers/create_account_form_provider.dart';
+import 'dart:math' as math;
 
 class AccountProvider extends ChangeNotifier {
   final Map<int, AccountOjbModel> _accounts = {};
@@ -20,6 +23,15 @@ class AccountProvider extends ChangeNotifier {
 
   // Map để lưu accounts theo category
   final Map<int, List<AccountOjbModel>> _groupedCategoryIdAccounts = {};
+  
+  // Map để lưu trạng thái hiển thị của mỗi category (true = hiển thị tất cả, false = hiển thị giới hạn)
+  final Map<int, bool> _expandedCategories = {};
+  
+  // Số lượng account hiển thị ban đầu cho mỗi category
+  static const int INITIAL_ACCOUNTS_PER_CATEGORY = 5;
+
+  // Số lượng account tải thêm mỗi lần nhấn "Xem thêm"
+  static const int LOAD_MORE_ACCOUNTS_COUNT = 10;
 
   // Thêm cache cho basic info
   final Map<int, AccountOjbModel> _basicInfoCache = {};
@@ -30,6 +42,12 @@ class AccountProvider extends ChangeNotifier {
   // Thêm batch size để xử lý từng phần
   static const int BATCH_SIZE = 20;
 
+  // Map để lưu số lượng tài khoản trong mỗi category
+  final Map<int, int> _categoryAccountCounts = {};
+
+  // Thêm map để lưu số lượng tài khoản hiển thị cho mỗi category
+  final Map<int, int> _visibleAccountsPerCategory = {};
+
   // Getters
   Map<int, AccountOjbModel> get accounts => Map.unmodifiable(_accounts);
   List<AccountOjbModel> get accountList => _accounts.values.toList();
@@ -37,8 +55,83 @@ class AccountProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  // Getter cho grouped accounts
-  Map<int, List<AccountOjbModel>> get groupedAccounts => Map.unmodifiable(_groupedCategoryIdAccounts);
+  // Getter cho grouped accounts với giới hạn hiển thị
+  Map<int, List<AccountOjbModel>> get groupedAccounts {
+    final result = <int, List<AccountOjbModel>>{};
+    
+    _groupedCategoryIdAccounts.forEach((categoryId, accounts) {
+      // Nếu category đã được mở rộng hoàn toàn, hiển thị tất cả
+      if (_expandedCategories[categoryId] == true) {
+        result[categoryId] = accounts;
+      } 
+      // Nếu đã nhấn "Xem thêm" ít nhất một lần, hiển thị số lượng đã chỉ định
+      else if (_visibleAccountsPerCategory.containsKey(categoryId)) {
+        final visibleCount = _visibleAccountsPerCategory[categoryId]!;
+        result[categoryId] = accounts.take(visibleCount).toList();
+      }
+      // Nếu số lượng account ít hơn giới hạn ban đầu, hiển thị tất cả
+      else if (accounts.length <= INITIAL_ACCOUNTS_PER_CATEGORY) {
+        result[categoryId] = accounts;
+      } 
+      // Ngược lại chỉ hiển thị số lượng giới hạn ban đầu
+      else {
+        result[categoryId] = accounts.take(INITIAL_ACCOUNTS_PER_CATEGORY).toList();
+      }
+    });
+    
+    return Map.unmodifiable(result);
+  }
+  
+  // Getter để biết category có thể xem thêm không
+  bool canExpandCategory(int categoryId) {
+    final totalCount = _categoryAccountCounts[categoryId] ?? 0;
+    final currentCount = _groupedCategoryIdAccounts[categoryId]?.length ?? 0;
+    return totalCount > currentCount && (_expandedCategories[categoryId] != true);
+  }
+  
+  // Getter để lấy tổng số account trong category
+  int getTotalAccountsInCategory(int categoryId) {
+    return _categoryAccountCounts[categoryId] ?? 0;
+  }
+  
+  // Phương thức để mở rộng/thu gọn category
+  void toggleCategoryExpansion(int categoryId) {
+    final currentState = _expandedCategories[categoryId] ?? false;
+    _expandedCategories[categoryId] = !currentState;
+    notifyListeners();
+  }
+  
+  // Phương thức để mở rộng category
+  void expandCategory(int categoryId) {
+    if (!(_expandedCategories[categoryId] ?? false)) {
+      _expandedCategories[categoryId] = true;
+      notifyListeners();
+    }
+  }
+  
+  // Phương thức để thu gọn category
+  void collapseCategory(int categoryId) {
+    if (_expandedCategories[categoryId] ?? false) {
+      _expandedCategories[categoryId] = false;
+      notifyListeners();
+    }
+  }
+  
+  // Phương thức để mở rộng tất cả các category
+  void expandAllCategories() {
+    for (var categoryId in _groupedCategoryIdAccounts.keys) {
+      _expandedCategories[categoryId] = true;
+    }
+    notifyListeners();
+  }
+  
+  // Phương thức để thu gọn tất cả các category
+  void collapseAllCategories() {
+    for (var categoryId in _groupedCategoryIdAccounts.keys) {
+      _expandedCategories[categoryId] = false;
+    }
+    notifyListeners();
+  }
 
   void _setError(String? value) {
     _error = value;
@@ -84,7 +177,7 @@ class AccountProvider extends ChangeNotifier {
       return _basicInfoCache[account.id]!;
     }
 
-    final encryptData = EncryptAppData.instance;
+    final encryptData = EncryptAppDataService.instance;
     final decryptedAccount = AccountOjbModel.fromModel(account);
 
     // Giải mã title và email riêng biệt để tránh lỗi kiểu dữ liệu
@@ -99,46 +192,64 @@ class AccountProvider extends ChangeNotifier {
     return decryptedAccount;
   }
 
-  Future<void> getAccounts() async {
+  Future<void> getAccounts({bool resetExpansion = false}) async {
     await _handleAsync(funcName: "getAccounts", () async {
-      final accounts = AccountBox.getAll();
+      // Lấy tất cả các category trước
+      final categories = CategoryBox.getAll();
+      
+      // Xóa dữ liệu cũ
       _accounts.clear();
       _groupedCategoryIdAccounts.clear();
+      
+      // Reset trạng thái mở rộng nếu được yêu cầu
+      if (resetExpansion) {
+        _expandedCategories.clear();
+      }
+      
       clearDecryptedCache();
+      
+      // Reset số lượng tài khoản hiển thị
+      _visibleAccountsPerCategory.clear();
 
       // Tạo cache cho category để tránh truy vấn lặp lại
-      final categoryCache = <int, CategoryOjbModel>{};
-
-      // Tối ưu: Chia thành các batch nhỏ để xử lý
-      for (var i = 0; i < accounts.length; i += BATCH_SIZE) {
-        final end = (i + BATCH_SIZE < accounts.length) ? i + BATCH_SIZE : accounts.length;
-        final batch = accounts.sublist(i, end);
-
-        // Xử lý song song các account trong batch
-        final decryptedBatch = await Future.wait(batch.map((account) => _getDecryptedBasicInfo(account)));
-
-        for (var j = 0; j < batch.length; j++) {
-          final account = batch[j];
-          final decryptedAccount = decryptedBatch[j];
-
+      _categoryCache.clear();
+      
+      // Lưu tất cả category vào cache
+      for (var category in categories) {
+        _categoryCache[category.id] = category;
+      }
+      
+      // Lấy tài khoản cho mỗi category với giới hạn số lượng
+      final accountsByCategory = AccountBox.getByCategoriesWithLimit(categories, INITIAL_ACCOUNTS_PER_CATEGORY);
+      
+      // Xử lý từng category
+      for (var categoryId in accountsByCategory.keys) {
+        final accounts = accountsByCategory[categoryId] ?? [];
+        final category = _categoryCache[categoryId] ?? CategoryOjbModel(id: 0, categoryName: 'Không xác định');
+        
+        // Xử lý song song các account trong category
+        final decryptedAccounts = await Future.wait(accounts.map((account) => _getDecryptedBasicInfo(account)));
+        
+        // Lưu vào _accounts và _groupedCategoryIdAccounts
+        for (var i = 0; i < accounts.length; i++) {
+          final account = accounts[i];
+          final decryptedAccount = decryptedAccounts[i];
+          
           _accounts[account.id] = account;
-
-          // Lấy category từ cache hoặc từ account
-          final categoryId = account.category.targetId;
-          var category = categoryCache[categoryId];
-          if (category == null && account.category.target != null) {
-            category = account.category.target!;
-            categoryCache[categoryId] = category;
-          }
-          category ??= CategoryOjbModel(id: 0, categoryName: 'Không xác định');
-
-          // Thêm vào grouped accounts
           _groupedCategoryIdAccounts.putIfAbsent(category.id, () => []).add(decryptedAccount);
         }
-
-        // Thông báo sau mỗi batch để UI cập nhật dần
+        
+        // Thông báo sau mỗi category để UI cập nhật dần
         notifyListeners();
       }
+      
+      // Sắp xếp account trong mỗi category theo tên (chỉ sắp xếp lần đầu)
+      _groupedCategoryIdAccounts.forEach((categoryId, accounts) {
+        accounts.sort((a, b) => a.title.compareTo(b.title));
+      });
+      
+      // Lấy số lượng tài khoản cho mỗi category để hiển thị "Xem thêm"
+      _updateAccountCountsForCategories(categories);
     });
   }
 
@@ -214,7 +325,12 @@ class AccountProvider extends ChangeNotifier {
       }
       _accounts.remove(account.id);
       _decryptedCache.remove(account.id);
-      _basicInfoCache.remove(account.id); // Xóa basic info cache
+      _basicInfoCache.remove(account.id);
+      if (account.getCategory != null) {
+        _groupedCategoryIdAccounts[account.getCategory!.id]?.remove(account);
+        _categoryAccountCounts[account.getCategory!.id] = _groupedCategoryIdAccounts[account.getCategory!.id]?.length ?? 0;
+        refreshAccounts();
+      }
       return true;
     });
 
@@ -228,7 +344,7 @@ class AccountProvider extends ChangeNotifier {
       return _basicInfoCache[account.id]!;
     }
 
-    final encryptData = EncryptAppData.instance;
+    final encryptData = EncryptAppDataService.instance;
     final decryptedBasic = AccountOjbModel(
       id: account.id,
       title: await encryptData.decryptInfo(account.title),
@@ -243,7 +359,7 @@ class AccountProvider extends ChangeNotifier {
 
   // Mã hóa dữ liệu account
   Future<AccountOjbModel> _encryptAccount(AccountOjbModel account) async {
-    final encryptData = EncryptAppData.instance;
+    final encryptData = EncryptAppDataService.instance;
     final encryptedAccount = AccountOjbModel.fromModel(account);
 
     // Encrypt các trường cơ bản
@@ -273,7 +389,7 @@ class AccountProvider extends ChangeNotifier {
 
   // Giải mã dữ liệu account
   Future<AccountOjbModel> _decryptAccount(AccountOjbModel account) async {
-    final encryptData = EncryptAppData.instance;
+    final encryptData = EncryptAppDataService.instance;
     final decryptedAccount = AccountOjbModel.fromModel(account);
 
     // Decrypt các trường cơ bản
@@ -312,6 +428,7 @@ class AccountProvider extends ChangeNotifier {
   void clearDecryptedCache() {
     _decryptedCache.clear();
     _basicInfoCache.clear();
+    // Không xóa _expandedCategories để giữ trạng thái mở rộng
     notifyListeners();
   }
 
@@ -323,6 +440,9 @@ class AccountProvider extends ChangeNotifier {
     txtPassword.dispose();
     txtNote.dispose();
     _accounts.clear();
+    _expandedCategories.clear();
+    _categoryAccountCounts.clear();
+    _visibleAccountsPerCategory.clear();
     super.dispose();
   }
 
@@ -348,5 +468,264 @@ class AccountProvider extends ChangeNotifier {
     }
     await hideLoadingDialog();
     return result;
+  }
+
+  // Hàm tạo dữ liệu giả với 9 category, mỗi category có 40 account
+  Future<bool> generateFakeData() async {
+    final stopwatch = Stopwatch()..start();
+    
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+      
+      // Danh sách tên category
+      final categoryNames = [
+        'Mạng xã hội',
+        'Ngân hàng',
+        'Email',
+        'Mua sắm',
+        'Giải trí',
+        'Công việc',
+        'Học tập',
+        'Trò chơi',
+        'Khác'
+      ];
+      
+      // Danh sách tên dịch vụ phổ biến cho mỗi category
+      final servicesByCategory = {
+        'Mạng xã hội': ['Facebook', 'Instagram', 'Twitter', 'LinkedIn', 'TikTok', 'Pinterest', 'Reddit', 'Snapchat', 'Tumblr', 'Discord'],
+        'Ngân hàng': ['Vietcombank', 'Techcombank', 'BIDV', 'VPBank', 'ACB', 'MBBank', 'TPBank', 'VIB', 'Sacombank', 'HDBank'],
+        'Email': ['Gmail', 'Outlook', 'Yahoo Mail', 'Zoho Mail', 'ProtonMail', 'Mail.com', 'iCloud Mail', 'AOL Mail', 'GMX Mail', 'Yandex Mail'],
+        'Mua sắm': ['Shopee', 'Lazada', 'Tiki', 'Amazon', 'Sendo', 'Alibaba', 'eBay', 'Zalora', 'Fado', 'Tiki'],
+        'Giải trí': ['Netflix', 'Spotify', 'YouTube', 'Disney+', 'HBO', 'Apple TV+', 'Amazon Prime', 'VieON', 'FPT Play', 'Galaxy Play'],
+        'Công việc': ['Slack', 'Trello', 'Asana', 'Jira', 'Microsoft Teams', 'Notion', 'Monday.com', 'ClickUp', 'Basecamp', 'Todoist'],
+        'Học tập': ['Coursera', 'Udemy', 'edX', 'Khan Academy', 'Duolingo', 'Quizlet', 'Memrise', 'Brilliant', 'Skillshare', 'Codecademy'],
+        'Trò chơi': ['Steam', 'Epic Games', 'Origin', 'Ubisoft Connect', 'Battle.net', 'PlayStation Network', 'Xbox Live', 'Nintendo', 'Garena', 'Riot Games'],
+        'Khác': ['Dropbox', 'Google Drive', 'OneDrive', 'iCloud', 'Evernote', 'LastPass', 'NordVPN', 'ExpressVPN', 'Adobe', 'Canva']
+      };
+       
+      // Tạo các category
+      final categories = <CategoryOjbModel>[];
+      for (var i = 0; i < categoryNames.length; i++) {
+        final category = CategoryOjbModel(
+          categoryName: categoryNames[i],
+          color: 0xFF000000 + (i * 1000000), // Màu ngẫu nhiên
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+        final categoryId = CategoryBox.put(category);
+        category.id = categoryId;
+        categories.add(category);
+        
+        debugPrint('Đã tạo category: ${category.categoryName} với ID: $categoryId');
+      }
+      
+      // Tạo account cho mỗi category
+      for (var category in categories) {
+        final services = servicesByCategory[category.categoryName] ?? [];
+        final accountsToCreate = <AccountOjbModel>[];
+        
+        // Tạo 40 account cho mỗi category
+        for (var i = 0; i < 40; i++) {
+          // Chọn dịch vụ từ danh sách hoặc tạo tên ngẫu nhiên
+          final serviceName = i < services.length 
+              ? services[i] 
+              : '${category.categoryName} Account ${i + 1}';
+          
+          final account = AccountOjbModel(
+            title: serviceName,
+            email: 'user${i + 1}@${serviceName.toLowerCase().replaceAll(' ', '')}.com',
+            password: 'Password${i + 1}@${DateTime.now().year}',
+            notes: 'Tài khoản $serviceName được tạo tự động.',
+            categoryOjbModel: category,
+            createdAt: DateTime.now().subtract(Duration(days: i % 30)),
+            updatedAt: DateTime.now().subtract(Duration(hours: i % 24)),
+          );
+          
+          accountsToCreate.add(account);
+        }
+        
+        // Lưu hàng loạt account
+        final accountIds = AccountBox.putMany(accountsToCreate);
+        debugPrint('Đã tạo ${accountIds.length} account cho category: ${category.categoryName}');
+      }
+      
+      final elapsedTime = stopwatch.elapsed;
+      debugPrint('generateFakeData: Thao tác hoàn thành trong: ${elapsedTime.inMilliseconds}ms');
+      
+      // Cập nhật lại danh sách account
+      await getAccounts();
+      
+      return true;
+    } catch (e) {
+      final elapsedTime = stopwatch.elapsed;
+      _setError(e.toString());
+      debugPrint('generateFakeData: Lỗi sau ${elapsedTime.inMilliseconds}ms: $e');
+      return false;
+    } finally {
+      stopwatch.stop();
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Phương thức để cập nhật số lượng tài khoản cho mỗi category
+  Future<void> _updateAccountCountsForCategories(List<CategoryOjbModel> categories) async {
+    for (var category in categories) {
+      final count = AccountBox.countByCategory(category);
+      // Lưu vào cache để sử dụng cho canExpandCategory
+      _categoryAccountCounts[category.id] = count;
+    }
+  }
+
+  // Phương thức để tải thêm tài khoản cho một category cụ thể
+  Future<void> loadMoreAccountsForCategory(int categoryId) async {
+    showLoadingDialog();
+    await _handleAsync(funcName: "loadMoreAccountsForCategory", () async {
+      // Kiểm tra xem category có tồn tại không
+      final category = _categoryCache[categoryId];
+      if (category == null) return;
+      
+      // Lấy số lượng tài khoản hiện tại
+      final currentAccounts = _groupedCategoryIdAccounts[categoryId] ?? [];
+      final offset = currentAccounts.length;
+      
+      // Lấy thêm tài khoản (10 tài khoản mỗi lần)
+      final moreAccounts = AccountBox.getByCategoryWithLimit(category, LOAD_MORE_ACCOUNTS_COUNT, offset);
+      
+      // Nếu không có thêm tài khoản nào, thoát
+      if (moreAccounts.isEmpty) return;
+      
+      // Tạo set chứa ID của các tài khoản hiện tại để kiểm tra trùng lặp
+      final existingAccountIds = currentAccounts.map((a) => a.id).toSet();
+      
+      // Lọc ra những tài khoản chưa có trong danh sách
+      final newAccounts = moreAccounts.where((a) => !existingAccountIds.contains(a.id)).toList();
+      
+      // Nếu không có tài khoản mới, thoát
+      if (newAccounts.isEmpty) return;
+      
+      // Giải mã tài khoản mới
+      final decryptedMoreAccounts = await Future.wait(newAccounts.map((account) => _getDecryptedBasicInfo(account)));
+      
+      // Thêm vào danh sách hiện tại
+      for (var i = 0; i < newAccounts.length; i++) {
+        final account = newAccounts[i];
+        final decryptedAccount = decryptedMoreAccounts[i];
+        
+        _accounts[account.id] = account;
+        _groupedCategoryIdAccounts.putIfAbsent(categoryId, () => []).add(decryptedAccount);
+      }
+      
+      // Không sắp xếp lại danh sách để giữ nguyên thứ tự các tài khoản mới được thêm vào cuối
+      // _groupedCategoryIdAccounts[categoryId]?.sort((a, b) => a.title.compareTo(b.title));
+      
+      // Cập nhật số lượng tài khoản hiển thị
+      final currentVisibleCount = _visibleAccountsPerCategory[categoryId] ?? INITIAL_ACCOUNTS_PER_CATEGORY;
+      _visibleAccountsPerCategory[categoryId] = currentVisibleCount + LOAD_MORE_ACCOUNTS_COUNT;
+      
+      // Kiểm tra xem đã tải hết tài khoản chưa
+      final totalCount = _categoryAccountCounts[categoryId] ?? 0;
+      final currentCount = _groupedCategoryIdAccounts[categoryId]?.length ?? 0;
+      
+      // Nếu đã tải hết, đánh dấu là đã mở rộng
+      if (currentCount >= totalCount) {
+        _expandedCategories[categoryId] = true;
+        // Không cần giới hạn số lượng hiển thị nữa
+        _visibleAccountsPerCategory.remove(categoryId);
+      }
+      
+      notifyListeners();
+    });
+    hideLoadingDialog();
+  }
+  
+  // Phương thức để tải tất cả tài khoản cho một category
+  Future<void> loadAllAccountsForCategory(int categoryId) async {
+    await _handleAsync(funcName: "loadAllAccountsForCategory", () async {
+      // Kiểm tra xem category có tồn tại không
+      final category = _categoryCache[categoryId];
+      if (category == null) return;
+      
+      // Lấy tất cả tài khoản trong category
+      final allAccounts = AccountBox.getByCategory(category);
+      
+      // Lấy danh sách tài khoản hiện tại
+      final currentAccounts = _groupedCategoryIdAccounts[categoryId] ?? [];
+      final currentAccountIds = currentAccounts.map((a) => a.id).toSet();
+      
+      // Lọc ra những tài khoản chưa được tải
+      final newAccounts = allAccounts.where((a) => !currentAccountIds.contains(a.id)).toList();
+      
+      // Nếu không có tài khoản mới, thoát
+      if (newAccounts.isEmpty) {
+        // Đánh dấu category đã được mở rộng ngay cả khi không có tài khoản mới
+        _expandedCategories[categoryId] = true;
+        // Xóa giới hạn hiển thị
+        _visibleAccountsPerCategory.remove(categoryId);
+        notifyListeners();
+        return;
+      }
+      
+      // Giải mã tài khoản mới
+      final decryptedNewAccounts = await Future.wait(newAccounts.map((account) => _getDecryptedBasicInfo(account)));
+      
+      // Thêm vào danh sách hiện tại
+      for (var i = 0; i < newAccounts.length; i++) {
+        final account = newAccounts[i];
+        final decryptedAccount = decryptedNewAccounts[i];
+        
+        _accounts[account.id] = account;
+        _groupedCategoryIdAccounts.putIfAbsent(categoryId, () => []).add(decryptedAccount);
+      }
+      
+      // Không sắp xếp lại danh sách để giữ nguyên thứ tự các tài khoản mới được thêm vào cuối
+      // _groupedCategoryIdAccounts[categoryId]?.sort((a, b) => a.title.compareTo(b.title));
+      
+      // Đánh dấu category đã được mở rộng
+      _expandedCategories[categoryId] = true;
+      // Xóa giới hạn hiển thị
+      _visibleAccountsPerCategory.remove(categoryId);
+      
+      notifyListeners();
+    });
+  }
+
+  // Phương thức để reset trạng thái mở rộng của tất cả các danh mục
+  void resetExpansionState() {
+    _expandedCategories.clear();
+    _visibleAccountsPerCategory.clear();
+    notifyListeners();
+  }
+  
+  // Phương thức để reset trạng thái mở rộng của một danh mục cụ thể
+  void resetCategoryExpansion(int categoryId) {
+    _expandedCategories.remove(categoryId);
+    _visibleAccountsPerCategory.remove(categoryId);
+    notifyListeners();
+  }
+  
+  // Phương thức để kiểm tra xem một danh mục có đang được mở rộng không
+  bool isCategoryExpanded(int categoryId) {
+    return _expandedCategories[categoryId] == true;
+  }
+  
+  // Phương thức để lấy số lượng tài khoản đang hiển thị trong một danh mục
+  int getVisibleAccountsCount(int categoryId) {
+    if (_expandedCategories[categoryId] == true) {
+      return _groupedCategoryIdAccounts[categoryId]?.length ?? 0;
+    } else if (_visibleAccountsPerCategory.containsKey(categoryId)) {
+      return _visibleAccountsPerCategory[categoryId]!;
+    } else {
+      return math.min(INITIAL_ACCOUNTS_PER_CATEGORY, _groupedCategoryIdAccounts[categoryId]?.length ?? 0);
+    }
+  }
+
+  // Phương thức để tải lại danh sách tài khoản
+  Future<void> refreshAccounts({bool resetExpansion = false}) async {
+    showLoadingDialog();
+    await getAccounts(resetExpansion: resetExpansion);
+    hideLoadingDialog();
   }
 }

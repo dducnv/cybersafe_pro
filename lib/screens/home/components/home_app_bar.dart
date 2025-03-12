@@ -45,28 +45,14 @@ class _HomeAppBarCustomState extends State<HomeAppBarCustom> {
       scrolledUnderElevation: 0,
       actions: [
         // Theme toggle button
-        IconButton(
-          icon: Icon(
-            isDark ? Icons.light_mode : Icons.dark_mode,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          onPressed: () => themeProvider.toggleTheme(),
-        ),
-        IconButton(
-          icon: Icon(
-            Icons.update_rounded,
-            color: Theme.of(context).colorScheme.primary,
-            size: 24,
-          ),
-          onPressed: () {},
-        ),
-        Visibility(
-          visible: !widget.isDesktop,
-          child: IconButton(
-            icon: const Icon(Icons.search_rounded, size: 24),
-            onPressed: () {},
-          ),
-        ),
+        // IconButton(
+        //   icon: Icon(
+        //     isDark ? Icons.light_mode : Icons.dark_mode,
+        //     color: Theme.of(context).colorScheme.primary,
+        //   ),
+        //   onPressed: () => themeProvider.toggleTheme(),
+        // ),
+    
         Visibility(
           visible: !widget.isDesktop,
           child: IconButton(

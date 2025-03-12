@@ -1,7 +1,7 @@
 import 'package:cybersafe_pro/env/env.dart';
-import 'package:cybersafe_pro/services/old_encript_method/encrypt_utils.dart';
+import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_utils.dart';
 
-class OldEncriptData {
+class OldEncryptData {
   static String decryptInfo(String info) {
   try {
     if (info.isEmpty) return '';

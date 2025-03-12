@@ -167,6 +167,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
             inputFormatters: widget.inputFormatters,
             onFieldSubmitted: widget.onFieldSubmitted,
             autocorrect: false,
+            
             stylusHandwritingEnabled: false,
             textAlign: widget.textAlign,
             controller: widget.controller,
@@ -198,6 +199,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
               ),
               isDense: true,
               hintText: widget.hintText,
+              prefixIcon:widget.prefixIcon,
               suffixIconConstraints: BoxConstraints(
                 maxHeight: widget.suffixIconConstraintsMaxHeight ?? 25.h,
               ),
