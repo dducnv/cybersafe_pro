@@ -128,7 +128,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                       TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey[800]),
+                          color: Colors.grey[600]),
                   children: widget.requiredTextField
                       ? <TextSpan>[
                           TextSpan(

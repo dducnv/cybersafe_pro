@@ -1,6 +1,7 @@
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/app_locale.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
+import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/providers/theme_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
@@ -13,7 +14,8 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  final String initialRoute;
+  const MyApp({super.key, required this.initialRoute});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -22,15 +24,16 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   // Khởi tạo SecureAppSwitcher để ngăn chặn chụp màn hình
   final _secureAppSwitcher = SecureAppSwitcher();
-  
+
+
   @override
   void initState() {
     super.initState();
     // Khởi tạo SecureAppSwitcher với chặn chụp màn hình
     _secureAppSwitcher.initialize(blockScreenshot: true);
-    initData();
+    initApp();
   }
-  
+
   @override
   void dispose() {
     // Đảm bảo tắt chặn chụp màn hình khi app bị đóng
@@ -38,8 +41,11 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
-  Future<void> initData() async {
+  Future<void> initApp() async {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!context.mounted) {
+        return;
+      }
       final categoryProvider = Provider.of<CategoryProvider>(context, listen: false);
       final accountProvider = Provider.of<AccountProvider>(context, listen: false);
       // await accountProvider.generateFakeData();
@@ -49,50 +55,52 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+ 
   /// SecureAppSwitcher When the app is opened, the screen will be masked
 
   @override
   Widget build(BuildContext context) {
     return Consumer2<AppLocale, ThemeProvider>(
       builder: (context, appLocale, themeProvider, child) {
-        return MaterialApp(
-          title: 'CyberSafe Pro',
-          debugShowCheckedModeBanner: false,
-          locale: appLocale.locale,
-          navigatorKey: GlobalKeys.appRootNavigatorKey,
-          supportedLocales: const [Locale('vi', 'VN'), Locale('en', 'US')],
-          localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
-          themeMode: themeProvider.themeMode,
-          theme: themeProvider.lightTheme,
-          darkTheme: themeProvider.darkTheme,
-          navigatorObservers: [secureAppSwitcherRouteObserver],
-          initialRoute: AppRoutes.home,
-          routes: AppRoutes.getRoutes(),
-          onGenerateRoute: AppRoutes.onGenerateRoute,
-          builder: (context, child) {
-            return MediaQuery(
+        return Listener(
+          behavior: HitTestBehavior.translucent,
+          onPointerDown: (details) => context.read<AppProvider>().handleUserInteraction(details),
+          onPointerMove: (details) => context.read<AppProvider>().handleUserInteraction(details),
+          onPointerUp: (details) => context.read<AppProvider>().handleUserInteraction(details),
+          child: MaterialApp(
+            title: 'CyberSafe Pro',
+            debugShowCheckedModeBanner: false,
+            locale: appLocale.locale,
+            navigatorKey: GlobalKeys.appRootNavigatorKey,
+            supportedLocales: const [Locale('vi', 'VN'), Locale('en', 'US')],
+            localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
+            themeMode: themeProvider.themeMode,
+            theme: themeProvider.lightTheme,
+            darkTheme: themeProvider.darkTheme,
+            navigatorObservers: [secureAppSwitcherRouteObserver],
+            initialRoute: widget.initialRoute,
+            routes: AppRoutes.getRoutes(),
+            onGenerateRoute: AppRoutes.onGenerateRoute,
+            builder: (context, child) {
+              return MediaQuery(
                 data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1)),
                 child: ColoredBox(
                   color: Theme.of(context).colorScheme.surface,
-                  child: SafeArea(
-                    bottom: false,
-                    right: false,
-                    left: false,
-                    child: AnnotatedRegion(
-                      value: SystemUiOverlayStyle(
-                        statusBarColor: Theme.of(context).colorScheme.surface,
-                        statusBarBrightness: !context.darkMode ? Brightness.light : Brightness.dark,
-                        statusBarIconBrightness: !context.darkMode ? Brightness.dark : Brightness.light,
-                        systemNavigationBarColor: Theme.of(context).colorScheme.surface,
-                        systemNavigationBarDividerColor: Theme.of(context).colorScheme.surface,
-                        systemNavigationBarIconBrightness: !context.darkMode ? Brightness.dark : Brightness.light,
-                      ),
-                      child: child!,
+                  child: AnnotatedRegion(
+                    value: SystemUiOverlayStyle(
+                      statusBarColor: Theme.of(context).colorScheme.surface,
+                      statusBarBrightness: !context.darkMode ? Brightness.light : Brightness.dark,
+                      statusBarIconBrightness: !context.darkMode ? Brightness.dark : Brightness.light,
+                      systemNavigationBarColor: Theme.of(context).colorScheme.surface,
+                      systemNavigationBarDividerColor: Theme.of(context).colorScheme.surface,
+                      systemNavigationBarIconBrightness: !context.darkMode ? Brightness.dark : Brightness.light,
                     ),
+                    child: child!,
                   ),
                 ),
               );
-          },
+            },
+          ),
         );
       },
     );

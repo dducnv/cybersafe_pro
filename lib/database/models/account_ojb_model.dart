@@ -64,7 +64,7 @@ class AccountOjbModel {
     TOTPOjbModel? totpOjbModel,
     IconCustomModel? iconCustomModel,
   }) {
-    this.createdAt = createdAt ?? DateTime.now();
+    this.createdAt = createdAt ?? this.createdAt;
     this.passwordUpdatedAt = passwordUpdatedAt ?? DateTime.now();
     updatedAt = updatedAt ?? DateTime.now();
 
@@ -72,8 +72,11 @@ class AccountOjbModel {
     if (categoryOjbModel != null) setCategory = categoryOjbModel;
     if (totpOjbModel != null) setTotp = totpOjbModel;
     if (iconCustomModel != null) setIconCustom = iconCustomModel;
-    if (customFieldOjbModel != null) customFields.addAll(customFieldOjbModel);
     if (passwordHistoriesList != null) passwordHistories.addAll(passwordHistoriesList);
+    if (customFieldOjbModel != null){
+      customFields.clear();
+      customFields.addAll(customFieldOjbModel);
+    }
   }
 
   // Factory constructor để tạo object mới từ object cũ

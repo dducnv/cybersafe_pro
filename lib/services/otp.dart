@@ -1,12 +1,42 @@
-library;
-
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
-
 import 'package:crypto/crypto.dart';
 import 'package:cybersafe_pro/utils/base32.dart';
-import 'package:logging/logging.dart';
+import 'package:flutter/material.dart';
+
+enum Type { hotp, totp }
+
+class InforFromUri {
+  String issuer;
+  String accountName;
+  String secret;
+  Type type;
+  int interval;
+  Algorithm algorithm;
+  int digits;
+  InforFromUri({
+    required this.issuer,
+    required this.accountName,
+    required this.secret,
+    required this.type,
+    required this.interval,
+    required this.algorithm,
+    required this.digits,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'issuer': issuer,
+      'accountName': accountName,
+      'secret': secret,
+      'type': type,
+      'interval': interval,
+      'algorithm': algorithm,
+      'digits': digits,
+    };
+  }
+}
 
 /// RFC4226/RFC6238 One-Time Password / Google Authenticator Library
 class OTP {
@@ -18,6 +48,77 @@ class OTP {
 
   /// Has the last used counter for HOTP and TOTP codes. TOTP codes are Milliseconds / 1000 / interval (default 30)
   static int lastUsedCounter = 0;
+
+  static isKeyValid(String secret) {
+    try {
+      base32.decode(secret);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static InforFromUri fromUri(String uri) {
+    Uri u = Uri.parse(uri);
+    Algorithm algorithm = Algorithm.SHA1;
+    int digits = 6;
+    int interval = 30;
+
+    if (u.scheme != 'otpauth') {
+      throw Exception('uri had scheme ${u.scheme}, not otpauth');
+    }
+
+    Type type = u.host == 'totp' ? Type.totp : Type.hotp;
+
+    if (u.queryParameters['issuer'] == null && !u.path.contains(':')) {
+      throw Exception('uri is missing issuer, uri: $uri');
+    }
+    String issuer = u.queryParameters['issuer'] != null
+        ? u.queryParameters['issuer']!
+        : u.path.split(':')[0];
+
+    String accountName = u.path.contains(':') ? u.path.split(':')[1] : u.path;
+
+    if (u.queryParameters['secret'] == null) {
+      throw Exception('uri had no secret parameter, uri: $uri');
+    }
+    String secret = u.queryParameters['secret']!;
+
+    if (u.queryParameters['algorithm'] != null) {
+      switch (u.queryParameters['algorithm']!.toUpperCase()) {
+        case 'SHA1':
+          algorithm = Algorithm.SHA1;
+          break;
+        case 'SHA256':
+          algorithm = Algorithm.SHA256;
+          break;
+        case 'SHA512':
+          algorithm = Algorithm.SHA512;
+          break;
+        default:
+          throw Exception(
+              'uri had invalid algorithm, uri: $uri, algorithm: ${u.queryParameters['algorithm']}');
+      }
+    }
+
+    if (u.queryParameters['digits'] != null) {
+      digits = int.parse(u.queryParameters['digits']!);
+    }
+
+    if (u.queryParameters['period'] != null) {
+      interval = int.parse(u.queryParameters['period']!);
+    }
+
+    return InforFromUri(
+      issuer: issuer,
+      accountName: accountName,
+      secret: secret,
+      type: type,
+      interval: interval,
+      algorithm: algorithm,
+      digits: digits,
+    );
+  }
 
   /// Generates a Time-based one time password code
   ///
@@ -52,6 +153,10 @@ class OTP {
       int interval = 30,
       Algorithm algorithm = Algorithm.SHA256,
       bool isGoogle = false}) {
+    if (isKeyValid(secret) == false) {
+      throw Exception('Invalid secret key');
+    }
+
     final code =
         '${generateTOTPCode(secret, time, length: length, interval: interval, algorithm: algorithm, isGoogle: isGoogle)}';
     return code.padLeft(length, '0');
@@ -207,9 +312,7 @@ class OTP {
 
   static void _showHOTPWarning(Hash mac) {
     if (mac == sha256 || mac == sha512) {
-      final logger = Logger('otp');
-      logger.warning(
-          'Using non-SHA1 hashing with HOTP is not part of the RFC for HOTP and may cause incompatibilities between different library implementatiions. This library attempts to match behavior with other libraries as best it can.');
+      debugPrint("Using non-SHA1 hashing with HOTP is not part of the RFC for HOTP and may cause incompatibilities between different library implementatiions. This library attempts to match behavior with other libraries as best it can.");
     }
   }
 

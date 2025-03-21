@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:cybersafe_pro/components/bottom_sheets/create_category_bottom_sheet.dart';
+import 'package:cybersafe_pro/components/bottom_sheets/search_bottom_sheet.dart';
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
-import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
@@ -155,7 +155,9 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
           children: [
             SizedBox(width: 16),
             // Nút Home
-            Expanded(child: _buildNavItem(icon: Icons.key_rounded, onTap: () {})),
+            Expanded(child: _buildNavItem(icon: Icons.key_rounded, onTap: () {
+              AppRoutes.navigateTo(context, AppRoutes.otpList);
+            })),
             // Nút Danh mục
             Expanded(
               child: _buildNavItem(
@@ -168,9 +170,11 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
             // Khoảng trống cho FAB
             const SizedBox(width: 80),
             // Nút Tìm kiếm
-            Expanded(child: _buildNavItem(icon: Icons.search_outlined, onTap: () {})),
+            Expanded(child: _buildNavItem(icon: Icons.search_outlined, onTap: () {
+              showSearchBottomSheet(context);
+            })),
             // Nút cuộn lên đầu trang
-            Expanded(child: _buildNavItem(icon: Icons.settings_rounded, onTap: () {})),
+            Expanded(child: _buildNavItem(icon: Icons.analytics_sharp, onTap: () {})),
             SizedBox(width: 16),
           ],
         ),
@@ -219,30 +223,9 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                                 isLastItem: itemIndex == accounts.length - 1,
                                 onLongPress: () {},
                                 onCallBackPop: () {},
+                                
                                 onTapSubButton: () {
-                                  showDialog(
-                                    context: context,
-                                    builder:
-                                        (context) => AlertDialog(
-                                          title: Text('Xóa tài khoản'),
-                                          content: Text('Bạn có chắc chắn muốn xóa tài khoản này không?'),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () async {
-                                               Navigator.pop(context);
-                                               await context.read<AccountProvider>().deleteAccount(account);
-                                              },
-                                              child: Text('Xóa'),
-                                            ),
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: Text('Hủy'),
-                                            ),
-                                          ],
-                                        ),
-                                  );
+                                   AppRoutes.navigateTo(context, AppRoutes.updateAccount, arguments: {"accountId": accounts[itemIndex].id});
                                 },
                                 onSelect: () {
                                   // Xử lý khi tap vào account
@@ -264,21 +247,9 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
     );
   }
 
-  Widget _buildCategory() {
+ Widget _buildCategory() {
     return Column(
       children: [
-        // Padding(
-        //   padding: const EdgeInsets.symmetric(horizontal:16).copyWith(bottom:10),
-        //   child: CustomTextField(
-        //     borderRadius: BorderRadius.circular(50),
-        //     controller: TextEditingController(),
-        //     prefixIcon:Icon(Icons.search),
-        //     readOnly:true,
-        //     hintText:"Tìm kiêm",
-        //     onTap:(){},
-        //     textInputAction: TextInputAction.search,
-        //     textAlign: TextAlign.start),
-        // ),
         SizedBox(
           height: 40.h,
           child: Row(
@@ -293,25 +264,55 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
               Flexible(
                 child: SizedBox(
                   height: 35.h,
-                  child: Selector<CategoryProvider, List<CategoryOjbModel>>(
-                    selector: (context, provider) => provider.categoryList,
-                    builder: (context, value, child) {
+                  child: Consumer2<CategoryProvider, AccountProvider>(
+                    builder: (context, categoryProvider, accountProvider, child) {
+                      final categories = categoryProvider.categoryList;
                       return ScrollablePositionedList.separated(
                         separatorBuilder: (context, index) => const SizedBox(width: 10),
                         scrollDirection: Axis.horizontal,
                         itemScrollController: itemScrollController,
-                        itemCount: value.length,
+                        itemCount: categories.length,
                         padding: EdgeInsets.only(right: 16),
                         itemBuilder: (context, index) {
+                          final category = categories[index];
+                          final isSelected = category.id == accountProvider.selectedCategoryId;
+                          
                           return Material(
                             child: Ink(
-                              decoration: BoxDecoration(color: Colors.grey.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(25)),
+                              decoration: BoxDecoration(
+                                color: isSelected 
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Colors.grey.withAlpha(50),
+                                borderRadius: BorderRadius.circular(25)
+                              ),
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(25),
-                                onTap: () {},
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 2.h),
-                                  child: Center(child: Text(value[index].categoryName, style: TextStyle(fontSize: 14.sp))),
+                                onTap: () {
+                                  accountProvider.selectCategory(category.id, context: context);
+
+                                },
+                                child: Row(
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 2.h).copyWith(right: isSelected ? 0 : 20.w),
+                                      child: Center(
+                                        child: Text(
+                                          category.categoryName,
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            color: isSelected 
+                                              ? Theme.of(context).colorScheme.onPrimary
+                                              : null
+                                          )
+                                        )
+                                      ),
+                                    ),
+                                    if (isSelected)
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Icon(Icons.close, size: 18.sp, color: Theme.of(context).colorScheme.onPrimary),
+                                      )
+                                  ],
                                 ),
                               ),
                             ),
@@ -328,7 +329,6 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
       ],
     );
   }
-
   Widget _buildEmptyData() {
     return Center(
       child: Column(

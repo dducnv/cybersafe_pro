@@ -1,0 +1,183 @@
+import 'dart:async';
+
+import 'package:cybersafe_pro/components/icon_show_component.dart';
+import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
+import 'package:cybersafe_pro/providers/account_provider.dart';
+import 'package:cybersafe_pro/routes/app_routes.dart';
+import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/widgets/decrypt_text/decrypt_text.dart';
+import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+Future<void> showSearchBottomSheet(BuildContext context) async {
+  return showModalBottomSheet(
+    isScrollControlled: true, 
+    context: context, 
+    builder: (context) => SearchBottomSheet()
+  );
+}
+
+class SearchBottomSheet extends StatefulWidget {
+  const SearchBottomSheet({super.key});
+
+  @override
+  State<SearchBottomSheet> createState() => _SearchBottomSheetState();
+}
+
+class _SearchBottomSheetState extends State<SearchBottomSheet> {
+  final TextEditingController _searchController = TextEditingController();
+  List<AccountOjbModel> _searchResults = [];
+  bool _isLoading = false;
+  Timer? _debounceTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    // Hủy timer cũ nếu có
+    _debounceTimer?.cancel();
+    
+    // Tạo timer mới để debounce
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      final query = _searchController.text.trim();
+      if (query.isEmpty) {
+        setState(() {
+          _searchResults = [];
+          _isLoading = false;
+        });
+        return;
+      }
+
+      setState(() => _isLoading = true);
+      
+      // Thực hiện tìm kiếm
+      final accountProvider = context.read<AccountProvider>();
+      accountProvider.searchAccounts(query).then((results) {
+        if (mounted) {
+          setState(() {
+            _searchResults = results;
+            _isLoading = false;
+          });
+        }
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.8,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8).copyWith(top: 16),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                const Center(
+                  child: Text(
+                    "Tìm kiếm",
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)
+                  )
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    onPressed: () => AppRoutes.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: CustomTextField(
+              prefixIcon: Icon(Icons.search),
+              controller: _searchController,
+              textInputAction: TextInputAction.search,
+              textAlign: TextAlign.start,
+              autoFocus: true,
+              hintText: "Tìm theo tên hoặc email...",
+              onChanged: (_) => _onSearchChanged(),
+            ),
+          ),
+          if (_isLoading)
+            const Center(child: CircularProgressIndicator())
+          else if (_searchResults.isEmpty && _searchController.text.isNotEmpty)
+             Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image.asset("assets/images/exclamation-mark.png", width: 60.w, height: 60.h),
+                  const SizedBox(height: 10),
+                  Text("Không tìm thấy kết quả", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey[800])),
+                ],
+              ),
+            )
+          else
+            Expanded(
+              child: ListView.builder(
+                itemCount: _searchResults.length,
+                itemBuilder: (context, index) {
+                  final account = _searchResults[index];
+                  return ListTile(
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: IconShowComponent(
+                            account: account,
+                            width: 30,
+                            height: 30,
+                            textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey[800]),
+                            isDecrypted: false,
+                          ),
+                        ),
+                      ),
+                    ),
+                    title: DecryptText(
+                      value: account.title,
+                      decryptTextType: DecryptTextType.info,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600
+                      ),
+                    ),
+                    subtitle: account.email != null ? DecryptText(
+                      value: account.email!,
+                      decryptTextType: DecryptTextType.info,
+                      style: TextStyle(
+                        color: Colors.grey[600]
+                      ),
+                    ) : null,
+                    onTap: () {
+                      AppRoutes.navigateTo(context, AppRoutes.detailsAccount, arguments: {"accountId": account.id});
+                    },
+                  );
+                },
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}

@@ -12,6 +12,7 @@ enum SecureStorageKeys {
   pinCode,
   isEnableLocalAuth,
   firstOpenApp,
+  fistOpenApp,
   isRequiredPinCodeForFileBackup,
   isAutoLock,
   timeAutoLock,
@@ -95,5 +96,10 @@ class SecureStorage {
       return double.tryParse(value);
     }
     return null;
+  }
+
+  //reset all data
+  Future<void> reset() async {
+    await _storage.deleteAll();
   }
 }

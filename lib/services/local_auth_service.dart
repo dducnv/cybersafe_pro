@@ -54,7 +54,7 @@ class LocalAuthConfig {
     }
     try {
       _canCheckBiometrics = await auth.canCheckBiometrics;
-    } on PlatformException catch (e) {
+    } on PlatformException {
       // customLogger(msg: "canCheckBiometrics: $e", typeLogger: TypeLogger.error);
       _canCheckBiometrics = false;
     }
@@ -87,7 +87,7 @@ class LocalAuthConfig {
         // Chỉ giữ lại vân tay cho Android
         availableBiometrics.removeWhere((type) => type != BiometricType.fingerprint);
       }
-    } on PlatformException catch (e) {
+    } on PlatformException {
       availableBiometrics = [];
     }
     _availableBiometrics = availableBiometrics;
@@ -114,7 +114,7 @@ class LocalAuthConfig {
           sensitiveTransaction: true,
         ),
       );
-    } on PlatformException catch (e) {
+    } on PlatformException {
       return false;
     }
     return authenticated;

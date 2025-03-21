@@ -6,24 +6,35 @@ import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-Future<void> showCreateCategoryBottomSheet(BuildContext context) async {
+Future<void> showCreateCategoryBottomSheet(BuildContext context, {
+  bool isUpdate = false,
+  CategoryOjbModel? categoryOjbModel
+}) async {
   await showModalBottomSheet(
     isScrollControlled: true,
     context: context,
-    builder: (context) => Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: 16.w,
-        right: 16.w,
-        top: 16.h,
+  
+    builder: (context) => SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 16.w,
+          right: 16.w,
+          top: 16.h,
+        ),
+        child:  CreateCategoryBottomSheet(
+          isUpdate: isUpdate,
+          categoryOjbModel: categoryOjbModel,
+        ),
       ),
-      child: const CreateCategoryBottomSheet(),
     ),
   );
 }
 
 class CreateCategoryBottomSheet extends StatelessWidget {
-  const CreateCategoryBottomSheet({super.key});
+  final bool isUpdate;
+  final CategoryOjbModel? categoryOjbModel;
+  const CreateCategoryBottomSheet({super.key,  this.categoryOjbModel, this.isUpdate = false});
 
   Future<void> _handleCreateCategory(BuildContext context, String name) async {
     if (name.trim().isEmpty) return;

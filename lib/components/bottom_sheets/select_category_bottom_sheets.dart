@@ -12,9 +12,11 @@ Future<void> showSelectCategoryBottomSheet(
 }) async {
   await showModalBottomSheet(
     context: context,
-    builder: (context) => SelectCategoryBottomSheet(
-      selectedCategory: selectedCategory,
-      onSelected: onSelected,
+    builder: (context) => SafeArea(
+      child: SelectCategoryBottomSheet(
+        selectedCategory: selectedCategory,
+        onSelected: onSelected,
+      ),
     ),
   );
 }

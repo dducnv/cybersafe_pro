@@ -33,8 +33,10 @@ dependencies:
   intl: ^0.19.0
   lottie: ^3.3.1
   logging: ^1.3.0
+  shimmer: ^3.0.0
   timezone: ^0.10.0
   pie_chart: ^5.4.0
+  icons_plus: ^5.0.0
   share_plus: ^10.1.4
   flutter_svg: ^2.0.17
   image_picker: ^1.1.2
@@ -44,6 +46,7 @@ dependencies:
   pin_code_fields: ^8.0.1
   package_info_plus: ^8.3.0
   permission_handler: ^11.4.0
+  flutter_styled_toast: ^2.2.1
   qr_code_scanner_plus: ^2.0.10+1
   flutter_native_splash: ^2.4.5
   password_strength_checker: ^1.2.4
@@ -63,3 +66,5 @@ flutter:
     - assets/images/
     - assets/animations/
     - assets/icons/
+    - assets/icons/brand_icons/
+    - assets/icons/brand_icons/banks/

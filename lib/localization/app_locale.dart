@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'screens/auth/auth_locale.dart';
 import 'screens/home/home_locale.dart';
 import 'screens/settings/settings_locale.dart';
-import 'base_locale.dart';
 
 class AppLocale extends ChangeNotifier {
   Locale _locale = const Locale('vi', 'VN');

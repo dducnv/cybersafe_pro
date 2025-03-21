@@ -1,0 +1,73 @@
+import 'package:cybersafe_pro/providers/local_auth_provider.dart';
+import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
+import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+class CreatePinCodeWidget extends StatefulWidget {
+  final GlobalKey<AppPinCodeFieldsState> appPinCodeCreateKey;
+  final GlobalKey<FormState> formCreateKey;
+  final PageController pageController;
+  const CreatePinCodeWidget({super.key, required this.appPinCodeCreateKey, required this.formCreateKey, required this.pageController});
+
+  @override
+  State<CreatePinCodeWidget> createState() => _CreatePinCodeWidgetState();
+}
+
+class _CreatePinCodeWidgetState extends State<CreatePinCodeWidget> {
+  TextEditingController pinCodeController = TextEditingController();
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text("Tạo mã PIN", style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 20),
+        Container(
+          constraints: const BoxConstraints(maxWidth: 430),
+          child: AppPinCodeFields(
+            key: widget.appPinCodeCreateKey,
+            formKey: widget.formCreateKey,
+            textEditingController: pinCodeController,
+            onSubmitted: (value) {},
+            onEnter: () {},
+            autoFocus: true,
+            validator: (value) {
+              if (value!.length < 6) {
+                return "Vui lòng nhập đủ 6 số";
+              }
+              return null;
+            },
+            onCompleted: (value, state) {},
+            onChanged: (value) {},
+          ),
+        ),
+        const SizedBox(height: 5),
+        const SizedBox(height: 20),
+        CustomButtonWidget(
+          borderRaidus: 100,
+          width: 75.h,
+          height: 75.h,
+          onPressed: () {
+            widget.formCreateKey.currentState!.validate();
+            if (pinCodeController.text.length < 6) {
+              widget.appPinCodeCreateKey.currentState!.triggerErrorAnimation();
+            }
+            if (pinCodeController.text.isNotEmpty && context.mounted) {
+              Provider.of<LocalAuthProvider>(context, listen: false).setPinCodeToConfirm(pinCodeController.text);
+              widget.pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+            }
+          },
+          text: "",
+          child: Icon(Icons.arrow_forward, color: Colors.white, size: 24.sp),
+        ),
+      ],
+    );
+  }
+}

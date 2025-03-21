@@ -1,5 +1,4 @@
 import '../../base_locale.dart';
-import '../../app_locale.dart';
 
 class AuthLocale extends BaseLocale {
   AuthLocale(super.appLocale);

@@ -1,211 +1,335 @@
-import 'package:cybersafe_pro/components/bottom_sheets/select_category_bottom_sheets.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:cybersafe_pro/database/models/icon_custom_model.dart';
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/resources/brand_logo.dart';
+import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:cybersafe_pro/providers/create_account_form_provider.dart';
+import 'package:cybersafe_pro/providers/account_form_provider.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
+import 'package:cybersafe_pro/screens/create_account/components/icon_picker.dart';
+import 'package:cybersafe_pro/screens/create_account/components/account_form_fields.dart';
+import 'package:cybersafe_pro/screens/create_account/components/add_field_bottom_sheet.dart';
+import 'package:image/image.dart' as img;
 
-class CreateAccountMobileLayout extends StatelessWidget {
+class CreateAccountMobileLayout extends StatefulWidget {
   const CreateAccountMobileLayout({super.key});
 
   @override
+  State<CreateAccountMobileLayout> createState() => _CreateAccountMobileLayoutState();
+}
+
+class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> with SingleTickerProviderStateMixin {
+  late TabController tabController;
+  @override
+  void initState() {
+    super.initState();
+    tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Builder(builder: (context) {
-      final formProvider = Provider.of<CreateAccountFormProvider>(context,listen: true);
-      final accountProvider = Provider.of<AccountProvider>(context,listen: true);
-    
-      return Scaffold(
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            final success = await accountProvider.createAccountFromForm(formProvider);
-            if (success && context.mounted) {
-              Navigator.pop(context);
-            }
-          },
-          child: const Icon(Icons.check),
+    return Consumer2<AccountFormProvider, AccountProvider>(
+      builder: (context, formProvider, accountProvider, _) {
+        return Scaffold(floatingActionButton: _buildSubmitButton(context, formProvider, accountProvider), appBar: _buildAppBar(context), body: _buildBody(context, formProvider));
+      },
+    );
+  }
+
+  Widget _buildBody(BuildContext context, AccountFormProvider formProvider) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Form(
+        key: formProvider.formKey,
+        child: Column(
+          children: [
+            IconPicker(onTap: () => _showIconPicker(context, formProvider)),
+            const SizedBox(height: 10),
+            AccountFormFields(formProvider: formProvider, onAddField: () => _showAddFieldBottomSheet(context)),
+          ],
         ),
-        appBar: AppBar(
-          title: const Text('Tạo tài khoản'),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Form(
-            key: formProvider.formKey,
-            child: Column(
-              children: [
-                // Icon picker
-                Container(
-                  width: 70,
-                  height: 70,
-                  clipBehavior: Clip.hardEdge,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondaryContainer,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: InkWell(
-                    onTap: () {},
-                    borderRadius: BorderRadius.circular(15),
-                    child: const Center(
-                      child: Icon(Icons.add),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                
-                // Chọn icon text
-                InkWell(
-                  borderRadius: BorderRadius.circular(10),
-                  onTap: () {},
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4),
-                    child: Text(
-                      'Chọn Icon',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-    
-                // Tên ứng dụng
-                CustomTextField(
-                  requiredTextField: true,
-                  titleTextField: 'Tên ứng dụng',
-                  controller: formProvider.appNameController,
-                  textInputAction: TextInputAction.next,
-                  textAlign: TextAlign.start,
-                  hintText: 'Tên ứng dụng',
-                  maxLines: 1,
-                  isObscure: false,
-                  textError: formProvider.appNameError,
-                  onChanged: (_) => formProvider.validateAppName(),
-                ),
-                const SizedBox(height: 10),
-    
-                // Tên đăng nhập
-                CustomTextField(
-                  requiredTextField: false,
-                  titleTextField: 'Tên đăng nhập',
-                  controller: formProvider.usernameController,
-                  textInputAction: TextInputAction.next,
-                  textAlign: TextAlign.start,
-                  hintText: 'Tên đăng nhập',
-                  maxLines: 1,
-                  isObscure: false,
-                  autofillHints: const [AutofillHints.username],
-                ),
-                const SizedBox(height: 10),
-    
-                // Mật khẩu
-                CustomTextField(
-                  requiredTextField: false,
-                  titleTextField: 'Mật khẩu',
-                  controller: formProvider.passwordController,
-                  textInputAction: TextInputAction.next,
-                  textAlign: TextAlign.start,
-                  hintText: 'Mật khẩu',
-                  maxLines: 1,
-                  isObscure: true,
-                  autofillHints: const [AutofillHints.password],
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.loop),
-                    onPressed: () {},
-                  ),
-                ),
-                const SizedBox(height: 10),
-    
-                // Chọn danh mục
-                CustomTextField(
-                  requiredTextField: true,
-                  titleTextField: 'Chọn danh mục',
-                  controller: formProvider.categoryController,
-                  textInputAction: TextInputAction.next,
-                  textAlign: TextAlign.start,
-                  hintText: 'Chọn danh mục',
-                  maxLines: 1,
-                  isObscure: false,
-                  readOnly: true,
-                  textError: formProvider.categoryError,
-                  suffixIcon: const Icon(Icons.keyboard_arrow_down),
-                  onTap: () {
-                    showSelectCategoryBottomSheet(
-                      context,
-                      selectedCategory: formProvider.selectedCategory,
-                      onSelected: formProvider.setCategory,
-                    );
-                  },
-                ),
-                const SizedBox(height: 10),
-    
-                // Xác thực 2 lớp
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Xác thực 2 lớp',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Row(
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    return AppBar(title: const Text('Tạo tài khoản'), elevation: 0, scrolledUnderElevation: 0, shadowColor: Colors.transparent, backgroundColor: Theme.of(context).colorScheme.surface);
+  }
+
+  Widget _buildSubmitButton(BuildContext context, AccountFormProvider formProvider, AccountProvider accountProvider) {
+    return FloatingActionButton(onPressed: () => _handleSubmit(context, formProvider, accountProvider), child: const Icon(Icons.check));
+  }
+
+  Future<void> _handleSubmit(BuildContext context, AccountFormProvider formProvider, AccountProvider accountProvider) async {
+    final success = await accountProvider.createAccountFromForm(formProvider);
+    if (success && context.mounted) {
+      Navigator.pop(context);
+    }
+  }
+
+  Future<void> _showIconPicker(BuildContext context, AccountFormProvider formProvider) async {
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder:
+          (context) => DefaultTabController(
+            length: 2,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.8,
+              width: double.infinity,
+              padding: const EdgeInsets.only( top: 16),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Expanded(
-                          child: CustomTextField(
-                            requiredTextField: false,
-                            controller: formProvider.otpController,
-                            textInputAction: TextInputAction.next,
-                            textAlign: TextAlign.start,
-                            hintText: 'Nhập mã xác thực TOTP',
-                            maxLines: 1,
-                            isObscure: false,
-                            readOnly: true,
-                            prefixIcon: const Icon(Icons.qr_code_scanner),
-                            onTap: () {},
-                          ),
-                        ),
+                        Text("Chọn icon", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600)),
                         IconButton(
-                          onPressed: () {},
-                          icon: const Icon(Icons.keyboard_alt_outlined),
+                          onPressed: () {
+                            _pickImageFromGallery(context, formProvider, tabController);
+                          },
+                          icon: Icon(Icons.add, size: 24.sp),
                         ),
                       ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-    
-                // Ghi chú
-                CustomTextField(
-                  requiredTextField: false,
-                  titleTextField: 'Ghi chú',
-                  controller: formProvider.noteController,
-                  textInputAction: TextInputAction.newline,
-                  textAlign: TextAlign.start,
-                  textInputType: TextInputType.multiline,
-                  hintText: 'Ghi chú',
-                  minLines: 1,
-                  maxLines: 15,
-                  isObscure: false,
-                ),
-                const SizedBox(height: 16),
-    
-                // Thêm trường
-                OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.add),
-                  label: const Text('Thêm trường'),
-                ),
-              ],
+                  ),
+                  const SizedBox(height: 10),
+                  ListTile(
+                    selected: formProvider.branchLogoSelected == null,
+                    onTap: () {
+                      formProvider.resetIcon();
+                      Navigator.pop(context);
+                    },
+                    leading: Icon(Icons.cancel_outlined, color: Colors.blueAccent, size: 30.sp),
+                    title: Text("Không chọn", style: TextStyle(fontSize: 16.sp)),
+                  ),
+                  const SizedBox(height: 10),
+
+                  TabBar(dividerColor: Colors.grey[500], controller: tabController, tabs: const [Tab(text: "App"), Tab(text: "Custom")]),
+                  const SizedBox(height: 10),
+                  Expanded(
+                    child: TabBarView(
+                      controller: tabController,
+                      children: [_buildListIconsDefaultApp(context: context, formProvider: formProvider), _buildListIconsCustom(context: context, formProvider: formProvider)],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
+    );
+  }
+
+  Future<void> _showAddFieldBottomSheet(BuildContext context) async {
+    final formProvider = context.read<AccountFormProvider>();
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder:
+          (context) => AddFieldBottomSheet(
+            controller: formProvider.txtFieldTitle,
+            onAddField: () {
+              Navigator.pop(context);
+              formProvider.handleAddField();
+            },
+            typeTextFields: typeTextFields,
+          ),
+    );
+  }
+
+  Widget _buildListIconsDefaultApp({required BuildContext context, required AccountFormProvider formProvider}) {
+    return ListView.builder(
+      itemCount: branchLogoCategories.length,
+      shrinkWrap: true,
+      itemBuilder: (context, index) {
+        var column = Column(
+          children: [
+            Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text(branchLogoCategories[index].categoryName, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600))),
+            const SizedBox(height: 10),
+            Column(
+              children:
+                  branchLogoCategories[index].branchLogos
+                      .map(
+                        (e) => ListTile(
+                          selected: formProvider.branchLogoSelected == e,
+                          onTap: () {
+                            formProvider.pickIcon(isCustomIcon: false, iconCustomModel: null, branchLogo: e);
+                            Navigator.pop(context);
+                          },
+                          leading: SizedBox(width: 40.h, height: 40.h, child: SvgPicture.asset(context.darkMode ? e.branchLogoPathDarkMode! : e.branchLogoPathLightMode!)),
+                          title: Text(e.branchName ?? "", style: TextStyle(fontSize: 16.sp)),
+                        ),
+                      )
+                      .toList(),
+            ),
+          ],
+        );
+        return column;
+      },
+    );
+  }
+
+  Widget _buildListIconsCustom({required BuildContext context, required AccountFormProvider formProvider}) {
+    return Selector<AccountFormProvider, List<IconCustomModel>>(
+      selector: (context, formProvider) => formProvider.listIconsCustom,
+      builder: (context, listIconsCustom, child) {
+        return ListView.builder(
+          itemCount: listIconsCustom.length,
+          shrinkWrap: true,
+          itemBuilder: (context, index) {
+            return ListTile(
+              onTap: () {
+                formProvider.pickIcon(isCustomIcon: true, iconCustomModel: formProvider.listIconsCustom[index]);
+                Navigator.pop(context);
+              },
+              leading: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.memory(base64Decode(formProvider.listIconsCustom[index].imageBase64), width: 40.h, height: 40.h, fit: BoxFit.contain),
+              ),
+              title: Text(formProvider.listIconsCustom[index].name, style: TextStyle(fontSize: 16.sp)),
+              trailing: IconButton(
+                onPressed: () {
+                  formProvider.deleteIconCustom(formProvider.listIconsCustom[index]);
+                },
+                icon: Icon(Icons.close, color: Colors.redAccent, size: 24.sp),
+              ),
+            );
+          },
+        );
+      }
+    );
+  }
+
+  //pick image from gallery
+  Future<void> _pickImageFromGallery(BuildContext context, AccountFormProvider formProvider, TabController tabController) async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image == null) {
+      return;
+    }
+
+    CroppedFile? croppedFile = await ImageCropper().cropImage(
+      sourcePath: image.path,
+      aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+      compressFormat: ImageCompressFormat.png,
+      compressQuality: 100,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Cropper',
+          toolbarColor: Theme.of(context).colorScheme.primary,
+          toolbarWidgetColor: Colors.white,
+          activeControlsWidgetColor: Theme.of(context).colorScheme.primary,
+          initAspectRatio: CropAspectRatioPreset.square,
+          lockAspectRatio: true,
         ),
-      );
-    });
+        IOSUiSettings(title: 'Cropper', aspectRatioLockEnabled: true, aspectRatioPickerButtonHidden: true, minimumAspectRatio: 1.0),
+        WebUiSettings(
+          // ignore: use_build_context_synchronously
+          context: context,
+        ),
+      ],
+    );
+
+    if (croppedFile == null) {
+      return;
+    }
+
+    //resize image 70x70
+    final File file = File(croppedFile.path);
+    final List<int> imageBytes = await file.readAsBytes();
+    Uint8List imageUint8List = Uint8List.fromList(imageBytes);
+    final img.Image? originalImage = img.decodeImage(imageUint8List);
+
+    if (originalImage == null) {
+      return;
+    }
+
+    // Resize the image to 70x70
+    final img.Image resizedImage = img.copyResize(originalImage, width: 100, height: 100);
+    final List<int> resizedImageBytes = img.encodePng(resizedImage);
+    final String base64Image = base64Encode(resizedImageBytes);
+
+    _showDialogCreateCustomIcon(
+      // ignore: use_build_context_synchronously
+      context: context,
+      base64Image: base64Image,
+      formProvider: formProvider,
+      tabController: tabController,
+    );
+  }
+
+  Future<void> _showDialogCreateCustomIcon({required BuildContext context, required String base64Image, required AccountFormProvider formProvider, required TabController tabController}) async {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return AlertDialog(
+              actionsPadding: const EdgeInsets.only(right:10, bottom:10),
+              contentPadding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 10),
+              content: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minWidth: 300.0, // Set your desired minimum width
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.memory(
+                        base64Decode(base64Image),
+                        width: 50.h, // Fixed width, remove the .w if using a fixed size
+                        height: 50.h, // Fixed height, remove the .w if using a fixed size
+                      ),
+                    ),
+                    const SizedBox(height: 25),
+                    CustomTextField(
+                      autoFocus: true,
+                      requiredTextField: true,
+                      titleTextField: "Tên icon",
+                      controller: formProvider.iconCustomName,
+                      textInputAction: TextInputAction.go,
+                      textAlign: TextAlign.start,
+                      hintText: "Tên icon",
+                      maxLines: 1,
+                      isObscure: false,
+                      onFieldSubmitted: (value) async {
+                        if (formProvider.iconCustomName.text.isEmpty) {
+                          return;
+                        }
+                        formProvider.handleSaveIcon(imageBase64: base64Image);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    if (formProvider.iconCustomName.text.isEmpty) {
+                      return;
+                    }
+                    formProvider.handleSaveIcon(imageBase64: base64Image);
+                    tabController.animateTo(1);
+                    Navigator.pop(context);
+                  },
+                  child: const Text("OK"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 }

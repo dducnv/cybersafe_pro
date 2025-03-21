@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../utils/secure_storage.dart';
 
 extension ColorsDefined on ColorScheme {
   Color get selectableColorRed => Colors.red.shade400;

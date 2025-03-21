@@ -1,0 +1,359 @@
+import 'package:cybersafe_pro/components/icon_show_component.dart';
+import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
+import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
+import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/utils/utils.dart';
+import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
+import 'package:cybersafe_pro/widgets/decrypt_text/decrypt_text.dart';
+import 'package:cybersafe_pro/widgets/item_custom/item_copy_value.dart';
+import 'package:cybersafe_pro/widgets/otp_text_with_countdown/otp_text_with_countdown.dart';
+import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+class DetailsAccountMobileLayout extends StatefulWidget {
+  final AccountOjbModel accountOjbModel;
+  const DetailsAccountMobileLayout({super.key, required this.accountOjbModel});
+
+  @override
+  State<DetailsAccountMobileLayout> createState() => _DetailsAccountMobileLayoutState();
+}
+
+class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout> {
+  final decryptService = EncryptAppDataService.instance;
+  late final AccountOjbModel accountOjbModel;
+
+  // Thêm các biến điều khiển animation
+  final List<bool> _isVisible = List.generate(7, (_) => false);
+  final Duration _animationDuration = const Duration(milliseconds: 300);
+  final Duration _staggeredDelay = const Duration(milliseconds: 100);
+
+  @override
+  void initState() {
+    super.initState();
+    accountOjbModel = widget.accountOjbModel;
+    _startAnimation();
+  }
+
+  // Thêm phương thức điều khiển animation
+  void _startAnimation() async {
+    for (int i = 0; i < _isVisible.length; i++) {
+      await Future.delayed(_staggeredDelay);
+      if (mounted) {
+        setState(() {
+          _isVisible[i] = true;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(elevation: 0, scrolledUnderElevation: 0, shadowColor: Colors.transparent, backgroundColor: Theme.of(context).colorScheme.surface),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          children: [
+            _buildAnimatedWidget(index: 0, child: _buildAccountIcon()),
+            if (accountOjbModel.totp.target != null && accountOjbModel.totp.target?.secretKey != null) _buildAnimatedWidget(index: 1, child: _buildTOTPWidget(accountOjbModel)),
+            if (accountOjbModel.email != null && accountOjbModel.email!.isNotEmpty) _buildAnimatedWidget(index: 2, child: _buildBaseInfo()),
+            _buildAnimatedWidget(index: 3, child: _buildCategory()),
+            if (accountOjbModel.notes != null && accountOjbModel.notes!.isNotEmpty) _buildAnimatedWidget(index: 4, child: _buildNoteWidget()),
+            if (accountOjbModel.customFields.isNotEmpty) _buildAnimatedWidget(index: 5, child: _buildCustomFieldsWidget(accountOjbModel)),
+            _buildAnimatedWidget(
+              index: 6,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [if (accountOjbModel.passwordHistories.isNotEmpty) _buildPasswordHistoryWidget(accountOjbModel), const SizedBox(height: 10), _buildUpdatedAtWidget(accountOjbModel)],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Thêm widget wrapper cho animation
+  Widget _buildAnimatedWidget({required int index, required Widget child}) {
+    return AnimatedOpacity(
+      duration: _animationDuration,
+      opacity: _isVisible[index] ? 1.0 : 0.0,
+      curve: Curves.easeInSine,
+      child: AnimatedSlide(
+        duration: Duration(milliseconds: 200),
+        offset: _isVisible[index] ? Offset.zero : const Offset(0.1, 0),
+        curve: Curves.easeInSine,
+        child: AnimatedScale(duration: Duration(milliseconds: 300), scale: _isVisible[index] ? 1.0 : 0.95, curve: Curves.easeInSine, child: child),
+      ),
+    );
+  }
+
+  Widget _buildAccountIcon() {
+    return Center(
+      child: Column(
+        children: [
+          Container(
+            width: 70.h,
+            height: 70.h,
+            clipBehavior: Clip.hardEdge,
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainer, borderRadius: BorderRadius.circular(15)),
+            child: Center(
+              child: IconShowComponent(
+                account: accountOjbModel,
+                width: 50.h,
+                height: 50.h,
+                isDecrypted: false,
+                textStyle: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+              ),
+            ),
+          ),
+          const SizedBox(height: 5),
+          DecryptText(showLoading: true, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.sp), value: accountOjbModel.title, decryptTextType: DecryptTextType.info),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBaseInfo() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 10),
+        Text("Account Information", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+        const SizedBox(height: 5),
+        CardCustomWidget(
+          child: Column(
+            children: [
+              if (accountOjbModel.email != null && accountOjbModel.email!.isNotEmpty) ItemCopyValue(title: "Username", value: accountOjbModel.email!, isLastItem: accountOjbModel.password!.isEmpty),
+              if (accountOjbModel.password != null && accountOjbModel.password!.isNotEmpty) ItemCopyValue(title: "Password", value: accountOjbModel.password!, isLastItem: true, isPrivateValue: true),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategory() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 16),
+        Text("Danh mục", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+        const SizedBox(height: 5),
+        CardCustomWidget(
+          child: Row(
+            children: [
+              Icon(Icons.folder, color: Theme.of(context).colorScheme.primary, size: 24.sp),
+              const SizedBox(width: 10),
+              Text(accountOjbModel.category.target?.categoryName ?? "", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNoteWidget() {
+    return Column(
+      children: [
+        const SizedBox(height: 16),
+        Column(
+          children: [
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text("Ghi chú", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]))]),
+            const SizedBox(height: 5),
+            FutureBuilder(
+              future: decryptService.decryptInfo(accountOjbModel.notes ?? ""),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data != null) {
+                  return CustomTextField(
+                    borderRadius: BorderRadius.circular(25),
+                    contentPadding: const EdgeInsets.all(15),
+                    readOnly: true,
+                    autoFocus: true,
+                    borderColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    requiredTextField: false,
+                    textInputType: TextInputType.multiline,
+                    textInputAction: TextInputAction.newline,
+                    textAlign: TextAlign.start,
+                    minLines: 1,
+                    textStyle: TextStyle(),
+                    maxLines: null,
+                    isObscure: false,
+                    controller: TextEditingController(text: snapshot.data),
+                  );
+                }
+                return SizedBox.shrink();
+              },
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 10),
+      ],
+    );
+  }
+
+  Widget _buildCustomFieldsWidget(AccountOjbModel account) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Thông tin tuỳ chỉnh", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[800])),
+        const SizedBox(height: 5),
+        CardCustomWidget(
+          child: Column(
+            children: [
+              ...account.customFields.map(
+                (element) => ItemCopyValue(
+                  title: element.hintText,
+                  value: element.value,
+                  isPrivateValue: element.typeField.toLowerCase().contains("password"),
+                  isLastItem: account.customFields.last == element,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTOTPWidget(AccountOjbModel account) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("OTP Code", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+        const SizedBox(height: 5),
+        CardCustomWidget(
+          padding: const EdgeInsets.all(0),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                HapticFeedback.selectionClick();
+                clipboardCustom(context: context, text: "");
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(top: 10, bottom: 10, left: 10, right: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    FutureBuilder(
+                      future: decryptService.decryptTOTPKey(account.totp.target!.secretKey),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData && snapshot.data != null) {
+                          return OtpTextWithCountdown(keySecret: snapshot.data!);
+                        }
+                        return SizedBox.shrink();
+                      },
+                    ),
+                    Icon(Icons.copy, size: 18),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUpdatedAtWidget(AccountOjbModel account) {
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(text: "Cập nhật vào: ", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[800])),
+          TextSpan(text: account.updatedAtFormat, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.grey[800])),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPasswordHistoryWidget(AccountOjbModel account) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 5),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(text: "Lịch sử thay đổi mật khẩu: ", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[800])),
+                  TextSpan(text: "${account.passwordHistories.length}", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary)),
+                ],
+              ),
+            ),
+            InkWell(
+              borderRadius: BorderRadius.circular(50),
+              onTap: () {
+                bottomSheetPasswordHistory(context: context, accountOjbModel: account);
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
+                child: Text("Chi tiết", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary)),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Future<void> bottomSheetPasswordHistory({required BuildContext context, required AccountOjbModel accountOjbModel}) {
+    return showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SizedBox(
+          height: MediaQuery.of(context).size.height * 0.3,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Lịch sử mật khẩu", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey[800])),
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: const Icon(Icons.close, size: 22),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: accountOjbModel.passwordHistories.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final passwordHistory = accountOjbModel.passwordHistories[index];
+                      return ListTile(
+                        title: DecryptText(decryptTextType: DecryptTextType.password, style: Theme.of(context).textTheme.bodyLarge!, value: passwordHistory.password),
+                        subtitle: Text(passwordHistory.createdAtFormat, style: Theme.of(context).textTheme.bodyMedium),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.copy),
+                          onPressed: () {
+                            clipboardCustom(context: context, text: "");
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

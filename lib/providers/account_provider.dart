@@ -1,32 +1,31 @@
 import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
+import 'package:cybersafe_pro/database/models/account_custom_field.dart';
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
+import 'package:cybersafe_pro/database/models/password_history_model.dart';
 import 'package:cybersafe_pro/database/models/totp_ojb_model.dart';
 import 'package:cybersafe_pro/database/boxes/account_box.dart';
 import 'package:cybersafe_pro/database/boxes/category_box.dart';
-import 'package:cybersafe_pro/services/encrypt_app_data.dart';
+import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:flutter/material.dart';
-import 'package:cybersafe_pro/providers/create_account_form_provider.dart';
+import 'package:cybersafe_pro/providers/account_form_provider.dart';
 import 'dart:math' as math;
+
+import 'package:provider/provider.dart';
 
 class AccountProvider extends ChangeNotifier {
   final Map<int, AccountOjbModel> _accounts = {};
-  final Map<int, AccountOjbModel> _decryptedCache = {};
-  final TextEditingController txtTitle = TextEditingController();
-  final TextEditingController txtUsername = TextEditingController();
-  final TextEditingController txtPassword = TextEditingController();
-  final TextEditingController txtNote = TextEditingController();
 
   bool _isLoading = false;
   String? _error;
 
   // Map để lưu accounts theo category
   final Map<int, List<AccountOjbModel>> _groupedCategoryIdAccounts = {};
-  
+
   // Map để lưu trạng thái hiển thị của mỗi category (true = hiển thị tất cả, false = hiển thị giới hạn)
   final Map<int, bool> _expandedCategories = {};
-  
+
   // Số lượng account hiển thị ban đầu cho mỗi category
   static const int INITIAL_ACCOUNTS_PER_CATEGORY = 5;
 
@@ -48,6 +47,10 @@ class AccountProvider extends ChangeNotifier {
   // Thêm map để lưu số lượng tài khoản hiển thị cho mỗi category
   final Map<int, int> _visibleAccountsPerCategory = {};
 
+  // Thêm thuộc tính để lưu category đang được chọn
+  int? _selectedCategoryId;
+  int? get selectedCategoryId => _selectedCategoryId;
+
   // Getters
   Map<int, AccountOjbModel> get accounts => Map.unmodifiable(_accounts);
   List<AccountOjbModel> get accountList => _accounts.values.toList();
@@ -55,52 +58,58 @@ class AccountProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  // Getter cho grouped accounts với giới hạn hiển thị
+  // Getter cho accounts đã được lọc
   Map<int, List<AccountOjbModel>> get groupedAccounts {
     final result = <int, List<AccountOjbModel>>{};
-    
-    _groupedCategoryIdAccounts.forEach((categoryId, accounts) {
-      // Nếu category đã được mở rộng hoàn toàn, hiển thị tất cả
-      if (_expandedCategories[categoryId] == true) {
-        result[categoryId] = accounts;
-      } 
-      // Nếu đã nhấn "Xem thêm" ít nhất một lần, hiển thị số lượng đã chỉ định
-      else if (_visibleAccountsPerCategory.containsKey(categoryId)) {
-        final visibleCount = _visibleAccountsPerCategory[categoryId]!;
-        result[categoryId] = accounts.take(visibleCount).toList();
+
+    // Nếu có category được chọn, chỉ hiển thị accounts của category đó
+    if (_selectedCategoryId != null) {
+      if (_groupedCategoryIdAccounts.containsKey(_selectedCategoryId)) {
+        result[_selectedCategoryId!] = _getVisibleAccounts(_selectedCategoryId!, _groupedCategoryIdAccounts[_selectedCategoryId!] ?? []);
       }
-      // Nếu số lượng account ít hơn giới hạn ban đầu, hiển thị tất cả
-      else if (accounts.length <= INITIAL_ACCOUNTS_PER_CATEGORY) {
-        result[categoryId] = accounts;
-      } 
-      // Ngược lại chỉ hiển thị số lượng giới hạn ban đầu
-      else {
-        result[categoryId] = accounts.take(INITIAL_ACCOUNTS_PER_CATEGORY).toList();
-      }
-    });
-    
+    } else {
+      // Nếu không có category được chọn, hiển thị tất cả
+      _groupedCategoryIdAccounts.forEach((categoryId, accounts) {
+        result[categoryId] = _getVisibleAccounts(categoryId, accounts);
+      });
+    }
+
     return Map.unmodifiable(result);
   }
-  
+
+  // Helper method để lấy số lượng accounts hiển thị
+  List<AccountOjbModel> _getVisibleAccounts(int categoryId, List<AccountOjbModel> accounts) {
+    if (_expandedCategories[categoryId] == true) {
+      return accounts;
+    } else if (_visibleAccountsPerCategory.containsKey(categoryId)) {
+      final visibleCount = _visibleAccountsPerCategory[categoryId]!;
+      return accounts.take(visibleCount).toList();
+    } else if (accounts.length <= INITIAL_ACCOUNTS_PER_CATEGORY) {
+      return accounts;
+    } else {
+      return accounts.take(INITIAL_ACCOUNTS_PER_CATEGORY).toList();
+    }
+  }
+
   // Getter để biết category có thể xem thêm không
   bool canExpandCategory(int categoryId) {
     final totalCount = _categoryAccountCounts[categoryId] ?? 0;
     final currentCount = _groupedCategoryIdAccounts[categoryId]?.length ?? 0;
     return totalCount > currentCount && (_expandedCategories[categoryId] != true);
   }
-  
+
   // Getter để lấy tổng số account trong category
   int getTotalAccountsInCategory(int categoryId) {
     return _categoryAccountCounts[categoryId] ?? 0;
   }
-  
+
   // Phương thức để mở rộng/thu gọn category
   void toggleCategoryExpansion(int categoryId) {
     final currentState = _expandedCategories[categoryId] ?? false;
     _expandedCategories[categoryId] = !currentState;
     notifyListeners();
   }
-  
+
   // Phương thức để mở rộng category
   void expandCategory(int categoryId) {
     if (!(_expandedCategories[categoryId] ?? false)) {
@@ -108,7 +117,7 @@ class AccountProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-  
+
   // Phương thức để thu gọn category
   void collapseCategory(int categoryId) {
     if (_expandedCategories[categoryId] ?? false) {
@@ -116,7 +125,7 @@ class AccountProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-  
+
   // Phương thức để mở rộng tất cả các category
   void expandAllCategories() {
     for (var categoryId in _groupedCategoryIdAccounts.keys) {
@@ -124,7 +133,7 @@ class AccountProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
-  
+
   // Phương thức để thu gọn tất cả các category
   void collapseAllCategories() {
     for (var categoryId in _groupedCategoryIdAccounts.keys) {
@@ -136,6 +145,26 @@ class AccountProvider extends ChangeNotifier {
   void _setError(String? value) {
     _error = value;
     notifyListeners();
+  }
+
+  Future<List<AccountOjbModel>> searchAccounts(String query) async {
+    final result = await _handleAsync<List<AccountOjbModel>>(funcName: "searchAccounts", () async {
+      if (query.isEmpty) return <AccountOjbModel>[];
+
+      final queryLower = query.toLowerCase();
+      // Lấy tất cả tài khoản và giải mã
+      final accounts = await AccountBox.getAll();
+      final decryptedAccounts = await Future.wait(accounts.map((account) => _getDecryptedBasicInfo(account)));
+
+      // Tìm kiếm trong dữ liệu đã giải mã
+      return decryptedAccounts.where((account) {
+        final titleMatch = account.title.toLowerCase().contains(queryLower);
+        final emailMatch = account.email?.toLowerCase().contains(queryLower) ?? false;
+        return titleMatch || emailMatch;
+      }).toList();
+    });
+
+    return result ?? <AccountOjbModel>[];
   }
 
   // Helper để quản lý trạng thái loading
@@ -196,95 +225,124 @@ class AccountProvider extends ChangeNotifier {
     await _handleAsync(funcName: "getAccounts", () async {
       // Lấy tất cả các category trước
       final categories = CategoryBox.getAll();
-      
+
       // Xóa dữ liệu cũ
       _accounts.clear();
       _groupedCategoryIdAccounts.clear();
-      
+
       // Reset trạng thái mở rộng nếu được yêu cầu
       if (resetExpansion) {
         _expandedCategories.clear();
       }
-      
+
       clearDecryptedCache();
-      
+
       // Reset số lượng tài khoản hiển thị
       _visibleAccountsPerCategory.clear();
 
       // Tạo cache cho category để tránh truy vấn lặp lại
       _categoryCache.clear();
-      
+
       // Lưu tất cả category vào cache
       for (var category in categories) {
         _categoryCache[category.id] = category;
       }
-      
+
       // Lấy tài khoản cho mỗi category với giới hạn số lượng
       final accountsByCategory = AccountBox.getByCategoriesWithLimit(categories, INITIAL_ACCOUNTS_PER_CATEGORY);
-      
+
       // Xử lý từng category
       for (var categoryId in accountsByCategory.keys) {
         final accounts = accountsByCategory[categoryId] ?? [];
         final category = _categoryCache[categoryId] ?? CategoryOjbModel(id: 0, categoryName: 'Không xác định');
-        
+
         // Xử lý song song các account trong category
         final decryptedAccounts = await Future.wait(accounts.map((account) => _getDecryptedBasicInfo(account)));
-        
+
         // Lưu vào _accounts và _groupedCategoryIdAccounts
         for (var i = 0; i < accounts.length; i++) {
           final account = accounts[i];
           final decryptedAccount = decryptedAccounts[i];
-          
+
           _accounts[account.id] = account;
           _groupedCategoryIdAccounts.putIfAbsent(category.id, () => []).add(decryptedAccount);
         }
-        
+
         // Thông báo sau mỗi category để UI cập nhật dần
         notifyListeners();
       }
-      
-      // Sắp xếp account trong mỗi category theo tên (chỉ sắp xếp lần đầu)
-      _groupedCategoryIdAccounts.forEach((categoryId, accounts) {
-        accounts.sort((a, b) => a.title.compareTo(b.title));
-      });
-      
+
       // Lấy số lượng tài khoản cho mỗi category để hiển thị "Xem thêm"
       _updateAccountCountsForCategories(categories);
     });
   }
 
-  // Lấy account đã giải mã với cache
-  Future<AccountOjbModel> getDecryptedAccount(int id) async {
-    // Kiểm tra cache trước
-    if (_decryptedCache.containsKey(id)) {
-      return _decryptedCache[id]!;
-    }
+  // // Lấy account đã giải mã với cache
+  // Future<AccountOjbModel> getDecryptedAccount(int id) async {
+  //   // Kiểm tra cache trước
+  //   if (_decryptedCache.containsKey(id)) {
+  //     return _decryptedCache[id]!;
+  //   }
 
-    final account = _accounts[id];
-    if (account == null) throw Exception('Account không tồn tại');
+  //   final account = _accounts[id];
+  //   if (account == null) throw Exception('Account không tồn tại');
 
-    final decrypted = await _decryptAccount(account);
-    // Lưu vào cache
-    _decryptedCache[id] = decrypted;
-    return decrypted;
-  }
+  //   final decrypted = await _decryptAccount(account);
+  //   // Lưu vào cache
+  //   _decryptedCache[id] = decrypted;
+  //   return decrypted;
+  // }
 
   // Thêm account mới với mã hóa
-  Future<bool> createAccount(AccountOjbModel account) async {
+  Future<bool> createOrUpdateAccount(AccountOjbModel account, {bool isUpdate = false}) async {
     final stopwatch = Stopwatch()..start();
-    final result = await _handleAsync(funcName: "createAccount", () async {
+    final result = await _handleAsync(funcName: isUpdate ? "updateAccount" : "createAccount", () async {
       if (account.title.trim().isEmpty) {
         throw Exception('Tên tài khoản không được để trống');
       }
-      final encryptedAccount = await _encryptAccount(account);
+
+      AccountOjbModel accountToSave;
+      if (isUpdate) {
+        // Update logic
+        AccountOjbModel? currentAccount = account.id != 0 ? await AccountBox.getById(account.id) : null;
+        if (currentAccount == null) throw Exception('Tài khoản không được để chống');
+        AccountOjbModel decryptedAccount = await decryptAccount(currentAccount);
+
+        // Update existing account fields
+        currentAccount.icon = account.icon;
+        currentAccount.setIconCustom = account.getIconCustom;
+        currentAccount.title = account.title;
+        currentAccount.email = account.email;
+        if (decryptedAccount.password != null && decryptedAccount.password!.isNotEmpty && decryptedAccount.password != account.password) {
+          currentAccount.passwordHistories.add(PasswordHistory(password: decryptedAccount.password!, createdAt: DateTime.now(), updatedAt: DateTime.now()));
+          currentAccount.password = account.password;
+        } else {
+          currentAccount.password = account.password;
+        }
+        currentAccount.notes = account.notes;
+        currentAccount.setCategory = account.getCategory;
+        currentAccount.customFields.clear();
+        currentAccount.customFields.addAll(account.getCustomFields);
+        currentAccount.updatedAt = DateTime.now();
+        accountToSave = currentAccount;
+      } else {
+        // Create logic
+        accountToSave = account;
+      }
+
+      final encryptedAccount = await _encryptAccount(accountToSave);
       final elapsedTime = stopwatch.elapsed;
-      debugPrint('createAccount: _encryptAccount Thao tác hoàn thành trong: ${elapsedTime.inMilliseconds}ms');
-      final id = AccountBox.put(encryptedAccount);
-      debugPrint('createAccount: AccountBox.put $id Thao tác hoàn thành trong: ${elapsedTime.inMilliseconds}ms');
-      encryptedAccount.id = id;
-      _accounts.putIfAbsent(id, () => encryptedAccount);
-      _clearForm();
-      debugPrint('createAccount: Thao tác hoàn thành trong: ${elapsedTime.inMilliseconds}ms');
+      debugPrint('${isUpdate ? "updateAccount" : "createAccount"}: _encryptAccount completed in: ${elapsedTime.inMilliseconds}ms');
+
+      final id = await AccountBox.put(encryptedAccount);
+      if (!isUpdate) {
+        encryptedAccount.id = id;
+      }
+
+      _accounts[isUpdate ? account.id : id] = encryptedAccount;
+      _basicInfoCache.remove(isUpdate ? account.id : id);
+
+      debugPrint('${isUpdate ? "updateAccount" : "createAccount"}: Operation completed in: ${elapsedTime.inMilliseconds}ms');
       return true;
     });
 
@@ -294,37 +352,14 @@ class AccountProvider extends ChangeNotifier {
     return result ?? false;
   }
 
-  // Cập nhật account với mã hóa
-  Future<bool> updateAccount(AccountOjbModel account) async {
-    final result = await _handleAsync(
-      funcName:"updateAccount",
-      () async {
-      if (account.title.trim().isEmpty) {
-        throw Exception('Tên tài khoản không được để trống');
-      }
-
-      final encryptedAccount = await _encryptAccount(account);
-      AccountBox.put(encryptedAccount);
-
-      _accounts[account.id] = encryptedAccount;
-      _decryptedCache.remove(account.id);
-      _basicInfoCache.remove(account.id); // Xóa basic info cache
-      return true;
-    });
-
-    return result ?? false;
-  }
-
   // Xóa account
   Future<bool> deleteAccount(AccountOjbModel account) async {
-    final result = await _handleAsync(
-      funcName:"deleteAccount",
-      () async {
+    final result = await _handleAsync(funcName: "deleteAccount", () async {
       if (!AccountBox.delete(account.id)) {
         throw Exception('Không thể xóa tài khoản');
       }
       _accounts.remove(account.id);
-      _decryptedCache.remove(account.id);
+      // _decryptedCache.remove(account.id);
       _basicInfoCache.remove(account.id);
       if (account.getCategory != null) {
         _groupedCategoryIdAccounts[account.getCategory!.id]?.remove(account);
@@ -360,35 +395,34 @@ class AccountProvider extends ChangeNotifier {
   // Mã hóa dữ liệu account
   Future<AccountOjbModel> _encryptAccount(AccountOjbModel account) async {
     final encryptData = EncryptAppDataService.instance;
-    final encryptedAccount = AccountOjbModel.fromModel(account);
 
     // Encrypt các trường cơ bản
-    encryptedAccount.title = await encryptData.encryptInfo(account.title);
+    account.title = await encryptData.encryptInfo(account.title);
     if (account.email != null) {
-      encryptedAccount.email = await encryptData.encryptInfo(account.email!);
+      account.email = await encryptData.encryptInfo(account.email!);
     }
     if (account.password != null) {
-      encryptedAccount.password = await encryptData.encryptPassword(account.password!);
+      account.password = await encryptData.encryptPassword(account.password!);
     }
     if (account.notes != null) {
-      encryptedAccount.notes = await encryptData.encryptInfo(account.notes!);
+      account.notes = await encryptData.encryptInfo(account.notes!);
     }
 
     // Encrypt custom fields
-    for (var field in encryptedAccount.customFields) {
+    for (var field in account.customFields) {
       field.value = field.typeField == 'password' ? await encryptData.encryptPassword(field.value) : await encryptData.encryptInfo(field.value);
     }
 
     // Encrypt TOTP
-    if (encryptedAccount.totp.target != null) {
-      encryptedAccount.totp.target!.secretKey = await encryptData.encryptTOTPKey(encryptedAccount.totp.target!.secretKey);
+    if (account.totp.target != null) {
+      account.totp.target!.secretKey = await encryptData.encryptTOTPKey(account.totp.target!.secretKey);
     }
 
-    return encryptedAccount;
+    return account;
   }
 
-  // Giải mã dữ liệu account
-  Future<AccountOjbModel> _decryptAccount(AccountOjbModel account) async {
+  //Giải mã dữ liệu account
+  Future<AccountOjbModel> decryptAccount(AccountOjbModel account) async {
     final encryptData = EncryptAppDataService.instance;
     final decryptedAccount = AccountOjbModel.fromModel(account);
 
@@ -417,16 +451,9 @@ class AccountProvider extends ChangeNotifier {
     return decryptedAccount;
   }
 
-  void _clearForm() {
-    txtTitle.clear();
-    txtUsername.clear();
-    txtPassword.clear();
-    txtNote.clear();
-  }
-
   // Xóa cache khi cần
   void clearDecryptedCache() {
-    _decryptedCache.clear();
+    // _decryptedCache.clear();
     _basicInfoCache.clear();
     // Không xóa _expandedCategories để giữ trạng thái mở rộng
     notifyListeners();
@@ -434,11 +461,9 @@ class AccountProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _basicInfoCache.clear();
+    _categoryCache.clear();
     clearDecryptedCache();
-    txtTitle.dispose();
-    txtUsername.dispose();
-    txtPassword.dispose();
-    txtNote.dispose();
     _accounts.clear();
     _expandedCategories.clear();
     _categoryAccountCounts.clear();
@@ -446,52 +471,55 @@ class AccountProvider extends ChangeNotifier {
     super.dispose();
   }
 
-  Future<bool> createAccountFromForm(CreateAccountFormProvider form) async {
+  Future<bool> createAccountFromForm(AccountFormProvider form) async {
     if (!form.validateForm()) {
       return false;
     }
-    showLoadingDialog();
-    final newAccount = AccountOjbModel(
-      id: 0, // ID sẽ được tạo khi lưu vào database
-      title: form.appNameController.text.trim(),
-      email: form.usernameController.text.trim(),
-      password: form.passwordController.text,
-      notes: form.noteController.text.trim(),
-      categoryOjbModel: form.selectedCategory!,
-      totpOjbModel: form.otpController.text.isNotEmpty ? TOTPOjbModel(secretKey: form.otpController.text, algorithm: 'SHA1', digits: 6, period: 30) : null,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-    final result = await createAccount(newAccount);
-    if (result) {
-      form.resetForm();
-    }
-    await hideLoadingDialog();
-    return result;
+
+    return await _handleAsync(funcName: "createAccountFromForm", () async {
+          showLoadingDialog();
+          final customFields =
+              form.dynamicTextFieldNotifier.map((e) {
+                return AccountCustomFieldOjbModel(name: e.customField.key, value: e.controller.text, hintText: e.customField.hintText, typeField: e.customField.typeField.type);
+              }).toList();
+
+          final now = DateTime.now();
+          final newAccount = AccountOjbModel(
+            id: form.accountId,
+            icon: form.branchLogoSelected?.branchLogoSlug,
+            title: form.appNameController.text.trim(),
+            email: form.usernameController.text.trim(),
+            password: form.passwordController.text,
+            notes: form.noteController.text.trim(),
+            categoryOjbModel: form.selectedCategory!,
+            totpOjbModel: form.otpController.text.isNotEmpty ? TOTPOjbModel(secretKey: form.otpController.text.toUpperCase(), algorithm: 'SHA1', digits: 6, period: 30) : null,
+            customFieldOjbModel: customFields,
+            iconCustomModel: form.selectedIconCustom,
+            createdAt: form.accountId == 0 ? now : null,
+            updatedAt: now,
+          );
+          final result = await createOrUpdateAccount(newAccount, isUpdate: form.accountId != 0);
+          if (result) {
+            form.resetForm();
+          }
+          hideLoadingDialog();
+          return result;
+        }) ??
+        false;
   }
 
   // Hàm tạo dữ liệu giả với 9 category, mỗi category có 40 account
   Future<bool> generateFakeData() async {
     final stopwatch = Stopwatch()..start();
-    
+
     try {
       _isLoading = true;
       _error = null;
       notifyListeners();
-      
+
       // Danh sách tên category
-      final categoryNames = [
-        'Mạng xã hội',
-        'Ngân hàng',
-        'Email',
-        'Mua sắm',
-        'Giải trí',
-        'Công việc',
-        'Học tập',
-        'Trò chơi',
-        'Khác'
-      ];
-      
+      final categoryNames = ['Mạng xã hội', 'Ngân hàng', 'Email', 'Mua sắm', 'Giải trí', 'Công việc', 'Học tập', 'Trò chơi', 'Khác'];
+
       // Danh sách tên dịch vụ phổ biến cho mỗi category
       final servicesByCategory = {
         'Mạng xã hội': ['Facebook', 'Instagram', 'Twitter', 'LinkedIn', 'TikTok', 'Pinterest', 'Reddit', 'Snapchat', 'Tumblr', 'Discord'],
@@ -502,9 +530,9 @@ class AccountProvider extends ChangeNotifier {
         'Công việc': ['Slack', 'Trello', 'Asana', 'Jira', 'Microsoft Teams', 'Notion', 'Monday.com', 'ClickUp', 'Basecamp', 'Todoist'],
         'Học tập': ['Coursera', 'Udemy', 'edX', 'Khan Academy', 'Duolingo', 'Quizlet', 'Memrise', 'Brilliant', 'Skillshare', 'Codecademy'],
         'Trò chơi': ['Steam', 'Epic Games', 'Origin', 'Ubisoft Connect', 'Battle.net', 'PlayStation Network', 'Xbox Live', 'Nintendo', 'Garena', 'Riot Games'],
-        'Khác': ['Dropbox', 'Google Drive', 'OneDrive', 'iCloud', 'Evernote', 'LastPass', 'NordVPN', 'ExpressVPN', 'Adobe', 'Canva']
+        'Khác': ['Dropbox', 'Google Drive', 'OneDrive', 'iCloud', 'Evernote', 'LastPass', 'NordVPN', 'ExpressVPN', 'Adobe', 'Canva'],
       };
-       
+
       // Tạo các category
       final categories = <CategoryOjbModel>[];
       for (var i = 0; i < categoryNames.length; i++) {
@@ -517,22 +545,20 @@ class AccountProvider extends ChangeNotifier {
         final categoryId = CategoryBox.put(category);
         category.id = categoryId;
         categories.add(category);
-        
+
         debugPrint('Đã tạo category: ${category.categoryName} với ID: $categoryId');
       }
-      
+
       // Tạo account cho mỗi category
       for (var category in categories) {
         final services = servicesByCategory[category.categoryName] ?? [];
         final accountsToCreate = <AccountOjbModel>[];
-        
+
         // Tạo 40 account cho mỗi category
         for (var i = 0; i < 40; i++) {
           // Chọn dịch vụ từ danh sách hoặc tạo tên ngẫu nhiên
-          final serviceName = i < services.length 
-              ? services[i] 
-              : '${category.categoryName} Account ${i + 1}';
-          
+          final serviceName = i < services.length ? services[i] : '${category.categoryName} Account ${i + 1}';
+
           final account = AccountOjbModel(
             title: serviceName,
             email: 'user${i + 1}@${serviceName.toLowerCase().replaceAll(' ', '')}.com',
@@ -542,21 +568,21 @@ class AccountProvider extends ChangeNotifier {
             createdAt: DateTime.now().subtract(Duration(days: i % 30)),
             updatedAt: DateTime.now().subtract(Duration(hours: i % 24)),
           );
-          
+
           accountsToCreate.add(account);
         }
-        
+
         // Lưu hàng loạt account
-        final accountIds = AccountBox.putMany(accountsToCreate);
+        final accountIds = await AccountBox.putMany(accountsToCreate);
         debugPrint('Đã tạo ${accountIds.length} account cho category: ${category.categoryName}');
       }
-      
+
       final elapsedTime = stopwatch.elapsed;
       debugPrint('generateFakeData: Thao tác hoàn thành trong: ${elapsedTime.inMilliseconds}ms');
-      
+
       // Cập nhật lại danh sách account
       await getAccounts();
-      
+
       return true;
     } catch (e) {
       final elapsedTime = stopwatch.elapsed;
@@ -586,78 +612,78 @@ class AccountProvider extends ChangeNotifier {
       // Kiểm tra xem category có tồn tại không
       final category = _categoryCache[categoryId];
       if (category == null) return;
-      
+
       // Lấy số lượng tài khoản hiện tại
       final currentAccounts = _groupedCategoryIdAccounts[categoryId] ?? [];
       final offset = currentAccounts.length;
-      
+
       // Lấy thêm tài khoản (10 tài khoản mỗi lần)
       final moreAccounts = AccountBox.getByCategoryWithLimit(category, LOAD_MORE_ACCOUNTS_COUNT, offset);
-      
+
       // Nếu không có thêm tài khoản nào, thoát
       if (moreAccounts.isEmpty) return;
-      
+
       // Tạo set chứa ID của các tài khoản hiện tại để kiểm tra trùng lặp
       final existingAccountIds = currentAccounts.map((a) => a.id).toSet();
-      
+
       // Lọc ra những tài khoản chưa có trong danh sách
       final newAccounts = moreAccounts.where((a) => !existingAccountIds.contains(a.id)).toList();
-      
+
       // Nếu không có tài khoản mới, thoát
       if (newAccounts.isEmpty) return;
-      
+
       // Giải mã tài khoản mới
       final decryptedMoreAccounts = await Future.wait(newAccounts.map((account) => _getDecryptedBasicInfo(account)));
-      
+
       // Thêm vào danh sách hiện tại
       for (var i = 0; i < newAccounts.length; i++) {
         final account = newAccounts[i];
         final decryptedAccount = decryptedMoreAccounts[i];
-        
+
         _accounts[account.id] = account;
         _groupedCategoryIdAccounts.putIfAbsent(categoryId, () => []).add(decryptedAccount);
       }
-      
+
       // Không sắp xếp lại danh sách để giữ nguyên thứ tự các tài khoản mới được thêm vào cuối
       // _groupedCategoryIdAccounts[categoryId]?.sort((a, b) => a.title.compareTo(b.title));
-      
+
       // Cập nhật số lượng tài khoản hiển thị
       final currentVisibleCount = _visibleAccountsPerCategory[categoryId] ?? INITIAL_ACCOUNTS_PER_CATEGORY;
       _visibleAccountsPerCategory[categoryId] = currentVisibleCount + LOAD_MORE_ACCOUNTS_COUNT;
-      
+
       // Kiểm tra xem đã tải hết tài khoản chưa
       final totalCount = _categoryAccountCounts[categoryId] ?? 0;
       final currentCount = _groupedCategoryIdAccounts[categoryId]?.length ?? 0;
-      
+
       // Nếu đã tải hết, đánh dấu là đã mở rộng
       if (currentCount >= totalCount) {
         _expandedCategories[categoryId] = true;
         // Không cần giới hạn số lượng hiển thị nữa
         _visibleAccountsPerCategory.remove(categoryId);
       }
-      
+
       notifyListeners();
     });
     hideLoadingDialog();
   }
-  
+
   // Phương thức để tải tất cả tài khoản cho một category
   Future<void> loadAllAccountsForCategory(int categoryId) async {
     await _handleAsync(funcName: "loadAllAccountsForCategory", () async {
       // Kiểm tra xem category có tồn tại không
       final category = _categoryCache[categoryId];
       if (category == null) return;
-      
+
       // Lấy tất cả tài khoản trong category
       final allAccounts = AccountBox.getByCategory(category);
-      
+
       // Lấy danh sách tài khoản hiện tại
       final currentAccounts = _groupedCategoryIdAccounts[categoryId] ?? [];
       final currentAccountIds = currentAccounts.map((a) => a.id).toSet();
-      
+
       // Lọc ra những tài khoản chưa được tải
       final newAccounts = allAccounts.where((a) => !currentAccountIds.contains(a.id)).toList();
-      
+
       // Nếu không có tài khoản mới, thoát
       if (newAccounts.isEmpty) {
         // Đánh dấu category đã được mở rộng ngay cả khi không có tài khoản mới
@@ -667,27 +693,27 @@ class AccountProvider extends ChangeNotifier {
         notifyListeners();
         return;
       }
-      
+
       // Giải mã tài khoản mới
       final decryptedNewAccounts = await Future.wait(newAccounts.map((account) => _getDecryptedBasicInfo(account)));
-      
+
       // Thêm vào danh sách hiện tại
       for (var i = 0; i < newAccounts.length; i++) {
         final account = newAccounts[i];
         final decryptedAccount = decryptedNewAccounts[i];
-        
+
         _accounts[account.id] = account;
         _groupedCategoryIdAccounts.putIfAbsent(categoryId, () => []).add(decryptedAccount);
       }
-      
+
       // Không sắp xếp lại danh sách để giữ nguyên thứ tự các tài khoản mới được thêm vào cuối
       // _groupedCategoryIdAccounts[categoryId]?.sort((a, b) => a.title.compareTo(b.title));
-      
+
       // Đánh dấu category đã được mở rộng
       _expandedCategories[categoryId] = true;
       // Xóa giới hạn hiển thị
       _visibleAccountsPerCategory.remove(categoryId);
-      
+
       notifyListeners();
     });
   }
@@ -698,19 +724,19 @@ class AccountProvider extends ChangeNotifier {
     _visibleAccountsPerCategory.clear();
     notifyListeners();
   }
-  
+
   // Phương thức để reset trạng thái mở rộng của một danh mục cụ thể
   void resetCategoryExpansion(int categoryId) {
     _expandedCategories.remove(categoryId);
     _visibleAccountsPerCategory.remove(categoryId);
     notifyListeners();
   }
-  
+
   // Phương thức để kiểm tra xem một danh mục có đang được mở rộng không
   bool isCategoryExpanded(int categoryId) {
     return _expandedCategories[categoryId] == true;
   }
-  
+
   // Phương thức để lấy số lượng tài khoản đang hiển thị trong một danh mục
   int getVisibleAccountsCount(int categoryId) {
     if (_expandedCategories[categoryId] == true) {
@@ -727,5 +753,19 @@ class AccountProvider extends ChangeNotifier {
     showLoadingDialog();
     await getAccounts(resetExpansion: resetExpansion);
     hideLoadingDialog();
+  }
+
+  // Phương thức để chọn/bỏ chọn category
+  void selectCategory(int? categoryId, {required BuildContext context}) {
+    final accountFormProvider = Provider.of<AccountFormProvider>(context, listen: false);
+    final categoryProvider = Provider.of<CategoryProvider>(context, listen: false);
+    if (_selectedCategoryId == categoryId) {
+      _selectedCategoryId = null; // Bỏ chọn nếu đã chọn
+      accountFormProvider.setCategoryNull();
+    } else {
+      _selectedCategoryId = categoryId; // Chọn category mới
+      accountFormProvider.setCategory(categoryProvider.categories[categoryId]!);
+    }
+    notifyListeners();
   }
 }

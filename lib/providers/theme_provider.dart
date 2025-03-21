@@ -3,14 +3,12 @@ import '../theme/app_colors.dart';
 import '../utils/secure_storage.dart';
 
 class ThemeProvider extends ChangeNotifier {
-  late ThemeMode themeMode;
-  late Color accentColor;
-  late bool isDefaultTheme;
+  late ThemeMode themeMode = ThemeMode.light;
+  late Color accentColor = AppThemeColor.blue.color;
+  late bool isDefaultTheme = true;
 
   ThemeProvider() {
-    themeMode = ThemeMode.light;
-    accentColor = AppThemeColor.blue.color;
-    isDefaultTheme = false;
+    initTheme();
   }
 
   // Khởi tạo theme từ storage

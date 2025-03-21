@@ -1,8 +1,6 @@
+import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
-import '../../../providers/theme_provider.dart';
-
 class HomeAppBarCustom extends StatefulWidget implements PreferredSizeWidget {
   final bool isDesktop;
   final GlobalKey<ScaffoldState>? scaffoldKey;
@@ -22,11 +20,9 @@ class HomeAppBarCustom extends StatefulWidget implements PreferredSizeWidget {
 class _HomeAppBarCustomState extends State<HomeAppBarCustom> {
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final isDark = themeProvider.isDarkMode;
-
     return AppBar(
       elevation: 0,
+      centerTitle:true,
       leading: widget.scaffoldKey != null ? IconButton(
         icon: const Icon(Icons.menu),
         onPressed: () {
@@ -57,7 +53,9 @@ class _HomeAppBarCustomState extends State<HomeAppBarCustom> {
           visible: !widget.isDesktop,
           child: IconButton(
             icon: const Icon(Icons.settings_rounded, size: 24),
-            onPressed: () {},
+            onPressed: () {
+              AppRoutes.navigateTo(context, AppRoutes.settings);
+            },
           ),
         ),
       ],

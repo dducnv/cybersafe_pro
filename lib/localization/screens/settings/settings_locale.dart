@@ -1,5 +1,4 @@
 import '../../base_locale.dart';
-import '../../app_locale.dart';
 
 class SettingsLocale extends BaseLocale {
   SettingsLocale(super.appLocale);

@@ -78,7 +78,7 @@ class _PasswordGenerateMobileLayoutState extends State<PasswordGenerateMobileLay
             Expanded(
               child: _buildNavItem(
                 context,
-                icon: viewModel.isFromForm ? Icons.check : Icons.copy_outlined,
+                icon: viewModel.isFromForm ? Icons.arrow_outward : Icons.copy_outlined,
                 onTap: () {
                   if (viewModel.isFromForm) {
                     viewModel.onPasswordChanged!(viewModel.password);

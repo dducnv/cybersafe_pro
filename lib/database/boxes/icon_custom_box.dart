@@ -13,14 +13,10 @@ class IconCustomBox {
   }
 
   static int put(IconCustomModel icon) {
-    icon.updatedAt = DateTime.now();
     return box.put(icon);
   }
 
   static List<int> putMany(List<IconCustomModel> icons) {
-    for (var icon in icons) {
-      icon.updatedAt = DateTime.now();
-    }
     return box.putMany(icons);
   }
 
@@ -35,4 +31,4 @@ class IconCustomBox {
   static Stream<List<IconCustomModel>> watchAll() {
     return box.query().watch(triggerImmediately: true).map((query) => query.find());
   }
-} 
+}

@@ -1,4 +1,7 @@
+
+import 'package:cybersafe_pro/components/icon_show_component.dart';
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
+import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:flutter/material.dart';
 
@@ -18,7 +21,9 @@ class AccountItemWidget extends StatelessWidget {
       color: const Color.fromRGBO(0, 0, 0, 0),
       child: InkWell(
         onLongPress: onLongPress,
-        onTap: () {},
+        onTap: () {
+          AppRoutes.navigateTo(context, AppRoutes.detailsAccount, arguments: {"accountId": accountModel.id});
+        },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Row(
@@ -30,7 +35,25 @@ class AccountItemWidget extends StatelessWidget {
                 },
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),
-                  child: ColoredBox(color: Colors.grey.withOpacity(0.2), child: Center(child: SizedBox(width: 50.h, height: 50.h, child: Center(child: Icon(Icons.abc))))),
+                  child: ColoredBox(
+                    color: Colors.grey.withOpacity(0.2),
+                    child: Center(
+                      child: SizedBox(
+                        width: 50.h,
+                        height: 50.h,
+
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: IconShowComponent(
+                            account: accountModel,
+                            width: 40.h,
+                            height: 40.h,
+                            textStyle: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 12),

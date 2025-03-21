@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/widgets/secure_app/secure_app_switcher.dart';
 import 'package:flutter/material.dart';
 
@@ -106,15 +105,17 @@ class _SecureAppSwitcherPageState extends State<SecureAppSwitcherPage> with Rout
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Widget con sẽ được hiển thị khi ứng dụng đang hoạt động
-        widget.child,
-        
-        // Màn hình che giấu sẽ hiển thị khi ứng dụng chuyển sang chế độ nền
-        if (_showMask)
-          _buildMask(context),
-      ],
+    return SafeArea(
+      child: Stack(
+        children: [
+          // Widget con sẽ được hiển thị khi ứng dụng đang hoạt động
+          widget.child,
+          
+          // Màn hình che giấu sẽ hiển thị khi ứng dụng chuyển sang chế độ nền
+          if (_showMask)
+            _buildMask(context),
+        ],
+      ),
     );
   }
 

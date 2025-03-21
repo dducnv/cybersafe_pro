@@ -19,6 +19,11 @@ class PasswordGenerateProvider extends ChangeNotifier {
   final String numbers = "0123456789";
   final String special = "@#=+!£\$%&?[](){}";
 
+  void init(bool isFromForm, Function(String)? onPasswordChanged) {
+    this.isFromForm = isFromForm;
+    this.onPasswordChanged = onPasswordChanged;
+  }
+
   void setPassLength(int length) {
     passLength = length;
     notifyListeners();

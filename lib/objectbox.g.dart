@@ -201,7 +201,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(5, 3055995045590780828),
       name: 'IconCustomModel',
-      lastPropertyId: const obx_int.IdUid(6, 4362901113340552298),
+      lastPropertyId: const obx_int.IdUid(8, 7801521614380956708),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -210,29 +210,19 @@ final _entities = <obx_int.ModelEntity>[
             type: 6,
             flags: 1),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(2, 2757664982512354282),
-            name: 'path',
-            type: 9,
-            flags: 0),
-        obx_int.ModelProperty(
             id: const obx_int.IdUid(3, 7015245297783846823),
             name: 'name',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 8233014793896729974),
-            name: 'color',
-            type: 6,
+            id: const obx_int.IdUid(7, 1012905758485839480),
+            name: 'imageBase64',
+            type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(5, 4115719657313187141),
-            name: 'createdAt',
-            type: 10,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(6, 4362901113340552298),
-            name: 'updatedAt',
-            type: 10,
+            id: const obx_int.IdUid(8, 7801521614380956708),
+            name: 'imageBase64DarkModel',
+            type: 9,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
@@ -400,7 +390,11 @@ obx_int.ModelDefinition getObjectBoxModel() {
         4155842190920700882,
         6711675260948032995,
         8055032713108837086,
-        8096244496920815466
+        8096244496920815466,
+        2757664982512354282,
+        8233014793896729974,
+        4115719657313187141,
+        4362901113340552298
       ],
       retiredRelationUids: const [],
       modelVersion: 5,
@@ -637,16 +631,16 @@ obx_int.ModelDefinition getObjectBoxModel() {
           object.id = id;
         },
         objectToFB: (IconCustomModel object, fb.Builder fbb) {
-          final pathOffset = fbb.writeString(object.path);
-          final nameOffset =
-              object.name == null ? null : fbb.writeString(object.name!);
-          fbb.startTable(7);
+          final nameOffset = fbb.writeString(object.name);
+          final imageBase64Offset = fbb.writeString(object.imageBase64);
+          final imageBase64DarkModelOffset = object.imageBase64DarkModel == null
+              ? null
+              : fbb.writeString(object.imageBase64DarkModel!);
+          fbb.startTable(9);
           fbb.addInt64(0, object.id);
-          fbb.addOffset(1, pathOffset);
           fbb.addOffset(2, nameOffset);
-          fbb.addInt64(3, object.color);
-          fbb.addInt64(4, object.createdAt.millisecondsSinceEpoch);
-          fbb.addInt64(5, object.updatedAt.millisecondsSinceEpoch);
+          fbb.addOffset(6, imageBase64Offset);
+          fbb.addOffset(7, imageBase64DarkModelOffset);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -655,23 +649,19 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final rootOffset = buffer.derefObject(0);
           final idParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
-          final pathParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGet(buffer, rootOffset, 6, '');
           final nameParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGetNullable(buffer, rootOffset, 8);
-          final colorParam =
-              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 10);
-          final createdAtParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0));
-          final updatedAtParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 14, 0));
+              .vTableGet(buffer, rootOffset, 8, '');
+          final imageBase64Param =
+              const fb.StringReader(asciiOptimization: true)
+                  .vTableGet(buffer, rootOffset, 16, '');
+          final imageBase64DarkModelParam =
+              const fb.StringReader(asciiOptimization: true)
+                  .vTableGetNullable(buffer, rootOffset, 18);
           final object = IconCustomModel(
               id: idParam,
-              path: pathParam,
               name: nameParam,
-              color: colorParam,
-              createdAt: createdAtParam,
-              updatedAt: updatedAtParam);
+              imageBase64: imageBase64Param,
+              imageBase64DarkModel: imageBase64DarkModelParam);
           obx_int.InternalToManyAccess.setRelInfo<IconCustomModel>(
               object.accounts,
               store,
@@ -916,25 +906,17 @@ class IconCustomModel_ {
   static final id =
       obx.QueryIntegerProperty<IconCustomModel>(_entities[3].properties[0]);
 
-  /// See [IconCustomModel.path].
-  static final path =
-      obx.QueryStringProperty<IconCustomModel>(_entities[3].properties[1]);
-
   /// See [IconCustomModel.name].
   static final name =
+      obx.QueryStringProperty<IconCustomModel>(_entities[3].properties[1]);
+
+  /// See [IconCustomModel.imageBase64].
+  static final imageBase64 =
       obx.QueryStringProperty<IconCustomModel>(_entities[3].properties[2]);
 
-  /// See [IconCustomModel.color].
-  static final color =
-      obx.QueryIntegerProperty<IconCustomModel>(_entities[3].properties[3]);
-
-  /// See [IconCustomModel.createdAt].
-  static final createdAt =
-      obx.QueryDateProperty<IconCustomModel>(_entities[3].properties[4]);
-
-  /// See [IconCustomModel.updatedAt].
-  static final updatedAt =
-      obx.QueryDateProperty<IconCustomModel>(_entities[3].properties[5]);
+  /// See [IconCustomModel.imageBase64DarkModel].
+  static final imageBase64DarkModel =
+      obx.QueryStringProperty<IconCustomModel>(_entities[3].properties[3]);
 
   /// see [IconCustomModel.accounts]
   static final accounts =

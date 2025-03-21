@@ -88,6 +88,7 @@ class AppPinCodeFieldsState extends State<AppPinCodeFields> {
           blinkWhenObscuring: false,
           showCursor: true,
           animationType: AnimationType.fade,
+          
           validator: widget.validator,
           onSubmitted: (value) {
             widget.onSubmitted(value);
