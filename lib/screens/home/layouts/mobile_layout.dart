@@ -228,7 +228,7 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                                    AppRoutes.navigateTo(context, AppRoutes.updateAccount, arguments: {"accountId": accounts[itemIndex].id});
                                 },
                                 onSelect: () {
-                                  // Xử lý khi tap vào account
+                                  context.read<AccountProvider>().handleSelectOrRemoveAccount(account);
                                 },
                               );
                             },

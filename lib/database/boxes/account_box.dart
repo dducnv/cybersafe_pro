@@ -123,7 +123,8 @@ class AccountBox {
   }
 
   // Xóa tài khoản theo ID
-  static bool delete(int id) => box.remove(id);
+  static Future<bool> delete(int id) async => await box.removeAsync(id);
+  static Future<int> deleteMultiple(List<int> ids) async =>  await box.removeManyAsync(ids);
 
   // Xóa tất cả tài khoản
   static void deleteAll() => box.removeAll();

@@ -46,6 +46,7 @@ dependencies:
   pin_code_fields: ^8.0.1
   package_info_plus: ^8.3.0
   permission_handler: ^11.4.0
+  shared_preferences: ^2.5.2
   flutter_styled_toast: ^2.2.1
   qr_code_scanner_plus: ^2.0.10+1
   flutter_native_splash: ^2.4.5

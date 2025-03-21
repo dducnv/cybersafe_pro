@@ -2,6 +2,8 @@ import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/my_app.dart';
 import 'package:cybersafe_pro/providers/provider.dart';
 import 'package:cybersafe_pro/providers/theme_provider.dart';
+import 'package:cybersafe_pro/resources/shared_preferences/constants.dart';
+import 'package:cybersafe_pro/resources/shared_preferences/shared_preferences_helper.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/services/local_auth_service.dart';
@@ -14,10 +16,14 @@ import 'package:timezone/data/latest.dart' as timezone;
 String initialRoute = AppRoutes.loginMasterPin;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   timezone.initializeTimeZones();
   // Khởi tạo ObjectBox
+  await SharedPreferencesHelper.init();
+  await clearSecureStorageOnReinstall();
   await ObjectBox.create();
   LocalAuthConfig.instance.init();
+
   final encryptService = EncryptAppDataService.instance;
   final themeProvider = ThemeProvider();
   await themeProvider.initTheme();
@@ -38,4 +44,12 @@ Future<String> getInitialRoute() async {
     return AppRoutes.registerMasterPin;
   }
   return AppRoutes.loginMasterPin;
+}
+
+clearSecureStorageOnReinstall() async {
+  bool hasRunBefore = SharedPreferencesHelper.instance.getBool(Constants.hasRunBefore) ?? false;
+  if (!hasRunBefore) {
+    await SecureStorage.instance.reset();
+    SharedPreferencesHelper.instance.setBool(Constants.hasRunBefore, true);
+  }
 }

@@ -51,6 +51,8 @@ class AccountProvider extends ChangeNotifier {
   int? _selectedCategoryId;
   int? get selectedCategoryId => _selectedCategoryId;
 
+  late List<AccountOjbModel> accountSelected = [];
+
   // Getters
   Map<int, AccountOjbModel> get accounts => Map.unmodifiable(_accounts);
   List<AccountOjbModel> get accountList => _accounts.values.toList();
@@ -355,7 +357,8 @@ class AccountProvider extends ChangeNotifier {
   // Xóa account
   Future<bool> deleteAccount(AccountOjbModel account) async {
     final result = await _handleAsync(funcName: "deleteAccount", () async {
-      if (!AccountBox.delete(account.id)) {
+      bool isDeleted = await AccountBox.delete(account.id);
+      if (!isDeleted) {
         throw Exception('Không thể xóa tài khoản');
       }
       _accounts.remove(account.id);
@@ -367,6 +370,43 @@ class AccountProvider extends ChangeNotifier {
         refreshAccounts();
       }
       return true;
+    });
+
+    return result ?? false;
+  }
+
+  Future<bool> handleDeleteAllAccount() async {
+    final result = await _handleAsync(funcName: "deleteAllAccount", () async {
+      showLoadingDialog();
+      try {
+        // Lấy danh sách ID cần xóa
+        List<int> listIds = accountSelected.map((e) => e.id).toList();
+        
+        // Xóa các tài khoản khỏi database
+        int deletedCount = await AccountBox.deleteMultiple(listIds);
+        if (deletedCount != listIds.length) {
+          throw Exception('Không thể xóa một số tài khoản');
+        }
+
+        // Xóa khỏi cache và các map quản lý
+        for (var account in accountSelected) {
+          _accounts.remove(account.id);
+          _basicInfoCache.remove(account.id);
+          if (account.getCategory != null) {
+            _groupedCategoryIdAccounts[account.getCategory!.id]?.remove(account);
+            _categoryAccountCounts[account.getCategory!.id] = _groupedCategoryIdAccounts[account.getCategory!.id]?.length ?? 0;
+          }
+        }
+
+        // Xóa danh sách tài khoản đã chọn
+        handleClearAccountsSelected();
+        
+        // Cập nhật lại UI
+        await refreshAccounts();
+        return true;
+      } finally {
+        hideLoadingDialog();
+      }
     });
 
     return result ?? false;
@@ -457,18 +497,6 @@ class AccountProvider extends ChangeNotifier {
     _basicInfoCache.clear();
     // Không xóa _expandedCategories để giữ trạng thái mở rộng
     notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    _basicInfoCache.clear();
-    _categoryCache.clear();
-    clearDecryptedCache();
-    _accounts.clear();
-    _expandedCategories.clear();
-    _categoryAccountCounts.clear();
-    _visibleAccountsPerCategory.clear();
-    super.dispose();
   }
 
   Future<bool> createAccountFromForm(AccountFormProvider form) async {
@@ -767,5 +795,44 @@ class AccountProvider extends ChangeNotifier {
       accountFormProvider.setCategory(categoryProvider.categories[categoryId]!);
     }
     notifyListeners();
+  }
+
+  Future<void> handleChangeCategory(CategoryOjbModel category) async {
+    List<AccountOjbModel> updatedAccounts = [];
+    for (final account in accountSelected) {
+      account.setCategory = category;
+      updatedAccounts.add(account);
+    }
+    await AccountBox.putMany(updatedAccounts);
+    handleClearAccountsSelected();
+    await refreshAccounts();
+    notifyListeners();
+  }
+
+  //hàm để chọn nhiều tài khoản ở màn hình home
+  void handleSelectOrRemoveAccount(AccountOjbModel account) {
+    if (accountSelected.contains(account)) {
+      accountSelected = List.from(accountSelected)..remove(account);
+    } else {
+      accountSelected = List.from(accountSelected)..add(account);
+    }
+    notifyListeners();
+  }
+
+  void handleClearAccountsSelected() {
+    accountSelected = [];
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _basicInfoCache.clear();
+    _categoryCache.clear();
+    clearDecryptedCache();
+    _accounts.clear();
+    _expandedCategories.clear();
+    _categoryAccountCounts.clear();
+    _visibleAccountsPerCategory.clear();
+    super.dispose();
   }
 }

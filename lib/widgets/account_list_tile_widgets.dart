@@ -1,9 +1,10 @@
-
 import 'package:cybersafe_pro/components/icon_show_component.dart';
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
+import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class AccountItemWidget extends StatelessWidget {
   final AccountOjbModel accountModel;
@@ -12,8 +13,9 @@ class AccountItemWidget extends StatelessWidget {
   final Function()? onCallBackPop;
   final Function()? onLongPress;
   final Function()? onSelect;
+  final Function()? onDragSelect;
   final Widget? subIcon;
-  const AccountItemWidget({super.key, this.onCallBackPop, required this.accountModel, required this.isLastItem, this.onLongPress, this.onTapSubButton, this.onSelect, this.subIcon});
+  const AccountItemWidget({super.key, this.onCallBackPop, required this.accountModel, required this.isLastItem, this.onLongPress, this.onTapSubButton, this.onSelect, this.subIcon, this.onDragSelect});
 
   @override
   Widget build(BuildContext context) {
@@ -42,14 +44,18 @@ class AccountItemWidget extends StatelessWidget {
                         width: 50.h,
                         height: 50.h,
 
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: IconShowComponent(
-                            account: accountModel,
-                            width: 40.h,
-                            height: 40.h,
-                            textStyle: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
-                          ),
+                        child: Selector<AccountProvider, List<AccountOjbModel>>(
+                          selector: (context, provider) => provider.accountSelected,
+                          builder: (context, value, child) {
+                            bool isSelected = value.where((element) => element.id == accountModel.id).isNotEmpty;
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child:
+                                  isSelected
+                                      ? Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary)
+                                      : IconShowComponent(account: accountModel, width: 40.h, height: 40.h, textStyle: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600)),
+                            );
+                          },
                         ),
                       ),
                     ),

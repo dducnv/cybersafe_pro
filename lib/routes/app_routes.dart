@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 
 class AppRoutes {
   // Route names
-  static const String home = '/';
+  static const String home = '/home';
   static const String onboarding = '/onboarding';
   static const String createAccount = '/create_account';
   static const String updateAccount = '/update_account';

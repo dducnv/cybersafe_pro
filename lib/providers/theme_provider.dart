@@ -39,7 +39,7 @@ class ThemeProvider extends ChangeNotifier {
 
   // Lấy trạng thái theme mặc định từ storage
   Future<bool> getIsDefaultTheme() async {
-    String? value = await SecureStorage.instance.read(key: SecureStorageKeys.isDefaultTheme.name);
+    String? value = await SecureStorage.instance.read(key: SecureStorageKeys.isDefaultTheme.name) ?? 'true';
     return value == 'true';
   }
 
