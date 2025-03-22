@@ -9,20 +9,33 @@ import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:intl/intl.dart';
 import 'package:objectbox/objectbox.dart';
 
-@Entity()
+@Entity(uid: 808721809346376920)
 class AccountOjbModel {
   @Id()
   int id;
+
+  @Property(uid: 2625426417278383013)
   String title;
+
+  @Property(uid: 615286758753448621)
   String? email;
+
+  @Property(uid: 5424898965257979061)
   String? password;
+
+  @Property(uid: 9173965011134390942)
   String? notes;
+
+  @Property(uid: 603238089867337940)
   String? icon;
-  @Property(type: PropertyType.date)
+
+  @Property(uid: 6270388988144688518, type: PropertyType.date)
   DateTime? passwordUpdatedAt;
-  @Property(type: PropertyType.date)
+
+  @Property(uid: 9156602806049161939, type: PropertyType.date)
   DateTime? createdAt;
-  @Property(type: PropertyType.date)
+
+  @Property(uid: 3899775664941408825, type: PropertyType.date)
   DateTime? updatedAt;
 
   // Relationships với ObjectBox
@@ -47,8 +60,6 @@ class AccountOjbModel {
   List<AccountCustomFieldOjbModel> get getCustomFields => customFields;
   List<PasswordHistory> get getPasswordHistories => passwordHistories;
 
-
-
   AccountOjbModel({
     this.id = 0,
     required this.title,
@@ -65,49 +76,85 @@ class AccountOjbModel {
     TOTPOjbModel? totpOjbModel,
     IconCustomModel? iconCustomModel,
   }) {
-    this.createdAt = createdAt ?? this.createdAt;
+    this.createdAt = createdAt ?? DateTime.now();
     this.passwordUpdatedAt = passwordUpdatedAt ?? DateTime.now();
     updatedAt = updatedAt ?? DateTime.now();
 
-    // Set relationships
-    if (categoryOjbModel != null) setCategory = categoryOjbModel;
-    if (totpOjbModel != null) setTotp = totpOjbModel;
-    if (iconCustomModel != null) setIconCustom = iconCustomModel;
-    if (passwordHistoriesList != null) passwordHistories.addAll(passwordHistoriesList);
-    if (customFieldOjbModel != null){
-      customFields.clear();
-      customFields.addAll(customFieldOjbModel);
+    // Set relationships một cách an toàn
+    try {
+      if (categoryOjbModel != null) {
+        category.target = categoryOjbModel;
+      }
+      if (totpOjbModel != null) {
+        totp.target = totpOjbModel;
+      }
+      if (iconCustomModel != null) {
+        iconCustom.target = iconCustomModel;
+      }
+      if (passwordHistoriesList != null) {
+        passwordHistories.clear(); // Clear trước khi thêm mới
+        for (var history in passwordHistoriesList) {
+          history.account.target = this;
+          passwordHistories.add(history);
+        }
+      }
+      if (customFieldOjbModel != null) {
+        customFields.clear();
+        for (var field in customFieldOjbModel) {
+          field.account.target = this;
+          customFields.add(field);
+        }
+      }
+    } catch (e) {
+      print('Error setting relationships: $e');
     }
   }
 
   // Factory constructor để tạo object mới từ object cũ
   factory AccountOjbModel.fromModel(AccountOjbModel account) {
-    final newAccount = AccountOjbModel(
-      id: account.id,
-      title: account.title,
-      email: account.email,
-      password: account.password,
-      notes: account.notes,
-      icon: account.icon,
-      passwordUpdatedAt: account.passwordUpdatedAt,
-      createdAt: account.createdAt,
-      updatedAt: account.updatedAt,
-    );
+    try {
+      final newAccount = AccountOjbModel(
+        id: account.id,
+        title: account.title,
+        email: account.email,
+        password: account.password,
+        notes: account.notes,
+        icon: account.icon,
+        passwordUpdatedAt: account.passwordUpdatedAt,
+        createdAt: account.createdAt,
+        updatedAt: account.updatedAt,
+      );
 
-    // Copy relationships
-    newAccount.setCategory = account.getCategory;
-    newAccount.setTotp = account.getTotp;
-    newAccount.setIconCustom = account.getIconCustom;
-    
-    if (account.getCustomFields.isNotEmpty) {
-      newAccount.customFields.addAll(account.getCustomFields);
-    }
-    
-    if (account.getPasswordHistories.isNotEmpty) {
-      newAccount.passwordHistories.addAll(account.getPasswordHistories);
-    }
+      // Copy relationships một cách an toàn
+      if (account.getCategory != null) {
+        newAccount.category.target = account.getCategory;
+      }
+      if (account.getTotp != null) {
+        newAccount.totp.target = account.getTotp;
+      }
+      if (account.getIconCustom != null) {
+        newAccount.iconCustom.target = account.getIconCustom;
+      }
+      
+      if (account.getCustomFields.isNotEmpty) {
+        for (var field in account.getCustomFields) {
+          field.account.target = newAccount;
+          newAccount.customFields.add(field);
+        }
+      }
+      
+      if (account.getPasswordHistories.isNotEmpty) {
+        for (var history in account.getPasswordHistories) {
+          history.account.target = newAccount;
+          newAccount.passwordHistories.add(history);
+        }
+      }
 
-    return newAccount;
+      return newAccount;
+    } catch (e) {
+      print('Error creating account from model: $e');
+      rethrow;
+    }
   }
 
   // Getters cho format date
@@ -120,16 +167,13 @@ class AccountOjbModel {
     return "${DateFormat.yMMMd(Platform.localeName).format(dateTime)} ${DateFormat.Hm(Platform.localeName).format(dateTime)}";
   }
 
-
-
-
   factory AccountOjbModel.fromJson(Map<String, dynamic> json) {
     return AccountOjbModel(
       id: json['id'] ?? 0,
       title: json['title'] ?? '',
-      email: json['email'],
-      password: json['password'],
-      notes: json['notes'],
+      email: json['email'] ?? '',
+      password: json['password'] ?? '',
+      notes: json['notes'] ?? '',
       icon: json['icon'],
       passwordUpdatedAt: json['passwordUpdatedAt'] != null 
         ? DateTime.parse(json['passwordUpdatedAt']) 

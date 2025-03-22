@@ -527,7 +527,7 @@ class AccountProvider extends ChangeNotifier {
             password: form.passwordController.text,
             notes: form.noteController.text.trim(),
             categoryOjbModel: form.selectedCategory!,
-            totpOjbModel: form.otpController.text.isNotEmpty ? TOTPOjbModel(secretKey: form.otpController.text.toUpperCase(), algorithm: 'SHA1', digits: 6, period: 30) : null,
+            totpOjbModel: form.otpController.text.isNotEmpty ? TOTPOjbModel(secretKey: form.otpController.text.toUpperCase()) : null,
             customFieldOjbModel: customFields,
             iconCustomModel: form.selectedIconCustom,
             createdAt: form.accountId == 0 ? now : null,
@@ -573,7 +573,6 @@ class AccountProvider extends ChangeNotifier {
       for (var i = 0; i < categoryNames.length; i++) {
         final category = CategoryOjbModel(
           categoryName: categoryNames[i],
-          color: 0xFF000000 + (i * 1000000), // Màu ngẫu nhiên
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );

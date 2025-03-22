@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/my_app.dart';
 import 'package:cybersafe_pro/providers/provider.dart';
@@ -47,9 +49,11 @@ Future<String> getInitialRoute() async {
 }
 
 clearSecureStorageOnReinstall() async {
-  bool hasRunBefore = SharedPreferencesHelper.instance.getBool(Constants.hasRunBefore) ?? false;
-  if (!hasRunBefore) {
-    await SecureStorage.instance.reset();
-    SharedPreferencesHelper.instance.setBool(Constants.hasRunBefore, true);
+  if (Platform.isIOS) {
+    bool hasRunBefore = SharedPreferencesHelper.instance.getBool(Constants.hasRunBefore) ?? false;
+    if (!hasRunBefore) {
+      await SecureStorage.instance.reset();
+      SharedPreferencesHelper.instance.setBool(Constants.hasRunBefore, true);
+    }
   }
 }

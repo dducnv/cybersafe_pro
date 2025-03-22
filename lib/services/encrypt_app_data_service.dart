@@ -564,7 +564,7 @@ class EncryptAppDataService {
         final decryptedSecret = await decryptTOTPKey(account.getTotp!.secretKey);
         final reencryptedSecret = await tempService.encryptTOTPKey(decryptedSecret);
 
-        reencryptedAccount.setTotp = TOTPOjbModel(secretKey: reencryptedSecret, algorithm: account.getTotp!.algorithm, digits: account.getTotp!.digits, period: account.getTotp!.period);
+        reencryptedAccount.setTotp = TOTPOjbModel(secretKey: reencryptedSecret);
       }
 
       return reencryptedAccount;
@@ -650,7 +650,7 @@ class EncryptAppDataService {
       if (account.getTotp != null) {
         final decryptedSecret = await decryptTOTPKey(account.getTotp!.secretKey);
         final reencryptedSecret = await encryptTOTPKey(decryptedSecret);
-        reencryptedAccount.setTotp = TOTPOjbModel(secretKey: reencryptedSecret, algorithm: account.getTotp!.algorithm, digits: account.getTotp!.digits, period: account.getTotp!.period);
+        reencryptedAccount.setTotp = TOTPOjbModel(secretKey: reencryptedSecret);
       }
 
       return reencryptedAccount;
@@ -663,7 +663,7 @@ class EncryptAppDataService {
   //   /// Giải mã với key cũ (chỉ dùng trong migration)
   Future<AccountOjbModel> _decryptWithLegacyKey(AccountOjbModel account) async {
     return AccountOjbModel(
-      id: 0,
+      id: account.id,
       title: OldEncryptData.decryptInfo(account.title),
       email: account.email != null ? OldEncryptData.decryptInfo(account.email!) : null,
       password: account.password != null ? OldEncryptData.decryptPassword(account.password!) : null,
@@ -680,9 +680,6 @@ class EncryptAppDataService {
               ? TOTPOjbModel(
                 id: 0,
                 secretKey: OldEncryptData.decryptTOTPKey(account.getTotp!.secretKey),
-                algorithm: account.getTotp!.algorithm,
-                digits: account.getTotp!.digits,
-                period: account.getTotp!.period,
               )
               : null,
       iconCustomModel: account.getIconCustom,
@@ -710,10 +707,7 @@ class EncryptAppDataService {
       if (account.getTotp != null) {
         accountNew.totp.target = TOTPOjbModel(
           id: 0, // Reset ID
-          secretKey: account.getTotp!.secretKey, 
-          algorithm: account.getTotp!.algorithm, 
-          digits: account.getTotp!.digits, 
-          period: account.getTotp!.period
+          secretKey: account.getTotp!.secretKey
         );
       }
 

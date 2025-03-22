@@ -100,8 +100,6 @@ class StatisticProvider extends ChangeNotifier {
       return CategoryOjbModel(
         id: category.id,
         categoryName: category.categoryName,
-        icon: category.icon,
-        color: category.color,
         indexPos: category.indexPos,
         createdAt: category.createdAt,
         updatedAt: category.updatedAt,

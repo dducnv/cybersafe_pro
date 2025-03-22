@@ -2,13 +2,21 @@ import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:objectbox/objectbox.dart';
 
-@Entity()
+@Entity(uid: 7720765967536005100)
 class AccountCustomFieldOjbModel {
   @Id()
   int id;
+
+  @Property(uid: 6810372553496786412)
   String name;
+
+  @Property(uid: 6756111045446270073)
   String value;
+
+  @Property(uid: 4112533644947478733)
   String hintText;
+
+  @Property(uid: 4951341637174002499)
   String typeField;
 
   AccountCustomFieldOjbModel(

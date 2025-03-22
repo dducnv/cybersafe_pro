@@ -8,135 +8,135 @@
 
 import 'dart:typed_data';
 
+import 'package:cybersafe_pro/database/models/account_custom_field.dart';
+import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
+import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
+import 'package:cybersafe_pro/database/models/icon_custom_model.dart';
+import 'package:cybersafe_pro/database/models/password_history_model.dart';
+import 'package:cybersafe_pro/database/models/totp_ojb_model.dart';
+
 import 'package:flat_buffers/flat_buffers.dart' as fb;
 import 'package:objectbox/internal.dart'
     as obx_int; // generated code can access "internal" functionality
 import 'package:objectbox/objectbox.dart' as obx;
 import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 
-import 'database/models/account_custom_field.dart';
-import 'database/models/account_ojb_model.dart';
-import 'database/models/category_ojb_model.dart';
-import 'database/models/icon_custom_model.dart';
-import 'database/models/password_history_model.dart';
-import 'database/models/totp_ojb_model.dart';
-
 export 'package:objectbox/objectbox.dart'; // so that callers only have to import this file
 
 final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
-      id: const obx_int.IdUid(2, 2383928923318499737),
+      id: const obx_int.IdUid(1, 7720765967536005100),
       name: 'AccountCustomFieldOjbModel',
-      lastPropertyId: const obx_int.IdUid(6, 5630134015553611220),
+      lastPropertyId: const obx_int.IdUid(6, 1599625332435180919),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(1, 4090243857449051327),
+            id: const obx_int.IdUid(1, 1027999289893133532),
             name: 'id',
             type: 6,
             flags: 1),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(2, 8108096208718074723),
+            id: const obx_int.IdUid(2, 6810372553496786412),
             name: 'name',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(3, 8130378122510920081),
+            id: const obx_int.IdUid(3, 6756111045446270073),
             name: 'value',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 195803133803081672),
+            id: const obx_int.IdUid(4, 4112533644947478733),
             name: 'hintText',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(5, 1528464119627355137),
+            id: const obx_int.IdUid(5, 4951341637174002499),
             name: 'typeField',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(6, 5630134015553611220),
+            id: const obx_int.IdUid(6, 1599625332435180919),
             name: 'accountId',
             type: 11,
             flags: 520,
-            indexId: const obx_int.IdUid(1, 3516835503781729309),
+            indexId: const obx_int.IdUid(1, 9223319715626760245),
             relationTarget: 'AccountOjbModel')
       ],
       relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[]),
   obx_int.ModelEntity(
-      id: const obx_int.IdUid(3, 1878628315045204891),
+      id: const obx_int.IdUid(2, 808721809346376920),
       name: 'AccountOjbModel',
-      lastPropertyId: const obx_int.IdUid(12, 2840453311877770067),
+      lastPropertyId: const obx_int.IdUid(12, 3734455674733270868),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(1, 1372285699841932207),
+            id: const obx_int.IdUid(1, 1681514535368842462),
             name: 'id',
             type: 6,
             flags: 1),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(2, 4300649734842015689),
+            id: const obx_int.IdUid(2, 2625426417278383013),
             name: 'title',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(3, 8825276413177178007),
+            id: const obx_int.IdUid(3, 615286758753448621),
             name: 'email',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 2443423335981930991),
+            id: const obx_int.IdUid(4, 5424898965257979061),
             name: 'password',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(5, 4271078033416534245),
+            id: const obx_int.IdUid(5, 9173965011134390942),
             name: 'notes',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(6, 3461382277341645239),
+            id: const obx_int.IdUid(6, 603238089867337940),
             name: 'icon',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(7, 2096088798621611869),
+            id: const obx_int.IdUid(7, 6270388988144688518),
             name: 'passwordUpdatedAt',
             type: 10,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(8, 3636003688389024147),
+            id: const obx_int.IdUid(8, 9156602806049161939),
             name: 'createdAt',
             type: 10,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(9, 7012549897201973190),
+            id: const obx_int.IdUid(9, 3899775664941408825),
             name: 'updatedAt',
             type: 10,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(10, 6070888810759960578),
+            id: const obx_int.IdUid(10, 3381464135663947211),
             name: 'categoryId',
             type: 11,
             flags: 520,
-            indexId: const obx_int.IdUid(2, 1428949723357222232),
+            indexId: const obx_int.IdUid(2, 6717451217174600009),
             relationTarget: 'CategoryOjbModel'),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(11, 7392309477732683641),
-            name: 'iconCustomId',
-            type: 11,
-            flags: 520,
-            indexId: const obx_int.IdUid(3, 2785332030754345948),
-            relationTarget: 'IconCustomModel'),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(12, 2840453311877770067),
+            id: const obx_int.IdUid(11, 8397634272657106479),
             name: 'totpId',
             type: 11,
             flags: 520,
-            indexId: const obx_int.IdUid(4, 5902132704694811328),
-            relationTarget: 'TOTPOjbModel')
+            indexId: const obx_int.IdUid(3, 6189364608502334637),
+            relationTarget: 'TOTPOjbModel'),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(12, 3734455674733270868),
+            name: 'iconCustomId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(6, 925758013839913807),
+            relationTarget: 'IconCustomModel')
       ],
       relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[
@@ -150,43 +150,33 @@ final _entities = <obx_int.ModelEntity>[
             srcField: 'account')
       ]),
   obx_int.ModelEntity(
-      id: const obx_int.IdUid(4, 7418765908887414954),
+      id: const obx_int.IdUid(3, 1129773840658876529),
       name: 'CategoryOjbModel',
-      lastPropertyId: const obx_int.IdUid(7, 5516788290996013881),
+      lastPropertyId: const obx_int.IdUid(5, 16479445437159146),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(1, 3137172756682708238),
+            id: const obx_int.IdUid(1, 4024083096627149080),
             name: 'id',
             type: 6,
             flags: 1),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(2, 8885917553095961023),
+            id: const obx_int.IdUid(2, 8872622909213525147),
             name: 'categoryName',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(3, 8159939972600516598),
-            name: 'icon',
-            type: 9,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 1818112331230895039),
-            name: 'color',
-            type: 6,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(5, 5584116146259932664),
+            id: const obx_int.IdUid(3, 5509757696427258474),
             name: 'indexPos',
             type: 6,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(6, 3896970218096645113),
+            id: const obx_int.IdUid(4, 3844861102953137554),
             name: 'createdAt',
             type: 10,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(7, 5516788290996013881),
+            id: const obx_int.IdUid(5, 16479445437159146),
             name: 'updatedAt',
             type: 10,
             flags: 0)
@@ -199,28 +189,100 @@ final _entities = <obx_int.ModelEntity>[
             srcField: 'category')
       ]),
   obx_int.ModelEntity(
-      id: const obx_int.IdUid(5, 3055995045590780828),
-      name: 'IconCustomModel',
-      lastPropertyId: const obx_int.IdUid(8, 7801521614380956708),
+      id: const obx_int.IdUid(4, 3018443929711597194),
+      name: 'PasswordHistory',
+      lastPropertyId: const obx_int.IdUid(4, 7289120895696701836),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(1, 6294659331695565505),
+            id: const obx_int.IdUid(1, 5819017810655339199),
             name: 'id',
             type: 6,
             flags: 1),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(3, 7015245297783846823),
+            id: const obx_int.IdUid(2, 2667871814024352714),
+            name: 'password',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 5165880507350807871),
+            name: 'createdAt',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(4, 7289120895696701836),
+            name: 'accountId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(4, 8616999152411792910),
+            relationTarget: 'AccountOjbModel')
+      ],
+      relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(5, 1076262210416939821),
+      name: 'TOTPOjbModel',
+      lastPropertyId: const obx_int.IdUid(6, 2469613977232459699),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 1117581393077461301),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 8564762779212685146),
+            name: 'secretKey',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 5582173328156468147),
+            name: 'isShowToHome',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(4, 2563563088476085377),
+            name: 'createdAt',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(5, 1140319654760595252),
+            name: 'updatedAt',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(6, 2469613977232459699),
+            name: 'accountId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(5, 1154736115679771846),
+            relationTarget: 'AccountOjbModel')
+      ],
+      relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(6, 965409409935003527),
+      name: 'IconCustomModel',
+      lastPropertyId: const obx_int.IdUid(4, 5132215409006114972),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 9024031581796992978),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 3048476553136400367),
             name: 'name',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(7, 1012905758485839480),
+            id: const obx_int.IdUid(3, 3062578946622634533),
             name: 'imageBase64',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(8, 7801521614380956708),
+            id: const obx_int.IdUid(4, 5132215409006114972),
             name: 'imageBase64DarkModel',
             type: 9,
             flags: 0)
@@ -231,101 +293,7 @@ final _entities = <obx_int.ModelEntity>[
             name: 'accounts',
             srcEntity: 'AccountOjbModel',
             srcField: 'iconCustom')
-      ]),
-  obx_int.ModelEntity(
-      id: const obx_int.IdUid(6, 2551119760188800600),
-      name: 'PasswordHistory',
-      lastPropertyId: const obx_int.IdUid(5, 6986931833305867789),
-      flags: 0,
-      properties: <obx_int.ModelProperty>[
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(1, 3077352258078751429),
-            name: 'id',
-            type: 6,
-            flags: 1),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(2, 4186192472090827493),
-            name: 'password',
-            type: 9,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(3, 1488242565971585751),
-            name: 'createdAt',
-            type: 10,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 5826854046891571145),
-            name: 'updatedAt',
-            type: 10,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(5, 6986931833305867789),
-            name: 'accountId',
-            type: 11,
-            flags: 520,
-            indexId: const obx_int.IdUid(5, 7939173635836407566),
-            relationTarget: 'AccountOjbModel')
-      ],
-      relations: <obx_int.ModelRelation>[],
-      backlinks: <obx_int.ModelBacklink>[]),
-  obx_int.ModelEntity(
-      id: const obx_int.IdUid(8, 7120869973844560665),
-      name: 'TOTPOjbModel',
-      lastPropertyId: const obx_int.IdUid(9, 7340138041424992946),
-      flags: 0,
-      properties: <obx_int.ModelProperty>[
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(1, 7287059395120116218),
-            name: 'id',
-            type: 6,
-            flags: 1),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(2, 1233602503582447821),
-            name: 'secretKey',
-            type: 9,
-            flags: 2048,
-            indexId: const obx_int.IdUid(7, 5998668159314400233)),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(3, 1904737723347952021),
-            name: 'algorithm',
-            type: 9,
-            flags: 2048,
-            indexId: const obx_int.IdUid(8, 5371294220000771482)),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 6206671128466549134),
-            name: 'digits',
-            type: 6,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(5, 1733067822921561598),
-            name: 'period',
-            type: 6,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(6, 9218111210333108305),
-            name: 'isShowToHome',
-            type: 1,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(7, 2249178839472043866),
-            name: 'createdAt',
-            type: 10,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(8, 3039338650922470844),
-            name: 'updatedAt',
-            type: 10,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(9, 7340138041424992946),
-            name: 'accountId',
-            type: 11,
-            flags: 520,
-            indexId: const obx_int.IdUid(9, 3150162145201670091),
-            relationTarget: 'AccountOjbModel')
-      ],
-      relations: <obx_int.ModelRelation>[],
-      backlinks: <obx_int.ModelBacklink>[])
+      ])
 ];
 
 /// Shortcut for [obx.Store.new] that passes [getObjectBoxModel] and for Flutter
@@ -363,39 +331,13 @@ Future<obx.Store> openStore(
 obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
       entities: _entities,
-      lastEntityId: const obx_int.IdUid(8, 7120869973844560665),
-      lastIndexId: const obx_int.IdUid(9, 3150162145201670091),
+      lastEntityId: const obx_int.IdUid(6, 965409409935003527),
+      lastIndexId: const obx_int.IdUid(6, 925758013839913807),
       lastRelationId: const obx_int.IdUid(0, 0),
       lastSequenceId: const obx_int.IdUid(0, 0),
-      retiredEntityUids: const [4576241909475943585, 6213000607887385064],
+      retiredEntityUids: const [],
       retiredIndexUids: const [],
-      retiredPropertyUids: const [
-        2342124192628778866,
-        3504522657512904849,
-        3078649058524668291,
-        4374515946613989280,
-        7006581877455254584,
-        2274224845818563168,
-        5993330135503332106,
-        3251973262211811324,
-        8847343354232474621,
-        3223109459863103305,
-        5418969512423873346,
-        1473061717587223460,
-        5751746544805988232,
-        5284008716632940634,
-        5508023974651288282,
-        2179601716462441340,
-        9157959535894620892,
-        4155842190920700882,
-        6711675260948032995,
-        8055032713108837086,
-        8096244496920815466,
-        2757664982512354282,
-        8233014793896729974,
-        4115719657313187141,
-        4362901113340552298
-      ],
+      retiredPropertyUids: const [],
       retiredRelationUids: const [],
       modelVersion: 5,
       modelVersionParserMinimum: 5,
@@ -453,14 +395,14 @@ obx_int.ModelDefinition getObjectBoxModel() {
     AccountOjbModel: obx_int.EntityDefinition<AccountOjbModel>(
         model: _entities[1],
         toOneRelations: (AccountOjbModel object) =>
-            [object.category, object.iconCustom, object.totp],
+            [object.category, object.totp, object.iconCustom],
         toManyRelations: (AccountOjbModel object) => {
               obx_int.RelInfo<AccountCustomFieldOjbModel>.toOneBacklink(
                   6,
                   object.id,
                   (AccountCustomFieldOjbModel srcObject) =>
                       srcObject.account): object.customFields,
-              obx_int.RelInfo<PasswordHistory>.toOneBacklink(5, object.id,
+              obx_int.RelInfo<PasswordHistory>.toOneBacklink(4, object.id,
                       (PasswordHistory srcObject) => srcObject.account):
                   object.passwordHistories
             },
@@ -490,8 +432,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addInt64(7, object.createdAt?.millisecondsSinceEpoch);
           fbb.addInt64(8, object.updatedAt?.millisecondsSinceEpoch);
           fbb.addInt64(9, object.category.targetId);
-          fbb.addInt64(10, object.iconCustom.targetId);
-          fbb.addInt64(11, object.totp.targetId);
+          fbb.addInt64(10, object.totp.targetId);
+          fbb.addInt64(11, object.iconCustom.targetId);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -538,12 +480,12 @@ obx_int.ModelDefinition getObjectBoxModel() {
           object.category.targetId =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 22, 0);
           object.category.attach(store);
-          object.iconCustom.targetId =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 24, 0);
-          object.iconCustom.attach(store);
           object.totp.targetId =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 26, 0);
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 24, 0);
           object.totp.attach(store);
+          object.iconCustom.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 26, 0);
+          object.iconCustom.attach(store);
           obx_int.InternalToManyAccess.setRelInfo<AccountOjbModel>(
               object.customFields,
               store,
@@ -554,7 +496,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           obx_int.InternalToManyAccess.setRelInfo<AccountOjbModel>(
               object.passwordHistories,
               store,
-              obx_int.RelInfo<PasswordHistory>.toOneBacklink(5, object.id,
+              obx_int.RelInfo<PasswordHistory>.toOneBacklink(4, object.id,
                   (PasswordHistory srcObject) => srcObject.account));
           return object;
         }),
@@ -572,42 +514,38 @@ obx_int.ModelDefinition getObjectBoxModel() {
         },
         objectToFB: (CategoryOjbModel object, fb.Builder fbb) {
           final categoryNameOffset = fbb.writeString(object.categoryName);
-          final iconOffset =
-              object.icon == null ? null : fbb.writeString(object.icon!);
-          fbb.startTable(8);
+          fbb.startTable(6);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, categoryNameOffset);
-          fbb.addOffset(2, iconOffset);
-          fbb.addInt64(3, object.color);
-          fbb.addInt64(4, object.indexPos);
-          fbb.addInt64(5, object.createdAt.millisecondsSinceEpoch);
-          fbb.addInt64(6, object.updatedAt.millisecondsSinceEpoch);
+          fbb.addInt64(2, object.indexPos);
+          fbb.addInt64(3, object.createdAt?.millisecondsSinceEpoch);
+          fbb.addInt64(4, object.updatedAt?.millisecondsSinceEpoch);
           fbb.finish(fbb.endTable());
           return object.id;
         },
         objectFromFB: (obx.Store store, ByteData fbData) {
           final buffer = fb.BufferContext(fbData);
           final rootOffset = buffer.derefObject(0);
+          final createdAtValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 10);
+          final updatedAtValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 12);
           final idParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
           final categoryNameParam =
               const fb.StringReader(asciiOptimization: true)
                   .vTableGet(buffer, rootOffset, 6, '');
-          final iconParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGetNullable(buffer, rootOffset, 8);
-          final colorParam =
-              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 10);
           final indexPosParam =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0);
-          final createdAtParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 14, 0));
-          final updatedAtParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0));
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0);
+          final createdAtParam = createdAtValue == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(createdAtValue);
+          final updatedAtParam = updatedAtValue == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(updatedAtValue);
           final object = CategoryOjbModel(
               id: idParam,
               categoryName: categoryNameParam,
-              icon: iconParam,
-              color: colorParam,
               indexPos: indexPosParam,
               createdAt: createdAtParam,
               updatedAt: updatedAtParam);
@@ -618,11 +556,98 @@ obx_int.ModelDefinition getObjectBoxModel() {
                   (AccountOjbModel srcObject) => srcObject.category));
           return object;
         }),
-    IconCustomModel: obx_int.EntityDefinition<IconCustomModel>(
+    PasswordHistory: obx_int.EntityDefinition<PasswordHistory>(
         model: _entities[3],
+        toOneRelations: (PasswordHistory object) => [object.account],
+        toManyRelations: (PasswordHistory object) => {},
+        getId: (PasswordHistory object) => object.id,
+        setId: (PasswordHistory object, int id) {
+          object.id = id;
+        },
+        objectToFB: (PasswordHistory object, fb.Builder fbb) {
+          final passwordOffset = fbb.writeString(object.password);
+          fbb.startTable(5);
+          fbb.addInt64(0, object.id);
+          fbb.addOffset(1, passwordOffset);
+          fbb.addInt64(2, object.createdAt?.millisecondsSinceEpoch);
+          fbb.addInt64(3, object.account.targetId);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+          final createdAtValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 8);
+          final idParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+          final passwordParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 6, '');
+          final createdAtParam = createdAtValue == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(createdAtValue);
+          final object = PasswordHistory(
+              id: idParam, password: passwordParam, createdAt: createdAtParam);
+          object.account.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0);
+          object.account.attach(store);
+          return object;
+        }),
+    TOTPOjbModel: obx_int.EntityDefinition<TOTPOjbModel>(
+        model: _entities[4],
+        toOneRelations: (TOTPOjbModel object) => [object.account],
+        toManyRelations: (TOTPOjbModel object) => {},
+        getId: (TOTPOjbModel object) => object.id,
+        setId: (TOTPOjbModel object, int id) {
+          object.id = id;
+        },
+        objectToFB: (TOTPOjbModel object, fb.Builder fbb) {
+          final secretKeyOffset = fbb.writeString(object.secretKey);
+          fbb.startTable(7);
+          fbb.addInt64(0, object.id);
+          fbb.addOffset(1, secretKeyOffset);
+          fbb.addBool(2, object.isShowToHome);
+          fbb.addInt64(3, object.createdAt?.millisecondsSinceEpoch);
+          fbb.addInt64(4, object.updatedAt?.millisecondsSinceEpoch);
+          fbb.addInt64(5, object.account.targetId);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+          final createdAtValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 10);
+          final updatedAtValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 12);
+          final idParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+          final secretKeyParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 6, '');
+          final isShowToHomeParam =
+              const fb.BoolReader().vTableGet(buffer, rootOffset, 8, false);
+          final createdAtParam = createdAtValue == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(createdAtValue);
+          final updatedAtParam = updatedAtValue == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(updatedAtValue);
+          final object = TOTPOjbModel(
+              id: idParam,
+              secretKey: secretKeyParam,
+              isShowToHome: isShowToHomeParam,
+              createdAt: createdAtParam,
+              updatedAt: updatedAtParam);
+          object.account.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 14, 0);
+          object.account.attach(store);
+          return object;
+        }),
+    IconCustomModel: obx_int.EntityDefinition<IconCustomModel>(
+        model: _entities[5],
         toOneRelations: (IconCustomModel object) => [],
         toManyRelations: (IconCustomModel object) => {
-              obx_int.RelInfo<AccountOjbModel>.toOneBacklink(11, object.id,
+              obx_int.RelInfo<AccountOjbModel>.toOneBacklink(12, object.id,
                       (AccountOjbModel srcObject) => srcObject.iconCustom):
                   object.accounts
             },
@@ -636,11 +661,11 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final imageBase64DarkModelOffset = object.imageBase64DarkModel == null
               ? null
               : fbb.writeString(object.imageBase64DarkModel!);
-          fbb.startTable(9);
+          fbb.startTable(5);
           fbb.addInt64(0, object.id);
-          fbb.addOffset(2, nameOffset);
-          fbb.addOffset(6, imageBase64Offset);
-          fbb.addOffset(7, imageBase64DarkModelOffset);
+          fbb.addOffset(1, nameOffset);
+          fbb.addOffset(2, imageBase64Offset);
+          fbb.addOffset(3, imageBase64DarkModelOffset);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -650,13 +675,13 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final idParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
           final nameParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGet(buffer, rootOffset, 8, '');
+              .vTableGet(buffer, rootOffset, 6, '');
           final imageBase64Param =
               const fb.StringReader(asciiOptimization: true)
-                  .vTableGet(buffer, rootOffset, 16, '');
+                  .vTableGet(buffer, rootOffset, 8, '');
           final imageBase64DarkModelParam =
               const fb.StringReader(asciiOptimization: true)
-                  .vTableGetNullable(buffer, rootOffset, 18);
+                  .vTableGetNullable(buffer, rootOffset, 10);
           final object = IconCustomModel(
               id: idParam,
               name: nameParam,
@@ -665,107 +690,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
           obx_int.InternalToManyAccess.setRelInfo<IconCustomModel>(
               object.accounts,
               store,
-              obx_int.RelInfo<AccountOjbModel>.toOneBacklink(11, object.id,
+              obx_int.RelInfo<AccountOjbModel>.toOneBacklink(12, object.id,
                   (AccountOjbModel srcObject) => srcObject.iconCustom));
-          return object;
-        }),
-    PasswordHistory: obx_int.EntityDefinition<PasswordHistory>(
-        model: _entities[4],
-        toOneRelations: (PasswordHistory object) => [object.account],
-        toManyRelations: (PasswordHistory object) => {},
-        getId: (PasswordHistory object) => object.id,
-        setId: (PasswordHistory object, int id) {
-          object.id = id;
-        },
-        objectToFB: (PasswordHistory object, fb.Builder fbb) {
-          final passwordOffset = fbb.writeString(object.password);
-          fbb.startTable(6);
-          fbb.addInt64(0, object.id);
-          fbb.addOffset(1, passwordOffset);
-          fbb.addInt64(2, object.createdAt.millisecondsSinceEpoch);
-          fbb.addInt64(3, object.updatedAt.millisecondsSinceEpoch);
-          fbb.addInt64(4, object.account.targetId);
-          fbb.finish(fbb.endTable());
-          return object.id;
-        },
-        objectFromFB: (obx.Store store, ByteData fbData) {
-          final buffer = fb.BufferContext(fbData);
-          final rootOffset = buffer.derefObject(0);
-          final idParam =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
-          final passwordParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGet(buffer, rootOffset, 6, '');
-          final createdAtParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0));
-          final updatedAtParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0));
-          final object = PasswordHistory(
-              id: idParam,
-              password: passwordParam,
-              createdAt: createdAtParam,
-              updatedAt: updatedAtParam);
-          object.account.targetId =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0);
-          object.account.attach(store);
-          return object;
-        }),
-    TOTPOjbModel: obx_int.EntityDefinition<TOTPOjbModel>(
-        model: _entities[5],
-        toOneRelations: (TOTPOjbModel object) => [object.account],
-        toManyRelations: (TOTPOjbModel object) => {},
-        getId: (TOTPOjbModel object) => object.id,
-        setId: (TOTPOjbModel object, int id) {
-          object.id = id;
-        },
-        objectToFB: (TOTPOjbModel object, fb.Builder fbb) {
-          final secretKeyOffset = fbb.writeString(object.secretKey);
-          final algorithmOffset = object.algorithm == null
-              ? null
-              : fbb.writeString(object.algorithm!);
-          fbb.startTable(10);
-          fbb.addInt64(0, object.id);
-          fbb.addOffset(1, secretKeyOffset);
-          fbb.addOffset(2, algorithmOffset);
-          fbb.addInt64(3, object.digits);
-          fbb.addInt64(4, object.period);
-          fbb.addBool(5, object.isShowToHome);
-          fbb.addInt64(6, object.createdAt.millisecondsSinceEpoch);
-          fbb.addInt64(7, object.updatedAt.millisecondsSinceEpoch);
-          fbb.addInt64(8, object.account.targetId);
-          fbb.finish(fbb.endTable());
-          return object.id;
-        },
-        objectFromFB: (obx.Store store, ByteData fbData) {
-          final buffer = fb.BufferContext(fbData);
-          final rootOffset = buffer.derefObject(0);
-          final idParam =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
-          final secretKeyParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGet(buffer, rootOffset, 6, '');
-          final algorithmParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGetNullable(buffer, rootOffset, 8);
-          final digitsParam =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0);
-          final periodParam =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0);
-          final isShowToHomeParam =
-              const fb.BoolReader().vTableGet(buffer, rootOffset, 14, false);
-          final createdAtParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0));
-          final updatedAtParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 18, 0));
-          final object = TOTPOjbModel(
-              id: idParam,
-              secretKey: secretKeyParam,
-              algorithm: algorithmParam,
-              digits: digitsParam,
-              period: periodParam,
-              isShowToHome: isShowToHomeParam,
-              createdAt: createdAtParam,
-              updatedAt: updatedAtParam);
-          object.account.targetId =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0);
-          object.account.attach(store);
           return object;
         })
   };
@@ -844,14 +770,14 @@ class AccountOjbModel_ {
       obx.QueryRelationToOne<AccountOjbModel, CategoryOjbModel>(
           _entities[1].properties[9]);
 
+  /// See [AccountOjbModel.totp].
+  static final totp = obx.QueryRelationToOne<AccountOjbModel, TOTPOjbModel>(
+      _entities[1].properties[10]);
+
   /// See [AccountOjbModel.iconCustom].
   static final iconCustom =
       obx.QueryRelationToOne<AccountOjbModel, IconCustomModel>(
-          _entities[1].properties[10]);
-
-  /// See [AccountOjbModel.totp].
-  static final totp = obx.QueryRelationToOne<AccountOjbModel, TOTPOjbModel>(
-      _entities[1].properties[11]);
+          _entities[1].properties[11]);
 
   /// see [AccountOjbModel.customFields]
   static final customFields =
@@ -874,25 +800,17 @@ class CategoryOjbModel_ {
   static final categoryName =
       obx.QueryStringProperty<CategoryOjbModel>(_entities[2].properties[1]);
 
-  /// See [CategoryOjbModel.icon].
-  static final icon =
-      obx.QueryStringProperty<CategoryOjbModel>(_entities[2].properties[2]);
-
-  /// See [CategoryOjbModel.color].
-  static final color =
-      obx.QueryIntegerProperty<CategoryOjbModel>(_entities[2].properties[3]);
-
   /// See [CategoryOjbModel.indexPos].
   static final indexPos =
-      obx.QueryIntegerProperty<CategoryOjbModel>(_entities[2].properties[4]);
+      obx.QueryIntegerProperty<CategoryOjbModel>(_entities[2].properties[2]);
 
   /// See [CategoryOjbModel.createdAt].
   static final createdAt =
-      obx.QueryDateProperty<CategoryOjbModel>(_entities[2].properties[5]);
+      obx.QueryDateProperty<CategoryOjbModel>(_entities[2].properties[3]);
 
   /// See [CategoryOjbModel.updatedAt].
   static final updatedAt =
-      obx.QueryDateProperty<CategoryOjbModel>(_entities[2].properties[6]);
+      obx.QueryDateProperty<CategoryOjbModel>(_entities[2].properties[4]);
 
   /// see [CategoryOjbModel.accounts]
   static final accounts =
@@ -900,89 +818,73 @@ class CategoryOjbModel_ {
           AccountOjbModel_.category);
 }
 
-/// [IconCustomModel] entity fields to define ObjectBox queries.
-class IconCustomModel_ {
-  /// See [IconCustomModel.id].
-  static final id =
-      obx.QueryIntegerProperty<IconCustomModel>(_entities[3].properties[0]);
-
-  /// See [IconCustomModel.name].
-  static final name =
-      obx.QueryStringProperty<IconCustomModel>(_entities[3].properties[1]);
-
-  /// See [IconCustomModel.imageBase64].
-  static final imageBase64 =
-      obx.QueryStringProperty<IconCustomModel>(_entities[3].properties[2]);
-
-  /// See [IconCustomModel.imageBase64DarkModel].
-  static final imageBase64DarkModel =
-      obx.QueryStringProperty<IconCustomModel>(_entities[3].properties[3]);
-
-  /// see [IconCustomModel.accounts]
-  static final accounts =
-      obx.QueryBacklinkToMany<AccountOjbModel, IconCustomModel>(
-          AccountOjbModel_.iconCustom);
-}
-
 /// [PasswordHistory] entity fields to define ObjectBox queries.
 class PasswordHistory_ {
   /// See [PasswordHistory.id].
   static final id =
-      obx.QueryIntegerProperty<PasswordHistory>(_entities[4].properties[0]);
+      obx.QueryIntegerProperty<PasswordHistory>(_entities[3].properties[0]);
 
   /// See [PasswordHistory.password].
   static final password =
-      obx.QueryStringProperty<PasswordHistory>(_entities[4].properties[1]);
+      obx.QueryStringProperty<PasswordHistory>(_entities[3].properties[1]);
 
   /// See [PasswordHistory.createdAt].
   static final createdAt =
-      obx.QueryDateProperty<PasswordHistory>(_entities[4].properties[2]);
-
-  /// See [PasswordHistory.updatedAt].
-  static final updatedAt =
-      obx.QueryDateProperty<PasswordHistory>(_entities[4].properties[3]);
+      obx.QueryDateProperty<PasswordHistory>(_entities[3].properties[2]);
 
   /// See [PasswordHistory.account].
   static final account =
       obx.QueryRelationToOne<PasswordHistory, AccountOjbModel>(
-          _entities[4].properties[4]);
+          _entities[3].properties[3]);
 }
 
 /// [TOTPOjbModel] entity fields to define ObjectBox queries.
 class TOTPOjbModel_ {
   /// See [TOTPOjbModel.id].
   static final id =
-      obx.QueryIntegerProperty<TOTPOjbModel>(_entities[5].properties[0]);
+      obx.QueryIntegerProperty<TOTPOjbModel>(_entities[4].properties[0]);
 
   /// See [TOTPOjbModel.secretKey].
   static final secretKey =
-      obx.QueryStringProperty<TOTPOjbModel>(_entities[5].properties[1]);
-
-  /// See [TOTPOjbModel.algorithm].
-  static final algorithm =
-      obx.QueryStringProperty<TOTPOjbModel>(_entities[5].properties[2]);
-
-  /// See [TOTPOjbModel.digits].
-  static final digits =
-      obx.QueryIntegerProperty<TOTPOjbModel>(_entities[5].properties[3]);
-
-  /// See [TOTPOjbModel.period].
-  static final period =
-      obx.QueryIntegerProperty<TOTPOjbModel>(_entities[5].properties[4]);
+      obx.QueryStringProperty<TOTPOjbModel>(_entities[4].properties[1]);
 
   /// See [TOTPOjbModel.isShowToHome].
   static final isShowToHome =
-      obx.QueryBooleanProperty<TOTPOjbModel>(_entities[5].properties[5]);
+      obx.QueryBooleanProperty<TOTPOjbModel>(_entities[4].properties[2]);
 
   /// See [TOTPOjbModel.createdAt].
   static final createdAt =
-      obx.QueryDateProperty<TOTPOjbModel>(_entities[5].properties[6]);
+      obx.QueryDateProperty<TOTPOjbModel>(_entities[4].properties[3]);
 
   /// See [TOTPOjbModel.updatedAt].
   static final updatedAt =
-      obx.QueryDateProperty<TOTPOjbModel>(_entities[5].properties[7]);
+      obx.QueryDateProperty<TOTPOjbModel>(_entities[4].properties[4]);
 
   /// See [TOTPOjbModel.account].
   static final account = obx.QueryRelationToOne<TOTPOjbModel, AccountOjbModel>(
-      _entities[5].properties[8]);
+      _entities[4].properties[5]);
+}
+
+/// [IconCustomModel] entity fields to define ObjectBox queries.
+class IconCustomModel_ {
+  /// See [IconCustomModel.id].
+  static final id =
+      obx.QueryIntegerProperty<IconCustomModel>(_entities[5].properties[0]);
+
+  /// See [IconCustomModel.name].
+  static final name =
+      obx.QueryStringProperty<IconCustomModel>(_entities[5].properties[1]);
+
+  /// See [IconCustomModel.imageBase64].
+  static final imageBase64 =
+      obx.QueryStringProperty<IconCustomModel>(_entities[5].properties[2]);
+
+  /// See [IconCustomModel.imageBase64DarkModel].
+  static final imageBase64DarkModel =
+      obx.QueryStringProperty<IconCustomModel>(_entities[5].properties[3]);
+
+  /// see [IconCustomModel.accounts]
+  static final accounts =
+      obx.QueryBacklinkToMany<AccountOjbModel, IconCustomModel>(
+          AccountOjbModel_.iconCustom);
 }

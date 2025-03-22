@@ -5,14 +5,18 @@ import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:objectbox/objectbox.dart';
 import 'package:intl/intl.dart';
 
-@Entity()
+@Entity(uid: 3018443929711597194)
 class PasswordHistory {
   @Id()
   int id;
+
+  @Property(uid: 2667871814024352714)
   String password;
-  @Property(type: PropertyType.date)
+
+  @Property(uid: 5165880507350807871, type: PropertyType.date)
   DateTime createdAt;
-  @Property(type: PropertyType.date)
+
+  @Property(uid: 7289120895696701836, type: PropertyType.date)
   DateTime updatedAt;
 
   // Relation to Account
@@ -44,10 +48,14 @@ class PasswordHistory {
   //from json
   factory PasswordHistory.fromJson(Map<String, dynamic> json) {
     return PasswordHistory(
-      id: json['id'],
-      password: json['password'],
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
+      id: json['id'] ?? 0,
+      password: json['password'] ?? '',
+      createdAt: json['createdAt'] != null 
+        ? DateTime.parse(json['createdAt']) 
+        : DateTime.now(),
+      updatedAt: json['updatedAt'] != null 
+        ? DateTime.parse(json['updatedAt']) 
+        : DateTime.now(),
     );
   }
 

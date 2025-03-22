@@ -2,27 +2,26 @@ import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:intl/intl.dart';
 import 'package:objectbox/objectbox.dart';
 
-@Entity()
+@Entity(uid: 1129773840658876529)
 class CategoryOjbModel {
   @Id()
   int id;
   
+  @Property(uid: 8872622909213525147)
   String categoryName;
-  String? icon;
-  int? color;
+
+  @Property(uid: 5509757696427258474)
   int indexPos;
   
-  @Property(type: PropertyType.date)
+  @Property(uid: 3844861102953137554, type: PropertyType.date)
   DateTime createdAt;
   
-  @Property(type: PropertyType.date)
+  @Property(uid: 16479445437159146, type: PropertyType.date)
   DateTime updatedAt;
 
   CategoryOjbModel({
     this.id = 0,
     required this.categoryName,
-    this.icon,
-    this.color,
     this.indexPos = 0,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -32,13 +31,16 @@ class CategoryOjbModel {
   //from json
   factory CategoryOjbModel.fromJson(Map<String, dynamic> json) {
     return CategoryOjbModel(
-      id: json['id'],
-      categoryName: json['categoryName'],
-      icon: json['icon'],
-      color: json['color'],
-      indexPos: json['indexPos'],
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(json['updatedAt'] ?? DateTime.now().toIso8601String()),
+      id: json['id'] ?? 0,
+      categoryName: json['categoryName'] ?? '',
+
+      indexPos: json['indexPos'] ?? 0,
+      createdAt: json['createdAt'] != null 
+        ? DateTime.parse(json['createdAt']) 
+        : DateTime.now(),
+      updatedAt: json['updatedAt'] != null 
+        ? DateTime.parse(json['updatedAt']) 
+        : DateTime.now(),
     );
   }
 
@@ -47,8 +49,6 @@ class CategoryOjbModel {
     return {
       'id': id,
       'categoryName': categoryName,
-      'icon': icon,
-      'color': color,
       'indexPos': indexPos,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),

@@ -1,13 +1,19 @@
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:objectbox/objectbox.dart';
-
-@Entity()
+@Entity(uid: 965409409935003527)
 class IconCustomModel {
   @Id()
   int id;
+
+  @Property(uid: 3048476553136400367)
   final String name;
+
+  @Property(uid: 3062578946622634533)
   final String imageBase64;
+
+  @Property(uid: 5132215409006114972)
   final String? imageBase64DarkModel;
+
   IconCustomModel(
       {this.id = 0,
       required this.name,
@@ -17,9 +23,9 @@ class IconCustomModel {
   //from json
   factory IconCustomModel.fromJson(Map<String, dynamic> json) {
     return IconCustomModel(
-      id: json['id'],
-      name: json['name'],
-      imageBase64: json['imageBase64'],
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      imageBase64: json['imageBase64'] ?? '',
       imageBase64DarkModel: json['imageBase64DarkModel'],
     );
   }
