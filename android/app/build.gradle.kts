@@ -50,7 +50,7 @@ android {
         applicationId = flutterApplicationId
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 27 //android 5.0
+        minSdk = 21 //android 5.0
         targetSdk = 35
         versionCode = flutterVersionCode
         versionName = flutterVersionName
@@ -62,10 +62,6 @@ android {
 
     signingConfigs {
         create("release") {
-            storePassword = "CyberSafe_App"
-            storeFile = file("/Users/ducnv/keystore/cybersafe-keystore.jks")
-            keyPassword = "CyberSafe_App"
-            keyAlias = "cybersafe"
             if (keystoreProperties.containsKey("storeFile")) {
                 keyAlias = keystoreProperties["keyAlias"] as String
                 keyPassword = keystoreProperties["keyPassword"] as String
@@ -103,5 +99,5 @@ android {
 }
 
 flutter {
-    source = ".."
+    source = "../.."
 }

@@ -221,17 +221,17 @@ class EncryptAppDataService {
     try {
       final backupData = jsonDecode(dataBackup);
       _validateBackupData(backupData);
-      
+
       try {
         final decryptedData = _encryptData.decryptFernet(value: backupData['data'], key: _generateBackupKey(pin));
         // Kiểm tra xem dữ liệu giải mã có đúng định dạng JSON không
         final data = jsonDecode(decryptedData);
-        
+
         // Kiểm tra xem có phải là dữ liệu backup hợp lệ không
         if (!data.containsKey('type') || data['type'] != 'CYBERSAFE_BACKUP') {
           throw Exception('PIN_INCORRECT');
         }
-        
+
         await _restoreData(data['data']);
         hideLoadingDialog();
         return true;
@@ -256,11 +256,11 @@ class EncryptAppDataService {
 
   // Helper methods
   void _logError(String message, Object error) {
-    debugPrint('[EncryptAppDataService] ERROR: $message: $error');
+    print('[EncryptAppDataService] ERROR: $message: $error');
   }
 
   Future<bool> _isLegacyUser() async {
-    return await _secureStorage.read(key: SecureStorageKey.themMode) != null;
+    return await _secureStorage.read(key: SecureStorageKeys.themMode.name) != null || await _secureStorage.read(key: SecureStorageKeys.fistOpenApp.name) != null;
   }
 
   Future<bool> _hasDeviceKey() async {
@@ -576,6 +576,7 @@ class EncryptAppDataService {
 
   Future<void> _migrateData() async {
     try {
+      print("Start migrate");
       final accounts = await AccountBox.getAll();
       if (accounts.isEmpty) {
         return;
@@ -675,13 +676,7 @@ class EncryptAppDataService {
             field.value = field.typeField == 'password' ? OldEncryptData.decryptPassword(field.value) : OldEncryptData.decryptInfo(field.value);
             return field;
           }).toList(),
-      totpOjbModel:
-          account.getTotp != null
-              ? TOTPOjbModel(
-                id: 0,
-                secretKey: OldEncryptData.decryptTOTPKey(account.getTotp!.secretKey),
-              )
-              : null,
+      totpOjbModel: account.getTotp != null ? TOTPOjbModel(id: 0, secretKey: OldEncryptData.decryptTOTPKey(account.getTotp!.secretKey)) : null,
       iconCustomModel: account.getIconCustom,
       createdAt: account.createdAt,
       updatedAt: account.updatedAt,
@@ -696,18 +691,18 @@ class EncryptAppDataService {
       // Reset ID về 0 để ObjectBox tự tạo ID mới
       final accountNew = AccountOjbModel(
         id: 0, // Set ID = 0 để ObjectBox tự tạo ID mới
-        title: account.title, 
-        email: account.email ?? "", 
-        password: account.password ?? "", 
-        notes: account.notes ?? "", 
-        icon: account.icon ?? ""
+        title: account.title,
+        email: account.email ?? "",
+        password: account.password ?? "",
+        notes: account.notes ?? "",
+        icon: account.icon ?? "",
       );
 
       // Xử lý TOTP
       if (account.getTotp != null) {
         accountNew.totp.target = TOTPOjbModel(
           id: 0, // Reset ID
-          secretKey: account.getTotp!.secretKey
+          secretKey: account.getTotp!.secretKey,
         );
       }
 
@@ -716,10 +711,10 @@ class EncryptAppDataService {
         for (var customField in account.getCustomFields) {
           final newCustomField = AccountCustomFieldOjbModel(
             id: 0, // Reset ID
-            name: customField.name, 
-            value: customField.value, 
-            hintText: customField.hintText, 
-            typeField: customField.typeField
+            name: customField.name,
+            value: customField.value,
+            hintText: customField.hintText,
+            typeField: customField.typeField,
           );
           accountNew.customFields.add(newCustomField);
         }
@@ -730,8 +725,8 @@ class EncryptAppDataService {
         for (var passwordHistory in account.getPasswordHistories) {
           final newPasswordHistory = PasswordHistory(
             id: 0, // Reset ID
-            password: passwordHistory.password, 
-            createdAt: passwordHistory.createdAt
+            password: passwordHistory.password,
+            createdAt: passwordHistory.createdAt,
           );
           accountNew.passwordHistories.add(newPasswordHistory);
         }
@@ -743,7 +738,7 @@ class EncryptAppDataService {
       if (categoryResult == null) {
         final newCategory = CategoryOjbModel(
           id: 0, // Reset ID
-          categoryName: account.category.target?.categoryName ?? "Backup"
+          categoryName: account.category.target?.categoryName ?? "Backup",
         );
         final id = CategoryBox.put(newCategory);
         newCategory.id = id;
