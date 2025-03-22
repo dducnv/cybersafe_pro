@@ -16,10 +16,17 @@ class LocalAuthProvider extends ChangeNotifier {
   TextEditingController textEditingController = TextEditingController();
   Function? onCallBack;
   Function(TextEditingController controller, GlobalKey<AppPinCodeFieldsState> appPinCodeKey)? onCallBackWithPin;
-  final GlobalKey<AppPinCodeFieldsState> appPinCodeKey = GlobalKey<AppPinCodeFieldsState>();
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  GlobalKey<AppPinCodeFieldsState> appPinCodeKey = GlobalKey<AppPinCodeFieldsState>();
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   String _pinCodeConfirm = '';
+
+  void init() {
+    textEditingController = TextEditingController();
+    focusNode = FocusNode();
+    appPinCodeKey = GlobalKey<AppPinCodeFieldsState>();
+    formKey = GlobalKey<FormState>();
+  }
 
   void authenticate() {
     isAuthenticated = true;
@@ -64,7 +71,7 @@ class LocalAuthProvider extends ChangeNotifier {
     return false;
   }
 
-    void onBiometric() async {
+  void onBiometric() async {
     bool isAuth = await checkLocalAuth();
     if (isAuth) {
       navigatorToHome();

@@ -155,9 +155,14 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
           children: [
             SizedBox(width: 16),
             // Nút Home
-            Expanded(child: _buildNavItem(icon: Icons.key_rounded, onTap: () {
-              AppRoutes.navigateTo(context, AppRoutes.otpList);
-            })),
+            Expanded(
+              child: _buildNavItem(
+                icon: Icons.key_rounded,
+                onTap: () {
+                  AppRoutes.navigateTo(context, AppRoutes.otpList);
+                },
+              ),
+            ),
             // Nút Danh mục
             Expanded(
               child: _buildNavItem(
@@ -170,11 +175,23 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
             // Khoảng trống cho FAB
             const SizedBox(width: 80),
             // Nút Tìm kiếm
-            Expanded(child: _buildNavItem(icon: Icons.search_outlined, onTap: () {
-              showSearchBottomSheet(context);
-            })),
+            Expanded(
+              child: _buildNavItem(
+                icon: Icons.search_outlined,
+                onTap: () {
+                  showSearchBottomSheet(context);
+                },
+              ),
+            ),
             // Nút cuộn lên đầu trang
-            Expanded(child: _buildNavItem(icon: Icons.analytics_sharp, onTap: () {})),
+            Expanded(
+              child: _buildNavItem(
+                icon: Icons.analytics_sharp,
+                onTap: () {
+                  AppRoutes.navigateTo(context, AppRoutes.statistic);
+                },
+              ),
+            ),
             SizedBox(width: 16),
           ],
         ),
@@ -223,9 +240,9 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                                 isLastItem: itemIndex == accounts.length - 1,
                                 onLongPress: () {},
                                 onCallBackPop: () {},
-                                
+
                                 onTapSubButton: () {
-                                   AppRoutes.navigateTo(context, AppRoutes.updateAccount, arguments: {"accountId": accounts[itemIndex].id});
+                                  AppRoutes.navigateTo(context, AppRoutes.updateAccount, arguments: {"accountId": accounts[itemIndex].id});
                                 },
                                 onSelect: () {
                                   context.read<AccountProvider>().handleSelectOrRemoveAccount(account);
@@ -247,7 +264,7 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
     );
   }
 
- Widget _buildCategory() {
+  Widget _buildCategory() {
     return Column(
       children: [
         SizedBox(
@@ -276,42 +293,22 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                         itemBuilder: (context, index) {
                           final category = categories[index];
                           final isSelected = category.id == accountProvider.selectedCategoryId;
-                          
+
                           return Material(
                             child: Ink(
-                              decoration: BoxDecoration(
-                                color: isSelected 
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Colors.grey.withAlpha(50),
-                                borderRadius: BorderRadius.circular(25)
-                              ),
+                              decoration: BoxDecoration(color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey.withAlpha(50), borderRadius: BorderRadius.circular(25)),
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(25),
                                 onTap: () {
                                   accountProvider.selectCategory(category.id, context: context);
-
                                 },
                                 child: Row(
                                   children: [
                                     Padding(
                                       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 2.h).copyWith(right: isSelected ? 0 : 20.w),
-                                      child: Center(
-                                        child: Text(
-                                          category.categoryName,
-                                          style: TextStyle(
-                                            fontSize: 14.sp,
-                                            color: isSelected 
-                                              ? Theme.of(context).colorScheme.onPrimary
-                                              : null
-                                          )
-                                        )
-                                      ),
+                                      child: Center(child: Text(category.categoryName, style: TextStyle(fontSize: 14.sp, color: isSelected ? Theme.of(context).colorScheme.onPrimary : null))),
                                     ),
-                                    if (isSelected)
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Icon(Icons.close, size: 18.sp, color: Theme.of(context).colorScheme.onPrimary),
-                                      )
+                                    if (isSelected) Padding(padding: const EdgeInsets.all(8.0), child: Icon(Icons.close, size: 18.sp, color: Theme.of(context).colorScheme.onPrimary)),
                                   ],
                                 ),
                               ),
@@ -329,6 +326,7 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
       ],
     );
   }
+
   Widget _buildEmptyData() {
     return Center(
       child: Column(

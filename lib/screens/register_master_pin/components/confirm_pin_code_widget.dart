@@ -1,3 +1,4 @@
+import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/local_auth_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
@@ -10,7 +11,8 @@ class ConfirmPinCodeWidget extends StatefulWidget {
   final GlobalKey<AppPinCodeFieldsState> appPinCodeConfirmKey;
   final GlobalKey<FormState> formConfirmKey;
   final PageController pageController;
-  const ConfirmPinCodeWidget({super.key, required this.appPinCodeConfirmKey, required this.formConfirmKey, required this.pageController});
+  final bool isChangePin;
+  const ConfirmPinCodeWidget({super.key, required this.appPinCodeConfirmKey, required this.formConfirmKey, required this.pageController, this.isChangePin = false});
 
   @override
   State<ConfirmPinCodeWidget> createState() => _ConfirmPinCodeWidgetState();
@@ -65,6 +67,7 @@ class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
             bool isVerified = Provider.of<LocalAuthProvider>(context, listen: false).verifyRegisterPinCode(pinCodeController.text);
             if (isVerified && pinCodeController.text.isNotEmpty && context.mounted) {
               Provider.of<LocalAuthProvider>(context, listen: false).savePinCode();
+              context.read<AppProvider>().initializeTimer();
               AppRoutes.navigateAndRemoveUntil(context, AppRoutes.home);
             } else {
               timeCorrect++;

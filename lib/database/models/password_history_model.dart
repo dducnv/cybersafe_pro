@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
+import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:objectbox/objectbox.dart';
 import 'package:intl/intl.dart';
 
@@ -30,6 +31,15 @@ class PasswordHistory {
       "${DateFormat.yMMMd(defaultLocale).format(createdAt)} ${DateFormat.Hm(defaultLocale).format(createdAt)}";
   String get updatedAtFormat =>
       "${DateFormat.yMMMd(defaultLocale).format(updatedAt)} ${DateFormat.Hm(defaultLocale).format(updatedAt)}";
+
+  final EncryptAppDataService _encryptAppDataService = EncryptAppDataService.instance;
+  Future<Map<String,dynamic>> toDecryptedJson() async {
+    return {
+      'password': await _encryptAppDataService.decryptPassword(password),
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+    };
+  }
 
   //from json
   factory PasswordHistory.fromJson(Map<String, dynamic> json) {

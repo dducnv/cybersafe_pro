@@ -7,6 +7,9 @@ import 'package:cybersafe_pro/screens/otp/otp_list_screen.dart';
 import 'package:cybersafe_pro/screens/password_generator/password_generate_screen.dart';
 import 'package:cybersafe_pro/screens/register_master_pin/register_master_pin.dart';
 import 'package:cybersafe_pro/screens/settings/setting_screen.dart';
+import 'package:cybersafe_pro/screens/statistic/statistic_screen.dart';
+import 'package:cybersafe_pro/screens/statistic/sub_sceens/account_password_weak.dart';
+import 'package:cybersafe_pro/screens/statistic/sub_sceens/same_passwords_view.dart';
 import 'package:cybersafe_pro/widgets/secure_app/secure_app_switcher.dart';
 import 'package:cybersafe_pro/widgets/secure_app/secure_app_switcher_page.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +26,9 @@ class AppRoutes {
   static const String settings = '/settings';
   static const String registerMasterPin = '/register_master_pin';
   static const String loginMasterPin = '/login_master_pin';
+  static const String statistic = '/statistic';
+  static const String accountPasswordWeak = '/account_password_weak';
+  static const String accountSamePassword = '/account_same_password';
 
   // Route map
   static Map<String, WidgetBuilder> getRoutes() {
@@ -35,6 +41,9 @@ class AppRoutes {
       passwordGenerator: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const PasswordGenerateScreen()),
       otpList: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const OtpListScreen()),
       settings: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const SettingScreen()),
+      statistic: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const StatisticScreen()),
+      accountPasswordWeak: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const AccountPasswordWeak()),
+      accountSamePassword: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const SamePasswordsView()),
     };
   }
 
@@ -77,6 +86,12 @@ class AppRoutes {
       case detailsAccount:
         final args = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(builder: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: DetailsAccountScreen(accountId: args["accountId"])), settings: settings);
+      case statistic:
+        return MaterialPageRoute(builder: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const StatisticScreen()), settings: settings);
+      case accountPasswordWeak:
+        return MaterialPageRoute(builder: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const AccountPasswordWeak()), settings: settings);
+      case accountSamePassword:
+        return MaterialPageRoute(builder: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const SamePasswordsView()), settings: settings);
       default:
         // If the route is not found, return a 404 page or home page
         return MaterialPageRoute(builder: (context) => const OnboardingScreen(), settings: settings);

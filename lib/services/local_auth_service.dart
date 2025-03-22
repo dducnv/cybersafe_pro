@@ -1,3 +1,4 @@
+import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter/services.dart';
@@ -46,6 +47,7 @@ class LocalAuthConfig {
     await canCheckBiometrics;
     await getAvailableBiometrics();
     await openUseBiometric();
+    await hasBiometrics();
   }
 
   Future<bool> get canCheckBiometrics async {
@@ -62,13 +64,8 @@ class LocalAuthConfig {
   }
 
   Future<void> openUseBiometric() async {
-    String? enableLocalAuth = await SecureStorage.instance
-        .read(key: SecureStorageKeys.isEnableLocalAuth.name);
-    if (enableLocalAuth == null || enableLocalAuth == "false") {
-      _isOpenUseBiometric = false;
-    } else {
-      _isOpenUseBiometric = true;
-    }
+    bool? enableLocalAuth = await SecureStorage.instance.readBool(SecureStorageKey.isEnableLocalAuth);
+    _isOpenUseBiometric = enableLocalAuth ?? false;
   }
 
   Future<List<BiometricType>> getAvailableBiometrics() async {
@@ -78,7 +75,6 @@ class LocalAuthConfig {
     List<BiometricType> availableBiometrics = [];
     try {
       availableBiometrics = await auth.getAvailableBiometrics();
-      
       // Lọc phương thức xác thực theo platform
       if (Platform.isIOS) {
         // Chỉ giữ lại Face ID cho iOS
@@ -90,6 +86,7 @@ class LocalAuthConfig {
     } on PlatformException {
       availableBiometrics = [];
     }
+    print("availableBiometrics: $availableBiometrics");
     _availableBiometrics = availableBiometrics;
     return _availableBiometrics!;
   }

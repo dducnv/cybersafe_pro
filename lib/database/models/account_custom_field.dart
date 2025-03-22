@@ -1,4 +1,5 @@
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
+import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:objectbox/objectbox.dart';
 
 @Entity()
@@ -28,6 +29,17 @@ class AccountCustomFieldOjbModel {
       hintText: json['hintText'],
       typeField: json['typeField'],
     );
+  }
+
+  final EncryptAppDataService _encryptAppDataService = EncryptAppDataService.instance;
+  Future<Map<String,dynamic>> toDecryptedJson() async {
+    return {
+      'id': id,
+      'name': name,
+      'value': typeField == 'password' ? await _encryptAppDataService.decryptPassword(value) : await _encryptAppDataService.decryptInfo(value),
+      'hintText': hintText,
+      'typeField': typeField,
+    };
   }
 
   //to json

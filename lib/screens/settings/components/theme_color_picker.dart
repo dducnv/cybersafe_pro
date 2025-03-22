@@ -15,33 +15,6 @@ class ThemeColorPicker extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Switch cho theme mặc định
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Sử dụng theme mặc định',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ),
-              Switch(
-                value: themeProvider.isDefaultTheme,
-                onChanged: (_) => themeProvider.toggleDefaultTheme(),
-              ),
-            ],
-          ),
-        ),
-        const Divider(),
-        // Theme color picker
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            'Màu sắc chủ đề',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-        ),
         if (!themeProvider.isDefaultTheme)
           Wrap(
             spacing: 12,

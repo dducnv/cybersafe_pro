@@ -9,7 +9,8 @@ class MobileLayout extends StatefulWidget {
   final GlobalKey<AppPinCodeFieldsState> appPinCodeConfirmKey;
   final GlobalKey<FormState> formCreateKey;
   final GlobalKey<FormState> formConfirmKey;
-  const MobileLayout({ super.key, required this.appPinCodeCreateKey, required this.appPinCodeConfirmKey, required this.formCreateKey, required this.formConfirmKey });
+  final bool? isChangePin;
+  const MobileLayout({ super.key, required this.appPinCodeCreateKey, required this.appPinCodeConfirmKey, required this.formCreateKey, required this.formConfirmKey, this.isChangePin });
 
   @override
   State<MobileLayout> createState() => _MobileLayoutState();
@@ -20,6 +21,11 @@ class _MobileLayoutState extends State<MobileLayout> {
   @override
   Widget build(BuildContext context){
     return Scaffold(
+      appBar: widget.isChangePin == true ? AppBar(
+        elevation: 0,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        scrolledUnderElevation: 0,
+      ) : null,
       body: PageView(
         controller: pageController,
         physics: const NeverScrollableScrollPhysics(),
@@ -33,6 +39,7 @@ class _MobileLayoutState extends State<MobileLayout> {
             appPinCodeConfirmKey: widget.appPinCodeConfirmKey,
             formConfirmKey: widget.formConfirmKey,
             pageController: pageController,
+            isChangePin: widget.isChangePin ?? false,
           ),
         ],
       ),

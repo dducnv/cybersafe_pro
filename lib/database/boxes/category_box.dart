@@ -22,6 +22,10 @@ class CategoryBox {
     return await box.getAsync(id);
   }
 
+  static CategoryOjbModel? findCategoryByName(String name) {
+    return box.query(CategoryOjbModel_.categoryName.equals(name)).build().findFirst();
+  }
+
   static int put(CategoryOjbModel category) {
     category.updatedAt = DateTime.now();
     category.indexPos = _getNextIndexPos();

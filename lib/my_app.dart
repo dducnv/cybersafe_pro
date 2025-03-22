@@ -1,4 +1,3 @@
-import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/app_locale.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
@@ -7,7 +6,6 @@ import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/providers/theme_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
-import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:cybersafe_pro/widgets/secure_app/secure_app_switcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -75,6 +73,7 @@ class _MyAppState extends State<MyApp> {
             supportedLocales: const [Locale('vi', 'VN'), Locale('en', 'US')],
             localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
             themeMode: themeProvider.themeMode,
+            theme: themeProvider.lightTheme,
             darkTheme: themeProvider.darkTheme,
             navigatorObservers: [secureAppSwitcherRouteObserver],
             initialRoute: widget.initialRoute,
@@ -86,17 +85,19 @@ class _MyAppState extends State<MyApp> {
                 child: Selector<AccountProvider, bool>(
                   selector: (context, provider) => provider.accountSelected.isNotEmpty,
                   builder: (_, value, _) {
-                    return AnnotatedRegion(
-                      value: SystemUiOverlayStyle(
-                        statusBarColor: Theme.of(context).colorScheme.surface,
-                        statusBarBrightness: !context.darkMode ? Brightness.light : Brightness.dark,
-                        statusBarIconBrightness: !context.darkMode ? Brightness.dark : Brightness.light,
-                        systemNavigationBarColor: Theme.of(context).colorScheme.surface,
-                        systemNavigationBarDividerColor: Theme.of(context).colorScheme.surface,
-                        systemNavigationBarIconBrightness: !context.darkMode ? Brightness.dark : Brightness.light,
-                        systemStatusBarContrastEnforced: true,
+                    return ColoredBox(
+                      color: Theme.of(context).colorScheme.surface,
+                      child: AnnotatedRegion(
+                        value: SystemUiOverlayStyle(
+                          statusBarColor: Theme.of(context).colorScheme.surface,
+                          statusBarBrightness: !context.darkMode ? Brightness.light : Brightness.dark,
+                          statusBarIconBrightness: !context.darkMode ? Brightness.dark : Brightness.light,
+                          systemNavigationBarColor: Theme.of(context).colorScheme.surface,
+                          systemNavigationBarDividerColor: Theme.of(context).colorScheme.surface,
+                          systemNavigationBarIconBrightness: !context.darkMode ? Brightness.dark : Brightness.light,
+                        ),
+                        child: child!,
                       ),
-                      child: Scaffold(body: child!),
                     );
                   },
                 ),

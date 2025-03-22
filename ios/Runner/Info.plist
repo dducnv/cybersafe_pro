@@ -28,6 +28,10 @@
 		<string>LaunchScreen</string>
 		<key>UIMainStoryboardFile</key>
 		<string>Main</string>
+		<key>UISupportsDocumentBrowser</key>  
+		<true/>
+		<key>NSFaceIDUsageDescription</key>
+		<string>CyberSafe Pro uses Face ID for authentication to unlock the app and perform security-related actions such as accessing passwords and confirming setting changes.</string>
 		<key>UISupportedInterfaceOrientations</key>
 		<array>
 			<string>UIInterfaceOrientationPortrait</string>

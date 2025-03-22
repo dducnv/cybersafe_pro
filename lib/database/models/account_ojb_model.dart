@@ -5,6 +5,7 @@ import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
 import 'package:cybersafe_pro/database/models/icon_custom_model.dart';
 import 'package:cybersafe_pro/database/models/password_history_model.dart';
 import 'package:cybersafe_pro/database/models/totp_ojb_model.dart';
+import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:intl/intl.dart';
 import 'package:objectbox/objectbox.dart';
 
@@ -119,6 +120,9 @@ class AccountOjbModel {
     return "${DateFormat.yMMMd(Platform.localeName).format(dateTime)} ${DateFormat.Hm(Platform.localeName).format(dateTime)}";
   }
 
+
+
+
   factory AccountOjbModel.fromJson(Map<String, dynamic> json) {
     return AccountOjbModel(
       id: json['id'] ?? 0,
@@ -158,6 +162,26 @@ class AccountOjbModel {
     );
   }
 
+  final EncryptAppDataService _encryptAppDataService = EncryptAppDataService.instance;
+
+  Future<Map<String, dynamic>> toDecryptedJson() async {
+    return {
+      'id': id,
+      'title': await _encryptAppDataService.decryptInfo(title),
+      'email': await _encryptAppDataService.decryptInfo(email ?? ''),
+      'password': await _encryptAppDataService.decryptPassword(password ?? ''),
+      'notes': await _encryptAppDataService.decryptInfo(notes ?? ''),
+      'icon': icon,
+      'customFields': getCustomFields.map((e) => e.toDecryptedJson()).toList(),
+      'totp': getTotp?.toDecryptedJson(),
+      'category': getCategory?.toJson(),
+      'passwordUpdatedAt': passwordUpdatedAt?.toIso8601String(),
+      'passwordHistories': getPasswordHistories.map((e) => e.toDecryptedJson()).toList(),
+      'iconCustom': getIconCustom?.toJson(),
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+    };
+  }
   Map<String, dynamic> toJson() {
     return {
       'id': id,

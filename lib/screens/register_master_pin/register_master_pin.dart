@@ -7,7 +7,8 @@ import 'layouts/mobile_layout.dart';
 import 'layouts/tablet_layout.dart';
 
 class RegisterMasterPin extends StatefulWidget {
-  const RegisterMasterPin({super.key});
+  final bool? isChangePin;
+  const RegisterMasterPin({super.key, this.isChangePin = false});
 
   @override
   State<RegisterMasterPin> createState() => _RegisterMasterPinState();
@@ -34,6 +35,7 @@ class _RegisterMasterPinState extends State<RegisterMasterPin> {
           appPinCodeConfirmKey: appPinCodeConfirmKey,
           formCreateKey: formCreateKey,
           formConfirmKey: formConfirmKey,
+          isChangePin: widget.isChangePin,
         );
     }
   }

@@ -19,9 +19,9 @@ class AppProvider extends ChangeNotifier {
   //time login
   Timer _rootTimer = Timer(Duration.zero, () {});
   bool _isOpenAutoLock = false;
+  bool get isOpenAutoLock => _isOpenAutoLock;
   int _timeAutoLock = 5;
-
-  void init() {}
+  int get timeAutoLock => _timeAutoLock;
 
   Future<void> checkRotateKey() async {
     final keyCreationTime = await _secureStorage.read(key: SecureStorageKey.encryptionKeyCreationTime);
@@ -32,10 +32,10 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> initializeTimer() async {
     _rootTimer.cancel();
-    final autoLock = await SecureStorage.instance.read(key: SecureStorageKey.isAutoLock);
-    final timeAutoLock = await SecureStorage.instance.read(key: SecureStorageKey.timeAutoLock) ?? "5";
-    _timeAutoLock = int.parse(timeAutoLock);
-    if (autoLock == null || autoLock == "false") {
+    final autoLock = await SecureStorage.instance.readBool(SecureStorageKey.isAutoLock);
+    final timeAutoLock = await SecureStorage.instance.readInt(SecureStorageKey.timeAutoLock) ?? 5;
+    _timeAutoLock = timeAutoLock;
+    if (autoLock == null || !autoLock) {
       _isOpenAutoLock = false;
       return;
     }
@@ -44,6 +44,10 @@ class AppProvider extends ChangeNotifier {
     _rootTimer = Timer(time, () {
       logOutUser();
     });
+  }
+
+  void stopTimer() {
+    _rootTimer.cancel();
   }
 
   void logOutUser() {
@@ -57,5 +61,14 @@ class AppProvider extends ChangeNotifier {
     }
     _rootTimer.cancel();
     initializeTimer();
+  }
+
+  void setAutoLock(bool isOpen, int time) {
+    _isOpenAutoLock = isOpen;
+    _timeAutoLock = time;
+    SecureStorage.instance.saveBool(SecureStorageKey.isAutoLock, isOpen);
+    SecureStorage.instance.saveInt(SecureStorageKey.timeAutoLock, time);
+    initializeTimer();
+    notifyListeners();
   }
 }

@@ -1,5 +1,7 @@
 import 'package:cybersafe_pro/components/icon_show_component.dart';
+import 'package:cybersafe_pro/database/boxes/account_box.dart';
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
+import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
@@ -7,6 +9,7 @@ import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
 import 'package:cybersafe_pro/widgets/decrypt_text/decrypt_text.dart';
 import 'package:cybersafe_pro/widgets/item_custom/item_copy_value.dart';
 import 'package:cybersafe_pro/widgets/otp_text_with_countdown/otp_text_with_countdown.dart';
+import 'package:cybersafe_pro/widgets/request_pro/request_pro.dart';
 import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,7 +24,7 @@ class DetailsAccountMobileLayout extends StatefulWidget {
 
 class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout> {
   final decryptService = EncryptAppDataService.instance;
-  late final AccountOjbModel accountOjbModel;
+  late AccountOjbModel _accountOjbModel;
 
   // Thêm các biến điều khiển animation
   final List<bool> _isVisible = List.generate(7, (_) => false);
@@ -31,9 +34,12 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
   @override
   void initState() {
     super.initState();
-    accountOjbModel = widget.accountOjbModel;
+    _accountOjbModel = widget.accountOjbModel;
     _startAnimation();
   }
+
+  // Getter để truy cập accountOjbModel
+  AccountOjbModel get accountOjbModel => _accountOjbModel;
 
   // Thêm phương thức điều khiển animation
   void _startAnimation() async {
@@ -47,10 +53,89 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
     }
   }
 
+  Future<void> reloadAccount() async {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      AccountOjbModel? accountOjbModelLoaded = await AccountBox.getById(widget.accountOjbModel.id);
+      if (accountOjbModelLoaded != null) {
+        setState(() {
+          _accountOjbModel = accountOjbModelLoaded;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(elevation: 0, scrolledUnderElevation: 0, shadowColor: Colors.transparent, backgroundColor: Theme.of(context).colorScheme.surface),
+      appBar: AppBar(
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        shadowColor: Colors.transparent,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        actions: [
+          IconButton(
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+
+                builder: (BuildContext context) {
+                  return SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(width: 40.w, height: 4.h, decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(10))),
+                          const SizedBox(height: 10),
+                          ListTile(
+                            title: Text("Edit Account"),
+                            onTap: () async {
+                              AppRoutes.pop(context);
+                              await AppRoutes.navigateTo(context, AppRoutes.updateAccount, arguments: {"accountId": accountOjbModel.id});
+                              reloadAccount();
+                            },
+                          ),
+                          ListTile(
+                            title: Text("Delete Account"),
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text("Delete Account"),
+                                    content: Text("Are you sure you want to delete this account?"),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: Text("Cancel"),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: Text("Delete"),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+            icon: const Icon(Icons.more_vert),
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -227,31 +312,33 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
       children: [
         Text("OTP Code", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
         const SizedBox(height: 5),
-        CardCustomWidget(
-          padding: const EdgeInsets.all(0),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                HapticFeedback.selectionClick();
-                clipboardCustom(context: context, text: "");
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(top: 10, bottom: 10, left: 10, right: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    FutureBuilder(
-                      future: decryptService.decryptTOTPKey(account.totp.target!.secretKey),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData && snapshot.data != null) {
-                          return OtpTextWithCountdown(keySecret: snapshot.data!);
-                        }
-                        return SizedBox.shrink();
-                      },
-                    ),
-                    Icon(Icons.copy, size: 18),
-                  ],
+        RequestPro(
+          child: CardCustomWidget(
+            padding: const EdgeInsets.all(0),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  clipboardCustom(context: context, text: "");
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 10, bottom: 10, left: 10, right: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      FutureBuilder(
+                        future: decryptService.decryptTOTPKey(account.totp.target!.secretKey),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData && snapshot.data != null) {
+                            return OtpTextWithCountdown(keySecret: snapshot.data!);
+                          }
+                          return SizedBox.shrink();
+                        },
+                      ),
+                      Icon(Icons.copy, size: 18),
+                    ],
+                  ),
                 ),
               ),
             ),

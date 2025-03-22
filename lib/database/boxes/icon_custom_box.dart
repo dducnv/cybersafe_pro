@@ -1,3 +1,5 @@
+import 'package:cybersafe_pro/objectbox.g.dart';
+
 import '../models/icon_custom_model.dart';
 import '../objectbox.dart';
 
@@ -22,6 +24,14 @@ class IconCustomBox {
 
   static bool delete(int id) {
     return box.remove(id);
+  }
+
+  static IconCustomModel? findIconByName(String name) {
+    return box.query(IconCustomModel_.name.equals(name)).build().findFirst();
+  }
+
+  static IconCustomModel? findIconByBase64Image(String base64Image) {
+    return box.query(IconCustomModel_.imageBase64.equals(base64Image)).build().findFirst();
   }
 
   static void deleteAll() {

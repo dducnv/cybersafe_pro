@@ -6,6 +6,7 @@ import 'package:cybersafe_pro/database/models/icon_custom_model.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/resources/brand_logo.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/widgets/request_pro/request_pro.dart';
 import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -187,21 +188,25 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
           itemCount: listIconsCustom.length,
           shrinkWrap: true,
           itemBuilder: (context, index) {
-            return ListTile(
-              onTap: () {
-                formProvider.pickIcon(isCustomIcon: true, iconCustomModel: formProvider.listIconsCustom[index]);
-                Navigator.pop(context);
-              },
-              leading: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.memory(base64Decode(formProvider.listIconsCustom[index].imageBase64), width: 40.h, height: 40.h, fit: BoxFit.contain),
-              ),
-              title: Text(formProvider.listIconsCustom[index].name, style: TextStyle(fontSize: 16.sp)),
-              trailing: IconButton(
-                onPressed: () {
-                  formProvider.deleteIconCustom(formProvider.listIconsCustom[index]);
+            return RequestPro(
+              child: ListTile(
+                onTap: () {
+                  formProvider.pickIcon(isCustomIcon: true, iconCustomModel: formProvider.listIconsCustom[index]);
+                  Navigator.pop(context);
                 },
-                icon: Icon(Icons.close, color: Colors.redAccent, size: 24.sp),
+                leading: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.memory(base64Decode(formProvider.listIconsCustom[index].imageBase64), width: 40.h, height: 40.h, fit: BoxFit.contain),
+                ),
+                title: Text(formProvider.listIconsCustom[index].name, style: TextStyle(fontSize: 16.sp)),
+                trailing: IconButton(
+                  onPressed: () {
+                    formProvider.deleteIconCustom(formProvider.listIconsCustom[index]);
+                  },
+                  icon: IgnorePointer(
+                    ignoring: false,
+                    child: Icon(Icons.close, color: Colors.redAccent, size: 24.sp)),
+                ),
               ),
             );
           },

@@ -1,3 +1,4 @@
+import 'package:cybersafe_pro/resources/app_config.dart';
 import 'package:cybersafe_pro/services/otp.dart';
 import 'package:cybersafe_pro/utils/refetch_totp.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
@@ -55,15 +56,11 @@ class OtpTextWithCountdownState extends State<OtpTextWithCountdown> {
   void initState() {
     super.initState();
     _initializeCountDown();
-    totp = generateTOTPCode(
-      keySecret: widget.keySecret,
-    );
+    totp = generateTOTPCode(keySecret: widget.keySecret);
 
     refetchTotp = RefetchTotp(
       refetchTotp: () {
-        totp = generateTOTPCode(
-          keySecret: widget.keySecret,
-        );
+        totp = generateTOTPCode(keySecret: widget.keySecret);
         setState(() {});
       },
     );
@@ -100,12 +97,7 @@ class OtpTextWithCountdownState extends State<OtpTextWithCountdown> {
       backgroundColor: Colors.grey[300],
       controller: countDownController,
       strokeWidth: 5,
-      textStyle: widget.countDownTextStyle ??
-          const TextStyle(
-            fontSize: 10,
-            color: Colors.black,
-            fontWeight: FontWeight.w500,
-          ),
+      textStyle: widget.countDownTextStyle ?? const TextStyle(fontSize: 10, color: Colors.black, fontWeight: FontWeight.w500),
       autoStart: true,
       isReverse: true,
       strokeCap: StrokeCap.round,
@@ -123,15 +115,10 @@ class OtpTextWithCountdownState extends State<OtpTextWithCountdown> {
       children: [
         if (!widget.isSubTimeCountDown) _buildCountDownTimer(),
         if (!widget.isSubTimeCountDown) const SizedBox(width: 10),
-        Text(
-          totp,
-          style: widget.otpTextStyle ??
-              TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-        ),
+        if (AppConfig.isProApp)
+          Text(totp, style: widget.otpTextStyle ?? TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.primary))
+        else
+          Text("*** ***", style: widget.otpTextStyle ?? TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.primary)),
         if (widget.isSubTimeCountDown) _buildCountDownTimer(),
       ],
     );

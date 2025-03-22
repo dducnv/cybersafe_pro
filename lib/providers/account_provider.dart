@@ -8,6 +8,7 @@ import 'package:cybersafe_pro/database/boxes/account_box.dart';
 import 'package:cybersafe_pro/database/boxes/category_box.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
+import 'package:cybersafe_pro/services/otp.dart';
 import 'package:flutter/material.dart';
 import 'package:cybersafe_pro/providers/account_form_provider.dart';
 import 'dart:math' as math;
@@ -315,12 +316,14 @@ class AccountProvider extends ChangeNotifier {
         currentAccount.setIconCustom = account.getIconCustom;
         currentAccount.title = account.title;
         currentAccount.email = account.email;
+        currentAccount.setTotp = account.getTotp;
         if (decryptedAccount.password != null && decryptedAccount.password!.isNotEmpty && decryptedAccount.password != account.password) {
           currentAccount.passwordHistories.add(PasswordHistory(password: decryptedAccount.password!, createdAt: DateTime.now(), updatedAt: DateTime.now()));
           currentAccount.password = account.password;
         } else {
           currentAccount.password = account.password;
         }
+
         currentAccount.notes = account.notes;
         currentAccount.setCategory = account.getCategory;
         currentAccount.customFields.clear();
@@ -381,7 +384,7 @@ class AccountProvider extends ChangeNotifier {
       try {
         // Lấy danh sách ID cần xóa
         List<int> listIds = accountSelected.map((e) => e.id).toList();
-        
+
         // Xóa các tài khoản khỏi database
         int deletedCount = await AccountBox.deleteMultiple(listIds);
         if (deletedCount != listIds.length) {
@@ -400,7 +403,7 @@ class AccountProvider extends ChangeNotifier {
 
         // Xóa danh sách tài khoản đã chọn
         handleClearAccountsSelected();
-        
+
         // Cập nhật lại UI
         await refreshAccounts();
         return true;
@@ -512,6 +515,10 @@ class AccountProvider extends ChangeNotifier {
               }).toList();
 
           final now = DateTime.now();
+          print(form.otpController.text);
+          if (form.otpController.text.isNotEmpty && !OTP.isKeyValid(form.otpController.text)) {
+            form.otpController.clear();
+          }
           final newAccount = AccountOjbModel(
             id: form.accountId,
             icon: form.branchLogoSelected?.branchLogoSlug,
@@ -596,8 +603,8 @@ class AccountProvider extends ChangeNotifier {
             createdAt: DateTime.now().subtract(Duration(days: i % 30)),
             updatedAt: DateTime.now().subtract(Duration(hours: i % 24)),
           );
-
-          accountsToCreate.add(account);
+          final encryptedAccount = await _encryptAccount(account);
+          accountsToCreate.add(encryptedAccount);
         }
 
         // Lưu hàng loạt account

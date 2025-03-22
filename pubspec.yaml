@@ -1,6 +1,6 @@
 name: cybersafe_pro
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 version: 0.1.0
 
 environment:
@@ -39,13 +39,16 @@ dependencies:
   icons_plus: ^5.0.0
   share_plus: ^10.1.4
   flutter_svg: ^2.0.17
+  file_picker: ^9.2.1
   image_picker: ^1.1.2
   numberpicker: ^2.1.2
   image_cropper: ^9.0.0
   in_app_review: ^2.0.10
   pin_code_fields: ^8.0.1
+  downloadsfolder: ^1.2.0
+  device_info_plus: ^11.3.3
   package_info_plus: ^8.3.0
-  permission_handler: ^11.4.0
+  permission_handler: 11.3.1
   shared_preferences: ^2.5.2
   flutter_styled_toast: ^2.2.1
   qr_code_scanner_plus: ^2.0.10+1

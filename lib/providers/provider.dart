@@ -5,6 +5,7 @@ import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/providers/account_form_provider.dart';
 import 'package:cybersafe_pro/providers/local_auth_provider.dart';
 import 'package:cybersafe_pro/providers/password_generate_provider.dart';
+import 'package:cybersafe_pro/providers/statistic_provider.dart';
 import 'package:cybersafe_pro/providers/theme_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
@@ -19,5 +20,6 @@ class ListProvider {
     ChangeNotifierProvider(create: (_) => AccountProvider()),
     ChangeNotifierProvider(create: (_) => AccountFormProvider()),
     ChangeNotifierProvider(create: (_) => PasswordGenerateProvider()),
+    ChangeNotifierProvider(create: (_) => StatisticProvider()),
   ];
 }
