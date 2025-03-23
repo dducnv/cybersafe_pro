@@ -27,6 +27,7 @@ class _UseBiometricLoginState extends State<UseBiometricLogin> {
 
   void changeBiometric(bool value) async {
     bool isAuth = await LocalAuthConfig.instance.authenticate();
+    print("isAuth: $isAuth");
     if (isAuth) {
       if (!value) {
         setState(() {

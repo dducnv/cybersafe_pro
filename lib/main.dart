@@ -15,7 +15,6 @@ import 'package:provider/provider.dart';
 import 'database/objectbox.dart';
 import 'package:timezone/data/latest.dart' as timezone;
 
-String initialRoute = AppRoutes.loginMasterPin;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -30,25 +29,35 @@ void main() async {
   final themeProvider = ThemeProvider();
   await themeProvider.initTheme();
   await encryptService.initialize();
-  String initialRoute = await getInitialRoute();
-  runApp(MultiProvider(providers: ListProvider.providers, child: MyApp(initialRoute: initialRoute)));
+  
+  // Xác định route ban đầu
+  final initialRoute = await _determineInitialRoute();
+  
+  runApp(MultiProvider(
+    providers: ListProvider.providers, 
+    child: MyApp(initialRoute: initialRoute)
+  ));
 }
 
-Future<String> getInitialRoute() async {
+Future<String> _determineInitialRoute() async {
+  // Kiểm tra lần đầu mở app
   String? isFirstTime = await SecureStorage.instance.read(key: SecureStorageKey.firstOpenApp);
-  //this is from old app, wrong key
   String? fistOpenApp = await SecureStorage.instance.read(key: SecureStorageKey.fistOpenAppOld);
+  
   if (isFirstTime == null && fistOpenApp == null) {
     return AppRoutes.onboarding;
   }
+
+  // Kiểm tra PIN
   final pinCode = await SecureStorage.instance.read(key: SecureStorageKey.pinCode);
   if (pinCode == null) {
     return AppRoutes.registerMasterPin;
   }
+
   return AppRoutes.loginMasterPin;
 }
 
-clearSecureStorageOnReinstall() async {
+Future<void> clearSecureStorageOnReinstall() async {
   if (Platform.isIOS) {
     bool hasRunBefore = SharedPreferencesHelper.instance.getBool(Constants.hasRunBefore) ?? false;
     if (!hasRunBefore) {

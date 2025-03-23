@@ -1,4 +1,5 @@
 import 'package:cybersafe_pro/providers/app_provider.dart';
+import 'package:cybersafe_pro/providers/local_auth_provider.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:flutter/material.dart';
 import 'package:cybersafe_pro/utils/device_type.dart';
@@ -10,12 +11,8 @@ import 'layouts/tablet_layout.dart';
 class LoginMasterPassword extends StatefulWidget {
   final bool showBiometric;
   final bool isFromBackup;
-  final Function({
-    bool? isLoginSuccess,
-    String? pin,
-    GlobalKey<AppPinCodeFieldsState>? appPinCodeKey,
-  })? callBackLoginSuccess;
-  const LoginMasterPassword({super.key, this.showBiometric = false, this.isFromBackup = false, this.callBackLoginSuccess});
+  final Function({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey})? callBackLoginSuccess;
+  const LoginMasterPassword({super.key, this.showBiometric = true, this.isFromBackup = false, this.callBackLoginSuccess});
 
   @override
   State<LoginMasterPassword> createState() => _LoginMasterPasswordState();
@@ -25,6 +22,7 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
   @override
   void initState() {
     context.read<AppProvider>().stopTimer();
+    context.read<LocalAuthProvider>().init();
     super.initState();
   }
 
@@ -37,7 +35,7 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
       case DeviceType.tablet:
         return const TabletLayout();
       case DeviceType.mobile:
-        return MobileLayout(showBiometric: widget.showBiometric, isFromBackup: widget.isFromBackup, callBackLoginSuccess: widget.callBackLoginSuccess,);
+        return MobileLayout(showBiometric: widget.showBiometric, isFromBackup: widget.isFromBackup, callBackLoginSuccess: widget.callBackLoginSuccess);
     }
   }
 }

@@ -256,7 +256,7 @@ class EncryptAppDataService {
 
   // Helper methods
   void _logError(String message, Object error) {
-    print('[EncryptAppDataService] ERROR: $message: $error');
+    debugPrint('[EncryptAppDataService] ERROR: $message: $error');
   }
 
   Future<bool> _isLegacyUser() async {
@@ -576,7 +576,6 @@ class EncryptAppDataService {
 
   Future<void> _migrateData() async {
     try {
-      print("Start migrate");
       final accounts = await AccountBox.getAll();
       if (accounts.isEmpty) {
         return;
@@ -647,6 +646,18 @@ class EncryptAppDataService {
         reencryptedAccount.customFields.addAll(reencryptedFields);
       }
 
+      // Mã hóa lại password histories nếu có
+      if (account.getPasswordHistories.isNotEmpty) {
+        final reencryptedHistories = await Future.wait(
+          account.getPasswordHistories.map((history) async {
+            final decryptedPassword = await decryptPassword(history.password);
+            final reencryptedPassword = await encryptPassword(decryptedPassword);
+            return PasswordHistory(id: history.id, password: reencryptedPassword, createdAt: history.createdAt);
+          }),
+        );
+        reencryptedAccount.passwordHistories.addAll(reencryptedHistories);
+      }
+
       // Mã hóa lại TOTP nếu có
       if (account.getTotp != null) {
         final decryptedSecret = await decryptTOTPKey(account.getTotp!.secretKey);
@@ -675,6 +686,11 @@ class EncryptAppDataService {
           account.getCustomFields.map((field) {
             field.value = field.typeField == 'password' ? OldEncryptData.decryptPassword(field.value) : OldEncryptData.decryptInfo(field.value);
             return field;
+          }).toList(),
+      passwordHistoriesList:
+          account.getPasswordHistories.map((history) {
+            history.password = OldEncryptData.decryptPassword(history.password);
+            return history;
           }).toList(),
       totpOjbModel: account.getTotp != null ? TOTPOjbModel(id: 0, secretKey: OldEncryptData.decryptTOTPKey(account.getTotp!.secretKey)) : null,
       iconCustomModel: account.getIconCustom,

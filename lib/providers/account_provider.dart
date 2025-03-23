@@ -502,6 +502,21 @@ class AccountProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<bool> createAccountOnlyOtp({required String secretKey, required String issuer, required String accountName}) async {
+    if (!OTP.isKeyValid(secretKey)) {
+      return false;
+    }
+    return await _handleAsync(funcName: "createAccountOnlyOtp", () async {
+      showLoadingDialog();
+      final newAccount = AccountOjbModel(title: issuer, email: accountName, totpOjbModel: TOTPOjbModel(secretKey: secretKey.toUpperCase().trim()));
+      newAccount.setTotp = TOTPOjbModel(secretKey: secretKey.toUpperCase().trim());
+      final result = await createOrUpdateAccount(newAccount);
+      hideLoadingDialog();
+      return result;
+    }) ??
+        false;
+  }
+
   Future<bool> createAccountFromForm(AccountFormProvider form) async {
     if (!form.validateForm()) {
       return false;
@@ -515,7 +530,6 @@ class AccountProvider extends ChangeNotifier {
               }).toList();
 
           final now = DateTime.now();
-          print(form.otpController.text);
           if (form.otpController.text.isNotEmpty && !OTP.isKeyValid(form.otpController.text)) {
             form.otpController.clear();
           }
@@ -527,7 +541,7 @@ class AccountProvider extends ChangeNotifier {
             password: form.passwordController.text,
             notes: form.noteController.text.trim(),
             categoryOjbModel: form.selectedCategory!,
-            totpOjbModel: form.otpController.text.isNotEmpty ? TOTPOjbModel(secretKey: form.otpController.text.toUpperCase()) : null,
+            totpOjbModel: form.otpController.text.isNotEmpty ? TOTPOjbModel(secretKey: form.otpController.text.toUpperCase().trim()) : null,
             customFieldOjbModel: customFields,
             iconCustomModel: form.selectedIconCustom,
             createdAt: form.accountId == 0 ? now : null,
@@ -571,11 +585,7 @@ class AccountProvider extends ChangeNotifier {
       // Tạo các category
       final categories = <CategoryOjbModel>[];
       for (var i = 0; i < categoryNames.length; i++) {
-        final category = CategoryOjbModel(
-          categoryName: categoryNames[i],
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
+        final category = CategoryOjbModel(categoryName: categoryNames[i], createdAt: DateTime.now(), updatedAt: DateTime.now());
         final categoryId = CategoryBox.put(category);
         category.id = categoryId;
         categories.add(category);

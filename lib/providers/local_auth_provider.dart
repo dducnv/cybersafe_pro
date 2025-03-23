@@ -26,6 +26,11 @@ class LocalAuthProvider extends ChangeNotifier {
     focusNode = FocusNode();
     appPinCodeKey = GlobalKey<AppPinCodeFieldsState>();
     formKey = GlobalKey<FormState>();
+    Future.delayed(Duration(milliseconds: 500), () {
+      if (!focusNode.hasFocus) {
+        focusNode.requestFocus();
+      }
+    });
   }
 
   void authenticate() {

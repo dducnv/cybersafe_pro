@@ -1,5 +1,6 @@
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
@@ -16,13 +17,14 @@ class LocalAuthConfig {
 
   // Kiểm tra xem thiết bị có hỗ trợ phương thức xác thực phù hợp không
   bool get isAvailableBiometrics {
+    print("isAvailableBiometrics: $_canCheckBiometrics $_availableBiometrics");
     if (_canCheckBiometrics != true) return false;
     if (_availableBiometrics == null) return false;
 
     if (Platform.isIOS) {
-      return _availableBiometrics!.contains(BiometricType.face);
+      return _availableBiometrics!.contains(BiometricType.face) || _availableBiometrics!.contains(BiometricType.strong);
     } else {
-      return _availableBiometrics!.contains(BiometricType.fingerprint);
+      return _availableBiometrics!.contains(BiometricType.fingerprint) || _availableBiometrics!.contains(BiometricType.strong);
     }
   }
 
@@ -31,12 +33,10 @@ class LocalAuthConfig {
   List<BiometricType> get availableBiometrics => _availableBiometrics!;
 
   // Kiểm tra xem có phải là Face ID không (chỉ cho iOS)
-  bool get isFaceId => Platform.isIOS && 
-      _availableBiometrics?.contains(BiometricType.face) == true;
+  bool get isFaceId => Platform.isIOS && _availableBiometrics?.contains(BiometricType.face) == true || _availableBiometrics?.contains(BiometricType.strong) == true;
 
   // Kiểm tra xem có phải là vân tay không (chỉ cho Android)
-  bool get isFingerprint => Platform.isAndroid && 
-      _availableBiometrics?.contains(BiometricType.fingerprint) == true;
+  bool get isFingerprint => Platform.isAndroid && _availableBiometrics?.contains(BiometricType.fingerprint) == true || _availableBiometrics?.contains(BiometricType.strong) == true;
 
   String get biometricMethod {
     if (Platform.isIOS) return 'Face ID';
@@ -78,15 +78,15 @@ class LocalAuthConfig {
       // Lọc phương thức xác thực theo platform
       if (Platform.isIOS) {
         // Chỉ giữ lại Face ID cho iOS
-        availableBiometrics.removeWhere((type) => type != BiometricType.face);
+        availableBiometrics.removeWhere((type) => type != BiometricType.face && type != BiometricType.strong);
       } else {
         // Chỉ giữ lại vân tay cho Android
-        availableBiometrics.removeWhere((type) => type != BiometricType.fingerprint);
+        availableBiometrics.removeWhere((type) => type != BiometricType.fingerprint && type != BiometricType.strong);
       }
-    } on PlatformException {
+    } on PlatformException catch (e) {
+      debugPrint("error getAvailableBiometrics: $e");
       availableBiometrics = [];
     }
-    print("availableBiometrics: $availableBiometrics");
     _availableBiometrics = availableBiometrics;
     return _availableBiometrics!;
   }
@@ -98,20 +98,11 @@ class LocalAuthConfig {
 
     bool authenticated = false;
     try {
-      final String reason = Platform.isIOS
-          ? 'Vui lòng sử dụng Face ID để xác thực'
-          : 'Vui lòng quét vân tay để xác thực';
+      final String reason = Platform.isIOS ? 'Vui lòng sử dụng Face ID để xác thực' : 'Vui lòng quét vân tay để xác thực';
 
-      authenticated = await auth.authenticate(
-        localizedReason: reason,
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-          biometricOnly: true,
-          useErrorDialogs: true,
-          sensitiveTransaction: true,
-        ),
-      );
-    } on PlatformException {
+      authenticated = await auth.authenticate(localizedReason: reason, options: const AuthenticationOptions(stickyAuth: true, biometricOnly: true));
+    } on PlatformException catch (e) {
+      debugPrint("error authenticate: $e");
       return false;
     }
     return authenticated;
@@ -121,17 +112,14 @@ class LocalAuthConfig {
   Future<bool> hasBiometrics() async {
     final availableBiometrics = await getAvailableBiometrics();
     if (Platform.isIOS) {
-      return availableBiometrics.contains(BiometricType.face);
+      return availableBiometrics.contains(BiometricType.face) || availableBiometrics.contains(BiometricType.strong);
     }
-    return availableBiometrics.contains(BiometricType.fingerprint);
+    return availableBiometrics.contains(BiometricType.fingerprint) || availableBiometrics.contains(BiometricType.strong);
   }
 
   // Lưu trạng thái sử dụng sinh trắc học
   Future<void> setUseBiometric(bool enable) async {
-    await SecureStorage.instance.save(
-      key: SecureStorageKeys.isEnableLocalAuth.name,
-      value: enable.toString(),
-    );
+    await SecureStorage.instance.save(key: SecureStorageKeys.isEnableLocalAuth.name, value: enable.toString());
     _isOpenUseBiometric = enable;
   }
 }

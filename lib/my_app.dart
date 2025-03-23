@@ -5,6 +5,9 @@ import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/providers/theme_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
+import 'package:cybersafe_pro/screens/login_master_password/login_master_password.dart';
+import 'package:cybersafe_pro/screens/onboarding/onboarding_screen.dart';
+import 'package:cybersafe_pro/screens/register_master_pin/register_master_pin.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/widgets/secure_app/secure_app_switcher.dart';
 import 'package:flutter/material.dart';
@@ -42,12 +45,10 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> initApp() async {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!context.mounted) {
-        return;
-      }
+      if (!context.mounted) return;
+
       final categoryProvider = Provider.of<CategoryProvider>(context, listen: false);
       final accountProvider = Provider.of<AccountProvider>(context, listen: false);
-      // await accountProvider.generateFakeData();
       await categoryProvider.getCategories();
       await accountProvider.getAccounts();
       FlutterNativeSplash.remove();
@@ -76,8 +77,7 @@ class _MyAppState extends State<MyApp> {
             theme: themeProvider.lightTheme,
             darkTheme: themeProvider.darkTheme,
             navigatorObservers: [secureAppSwitcherRouteObserver],
-            initialRoute: widget.initialRoute,
-            routes: AppRoutes.getRoutes(),
+            home: _buildInitialScreen(), // Sử dụng home thay vì initialRoute
             onGenerateRoute: AppRoutes.onGenerateRoute,
             builder: (context, child) {
               return MediaQuery(
@@ -107,5 +107,18 @@ class _MyAppState extends State<MyApp> {
         );
       },
     );
+  }
+
+  Widget _buildInitialScreen() {
+    switch (widget.initialRoute) {
+      case AppRoutes.onboarding:
+        return const OnboardingScreen();
+      case AppRoutes.registerMasterPin:
+        return const RegisterMasterPin();
+      case AppRoutes.loginMasterPin:
+        return const LoginMasterPassword();
+      default:
+        return const LoginMasterPassword();
+    }
   }
 }

@@ -4,8 +4,9 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import android.view.WindowManager.LayoutParams
+import io.flutter.embedding.android.FlutterFragmentActivity
 
-class MainActivity : FlutterActivity() {
+class MainActivity : FlutterFragmentActivity() {
     private val CHANNEL = "com.cybersafe_pro/secure_app"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {

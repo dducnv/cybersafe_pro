@@ -11,28 +11,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
-class MobileLayout extends StatefulWidget {
+class MobileLayout extends StatelessWidget {
   final bool showBiometric;
   final bool isFromBackup;
   final Function({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey})? callBackLoginSuccess;
-  const MobileLayout({super.key, this.showBiometric = false, this.isFromBackup = false, this.callBackLoginSuccess});
-
-  @override
-  State<MobileLayout> createState() => _MobileLayoutState();
-}
-
-class _MobileLayoutState extends State<MobileLayout> {
-  @override
-  void initState() {
-    context.read<LocalAuthProvider>().init();
-    super.initState();
-  }
+  const MobileLayout({super.key, this.showBiometric = true, this.isFromBackup = false, this.callBackLoginSuccess});
 
   @override
   Widget build(BuildContext context) {
     final localAuthProvider = Provider.of<LocalAuthProvider>(context, listen: false);
     return Scaffold(
-      appBar: widget.showBiometric ? AppBar(elevation: 0, backgroundColor: Theme.of(context).colorScheme.surface, scrolledUnderElevation: 0) : null,
+      appBar: showBiometric ? AppBar(elevation: 0, backgroundColor: Theme.of(context).colorScheme.surface, scrolledUnderElevation: 0) : null,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -81,7 +70,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                 //     )
                 //   ],
                 // ),
-                if (widget.showBiometric && LocalAuthConfig.instance.isAvailableBiometrics && LocalAuthConfig.instance.isOpenUseBiometric)
+                if (showBiometric && LocalAuthConfig.instance.isAvailableBiometrics && LocalAuthConfig.instance.isOpenUseBiometric)
                   IconButton(
                     onPressed: () {
                       localAuthProvider.onBiometric();
@@ -97,16 +86,16 @@ class _MobileLayoutState extends State<MobileLayout> {
             width: 75.h,
             height: 75.h,
             onPressed: () async {
-              if (widget.isFromBackup) {
-                if (widget.callBackLoginSuccess != null) {
-                  widget.callBackLoginSuccess!(isLoginSuccess: true, pin: localAuthProvider.textEditingController.text, appPinCodeKey: localAuthProvider.appPinCodeKey);
+              if (isFromBackup) {
+                if (callBackLoginSuccess != null) {
+                  callBackLoginSuccess!(isLoginSuccess: true, pin: localAuthProvider.textEditingController.text, appPinCodeKey: localAuthProvider.appPinCodeKey);
                 }
                 return;
               }
               bool isLoginSuccess = await localAuthProvider.handleLogin();
               if (isLoginSuccess && context.mounted) {
-                if (widget.callBackLoginSuccess != null) {
-                  widget.callBackLoginSuccess!(isLoginSuccess: true, pin: localAuthProvider.textEditingController.text, appPinCodeKey: localAuthProvider.appPinCodeKey);
+                if (callBackLoginSuccess != null) {
+                  callBackLoginSuccess!(isLoginSuccess: true, pin: localAuthProvider.textEditingController.text, appPinCodeKey: localAuthProvider.appPinCodeKey);
                   return;
                 }
                 context.read<AppProvider>().initializeTimer();

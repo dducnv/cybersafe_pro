@@ -12,7 +12,7 @@ class OldEncryptData {
     return decryptResult;
   } catch (e) {
     // customLogger(msg: "decryptInfo: $e", typeLogger: TypeLogger.error);
-    return "error decrypting info";
+    return "";
   }
 }
 
@@ -25,7 +25,7 @@ class OldEncryptData {
     );
     return decryptResult;
   } catch (e) {
-    return "error decrypting password";
+    return "";
   }
 }
 

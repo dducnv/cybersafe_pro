@@ -5,7 +5,6 @@ import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class HomeAppBarCustom extends StatefulWidget implements PreferredSizeWidget {
@@ -117,7 +116,7 @@ class _HomeAppBarCustomState extends State<HomeAppBarCustom> {
                       child: IconButton(
                         icon: const Icon(Icons.settings_rounded, size: 24),
                         onPressed: () {
-                          AppRoutes.navigateTo(context, AppRoutes.settings);
+                          AppRoutes.navigateTo(context, AppRoutes.settingsRoute);
                         },
                       ),
                     ),

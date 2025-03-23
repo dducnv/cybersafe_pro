@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cybersafe_pro/screens/create_account/create_account_screen.dart';
 import 'package:cybersafe_pro/screens/details_account/details_account_screen.dart' show DetailsAccountScreen;
 import 'package:cybersafe_pro/screens/home/home_screen.dart';
@@ -12,6 +14,7 @@ import 'package:cybersafe_pro/screens/statistic/sub_sceens/account_password_weak
 import 'package:cybersafe_pro/screens/statistic/sub_sceens/same_passwords_view.dart';
 import 'package:cybersafe_pro/widgets/secure_app/secure_app_switcher.dart';
 import 'package:cybersafe_pro/widgets/secure_app/secure_app_switcher_page.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class AppRoutes {
@@ -23,29 +26,15 @@ class AppRoutes {
   static const String detailsAccount = '/details_account';
   static const String passwordGenerator = '/password_generator';
   static const String otpList = '/otp_list';
-  static const String settings = '/settings';
+  static const String settingsRoute = '/settings';
   static const String registerMasterPin = '/register_master_pin';
   static const String loginMasterPin = '/login_master_pin';
   static const String statistic = '/statistic';
   static const String accountPasswordWeak = '/account_password_weak';
   static const String accountSamePassword = '/account_same_password';
 
-  // Route map
-  static Map<String, WidgetBuilder> getRoutes() {
-    return {
-      home: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const HomeScreen()),
-      onboarding: (context) => const OnboardingScreen(),
-      registerMasterPin: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const RegisterMasterPin()),
-      loginMasterPin: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const LoginMasterPassword()),
-      createAccount: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const CreateAccountScreen()),
-      passwordGenerator: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const PasswordGenerateScreen()),
-      otpList: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const OtpListScreen()),
-      settings: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const SettingScreen()),
-      statistic: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const StatisticScreen()),
-      accountPasswordWeak: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const AccountPasswordWeak()),
-      accountSamePassword: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const SamePasswordsView()),
-    };
-  }
+  // Danh sách các màn hình cần SecureAppSwitcher
+  static const List<String> securedRoutes = [home, detailsAccount, statistic, accountPasswordWeak, accountSamePassword];
 
   // Navigation methods
   static Future<T?> navigateTo<T>(BuildContext context, String routeName, {Object? arguments}) {
@@ -56,8 +45,13 @@ class AppRoutes {
     return Navigator.pushReplacementNamed<T, dynamic>(context, routeName, arguments: arguments);
   }
 
-  static Future<T?> navigateAndRemoveUntil<T>(BuildContext context, String routeName, {Object? arguments, String? untilRouteName}) {
-    return Navigator.pushNamedAndRemoveUntil<T>(context, routeName, untilRouteName != null ? ModalRoute.withName(untilRouteName) : (route) => false, arguments: arguments);
+  static Future<T?> navigateAndRemoveUntil<T>(BuildContext context, String routeName, {Object? arguments}) {
+    return Navigator.pushNamedAndRemoveUntil<T>(
+      context,
+      routeName,
+      (route) => false, // Luôn xóa tất cả route trước đó
+      arguments: arguments,
+    );
   }
 
   static void pop<T>(BuildContext context, [T? result]) {
@@ -68,33 +62,59 @@ class AppRoutes {
 
   // Route generator for handling dynamic routes and arguments
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
+    Widget screen;
+
     switch (settings.name) {
       case home:
-        return MaterialPageRoute(builder: (context) => const HomeScreen(), settings: settings);
-      case onboarding:
-        return MaterialPageRoute(builder: (context) => const OnboardingScreen(), settings: settings);
-      case loginMasterPin:
-        return MaterialPageRoute(builder: (context) => const LoginMasterPassword(), settings: settings);
-      case registerMasterPin:
-        return MaterialPageRoute(builder: (context) => const RegisterMasterPin(), settings: settings);
-      // Add cases for routes that need special handling or arguments
+        screen = const HomeScreen();
+        break;
+      case settingsRoute:
+        screen = const SettingScreen();
+        break;
       case createAccount:
-        return MaterialPageRoute(builder: (context) => const CreateAccountScreen(), settings: settings);
+        screen = const CreateAccountScreen();
+        break;
       case updateAccount:
         final args = settings.arguments as Map<String, dynamic>;
-        return MaterialPageRoute(builder: (context) => CreateAccountScreen(isUpdate: true, accountId: args["accountId"]), settings: settings);
+        screen = CreateAccountScreen(isUpdate: true, accountId: args["accountId"]);
+        break;
       case detailsAccount:
         final args = settings.arguments as Map<String, dynamic>;
-        return MaterialPageRoute(builder: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: DetailsAccountScreen(accountId: args["accountId"])), settings: settings);
+        screen = DetailsAccountScreen(accountId: args["accountId"]);
+        break;
+      case passwordGenerator:
+        screen = const PasswordGenerateScreen();
+        break;
+      case otpList:
+        screen = const OtpListScreen();
+        break;
       case statistic:
-        return MaterialPageRoute(builder: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const StatisticScreen()), settings: settings);
+        screen = const StatisticScreen();
+        break;
       case accountPasswordWeak:
-        return MaterialPageRoute(builder: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const AccountPasswordWeak()), settings: settings);
+        screen = const AccountPasswordWeak();
+        break;
       case accountSamePassword:
-        return MaterialPageRoute(builder: (context) => SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: const SamePasswordsView()), settings: settings);
+        screen = const SamePasswordsView();
+        break;
+      // Các route này sẽ được xử lý bởi _buildInitialScreen trong MyApp
+      case onboarding:
+      case registerMasterPin:
+      case loginMasterPin:
+        return null;
       default:
-        // If the route is not found, return a 404 page or home page
-        return MaterialPageRoute(builder: (context) => const OnboardingScreen(), settings: settings);
+        screen = const LoginMasterPassword();
     }
+
+    // Áp dụng SecureAppSwitcher cho các màn hình cần thiết
+    if (securedRoutes.contains(settings.name)) {
+      screen = SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: screen);
+    }
+
+    if (Platform.isIOS) {
+      return CupertinoPageRoute(builder: (context) => screen, settings: settings);
+    }
+
+    return MaterialPageRoute(builder: (context) => screen, settings: settings);
   }
 }
