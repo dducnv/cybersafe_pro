@@ -7,6 +7,7 @@ import 'package:cybersafe_pro/database/models/totp_ojb_model.dart';
 import 'package:cybersafe_pro/database/boxes/account_box.dart';
 import 'package:cybersafe_pro/database/boxes/category_box.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
+import 'package:cybersafe_pro/resources/brand_logo.dart';
 import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/services/otp.dart';
 import 'package:flutter/material.dart';
@@ -507,13 +508,31 @@ class AccountProvider extends ChangeNotifier {
       return false;
     }
     return await _handleAsync(funcName: "createAccountOnlyOtp", () async {
-      showLoadingDialog();
-      final newAccount = AccountOjbModel(title: issuer, email: accountName, totpOjbModel: TOTPOjbModel(secretKey: secretKey.toUpperCase().trim()));
-      newAccount.setTotp = TOTPOjbModel(secretKey: secretKey.toUpperCase().trim());
-      final result = await createOrUpdateAccount(newAccount);
-      hideLoadingDialog();
-      return result;
-    }) ??
+          showLoadingDialog();
+          final newAccount = AccountOjbModel(title: issuer, email: accountName, totpOjbModel: TOTPOjbModel(secretKey: secretKey.toUpperCase().trim()));
+          newAccount.setTotp = TOTPOjbModel(secretKey: secretKey.toUpperCase().trim());
+          //category mặc định
+          final category = CategoryOjbModel(categoryName: 'OTP', createdAt: DateTime.now(), updatedAt: DateTime.now());
+          final checkCategory = CategoryBox.findCategoryByName(category.categoryName);
+          if (checkCategory != null) {
+            category.id = checkCategory.id;
+          } else {
+            final categoryId = CategoryBox.put(category);
+            category.id = categoryId;
+          }
+          for (var icon in allBranchLogos) {
+            final pattern = icon.keyWords!.map((k) => RegExp.escape(k)).join('|');
+            final regex = RegExp(pattern, caseSensitive: false);
+            if (regex.hasMatch(newAccount.title.toLowerCase())) {
+              newAccount.icon = icon.branchLogoSlug;
+              break;
+            }
+          }
+          newAccount.setCategory = category;
+          final result = await createOrUpdateAccount(newAccount);
+          hideLoadingDialog();
+          return result;
+        }) ??
         false;
   }
 

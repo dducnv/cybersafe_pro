@@ -682,16 +682,44 @@ class EncryptAppDataService {
       notes: account.notes != null ? OldEncryptData.decryptInfo(account.notes!) : null,
       icon: account.icon,
       categoryOjbModel: account.getCategory,
-      customFieldOjbModel:
-          account.getCustomFields.map((field) {
-            field.value = field.typeField == 'password' ? OldEncryptData.decryptPassword(field.value) : OldEncryptData.decryptInfo(field.value);
-            return field;
-          }).toList(),
-      passwordHistoriesList:
-          account.getPasswordHistories.map((history) {
-            history.password = OldEncryptData.decryptPassword(history.password);
-            return history;
-          }).toList(),
+      customFieldOjbModel: account.getCustomFields
+          .map((field) {
+            try {
+              String decryptedValue = field.typeField == 'password' 
+                  ? OldEncryptData.decryptPassword(field.value) 
+                  : OldEncryptData.decryptInfo(field.value);
+                  
+              if (decryptedValue.isEmpty || decryptedValue.contains("error decrypting info") || decryptedValue.contains("error decrypting password")) {
+                return null;
+              }
+              
+              field.value = decryptedValue;
+              return field;
+            } catch (e) {
+              return null;
+            }
+          })
+          .where((field) => field != null)
+          .cast<AccountCustomFieldOjbModel>()
+          .toList(),
+      passwordHistoriesList: account.getPasswordHistories
+          .map((history) {
+            try {
+              String decryptedPassword = OldEncryptData.decryptPassword(history.password);
+              
+              if (decryptedPassword.isEmpty || decryptedPassword.contains("error decrypting info") || decryptedPassword.contains("error decrypting password")) {
+                return null;
+              }
+              
+              history.password = decryptedPassword;
+              return history;
+            } catch (e) {
+              return null;
+            }
+          })
+          .where((history) => history != null)
+          .cast<PasswordHistory>()
+          .toList(),
       totpOjbModel: account.getTotp != null ? TOTPOjbModel(id: 0, secretKey: OldEncryptData.decryptTOTPKey(account.getTotp!.secretKey)) : null,
       iconCustomModel: account.getIconCustom,
       createdAt: account.createdAt,
