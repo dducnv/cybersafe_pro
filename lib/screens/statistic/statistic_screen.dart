@@ -29,7 +29,7 @@ class _StatisticScreenState extends State<StatisticScreen> {
       case DeviceType.desktop:
         return const DesktopLayout();
       case DeviceType.tablet:
-        return const TabletLayout();
+        return const MobileLayout();
       case DeviceType.mobile:
         return const MobileLayout();
     }

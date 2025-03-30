@@ -1,7 +1,10 @@
 import 'package:cybersafe_pro/objectbox.g.dart';
+import 'package:cybersafe_pro/utils/logger.dart';
+import 'package:flutter/foundation.dart';
 
 import '../models/category_ojb_model.dart';
 import '../objectbox.dart';
+import 'package:cybersafe_pro/database/boxes/account_box.dart';
 
 class CategoryBox {
   static final box = ObjectBox.instance.store.box<CategoryOjbModel>();
@@ -33,30 +36,47 @@ class CategoryBox {
   }
 
   static int _getNextIndexPos() {
-    final queryBuilder = box.query()
-      ..order(CategoryOjbModel_.indexPos, flags: Order.descending);
+    final queryBuilder = box.query()..order(CategoryOjbModel_.indexPos, flags: Order.descending);
     final query = queryBuilder.build();
     final highestIndexPos = query.property(CategoryOjbModel_.indexPos).max();
     query.close();
     return (highestIndexPos) + 1;
   }
 
-  static List<int> putMany(List<CategoryOjbModel> categories) {
+  static Future<List<int>> putMany(List<CategoryOjbModel> categories) async {
     for (var category in categories) {
       category.updatedAt = DateTime.now();
     }
-    return box.putMany(categories);
+    return await box.putManyAsync(categories);
   }
 
-  static bool delete(int id) {
-    return box.remove(id);
+  static Future<bool> delete(int id) async {
+    final category = box.get(id);
+    if (category == null) return false;
+
+    try {
+      return await ObjectBox.instance.store.runInTransaction(TxMode.write, () {
+        // Xóa tất cả account trong category
+        for (var account in category.accounts) {
+          AccountBox.delete(account.id);
+        }
+        return box.remove(id);
+      });
+    } catch (e) {
+      logError('Error deleting category: $e');
+      return false;
+    }
   }
 
-  static void deleteAll() {
-    box.removeAll();
+  static Future<void> deleteAll() async {
+    try {
+      await box.removeAllAsync();
+    } catch (e) {
+      logError('Error deleting all categories: $e');
+    }
   }
 
   static Stream<List<CategoryOjbModel>> watchAll() {
     return box.query().watch(triggerImmediately: true).map((query) => query.find());
   }
-} 
+}

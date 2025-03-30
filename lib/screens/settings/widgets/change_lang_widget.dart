@@ -1,43 +1,50 @@
+import 'package:cybersafe_pro/components/bottom_sheets/choose_lang_bottom_sheet.dart';
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/app_locale.dart';
+import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
 import 'package:cybersafe_pro/resources/size_text_icon.dart';
-import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
+import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/widgets/setting_item_widget/setting_item_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class ChangeLangWidget extends StatelessWidget {
-  final Function() onTap;
-  final Locale locale;
-  const ChangeLangWidget({super.key, required this.onTap, required this.locale});
+  const ChangeLangWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return CardCustomWidget(
-      padding: const EdgeInsets.symmetric(vertical: 0),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            onTap();
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Đổi ngôn ngữ", style: settingTitleItemStyle),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const SizedBox(width: 8),
-                    Text("", style: settingTitleItemStyle),
-                    const SizedBox(width: 8),
-                    Icon(Icons.arrow_forward_ios, size: 24, color: Theme.of(context).colorScheme.onSurface),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
+    return Selector<AppLocale, (Locale, String)>(
+      selector: (_, provider) => (
+        provider.locale,
+        provider.currentLocaleModel.languageNativeName
       ),
+      shouldRebuild: (prev, next) => prev.$1 != next.$1,
+      builder: (context, data, child) {
+        final (locale, nativeName) = data;
+        return SettingItemWidget(
+          title: context.appLocale.settingsLocale.getText(SettingsLocale.language),
+          suffix: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(nativeName, style: settingTitleItemStyle),
+              const SizedBox(width: 8),
+              Text(
+                _getLocaleFlag(context),
+                style: TextStyle(fontSize: 20.sp)
+              ),
+              const SizedBox(width: 8),
+              Icon(Icons.arrow_drop_down, size: 20.sp)
+            ]
+          ),
+          onTap: () => showLanguageBottomSheet(context),
+        );
+      },
     );
+  }
+
+ 
+
+  String _getLocaleFlag(BuildContext context) {
+    return AppLocale.of(context).currentLocaleModel.flagEmoji;
   }
 }

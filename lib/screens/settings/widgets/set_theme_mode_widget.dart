@@ -1,3 +1,5 @@
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
 import 'package:cybersafe_pro/providers/theme_provider.dart';
 import 'package:cybersafe_pro/resources/size_text_icon.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
@@ -27,7 +29,7 @@ class SetThemeModeWidget extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Chọn chế độ hiển thị", style: settingTitleItemStyle),
+                    Text(context.appLocale.settingsLocale.getText(SettingsLocale.darkMode), style: settingTitleItemStyle),
                     SizedBox(child: value.themeMode == ThemeMode.dark ? Icon(Icons.light_mode, size: 24.sp) : Icon(Icons.dark_mode, size: 24.sp)),
                   ],
                 ),

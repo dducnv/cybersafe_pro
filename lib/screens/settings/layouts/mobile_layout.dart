@@ -1,3 +1,5 @@
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/resources/size_text_icon.dart';
 import 'package:cybersafe_pro/screens/login_master_password/login_master_password.dart';
@@ -7,12 +9,14 @@ import 'package:cybersafe_pro/screens/settings/widgets/set_theme_color.dart';
 import 'package:cybersafe_pro/screens/settings/widgets/set_theme_mode_widget.dart';
 import 'package:cybersafe_pro/screens/settings/widgets/use_biometric_login.dart';
 import 'package:cybersafe_pro/services/data_manager_service.dart';
+import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/app_custom_switch/app_custom_switch.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
 import 'package:cybersafe_pro/widgets/setting_item_widget/setting_item_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
 
@@ -22,7 +26,7 @@ class MobileLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings'), backgroundColor: Theme.of(context).colorScheme.surface, scrolledUnderElevation: 0, elevation: 0),
+      appBar: AppBar(title: Text(context.appLocale.settingsLocale.getText(SettingsLocale.settings)), backgroundColor: Theme.of(context).colorScheme.surface, scrolledUnderElevation: 0, elevation: 0),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
         child: ClipRRect(
@@ -31,20 +35,20 @@ class MobileLayout extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(padding: const EdgeInsets.only(left: 16), child: Text("Cài đặt chung", style: settingTitleCardStyle)),
+              Padding(padding: const EdgeInsets.only(left: 16), child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.general), style: settingTitleCardStyle)),
               const SizedBox(height: 5),
               const SetThemeModeWidget(),
               const SizedBox(height: 5),
-              ChangeLangWidget(onTap: () {}, locale: Locale('en')),
+              ChangeLangWidget(),
               const SizedBox(height: 5),
               const SetThemeColor(),
               const SizedBox(height: 16),
-              Padding(padding: const EdgeInsets.only(left: 16), child: Text("Cài đặt bảo mật", style: settingTitleCardStyle)),
+              Padding(padding: const EdgeInsets.only(left: 16), child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.security), style: settingTitleCardStyle)),
               const SizedBox(height: 5),
               const UseBiometricLogin(),
               const SizedBox(height: 5),
               SettingItemWidget(
-                title: "Đổi mật khẩu",
+                title: context.appLocale.settingsLocale.getText(SettingsLocale.changePin),
                 icon: Icons.pin,
                 onTap: () {
                   Navigator.of(context).push(
@@ -71,7 +75,7 @@ class MobileLayout extends StatelessWidget {
               ),
               const SizedBox(height: 5),
               SettingItemWidget(
-                title: "Thời gian tự động đăng xuất",
+                title: context.appLocale.settingsLocale.getText(SettingsLocale.autoLock),
                 suffix: Row(
                   children: [
                     Consumer<AppProvider>(
@@ -87,11 +91,29 @@ class MobileLayout extends StatelessWidget {
                   pickTimeAutoLock(context);
                 },
               ),
+              const SizedBox(height: 5),
+              Consumer<AppProvider>(
+                builder: (context, provider, child) {
+                  return SettingItemWidget(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    title: context.appLocale.settingsLocale.getText(SettingsLocale.lockOnBackground),
+                    suffix: AppCustomSwitch(
+                      value: provider.lockOnBackground,
+                      onChanged: (value) {
+                        provider.setLockOnBackground(value);
+                      },
+                    ),
+                    onTap: () {
+                      provider.setLockOnBackground(!provider.lockOnBackground);
+                    },
+                  );
+                },
+              ),
               const SizedBox(height: 16),
-              Padding(padding: const EdgeInsets.only(left: 16), child: Text("Quản lý dữ liệu", style: settingTitleCardStyle)),
+              Padding(padding: const EdgeInsets.only(left: 16), child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.backup), style: settingTitleCardStyle)),
               const SizedBox(height: 5),
               SettingItemWidget(
-                title: "Thêm dữ liệu từ trình duyệt",
+                title: context.appLocale.settingsLocale.getText(SettingsLocale.importDataFromBrowser),
                 icon: Icons.browser_updated,
                 onTap: () {
                   DataManagerService.importDataFromBrowser(context);
@@ -99,17 +121,22 @@ class MobileLayout extends StatelessWidget {
               ),
               const SizedBox(height: 5),
               SettingItemWidget(
-                title: "Sao lưu dữ liệu",
+                title: context.appLocale.settingsLocale.getText(SettingsLocale.backupData),
                 icon: Icons.backup,
                 onTap: () {
+                  if (!DataManagerService.checkData(context)) {
+                    showToast("Không có dữ liệu để sao lưu", context: context);
+                    return;
+                  }
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) {
                         return LoginMasterPassword(
                           showBiometric: false,
-                          callBackLoginSuccess: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) {
+                          callBackLoginSuccess: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
                             if (isLoginSuccess == true && pin != null) {
-                              DataManagerService.backupData(context, pin);
+                              Navigator.of(context).pop();
+                              await DataManagerService.backupData(GlobalKeys.appRootNavigatorKey.currentContext!, pin);
                             }
                           },
                         );
@@ -120,7 +147,7 @@ class MobileLayout extends StatelessWidget {
               ),
               const SizedBox(height: 5),
               SettingItemWidget(
-                title: "Khôi phục dữ liệu",
+                title: context.appLocale.settingsLocale.getText(SettingsLocale.restore),
                 icon: Icons.restore,
                 onTap: () {
                   DataManagerService.restoreData(context);
@@ -128,7 +155,14 @@ class MobileLayout extends StatelessWidget {
               ),
 
               const SizedBox(height: 5),
-              SettingItemWidget(title: "Xóa dữ liệu", icon: Icons.delete, onTap: () {}),
+              SettingItemWidget(
+                title: context.appLocale.settingsLocale.getText(SettingsLocale.deleteData),
+                suffix: Icon(Icons.delete, color: Theme.of(context).colorScheme.error, size: 24.sp),
+                titleStyle: settingTitleItemStyle.copyWith(color: Theme.of(context).colorScheme.error),
+                onTap: () async {
+                  await DataManagerService.deleteAllDataPopup(context: context);
+                },
+              ),
             ],
           ),
         ),
@@ -153,7 +187,7 @@ class MobileLayout extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Expanded(child: Text("Thời gian tự động đăng xuất", maxLines: 2, overflow: TextOverflow.ellipsis, style: settingTitleCardStyle)),
+                      Expanded(child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.autoLock), maxLines: 2, overflow: TextOverflow.ellipsis, style: settingTitleCardStyle)),
                       Consumer<AppProvider>(
                         builder: (context, provider, widget) {
                           return AppCustomSwitch(
@@ -176,15 +210,19 @@ class MobileLayout extends StatelessWidget {
                             child: NumberPicker(
                               haptics: true,
                               zeroPad: true,
-                              value: provider.timeAutoLock < 1 ? 1 : provider.timeAutoLock,
+                              value: provider.timeAutoLock < 1 ? 0 : provider.timeAutoLock,
                               selectedTextStyle: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 25.sp, fontWeight: FontWeight.bold),
                               itemCount: 5,
-                              minValue: 1,
+                              minValue: 0,
                               maxValue: 30,
                               itemWidth: 70.w,
                               itemHeight: 70.h,
                               decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2)),
                               axis: Axis.horizontal,
+                              textMapper: (numberText) {
+                                if (numberText == '0') return '30s';
+                                return "$numberText'";
+                              },
                               onChanged: (value) {
                                 provider.setAutoLock(provider.isOpenAutoLock, value);
                               },
@@ -202,7 +240,7 @@ class MobileLayout extends StatelessWidget {
                       context.read<AppProvider>().setAutoLock(context.read<AppProvider>().isOpenAutoLock, context.read<AppProvider>().timeAutoLock);
                       Navigator.pop(context);
                     },
-                    text: "Xác nhận",
+                    text: context.appLocale.settingsLocale.getText(SettingsLocale.confirm),
                   ),
                 ],
               ),

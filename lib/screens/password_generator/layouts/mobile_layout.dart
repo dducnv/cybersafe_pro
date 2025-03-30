@@ -1,3 +1,5 @@
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/providers/password_generate_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
@@ -14,8 +16,6 @@ class PasswordGenerateMobileLayout extends StatefulWidget {
 }
 
 class _PasswordGenerateMobileLayoutState extends State<PasswordGenerateMobileLayout> {
-
-
   @override
   void initState() {
     super.initState();
@@ -29,20 +29,17 @@ class _PasswordGenerateMobileLayoutState extends State<PasswordGenerateMobileLay
     final viewModel = Provider.of<PasswordGenerateProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text("Tạo Mật Khẩu"),
-      ),
+      appBar: AppBar(automaticallyImplyLeading: false, title: Text(context.trHome(HomeLocale.passwordGenerator))),
       floatingActionButton: SizedBox(
-        width: 65.w,
-        height: 65.h,
+        width: 61.h,
+        height: 61.h,
         child: FittedBox(
           child: FloatingActionButton(
             shape: const CircleBorder(),
             onPressed: () async {
               context.read<PasswordGenerateProvider>().generatePassword();
             },
-            child: Icon(Icons.loop_rounded, size: 18.sp),
+            child: Icon(Icons.loop_rounded, size: 18),
           ),
         ),
       ),
@@ -86,17 +83,11 @@ class _PasswordGenerateMobileLayoutState extends State<PasswordGenerateMobileLay
                     return;
                   }
                   Clipboard.setData(ClipboardData(text: viewModel.password));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Đã sao chép mật khẩu vào bộ nhớ tạm"),
-                      behavior: SnackBarBehavior.floating,
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Đã sao chép mật khẩu vào bộ nhớ tạm"), behavior: SnackBarBehavior.floating, duration: const Duration(seconds: 2)));
                 },
               ),
             ),
-             SizedBox(width: 16),
+            SizedBox(width: 16),
           ],
         ),
       ),
@@ -193,7 +184,7 @@ class _PasswordGenerateMobileLayoutState extends State<PasswordGenerateMobileLay
                   ],
                 ),
               ),
-              const SizedBox(height: 36),
+              SizedBox(height: 36.h),
             ],
           ),
         ),
@@ -202,24 +193,11 @@ class _PasswordGenerateMobileLayoutState extends State<PasswordGenerateMobileLay
   }
 
   // Helper method để tạo các mục trong thanh điều hướng
-  Widget _buildNavItem(
-    BuildContext context, {
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-
+  Widget _buildNavItem(BuildContext context, {required IconData icon, required VoidCallback onTap}) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 22),
-          ],
-        ),
-      ),
+      child: Padding(padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8.h), child: Column(mainAxisSize: MainAxisSize.min, children: [Icon(icon, size: 22)])),
     );
   }
 }

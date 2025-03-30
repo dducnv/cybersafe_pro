@@ -2,7 +2,12 @@ import 'package:cybersafe_pro/components/icon_show_component.dart';
 import 'package:cybersafe_pro/database/boxes/account_box.dart';
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:cybersafe_pro/database/models/icon_custom_model.dart';
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
+import 'package:cybersafe_pro/localization/keys/details_account_text.dart';
+import 'package:cybersafe_pro/localization/keys/otp_text.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
+import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/screens/otp/components/totp_item.dart';
 import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
@@ -63,7 +68,14 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
                     email: account.email ?? '',
                     icon: account.icon ?? '',
                     onTap: () {
-                      seeDetailTOTPBottomSheet(context, account);
+                      seeDetailTOTPBottomSheet(
+                        context,
+                        account,
+                        callBackSuccess: () {
+                          context.read<CategoryProvider>().refresh();
+                          _loadOTPAccounts();
+                        },
+                      );
                     },
                   );
                 },
@@ -114,13 +126,13 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
       final issuer = otpCustom['issuer'];
       final accountName = otpCustom['accountName'];
       if (context.mounted) {
-        await context.read<AccountProvider>().createAccountOnlyOtp(secretKey: secretKey, issuer: issuer, accountName: accountName);
+        await context.read<AccountProvider>().createAccountOnlyOtp(secretKey: secretKey, appName: issuer, accountName: accountName);
         _loadOTPAccounts();
       }
     }
   }
 
-  Future<void> seeDetailTOTPBottomSheet(BuildContext context, AccountOjbModel totp) async {
+  Future<void> seeDetailTOTPBottomSheet(BuildContext context, AccountOjbModel totp, {Function? callBackSuccess}) async {
     await showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -169,7 +181,7 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
                         decryptTextType: DecryptTextType.opt,
                         value: totp.totp.target?.secretKey ?? "",
                         builder: (context, value) {
-                          return CardCustomWidget(child: OtpTextWithCountdown(keySecret: value));
+                          return CardCustomWidget(padding: EdgeInsets.all(10), child: OtpTextWithCountdown(keySecret: value));
                         },
                       ),
                     ),
@@ -197,7 +209,8 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
 }
 
 class AddTOTPWithKeyboardBottomSheet extends StatefulWidget {
-  const AddTOTPWithKeyboardBottomSheet({super.key});
+  final Function? callBackSuccess;
+  const AddTOTPWithKeyboardBottomSheet({super.key, this.callBackSuccess});
 
   @override
   State<AddTOTPWithKeyboardBottomSheet> createState() => _AddTOTPWithKeyboardBottomSheetState();
@@ -212,7 +225,8 @@ class _AddTOTPWithKeyboardBottomSheetState extends State<AddTOTPWithKeyboardBott
   void _handleSubmit() {
     if (_formKey.currentState?.validate() ?? false) {
       if (controllerAccountName.text.isNotEmpty && controllerIssuer.text.isNotEmpty && controllerSecretKey.text.isNotEmpty) {
-        context.read<AccountProvider>().createAccountOnlyOtp(secretKey: controllerSecretKey.text, issuer: controllerIssuer.text, accountName: controllerAccountName.text);
+        context.read<AccountProvider>().createAccountOnlyOtp(secretKey: controllerSecretKey.text, appName: controllerIssuer.text, accountName: controllerAccountName.text);
+        widget.callBackSuccess?.call();
         Navigator.pop(context);
       }
     }
@@ -241,24 +255,24 @@ class _AddTOTPWithKeyboardBottomSheetState extends State<AddTOTPWithKeyboardBott
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
-                  Expanded(child: Center(child: Text("Thêm thủ công", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey[800])))),
+                  Expanded(child: Center(child: Text(context.trOtp(OtpText.enterManually), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey[800])))),
                   IconButton(onPressed: _handleSubmit, icon: const Icon(Icons.check)),
                 ],
               ),
               const SizedBox(height: 10),
               CustomTextField(
-                titleTextField: "Tên tài khoản",
-                controller: controllerAccountName,
+                titleTextField: context.trOtp(OtpText.accountName),
+                controller: controllerIssuer,
                 autoFocus: true,
                 textInputAction: TextInputAction.next,
                 textAlign: TextAlign.start,
-                hintText: "Tên tài khoản",
+                hintText: context.trCreateAccount(CreateAccountText.appName),
                 maxLines: 1,
                 isObscure: false,
                 requiredTextField: true,
                 validator: (value) {
                   if (value?.isEmpty ?? true) {
-                    return 'Vui lòng nhập tên tài khoản';
+                    return context.trCreateAccount(CreateAccountText.appNameValidation);
                   }
                   return null;
                 },
@@ -266,17 +280,17 @@ class _AddTOTPWithKeyboardBottomSheetState extends State<AddTOTPWithKeyboardBott
               ),
               const SizedBox(height: 10),
               CustomTextField(
-                titleTextField: "Tên đăng nhập",
-                controller: controllerIssuer,
+                titleTextField: context.trOtp(OtpText.accountName),
+                controller: controllerAccountName,
                 textInputAction: TextInputAction.next,
                 textAlign: TextAlign.start,
-                hintText: "Tên đăng nhập",
+                hintText: context.trCreateAccount(CreateAccountText.username),
                 maxLines: 1,
                 isObscure: false,
                 requiredTextField: true,
                 validator: (value) {
                   if (value?.isEmpty ?? true) {
-                    return 'Vui lòng nhập tên đăng nhập';
+                    return context.trCreateAccount(CreateAccountText.usernameValidation);
                   }
                   return null;
                 },
@@ -284,20 +298,20 @@ class _AddTOTPWithKeyboardBottomSheetState extends State<AddTOTPWithKeyboardBott
               ),
               const SizedBox(height: 10),
               CustomTextField(
-                titleTextField: "Khoá bảo mật",
+                titleTextField: context.trOtp(OtpText.secretKey),
                 controller: controllerSecretKey,
                 textInputAction: TextInputAction.done,
                 textAlign: TextAlign.start,
-                hintText: "Nhập khoá bảo mật",
+                hintText: context.trOtp(OtpText.secretKey),
                 requiredTextField: true,
                 maxLines: 1,
                 isObscure: true,
                 validator: (value) {
                   if (value?.isEmpty ?? true) {
-                    return 'Vui lòng nhập khoá bảo mật';
+                    return context.trOtp(OtpText.secretKeyValidation);
                   }
                   if (!OTP.isKeyValid(value ?? '')) {
-                    return 'Khoá bảo mật không hợp lệ';
+                    return context.trOtp(OtpText.invalidSecretKey);
                   }
                   return null;
                 },

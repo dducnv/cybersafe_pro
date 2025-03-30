@@ -1,6 +1,10 @@
 import 'package:cybersafe_pro/components/icon_show_component.dart';
 import 'package:cybersafe_pro/database/boxes/account_box.dart';
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/details_account_text.dart';
+import 'package:cybersafe_pro/providers/account_provider.dart';
+import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
@@ -13,6 +17,7 @@ import 'package:cybersafe_pro/widgets/request_pro/request_pro.dart';
 import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 class DetailsAccountMobileLayout extends StatefulWidget {
   final AccountOjbModel accountOjbModel;
@@ -82,15 +87,15 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                 builder: (BuildContext context) {
                   return SafeArea(
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 10),
+                      padding: EdgeInsets.only(top: 10.h),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Container(width: 40.w, height: 4.h, decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(10))),
-                          const SizedBox(height: 10),
+                          SizedBox(height: 10.h),
                           ListTile(
-                            title: Text("Edit Account"),
+                            title: Text(context.trDetails(DetailsAccountText.editAccount)),
                             onTap: () async {
                               AppRoutes.pop(context);
                               await AppRoutes.navigateTo(context, AppRoutes.updateAccount, arguments: {"accountId": accountOjbModel.id});
@@ -98,26 +103,30 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                             },
                           ),
                           ListTile(
-                            title: Text("Delete Account"),
+                            title: Text(context.trDetails(DetailsAccountText.deleteAccount), style: TextStyle(color: Theme.of(context).colorScheme.error)),
                             onTap: () {
+                              Navigator.of(context).pop();
                               showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
-                                    title: Text("Delete Account"),
-                                    content: Text("Are you sure you want to delete this account?"),
+                                    title: Text(context.trDetails(DetailsAccountText.deleteAccount)),
+                                    content: Text(context.trDetails(DetailsAccountText.deleteAccountQuestion)),
                                     actions: [
                                       TextButton(
                                         onPressed: () {
-                                          Navigator.pop(context);
+                                          Navigator.of(context).pop();
                                         },
-                                        child: Text("Cancel"),
+                                        child: Text(context.trDetails(DetailsAccountText.cancel)),
                                       ),
                                       TextButton(
                                         onPressed: () {
-                                          Navigator.pop(context);
+                                          context.read<CategoryProvider>().refresh();
+                                          context.read<AccountProvider>().deleteAccount(widget.accountOjbModel);
+                                          Navigator.of(context).pop();
+                                          Navigator.of(context).pop();
                                         },
-                                        child: Text("Delete"),
+                                        child: Text(context.trDetails(DetailsAccountText.deleteAccount), style: TextStyle(color: Theme.of(context).colorScheme.error)),
                                       ),
                                     ],
                                   );
@@ -190,11 +199,11 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                 width: 50.h,
                 height: 50.h,
                 isDecrypted: false,
-                textStyle: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+                textStyle: TextStyle(fontSize: 30.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
               ),
             ),
           ),
-          const SizedBox(height: 5),
+          SizedBox(height: 5.h),
           DecryptText(showLoading: true, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.sp), value: accountOjbModel.title, decryptTextType: DecryptTextType.info),
         ],
       ),
@@ -207,13 +216,16 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 10),
-        Text("Account Information", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
-        const SizedBox(height: 5),
+        Text(context.trDetails(DetailsAccountText.baseInfo), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+        SizedBox(height: 5.h),
         CardCustomWidget(
           child: Column(
             children: [
-              if (accountOjbModel.email != null && accountOjbModel.email!.isNotEmpty) ItemCopyValue(title: "Username", value: accountOjbModel.email!, isLastItem: accountOjbModel.password!.isEmpty),
-              if (accountOjbModel.password != null && accountOjbModel.password!.isNotEmpty) ItemCopyValue(title: "Password", value: accountOjbModel.password!, isLastItem: true, isPrivateValue: true),
+              if (accountOjbModel.email != null && accountOjbModel.email!.isNotEmpty)
+                ItemCopyValue(title: "${context.trDetails(DetailsAccountText.username)}/Email", value: accountOjbModel.email!, isLastItem: accountOjbModel.password?.isEmpty ?? true),
+              if (accountOjbModel.password != null) Padding(padding: EdgeInsets.symmetric(vertical: 5.h), child: Divider(color: Theme.of(context).colorScheme.surfaceContainerHighest)),
+              if (accountOjbModel.password != null && accountOjbModel.password!.isNotEmpty)
+                ItemCopyValue(title: context.trDetails(DetailsAccountText.password), value: accountOjbModel.password!, isLastItem: true, isPrivateValue: true),
             ],
           ),
         ),
@@ -226,7 +238,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        Text("Danh mục", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+        Text(context.trDetails(DetailsAccountText.category), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
         const SizedBox(height: 5),
         CardCustomWidget(
           child: Row(
@@ -247,7 +259,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
         const SizedBox(height: 16),
         Column(
           children: [
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text("Ghi chú", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]))]),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(context.trDetails(DetailsAccountText.note), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]))]),
             const SizedBox(height: 5),
             FutureBuilder(
               future: decryptService.decryptInfo(accountOjbModel.notes ?? ""),
@@ -285,17 +297,22 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Thông tin tuỳ chỉnh", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[800])),
+        Text(context.trDetails(DetailsAccountText.customFields), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[800])),
         const SizedBox(height: 5),
         CardCustomWidget(
           child: Column(
             children: [
               ...account.customFields.map(
-                (element) => ItemCopyValue(
-                  title: element.hintText,
-                  value: element.value,
-                  isPrivateValue: element.typeField.toLowerCase().contains("password"),
-                  isLastItem: account.customFields.last == element,
+                (element) => Column(
+                  children: [
+                    ItemCopyValue(
+                      title: element.hintText,
+                      value: element.value,
+                      isPrivateValue: element.typeField.toLowerCase().contains("password"),
+                      isLastItem: account.customFields.last == element,
+                    ),
+                    if (account.customFields.last != element) Divider(color: Theme.of(context).colorScheme.surfaceContainerHighest),
+                  ],
                 ),
               ),
             ],
@@ -310,7 +327,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("OTP Code", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+        Text(context.trDetails(DetailsAccountText.otpCode), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
         const SizedBox(height: 5),
         RequestPro(
           child: CardCustomWidget(
@@ -352,8 +369,8 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
     return RichText(
       text: TextSpan(
         children: [
-          TextSpan(text: "Cập nhật vào: ", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[800])),
-          TextSpan(text: account.updatedAtFormat, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.grey[800])),
+          TextSpan(text: "${context.trDetails(DetailsAccountText.updatedAt)}: ", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+          TextSpan(text: account.updatedAtFormat, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.grey[600])),
         ],
       ),
     );
@@ -363,14 +380,14 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 5),
+        const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             RichText(
               text: TextSpan(
                 children: [
-                  TextSpan(text: "Lịch sử thay đổi mật khẩu: ", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[800])),
+                  TextSpan(text: "${context.trDetails(DetailsAccountText.passwordHistoryTitle)}: ", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
                   TextSpan(text: "${account.passwordHistories.length}", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary)),
                 ],
               ),
@@ -382,7 +399,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
-                child: Text("Chi tiết", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary)),
+                child: Text(context.trDetails(DetailsAccountText.passwordHistoryDetail), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary)),
               ),
             ),
           ],
@@ -408,7 +425,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Lịch sử mật khẩu", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey[800])),
+                      Text(context.trDetails(DetailsAccountText.passwordHistoryTitle), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey[800])),
                       IconButton(
                         onPressed: () {
                           Navigator.pop(context);
@@ -428,8 +445,10 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                         subtitle: Text(passwordHistory.createdAtFormat, style: Theme.of(context).textTheme.bodyMedium),
                         trailing: IconButton(
                           icon: const Icon(Icons.copy),
-                          onPressed: () {
-                            clipboardCustom(context: context, text: "");
+                          onPressed: () async {
+                            final decryptService = EncryptAppDataService.instance;
+                            final decryptPassword = await decryptService.decryptInfo(passwordHistory.password);
+                            clipboardCustom(context: context, text: decryptPassword);
                           },
                         ),
                       );

@@ -37,14 +37,14 @@ class IconShowComponent extends StatelessWidget {
       return Center(
         child:
             isDecrypted
-                ? Text(account.title[0].toUpperCase(), style: textStyle ?? TextStyle(fontSize: 30.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary))
+                ? Text(account.title[0].toUpperCase(), style: textStyle ?? TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold))
                 : DecryptText(
                   showLoading: false,
                   style: textStyle ?? TextStyle(fontSize: 30.sp, fontWeight: FontWeight.bold),
                   value: account.title,
                   decryptTextType: DecryptTextType.info,
                   builder: (context, value) {
-                    return Text(value[0].toUpperCase(), style: textStyle ?? TextStyle(fontSize: 30.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary));
+                    return Text(value[0].toUpperCase(), style: textStyle ?? TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold));
                   },
                 ),
       );

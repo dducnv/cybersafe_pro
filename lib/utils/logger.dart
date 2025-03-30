@@ -1,6 +1,7 @@
 import 'package:logger/logger.dart';
-
+import 'package:flutter/foundation.dart';
 void customLogger({required String msg, TypeLogger typeLogger = TypeLogger.info}) {
+  if(!kDebugMode)return;
   var logger = Logger();
   switch (typeLogger) {
     case TypeLogger.info:
@@ -22,3 +23,20 @@ void customLogger({required String msg, TypeLogger typeLogger = TypeLogger.info}
 }
 
 enum TypeLogger { info, error, warning, debug, trace }
+
+
+
+logError(String msg) {
+  customLogger(msg: msg, typeLogger: TypeLogger.error);
+}
+
+logInfo(String msg) {
+  customLogger(msg: msg, typeLogger: TypeLogger.info);
+}
+
+logWarning(String msg) {
+  customLogger(msg: msg, typeLogger: TypeLogger.warning);
+}
+
+
+

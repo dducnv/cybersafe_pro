@@ -1,3 +1,5 @@
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
 import 'package:cybersafe_pro/utils/type_text_field.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +41,7 @@ class AddFieldBottomSheet extends StatelessWidget {
                 Expanded(
                   child: Center(
                     child: Text(
-                      "Thêm trường",
+                      context.trCreateAccount(CreateAccountText.addField),
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey[800]),
                     ),
                   ),
@@ -52,12 +54,12 @@ class AddFieldBottomSheet extends StatelessWidget {
             ),
             CustomTextField(
               requiredTextField: true,
-              titleTextField: "Tên trường",
+              titleTextField: context.trCreateAccount(CreateAccountText.titleField),
               controller: controller,
               autoFocus: true,
               textInputAction: TextInputAction.next,
               textAlign: TextAlign.start,
-              hintText: "Tên trường",
+              hintText: context.trCreateAccount(CreateAccountText.titleField),
               maxLines: 1,
               isObscure: false,
               onChanged: (value) {
@@ -83,7 +85,7 @@ class AddFieldBottomSheet extends StatelessWidget {
   Widget _buildFieldTypeLabel(BuildContext context) {
     return RichText(
       text: TextSpan(
-        text: "Kểu dữ liệu: ",
+        text: context.trCreateAccount(CreateAccountText.fieldType),
         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey[800]),
         children: [TextSpan(text: '*', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16))],
       ),
@@ -103,7 +105,7 @@ class AddFieldBottomSheet extends StatelessWidget {
           },
           backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
           margin: const EdgeInsets.all(0),
-          text: "",
+          text: context.trCreateAccount(CreateAccountText.fieldType),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [

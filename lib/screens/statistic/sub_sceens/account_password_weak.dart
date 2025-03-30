@@ -1,4 +1,6 @@
 
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/statistic_text.dart';
 import 'package:cybersafe_pro/providers/statistic_provider.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/account_list_tile_widgets.dart';
@@ -13,7 +15,7 @@ class AccountPasswordWeak extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mật khẩu yếu'),
+        title: Text(context.trStatistic(StatisticText.totalAccountPasswordWeak)),
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: Theme.of(context).colorScheme.surface,

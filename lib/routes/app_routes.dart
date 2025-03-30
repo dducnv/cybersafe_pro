@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cybersafe_pro/screens/category_manager/category_manager_screen.dart';
 import 'package:cybersafe_pro/screens/create_account/create_account_screen.dart';
 import 'package:cybersafe_pro/screens/details_account/details_account_screen.dart' show DetailsAccountScreen;
 import 'package:cybersafe_pro/screens/home/home_screen.dart';
@@ -12,10 +13,9 @@ import 'package:cybersafe_pro/screens/settings/setting_screen.dart';
 import 'package:cybersafe_pro/screens/statistic/statistic_screen.dart';
 import 'package:cybersafe_pro/screens/statistic/sub_sceens/account_password_weak.dart';
 import 'package:cybersafe_pro/screens/statistic/sub_sceens/same_passwords_view.dart';
-import 'package:cybersafe_pro/widgets/secure_app/secure_app_switcher.dart';
-import 'package:cybersafe_pro/widgets/secure_app/secure_app_switcher_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:cybersafe_pro/utils/secure_application_util.dart';
 
 class AppRoutes {
   // Route names
@@ -27,6 +27,7 @@ class AppRoutes {
   static const String passwordGenerator = '/password_generator';
   static const String otpList = '/otp_list';
   static const String settingsRoute = '/settings';
+  static const String categoryManager = '/category_manager';
   static const String registerMasterPin = '/register_master_pin';
   static const String loginMasterPin = '/login_master_pin';
   static const String statistic = '/statistic';
@@ -38,14 +39,26 @@ class AppRoutes {
 
   // Navigation methods
   static Future<T?> navigateTo<T>(BuildContext context, String routeName, {Object? arguments}) {
+    // Nếu điều hướng đến route được bảo mật, khởi tạo lại controller nếu cần
+    if (securedRoutes.contains(routeName)) {
+      SecureApplicationUtil.instance.init();
+    }
     return Navigator.pushNamed<T>(context, routeName, arguments: arguments);
   }
 
   static Future<T?> navigateToReplacement<T>(BuildContext context, String routeName, {Object? arguments}) {
+    // Nếu điều hướng đến route được bảo mật, khởi tạo lại controller nếu cần
+    if (securedRoutes.contains(routeName)) {
+      SecureApplicationUtil.instance.init();
+    }
     return Navigator.pushReplacementNamed<T, dynamic>(context, routeName, arguments: arguments);
   }
 
   static Future<T?> navigateAndRemoveUntil<T>(BuildContext context, String routeName, {Object? arguments}) {
+    // Nếu điều hướng đến route được bảo mật, khởi tạo lại controller nếu cần
+    if (securedRoutes.contains(routeName)) {
+      SecureApplicationUtil.instance.init();
+    }
     return Navigator.pushNamedAndRemoveUntil<T>(
       context,
       routeName,
@@ -65,11 +78,26 @@ class AppRoutes {
     Widget screen;
 
     switch (settings.name) {
+      case onboarding:
+        screen = const OnboardingScreen();
+        break;
       case home:
         screen = const HomeScreen();
         break;
+      case passwordGenerator:
+        screen = const PasswordGenerateScreen();
+        break;
+      case otpList:
+        screen = const OtpListScreen();
+        break;
+      case statistic:
+        screen = const StatisticScreen();
+        break;
       case settingsRoute:
         screen = const SettingScreen();
+        break;
+      case categoryManager:
+        screen = const CategoryManagerScreen();
         break;
       case createAccount:
         screen = const CreateAccountScreen();
@@ -82,33 +110,20 @@ class AppRoutes {
         final args = settings.arguments as Map<String, dynamic>;
         screen = DetailsAccountScreen(accountId: args["accountId"]);
         break;
-      case passwordGenerator:
-        screen = const PasswordGenerateScreen();
-        break;
-      case otpList:
-        screen = const OtpListScreen();
-        break;
-      case statistic:
-        screen = const StatisticScreen();
-        break;
       case accountPasswordWeak:
         screen = const AccountPasswordWeak();
         break;
       case accountSamePassword:
         screen = const SamePasswordsView();
         break;
-      // Các route này sẽ được xử lý bởi _buildInitialScreen trong MyApp
-      case onboarding:
       case registerMasterPin:
+        screen = const RegisterMasterPin();
+        break;
       case loginMasterPin:
-        return null;
+        screen = const LoginMasterPassword();
+        break;
       default:
         screen = const LoginMasterPassword();
-    }
-
-    // Áp dụng SecureAppSwitcher cho các màn hình cần thiết
-    if (securedRoutes.contains(settings.name)) {
-      screen = SecureAppSwitcherPage(style: SecureMaskStyle.blurLight, child: screen);
     }
 
     if (Platform.isIOS) {

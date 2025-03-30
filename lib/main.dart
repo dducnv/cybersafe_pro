@@ -9,41 +9,42 @@ import 'package:cybersafe_pro/resources/shared_preferences/shared_preferences_he
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/services/local_auth_service.dart';
+import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 import 'database/objectbox.dart';
 import 'package:timezone/data/latest.dart' as timezone;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   timezone.initializeTimeZones();
   // Khởi tạo ObjectBox
   await SharedPreferencesHelper.init();
   await clearSecureStorageOnReinstall();
   await ObjectBox.create();
   LocalAuthConfig.instance.init();
-
   final encryptService = EncryptAppDataService.instance;
   final themeProvider = ThemeProvider();
   await themeProvider.initTheme();
   await encryptService.initialize();
-  
   // Xác định route ban đầu
   final initialRoute = await _determineInitialRoute();
-  
-  runApp(MultiProvider(
-    providers: ListProvider.providers, 
-    child: MyApp(initialRoute: initialRoute)
-  ));
+  final String defaultLocale = Platform.localeName;
+  await initializeDateFormatting(defaultLocale, null);
+  SecureApplicationUtil.instance.init();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  runApp(MultiProvider(providers: ListProvider.providers, child: MyApp(initialRoute: initialRoute)));
 }
 
 Future<String> _determineInitialRoute() async {
   // Kiểm tra lần đầu mở app
   String? isFirstTime = await SecureStorage.instance.read(key: SecureStorageKey.firstOpenApp);
   String? fistOpenApp = await SecureStorage.instance.read(key: SecureStorageKey.fistOpenAppOld);
-  
+
   if (isFirstTime == null && fistOpenApp == null) {
     return AppRoutes.onboarding;
   }

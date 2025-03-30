@@ -10,6 +10,7 @@ import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/resources/brand_logo.dart';
 import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/services/otp.dart';
+import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:cybersafe_pro/providers/account_form_provider.dart';
 import 'dart:math' as math;
@@ -183,7 +184,7 @@ class AccountProvider extends ChangeNotifier {
 
       // Kiểm tra thời gian thực thi
       final elapsedTime = stopwatch.elapsed;
-      debugPrint('$funcName: Thao tác hoàn thành trong: ${elapsedTime.inMilliseconds}ms');
+      logInfo('$funcName: Thao tác hoàn thành trong: ${elapsedTime.inMilliseconds}ms');
 
       // Nếu thao tác quá nhanh (dưới 300ms), thêm độ trễ nhỏ để người dùng thấy loading
       if (elapsedTime.inMilliseconds < 300) {
@@ -194,7 +195,7 @@ class AccountProvider extends ChangeNotifier {
     } catch (e) {
       final elapsedTime = stopwatch.elapsed;
       _setError(e.toString());
-      debugPrint('$funcName: Lỗi sau ${elapsedTime.inMilliseconds}ms: $e');
+      logError('$funcName: Lỗi sau ${elapsedTime.inMilliseconds}ms: $e');
       return null;
     } finally {
       stopwatch.stop();
@@ -229,7 +230,7 @@ class AccountProvider extends ChangeNotifier {
     await _handleAsync(funcName: "getAccounts", () async {
       // Lấy tất cả các category trước
       final categories = CategoryBox.getAll();
-
+      categories.sort((a, b) => b.indexPos.compareTo(a.indexPos));
       // Xóa dữ liệu cũ
       _accounts.clear();
       _groupedCategoryIdAccounts.clear();
@@ -338,7 +339,7 @@ class AccountProvider extends ChangeNotifier {
 
       final encryptedAccount = await _encryptAccount(accountToSave);
       final elapsedTime = stopwatch.elapsed;
-      debugPrint('${isUpdate ? "updateAccount" : "createAccount"}: _encryptAccount completed in: ${elapsedTime.inMilliseconds}ms');
+      logInfo('${isUpdate ? "updateAccount" : "createAccount"}: _encryptAccount completed in: ${elapsedTime.inMilliseconds}ms');
 
       final id = await AccountBox.put(encryptedAccount);
       if (!isUpdate) {
@@ -348,7 +349,7 @@ class AccountProvider extends ChangeNotifier {
       _accounts[isUpdate ? account.id : id] = encryptedAccount;
       _basicInfoCache.remove(isUpdate ? account.id : id);
 
-      debugPrint('${isUpdate ? "updateAccount" : "createAccount"}: Operation completed in: ${elapsedTime.inMilliseconds}ms');
+      logInfo('${isUpdate ? "updateAccount" : "createAccount"}: Operation completed in: ${elapsedTime.inMilliseconds}ms');
       return true;
     });
 
@@ -387,7 +388,7 @@ class AccountProvider extends ChangeNotifier {
         List<int> listIds = accountSelected.map((e) => e.id).toList();
 
         // Xóa các tài khoản khỏi database
-        int deletedCount = await AccountBox.deleteMultiple(listIds);
+        int deletedCount = await AccountBox.deleteMany(listIds);
         if (deletedCount != listIds.length) {
           throw Exception('Không thể xóa một số tài khoản');
         }
@@ -503,13 +504,13 @@ class AccountProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> createAccountOnlyOtp({required String secretKey, required String issuer, required String accountName}) async {
+  Future<bool> createAccountOnlyOtp({required String secretKey, required String appName, required String accountName}) async {
     if (!OTP.isKeyValid(secretKey)) {
       return false;
     }
     return await _handleAsync(funcName: "createAccountOnlyOtp", () async {
           showLoadingDialog();
-          final newAccount = AccountOjbModel(title: issuer, email: accountName, totpOjbModel: TOTPOjbModel(secretKey: secretKey.toUpperCase().trim()));
+          final newAccount = AccountOjbModel(title: appName, email: accountName, totpOjbModel: TOTPOjbModel(secretKey: secretKey.toUpperCase().trim()));
           newAccount.setTotp = TOTPOjbModel(secretKey: secretKey.toUpperCase().trim());
           //category mặc định
           final category = CategoryOjbModel(categoryName: 'OTP', createdAt: DateTime.now(), updatedAt: DateTime.now());
@@ -609,7 +610,7 @@ class AccountProvider extends ChangeNotifier {
         category.id = categoryId;
         categories.add(category);
 
-        debugPrint('Đã tạo category: ${category.categoryName} với ID: $categoryId');
+        logInfo('Đã tạo category: ${category.categoryName} với ID: $categoryId');
       }
 
       // Tạo account cho mỗi category
@@ -637,11 +638,11 @@ class AccountProvider extends ChangeNotifier {
 
         // Lưu hàng loạt account
         final accountIds = await AccountBox.putMany(accountsToCreate);
-        debugPrint('Đã tạo ${accountIds.length} account cho category: ${category.categoryName}');
+        logInfo('Đã tạo ${accountIds.length} account cho category: ${category.categoryName}');
       }
 
       final elapsedTime = stopwatch.elapsed;
-      debugPrint('generateFakeData: Thao tác hoàn thành trong: ${elapsedTime.inMilliseconds}ms');
+      logInfo('generateFakeData: Thao tác hoàn thành trong: ${elapsedTime.inMilliseconds}ms');
 
       // Cập nhật lại danh sách account
       await getAccounts();
@@ -650,7 +651,7 @@ class AccountProvider extends ChangeNotifier {
     } catch (e) {
       final elapsedTime = stopwatch.elapsed;
       _setError(e.toString());
-      debugPrint('generateFakeData: Lỗi sau ${elapsedTime.inMilliseconds}ms: $e');
+      logError('generateFakeData: Lỗi sau ${elapsedTime.inMilliseconds}ms: $e');
       return false;
     } finally {
       stopwatch.stop();
@@ -856,6 +857,17 @@ class AccountProvider extends ChangeNotifier {
 
   void handleClearAccountsSelected() {
     accountSelected = [];
+    notifyListeners();
+  }
+
+  void clearAllData() {
+    _basicInfoCache.clear();
+    _categoryCache.clear();
+    clearDecryptedCache();
+    _accounts.clear();
+    _expandedCategories.clear();
+    _categoryAccountCounts.clear();
+    _visibleAccountsPerCategory.clear();
     notifyListeners();
   }
 

@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:cybersafe_pro/components/icon_show_component.dart';
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
@@ -85,9 +87,9 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                const Center(
+                 Center(
                   child: Text(
-                    "Tìm kiếm",
+                    context.trHome(HomeLocale.searchTitle),
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)
                   )
                 ),
@@ -109,7 +111,7 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
               textInputAction: TextInputAction.search,
               textAlign: TextAlign.start,
               autoFocus: true,
-              hintText: "Tìm theo tên hoặc email...",
+              hintText: context.trHome(HomeLocale.searchHint),
               onChanged: (_) => _onSearchChanged(),
             ),
           ),
@@ -124,7 +126,7 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
                 children: [
                   Image.asset("assets/images/exclamation-mark.png", width: 60.w, height: 60.h),
                   const SizedBox(height: 10),
-                  Text("Không tìm thấy kết quả", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey[800])),
+                  Text(context.trHome(HomeLocale.searchNoResult), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey[800])),
                 ],
               ),
             )

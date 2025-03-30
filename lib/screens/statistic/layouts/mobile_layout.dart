@@ -1,3 +1,5 @@
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/statistic_text.dart';
 import 'package:cybersafe_pro/providers/statistic_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/screens/statistic/widgets/security_check_item.dart';
@@ -20,7 +22,7 @@ class _MobileLayoutState extends State<MobileLayout> {
 
   void _updateStatistics() {
     if (!mounted) return;
-    
+
     final statisticProvider = Provider.of<StatisticProvider>(context, listen: false);
     final totalAccounts = statisticProvider.totalAccount.toDouble();
     if (totalAccounts == 0) return;
@@ -31,15 +33,15 @@ class _MobileLayoutState extends State<MobileLayout> {
 
     setState(() {
       dataMap = {
-        'Mạnh': strongPasswords,
-        'Yếu': weakPasswords,
-        'Trùng lặp': duplicatePasswords,
+        context.trStatistic(StatisticText.strongPasswords): strongPasswords,
+        context.trStatistic(StatisticText.weakPasswords): weakPasswords,
+        context.trStatistic(StatisticText.duplicatePasswords): duplicatePasswords,
       };
 
       // Tính điểm bảo mật (thang điểm 100)
       final strengthScore = (strongPasswords - weakPasswords) * (100 / totalAccounts);
       final duplicateScore = duplicatePasswords * (20 / totalAccounts);
-      
+
       score = (strengthScore - duplicateScore).round().clamp(0, 100);
     });
   }
@@ -47,10 +49,11 @@ class _MobileLayoutState extends State<MobileLayout> {
   @override
   void initState() {
     super.initState();
+
     dataMap = {
-      'Mạnh': 0,
-      'Yếu': 0,
-      'Trùng lặp': 0,
+      context.trStatistic(StatisticText.strongPasswords): 0,
+      context.trStatistic(StatisticText.weakPasswords): 0,
+      context.trStatistic(StatisticText.duplicatePasswords): 0,
     };
     score = 0;
   }
@@ -58,15 +61,16 @@ class _MobileLayoutState extends State<MobileLayout> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _updateStatistics();
+    Future.delayed(Duration(milliseconds: 500), () {
+      if (!mounted) return;
+      _updateStatistics();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Thống kê'),
-      ),
+      appBar: AppBar(title: Text(context.trStatistic(StatisticText.title))),
       body: Consumer<StatisticProvider>(
         builder: (context, statisticProvider, child) {
           // Cập nhật thống kê mỗi khi provider thay đổi
@@ -81,62 +85,47 @@ class _MobileLayoutState extends State<MobileLayout> {
               child: Column(
                 children: [
                   Expanded(
-                      child: SizedBox(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(25),
-                      child: ColoredBox(
-                        color: Theme.of(context).colorScheme.secondaryContainer,
-                        child: PieChart(
-                          dataMap: dataMap,
-                          animationDuration: const Duration(milliseconds: 800),
-                          chartLegendSpacing: 32.h,
-                          chartRadius: 170.h,
-                          colorList: const [
-                            Colors.blueAccent,
-                            Colors.redAccent,
-                            Colors.yellowAccent,
-                          ],
-                          initialAngleInDegree: 0,
-                          chartType: ChartType.ring,
-                          ringStrokeWidth: 40,
-                          centerWidget: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "$score",
-                                style: TextStyle(
-                                  fontSize: 35.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text("Điểm bảo mật",
-                                style: TextStyle(
-                                  fontSize: 11.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                    child: SizedBox(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(25),
+                        child: ColoredBox(
+                          color: Theme.of(context).colorScheme.secondaryContainer,
+                          child: PieChart(
+                            dataMap: dataMap,
+                            animationDuration: const Duration(milliseconds: 800),
+                            chartLegendSpacing: 32.h,
+                            chartRadius: 170.h,
+                            colorList: const [Colors.blueAccent, Colors.redAccent, Colors.yellowAccent],
+                            initialAngleInDegree: 0,
+                            chartType: ChartType.ring,
+                            ringStrokeWidth: 40,
+                            centerWidget: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text("$score", style: TextStyle(fontSize: 35.sp, fontWeight: FontWeight.bold)),
+                                Text(context.trStatistic(StatisticText.securityScore), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                            legendOptions: LegendOptions(
+                              showLegendsInRow: true,
+                              legendPosition: LegendPosition.bottom,
+                              showLegends: true,
+                              legendTextStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 16.sp),
+                            ),
+                            chartValuesOptions: const ChartValuesOptions(
+                              showChartValueBackground: false,
+                              showChartValues: false,
+                              showChartValuesInPercentage: false,
+                              showChartValuesOutside: false,
+                              decimalPlaces: 1,
+                            ),
+                            // gradientList: ---To add gradient colors---
+                            // emptyColorGradient: ---Empty Color gradient---
                           ),
-                          legendOptions: LegendOptions(
-                            showLegendsInRow: true,
-                            legendPosition: LegendPosition.bottom,
-                            showLegends: true,
-                            legendTextStyle: TextStyle(
-                                fontWeight: FontWeight.w500, fontSize: 16.sp),
-                          ),
-                          chartValuesOptions: const ChartValuesOptions(
-                            showChartValueBackground: false,
-                            showChartValues: false,
-                            showChartValuesInPercentage: false,
-                            showChartValuesOutside: false,
-                            decimalPlaces: 1,
-                          ),
-                          // gradientList: ---To add gradient colors---
-                          // emptyColorGradient: ---Empty Color gradient---
                         ),
                       ),
                     ),
-                  )),
+                  ),
                   const SizedBox(height: 16),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(25),
@@ -145,20 +134,12 @@ class _MobileLayoutState extends State<MobileLayout> {
                       child: SingleChildScrollView(
                         child: Column(
                           children: [
-                            SecurityCheckItem(
-                              title: "Tổng số tài khoản",
-                              value:statisticProvider.totalAccount,
-                              icon: Icons.lock,
-                            ),
+                            SecurityCheckItem(title: context.trStatistic(StatisticText.totalAccount), value: statisticProvider.totalAccount, icon: Icons.lock),
+                            const SizedBox(height: 10),
+                            SecurityCheckItem(title: context.trStatistic(StatisticText.totalAccountPasswordStrong), value: statisticProvider.totalAccountPasswordStrong, icon: Icons.security_outlined),
                             const SizedBox(height: 10),
                             SecurityCheckItem(
-                              title: "Tổng số mật khẩu mạnh",
-                              value: statisticProvider.totalAccountPasswordStrong,
-                              icon: Icons.security_outlined,
-                            ),
-                            const SizedBox(height: 10),
-                            SecurityCheckItem(
-                              title: "Tổng số mật khẩu yếu",
+                              title: context.trStatistic(StatisticText.totalAccountPasswordWeak),
                               value: statisticProvider.totalAccountPasswordWeak,
                               icon: Icons.warning_rounded,
                               subIcon: Icons.arrow_forward_ios_rounded,
@@ -169,7 +150,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                             const SizedBox(height: 10),
                             RequestPro(
                               child: SecurityCheckItem(
-                                title: "Tổng số mật khẩu trùng lặp",
+                                title: context.trStatistic(StatisticText.totalAccountPasswordWeak),
                                 value: statisticProvider.accountSamePassword.length,
                                 icon: Icons.copy_rounded,
                                 subIcon: Icons.arrow_forward_ios_rounded,

@@ -1,4 +1,6 @@
 import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/category_text.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
@@ -31,10 +33,29 @@ Future<void> showCreateCategoryBottomSheet(BuildContext context, {
   );
 }
 
-class CreateCategoryBottomSheet extends StatelessWidget {
+class CreateCategoryBottomSheet extends StatefulWidget {
   final bool isUpdate;
   final CategoryOjbModel? categoryOjbModel;
   const CreateCategoryBottomSheet({super.key,  this.categoryOjbModel, this.isUpdate = false});
+
+  @override
+  State<CreateCategoryBottomSheet> createState() => _CreateCategoryBottomSheetState();
+}
+
+class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
+  final textController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    textController.text = widget.categoryOjbModel?.categoryName ?? "";
+  }
+
+  @override
+  void dispose() {
+    textController.dispose();
+    super.dispose();
+  }
 
   Future<void> _handleCreateCategory(BuildContext context, String name) async {
     if (name.trim().isEmpty) return;
@@ -66,11 +87,10 @@ class CreateCategoryBottomSheet extends StatelessWidget {
             CustomTextField(
               autoFocus: true,
               requiredTextField: true,
-              titleTextField: "Tên danh mục",
-              controller: provider.txtCategoryName,
+              titleTextField: context.trCategory(CategoryText.categoryName),
+              controller: textController,
               textInputAction: TextInputAction.done,
               textAlign: TextAlign.start,
-              hintText: "Nhập tên danh mục",
               maxLines: 1,
               onFieldSubmitted: (value) => _handleCreateCategory(context, value),
             ),
@@ -85,14 +105,14 @@ class CreateCategoryBottomSheet extends StatelessWidget {
                     context, 
                     value.text,
                   ),
-                  text: "Tạo danh mục",
+                  text: context.trCategory(CategoryText.createCategory),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.add, color: Colors.white, size: 20.sp),
                       SizedBox(width: 8.w),
                       Text(
-                        "Tạo danh mục",
+                        context.trCategory(CategoryText.createCategory),
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,

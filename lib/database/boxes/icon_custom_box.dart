@@ -41,4 +41,8 @@ class IconCustomBox {
   static Stream<List<IconCustomModel>> watchAll() {
     return box.query().watch(triggerImmediately: true).map((query) => query.find());
   }
+
+  static Future<void> deleteAllAsync() async {
+    await box.removeAllAsync();
+  }
 }

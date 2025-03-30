@@ -1,3 +1,4 @@
+import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import '../objectbox.g.dart';
@@ -31,7 +32,7 @@ class ObjectBox {
     passwordHistoryBox = Box<PasswordHistory>(store);
     // Chỉ khởi tạo Admin trong chế độ debug
     if (Admin.isAvailable()) {
-      print("Khởi tạo Admin");
+      logInfo("Khởi tạo Admin");
       admin = Admin(store);
     }
   }
@@ -41,7 +42,7 @@ class ObjectBox {
     final dbPath = path.join(docsDir.path, "cyber_safe");
     final store = await openStore(directory: dbPath, macosApplicationGroup: "group.duc_app_lab_ind.cyber_safe");
     instance = ObjectBox._create(store);
-    print("Đường dẫn db: $dbPath");
+    logInfo("Đường dẫn db: $dbPath");
   }
 
   void dispose() {

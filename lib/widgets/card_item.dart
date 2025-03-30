@@ -1,3 +1,5 @@
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:flutter/material.dart';
 
@@ -10,16 +12,8 @@ class CardItem<T> extends StatefulWidget {
   final bool? showSeeMore;
   final Function? onSeeMoreItems;
   final int? totalItems;
-  
-  const CardItem({
-    super.key, 
-    required this.items, 
-    required this.title, 
-    required this.itemBuilder, 
-    this.onSeeMoreItems, 
-    this.showSeeMore = false,
-    this.totalItems,
-  });
+
+  const CardItem({super.key, required this.items, required this.title, required this.itemBuilder, this.onSeeMoreItems, this.showSeeMore = false, this.totalItems});
 
   @override
   State<CardItem<T>> createState() => _CardItemState<T>();
@@ -28,21 +22,15 @@ class CardItem<T> extends StatefulWidget {
 class _CardItemState<T> extends State<CardItem<T>> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
-  
+
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    );
+    _controller = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
     _controller.forward();
   }
-  
+
   @override
   void didUpdateWidget(CardItem<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -52,7 +40,7 @@ class _CardItemState<T> extends State<CardItem<T>> with SingleTickerProviderStat
       _controller.forward();
     }
   }
-  
+
   @override
   void dispose() {
     _controller.dispose();
@@ -63,7 +51,7 @@ class _CardItemState<T> extends State<CardItem<T>> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     final remainingItems = (widget.totalItems ?? widget.items.length) - widget.items.length;
     final shouldShowSeeMore = widget.showSeeMore == true && remainingItems > 0;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -72,8 +60,7 @@ class _CardItemState<T> extends State<CardItem<T>> with SingleTickerProviderStat
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(widget.title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp)),
-            if (widget.totalItems != null)
-              Text('${widget.totalItems} mục', style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            if (widget.totalItems != null) Text('${widget.totalItems} ${context.appLocale.homeLocale.getText(HomeLocale.items)}', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Theme.of(context).colorScheme.onSurfaceVariant)),
           ],
         ),
         const SizedBox(height: 10),
@@ -106,38 +93,23 @@ class _CardItemState<T> extends State<CardItem<T>> with SingleTickerProviderStat
                 ),
                 if (shouldShowSeeMore)
                   Material(
-                    color:Colors.transparent,
+                    color: Colors.transparent,
                     child: InkWell(
                       onTap: () => widget.onSeeMoreItems?.call(),
                       child: Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            top: BorderSide(
-                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                              width: 1,
-                            ),
-                          ),
-                        ),
+                        padding:  EdgeInsets.symmetric(vertical: 12.h),
+                        decoration: BoxDecoration(border: Border(top: BorderSide(color: Theme.of(context).colorScheme.surfaceContainerHighest, width: 1))),
                         child: Center(
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                remainingItems > 10 
-                                  ? 'Xem thêm 10 mục tiếp theo' 
-                                  : 'Xem thêm $remainingItems mục còn lại',
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                remainingItems > 10 ? context.appLocale.homeLocale.getText(HomeLocale.seeMore10) : context.appLocale.homeLocale.getText(HomeLocale.seeMore).replaceAll("{count}", remainingItems.toString()),
+                                style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w500, fontSize: 14.sp),
                               ),
                               const SizedBox(width: 4),
-                              Icon(
-                                Icons.keyboard_arrow_down,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
+                              Icon(Icons.keyboard_arrow_down, color: Theme.of(context).colorScheme.primary),
                             ],
                           ),
                         ),

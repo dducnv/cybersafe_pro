@@ -159,7 +159,7 @@
     },
     {
       "id": "4:3018443929711597194",
-      "lastPropertyId": "4:7289120895696701836",
+      "lastPropertyId": "5:5623166496235733287",
       "name": "PasswordHistory",
       "properties": [
         {
@@ -179,11 +179,11 @@
           "type": 10
         },
         {
-          "id": "4:7289120895696701836",
+          "id": "5:5623166496235733287",
           "name": "accountId",
           "type": 11,
           "flags": 520,
-          "indexId": "4:8616999152411792910",
+          "indexId": "7:6579639089864751933",
           "relationTarget": "AccountOjbModel"
         }
       ],
@@ -262,14 +262,18 @@
     }
   ],
   "lastEntityId": "6:965409409935003527",
-  "lastIndexId": "6:925758013839913807",
+  "lastIndexId": "7:6579639089864751933",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
   "retiredEntityUids": [],
-  "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredIndexUids": [
+    8616999152411792910
+  ],
+  "retiredPropertyUids": [
+    7289120895696701836
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

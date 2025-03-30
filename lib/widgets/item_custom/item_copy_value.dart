@@ -1,3 +1,4 @@
+import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/decrypt_text/decrypt_text.dart';
@@ -8,6 +9,7 @@ class ItemCopyValue extends StatefulWidget {
   final String title;
   final String value;
   final bool isPrivateValue;
+
   const ItemCopyValue({super.key, this.isLastItem = false, required this.title, required this.value, this.isPrivateValue = false});
 
   @override
@@ -17,57 +19,57 @@ class ItemCopyValue extends StatefulWidget {
 class _ItemCopyValueState extends State<ItemCopyValue> {
   bool _isShowValue = false;
 
+  BoxDecoration _buildDecoration(BuildContext context) => BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainer);
+
+  void _toggleValueVisibility() {
+    setState(() => _isShowValue = !_isShowValue);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: !widget.isLastItem ? EdgeInsets.only(bottom: 10.h) : EdgeInsets.only(top: 5 .h),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        border: !widget.isLastItem ? Border(bottom: BorderSide(color: Theme.of(context).colorScheme.surfaceContainerHighest)) : null,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(widget.title, style: TextStyle(color: Colors.grey, overflow: TextOverflow.ellipsis, fontSize: 14.sp, fontWeight: FontWeight.w600)),
-                SizedBox(height:5,),
-                if (widget.isPrivateValue ? _isShowValue : true)
-                  DecryptText(
-                    style: TextStyle(fontSize: 14.sp, overflow: TextOverflow.ellipsis),
-                    value: widget.value,
-                    decryptTextType: widget.isPrivateValue ? DecryptTextType.password : DecryptTextType.info,
-                  )
-                else
-                  Text("***********", style: TextStyle(fontSize: 14.sp, overflow: TextOverflow.ellipsis)),
-              ],
-            ),
-          ),
-          Row(
-            children: [
-              if (widget.isPrivateValue)
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _isShowValue = !_isShowValue;
-                    });
-                  },
-                  icon: _isShowValue ? Icon(Icons.visibility_off, size: 24.sp, color: Theme.of(context).colorScheme.primary) : Icon(Icons.visibility, size: 24.sp),
-                ),
-              widget.value != ""
-                  ? IconButton(
-                    onPressed: () {
-                      clipboardCustom(context: context, text: "");
-                    },
-                    icon: Icon(Icons.copy, size: 20.sp),
-                  )
-                  : const SizedBox.shrink(),
-            ],
-          ),
-        ],
-      ),
+    return Container(decoration: _buildDecoration(context), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Expanded(child: _buildContent()), _buildActions(context)]));
+  }
+
+  Widget _buildContent() {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildTitle(), const SizedBox(height: 5), _buildValue()]);
+  }
+
+  Widget _buildTitle() {
+    return Text(widget.title, style: TextStyle(color: Colors.grey, overflow: TextOverflow.ellipsis, fontSize: 14.sp, fontWeight: FontWeight.w600));
+  }
+
+  Widget _buildValue() {
+    if (widget.isPrivateValue && !_isShowValue) {
+      return Text("***********", style: TextStyle(fontSize: 14.sp, overflow: TextOverflow.ellipsis));
+    }
+
+    return DecryptText(
+      style: TextStyle(fontSize: 14.sp, overflow: TextOverflow.ellipsis),
+      value: widget.value,
+      decryptTextType: widget.isPrivateValue ? DecryptTextType.password : DecryptTextType.info,
+    );
+  }
+
+  Widget _buildActions(BuildContext context) {
+    return Row(children: [if (widget.isPrivateValue) _buildVisibilityToggle(context), if (widget.value.isNotEmpty) _buildCopyButton()]);
+  }
+
+  Widget _buildVisibilityToggle(BuildContext context) {
+    return IconButton(
+      onPressed: _toggleValueVisibility,
+      icon: Icon(_isShowValue ? Icons.visibility_off : Icons.visibility, size: _isShowValue ? 20.sp : 24.sp, color: _isShowValue ? Theme.of(context).colorScheme.primary : null),
+    );
+  }
+
+  Widget _buildCopyButton() {
+    return IconButton(
+      onPressed: () async {
+        final decryptService = EncryptAppDataService.instance;
+        final decryptedValue = widget.isPrivateValue ? await decryptService.decryptPassword(widget.value) : await decryptService.decryptInfo(widget.value);
+
+        clipboardCustom(context: context, text: decryptedValue);
+      },
+      icon: Icon(Icons.copy, size: 20.sp),
     );
   }
 }

@@ -78,7 +78,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       case DeviceType.desktop:
         return const CreateAccountDesktopLayout();
       case DeviceType.tablet:
-        return const CreateAccountTabletLayout();
+        return const CreateAccountMobileLayout();
       case DeviceType.mobile:
         return const CreateAccountMobileLayout();
     }

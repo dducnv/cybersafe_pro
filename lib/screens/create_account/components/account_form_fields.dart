@@ -1,7 +1,10 @@
 import 'package:cybersafe_pro/components/bottom_sheets/select_category_bottom_sheets.dart';
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
 import 'package:cybersafe_pro/resources/brand_logo.dart';
 import 'package:cybersafe_pro/screens/password_generator/password_generate_screen.dart';
 import 'package:cybersafe_pro/services/otp.dart';
+import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
 import 'package:cybersafe_pro/widgets/otp_qrcode_scan/otp_qrcode_scan.dart';
@@ -25,7 +28,8 @@ class AccountFormFields extends StatelessWidget {
         CustomTextField(
           requiredTextField: true,
           autoFocus: true,
-          titleTextField: 'Tên ứng dụng',
+          titleTextField: context.trCreateAccount(CreateAccountText.appName),
+          hintText: "Social App Name, Bank Name,...",
           controller: formProvider.appNameController,
           textError: formProvider.appNameError,
           onChanged: (_) => formProvider.validateAppName(),
@@ -33,7 +37,7 @@ class AccountFormFields extends StatelessWidget {
           textAlign: TextAlign.start,
         ),
         const SizedBox(height: 10),
-        _buildUsernameField(),
+        _buildUsernameField(context),
         const SizedBox(height: 10),
         _buildPasswordField(context),
         const SizedBox(height: 10),
@@ -43,7 +47,7 @@ class AccountFormFields extends StatelessWidget {
           builder: (context, value, child) => !value ? _buildTOTPField(context) : Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(padding: const EdgeInsets.only(left: 5, bottom: 5), child: Text("Xác thực 2 lớp", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]))),
+              Padding(padding: const EdgeInsets.only(left: 5, bottom: 5), child: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.twoFactorAuth), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]))),
               Row(
                 children: [
                   Expanded(child: CardCustomWidget(child: OtpTextWithCountdown(keySecret: formProvider.otpController.text))),
@@ -60,18 +64,19 @@ class AccountFormFields extends StatelessWidget {
           selector: (context, provider) => provider.isAddedTOTP,
         ),
         const SizedBox(height: 10),
-        _buildNotesField(),
+        _buildNotesField(context),
         const SizedBox(height: 10),
         _buildCustomFields(),
         const SizedBox(height: 10),
-        _buildAddFieldButton(),
+        _buildAddFieldButton(context),
       ],
     );
   }
 
-  Widget _buildUsernameField() {
+  Widget _buildUsernameField(BuildContext context) {
     return CustomTextField(
-      titleTextField: 'Tên đăng nhập',
+      titleTextField: context.appLocale.createAccountLocale.getText(CreateAccountText.username),
+      hintText: "Email, Phone, Username,...",
       controller: formProvider.usernameController,
       autofillHints: const [AutofillHints.username],
       textInputAction: TextInputAction.next,
@@ -83,7 +88,8 @@ class AccountFormFields extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(padding: const EdgeInsets.only(left: 5), child: Text("Mật khẩu", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]))),
+        Padding(padding: const EdgeInsets.only(left: 5), child: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.password), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]))),
+        const SizedBox(height: 5),
         Row(
           children: [
             Expanded(
@@ -91,6 +97,7 @@ class AccountFormFields extends StatelessWidget {
                 requiredTextField: false,
                 controller: formProvider.passwordController,
                 isObscure: true,
+                hintText: context.appLocale.createAccountLocale.getText(CreateAccountText.password),
                 autofillHints: const [AutofillHints.password],
                 suffixIcon: IconButton(icon: const Icon(Icons.loop), onPressed: () {}),
                 textInputAction: TextInputAction.next,
@@ -112,20 +119,20 @@ class AccountFormFields extends StatelessWidget {
                       return AlertDialog(
                         actionsPadding: const EdgeInsets.only(bottom: 2, right: 10),
                         contentPadding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 10),
-                        content: Text("Bạn có muốn ghi đè lên mật khẩu cũ không?", style: TextStyle(fontSize: 16.sp)),
+                        content: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.overwritePassword), style: TextStyle(fontSize: 16.sp)),
                         actions: [
                           TextButton(
                             onPressed: () {
                               Navigator.of(context).pop();
                             },
-                            child: Text("Hủy bỏ", style: TextStyle(fontSize: 14.sp)),
+                            child: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.cancel), style: TextStyle(fontSize: 14.sp)),
                           ),
                           TextButton(
                             onPressed: () {
                               Navigator.of(context).pop();
                               _toGenPass(context);
                             },
-                            child: Text("Đồng ý", style: TextStyle(fontSize: 14.sp)),
+                            child: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.confirm), style: TextStyle(fontSize: 14.sp)),
                           ),
                         ],
                       );
@@ -150,11 +157,11 @@ class AccountFormFields extends StatelessWidget {
   Widget _buildCategoryField(BuildContext context) {
     return CustomTextField(
       requiredTextField: true,
-      titleTextField: 'Chọn danh mục',
+      titleTextField: context.appLocale.createAccountLocale.getText(CreateAccountText.category),
       controller: formProvider.categoryController,
       textInputAction: TextInputAction.next,
       textAlign: TextAlign.start,
-      hintText: 'Chọn danh mục',
+      hintText: context.appLocale.createAccountLocale.getText(CreateAccountText.chooseCategory),
       maxLines: 1,
       isObscure: false,
       readOnly: true,
@@ -170,13 +177,13 @@ class AccountFormFields extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(padding: const EdgeInsets.only(bottom: 5, left: 5), child: Text('Xác thực 2 lớp', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey[600]))),
+        Padding(padding: const EdgeInsets.only(bottom: 5, left: 5), child: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.twoFactorAuth), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey[600]))),
         Row(
           children: [
             Expanded(
               child: CustomTextField(
                 controller: formProvider.otpController,
-                hintText: 'Nhập mã xác thực TOTP',
+                hintText: context.appLocale.createAccountLocale.getText(CreateAccountText.enterKey),
                 prefixIcon: const Icon(Icons.key),
                 textInputAction: TextInputAction.done,
                 textAlign: TextAlign.start,
@@ -186,7 +193,7 @@ class AccountFormFields extends StatelessWidget {
                     if (OTP.isKeyValid(value)) {
                       formProvider.handleAddTOTP();
                     } else {
-                      formProvider.otpError = 'Mã xác thực không hợp lệ';
+                      formProvider.otpError = context.trCreateAccount(CreateAccountText.otpError);
                     }
                   }
                 },
@@ -199,7 +206,7 @@ class AccountFormFields extends StatelessWidget {
                 final uri = await Navigator.of(context).push(MaterialPageRoute(builder: (context) => const QrcodeScaner()));
                 if (uri != null) {
                   var otpCustom = OTP.fromUri(uri.toString()).toJson();
-                  debugPrint("otpCustom.toString(): ${otpCustom.toString()}");
+                  logInfo("otpCustom.toString(): ${otpCustom.toString()}");
                   formProvider.otpError = null;
                   formProvider.handleAddTOTP();
                   formProvider.otpController.text = otpCustom['secret'].toUpperCase();
@@ -223,9 +230,9 @@ class AccountFormFields extends StatelessWidget {
     );
   }
 
-  Widget _buildNotesField() {
+  Widget _buildNotesField(BuildContext context) {
     return CustomTextField(
-      titleTextField: 'Ghi chú',
+      titleTextField: context.appLocale.createAccountLocale.getText(CreateAccountText.note),
       controller: formProvider.noteController,
       textInputType: TextInputType.multiline,
       minLines: 1,
@@ -244,8 +251,8 @@ class AccountFormFields extends StatelessWidget {
     );
   }
 
-  Widget _buildAddFieldButton() {
-    return OutlinedButton.icon(onPressed: onAddField, icon: const Icon(Icons.add), label: const Text('Thêm trường'));
+  Widget _buildAddFieldButton(BuildContext context) {
+    return OutlinedButton.icon(onPressed: onAddField, icon: const Icon(Icons.add), label:  Text(context.trCreateAccount(CreateAccountText.addField)));
   }
 
   Future _toGenPass(BuildContext context) {

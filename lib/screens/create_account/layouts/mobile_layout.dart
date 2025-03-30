@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:cybersafe_pro/database/models/icon_custom_model.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
 import 'package:cybersafe_pro/resources/brand_logo.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/request_pro/request_pro.dart';
@@ -61,7 +62,7 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return AppBar(title: const Text('Tạo tài khoản'), elevation: 0, scrolledUnderElevation: 0, shadowColor: Colors.transparent, backgroundColor: Theme.of(context).colorScheme.surface);
+    return AppBar( elevation: 0, scrolledUnderElevation: 0, shadowColor: Colors.transparent, backgroundColor: Theme.of(context).colorScheme.surface);
   }
 
   Widget _buildSubmitButton(BuildContext context, AccountFormProvider formProvider, AccountProvider accountProvider) {
@@ -85,7 +86,7 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
             child: Container(
               height: MediaQuery.of(context).size.height * 0.8,
               width: double.infinity,
-              padding: const EdgeInsets.only( top: 16),
+              padding: const EdgeInsets.only(top: 16),
               child: Column(
                 children: [
                   Padding(
@@ -94,7 +95,7 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text("Chọn icon", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600)),
+                        Text(context.appLocale.createAccountLocale.getText(CreateAccountText.chooseIcon), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600)),
                         IconButton(
                           onPressed: () {
                             _pickImageFromGallery(context, formProvider, tabController);
@@ -112,11 +113,11 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
                       Navigator.pop(context);
                     },
                     leading: Icon(Icons.cancel_outlined, color: Colors.blueAccent, size: 30.sp),
-                    title: Text("Không chọn", style: TextStyle(fontSize: 16.sp)),
+                    title: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.noSelect), style: TextStyle(fontSize: 16.sp)),
                   ),
                   const SizedBox(height: 10),
 
-                  TabBar(dividerColor: Colors.grey[500], controller: tabController, tabs: const [Tab(text: "App"), Tab(text: "Custom")]),
+                  TabBar(dividerColor: Colors.grey[500], controller: tabController, tabs: [Tab(text: context.appLocale.createAccountLocale.getText(CreateAccountText.iconApp)), Tab(text: context.appLocale.createAccountLocale.getText(CreateAccountText.iconCustom))]),
                   const SizedBox(height: 10),
                   Expanded(
                     child: TabBarView(
@@ -184,34 +185,34 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
     return Selector<AccountFormProvider, List<IconCustomModel>>(
       selector: (context, formProvider) => formProvider.listIconsCustom,
       builder: (context, listIconsCustom, child) {
-        return ListView.builder(
-          itemCount: listIconsCustom.length,
-          shrinkWrap: true,
-          itemBuilder: (context, index) {
-            return RequestPro(
-              child: ListTile(
-                onTap: () {
-                  formProvider.pickIcon(isCustomIcon: true, iconCustomModel: formProvider.listIconsCustom[index]);
-                  Navigator.pop(context);
-                },
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.memory(base64Decode(formProvider.listIconsCustom[index].imageBase64), width: 40.h, height: 40.h, fit: BoxFit.contain),
-                ),
-                title: Text(formProvider.listIconsCustom[index].name, style: TextStyle(fontSize: 16.sp)),
-                trailing: IconButton(
-                  onPressed: () {
-                    formProvider.deleteIconCustom(formProvider.listIconsCustom[index]);
-                  },
-                  icon: IgnorePointer(
-                    ignoring: false,
-                    child: Icon(Icons.close, color: Colors.redAccent, size: 24.sp)),
-                ),
-              ),
+        return listIconsCustom.isEmpty
+            ? Center(child: Image.asset("assets/images/exclamation-mark.png", width: 60.w, height: 60.h))
+            : ListView.builder(
+              itemCount: listIconsCustom.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                return RequestPro(
+                  child: ListTile(
+                    onTap: () {
+                      formProvider.pickIcon(isCustomIcon: true, iconCustomModel: formProvider.listIconsCustom[index]);
+                      Navigator.pop(context);
+                    },
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.memory(base64Decode(formProvider.listIconsCustom[index].imageBase64), width: 40.h, height: 40.h, fit: BoxFit.contain),
+                    ),
+                    title: Text(formProvider.listIconsCustom[index].name, style: TextStyle(fontSize: 16.sp)),
+                    trailing: IconButton(
+                      onPressed: () {
+                        formProvider.deleteIconCustom(formProvider.listIconsCustom[index]);
+                      },
+                      icon: IgnorePointer(ignoring: false, child: Icon(Icons.close, color: Colors.redAccent, size: 24.sp)),
+                    ),
+                  ),
+                );
+              },
             );
-          },
-        );
-      }
+      },
     );
   }
 
@@ -280,7 +281,7 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
         return LayoutBuilder(
           builder: (context, constraints) {
             return AlertDialog(
-              actionsPadding: const EdgeInsets.only(right:10, bottom:10),
+              actionsPadding: const EdgeInsets.only(right: 10, bottom: 10),
               contentPadding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 10),
               content: ConstrainedBox(
                 constraints: const BoxConstraints(

@@ -1,5 +1,5 @@
+import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PermissionService {
@@ -8,13 +8,21 @@ class PermissionService {
 
   Future<bool> requestStoragePermission() async {
     try {
-      var storageStatus = await Permission.storage.status;
-      if (storageStatus.isDenied) {
-        storageStatus = await Permission.storage.request();
+      final isGranted = await checkStoragePermission();
+      if (isGranted) {
+        return true;
       }
-      return storageStatus.isGranted;
+      final permission = Permission.storage;
+      final status = await permission.status;
+      if (status != PermissionStatus.granted) {
+        final result = await permission.request();
+        logInfo('storageStatus request: ${result.isGranted}');
+        return result.isGranted;
+      }
+      logInfo('storageStatus: ${status.isGranted}');
+      return status.isGranted;
     } catch (e) {
-      debugPrint('Lỗi khi yêu cầu quyền: $e');
+      logError('Lỗi khi yêu cầu quyền: $e');
       return false;
     }
   }
@@ -34,8 +42,8 @@ class PermissionService {
 
       return await Permission.storage.isGranted;
     } catch (e) {
-      debugPrint('Lỗi khi kiểm tra quyền: $e');
+      logError('Lỗi khi kiểm tra quyền: $e');
       return false;
     }
   }
-} 
+}

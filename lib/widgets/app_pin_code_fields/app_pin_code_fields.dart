@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
@@ -60,13 +61,23 @@ class AppPinCodeFieldsState extends State<AppPinCodeFields> {
   }
 
   void triggerErrorAnimation() {
-    widget.textEditingController?.clear();
-    widget.focusNode?.requestFocus();
-    errorController.add(ErrorAnimationType.shake);
+    try {
+      if (mounted) {
+        widget.textEditingController?.clear();
+        widget.focusNode?.requestFocus();
+        errorController.add(ErrorAnimationType.shake);
+      }
+    } catch (e) {
+      logError('Error triggering animation: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.textEditingController == null || !mounted) {
+      return const SizedBox.shrink();
+    }
+    
     return Form(
       key: widget.formKey,
       child: Padding(

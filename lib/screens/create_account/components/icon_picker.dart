@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
 import 'package:cybersafe_pro/providers/account_form_provider.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +50,7 @@ class IconPicker extends StatelessWidget {
         InkWell(
           borderRadius: BorderRadius.circular(10),
           onTap: onTap,
-          child: const Padding(padding: EdgeInsets.symmetric(horizontal: 4), child: Text('Chọn Icon', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
+          child: Padding(padding: const EdgeInsets.symmetric(horizontal: 4), child: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.chooseIcon), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
         ),
       ],
     );

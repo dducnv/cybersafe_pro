@@ -1,4 +1,5 @@
 import 'package:cybersafe_pro/resources/app_config.dart';
+import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:flutter/material.dart';
 
 class RequestPro extends StatelessWidget {
@@ -20,7 +21,7 @@ class RequestPro extends StatelessWidget {
         Positioned.fill(
           child: GestureDetector(
             onTap: () {
-              print("upgrade pro");
+              logInfo("upgrade pro");
             },
             child: Container(
               color: Colors.transparent,

@@ -15,7 +15,7 @@ class OtpListScreen extends StatelessWidget {
       case DeviceType.desktop:
         return const OtpDesktopLayout();
       case DeviceType.tablet:
-        return const OtpTabletLayout();
+        return const OtpMobileLayout();
       case DeviceType.mobile:
         return const OtpMobileLayout();
     }

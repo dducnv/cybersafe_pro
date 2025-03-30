@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
 import 'package:cybersafe_pro/services/local_auth_service.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
@@ -27,7 +29,6 @@ class _UseBiometricLoginState extends State<UseBiometricLogin> {
 
   void changeBiometric(bool value) async {
     bool isAuth = await LocalAuthConfig.instance.authenticate();
-    print("isAuth: $isAuth");
     if (isAuth) {
       if (!value) {
         setState(() {
@@ -70,10 +71,13 @@ class _UseBiometricLoginState extends State<UseBiometricLogin> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Khoá sinh trắc học", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500)),
-                  const SizedBox(height: 4),
-                  //switch
+                  Expanded(
+                    child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.biometric), 
+                      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500)
+                    ),
+                  ),
                   Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       AppCustomSwitch(
                         value: isOpenUseBiometric,

@@ -2,68 +2,62 @@ import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-InputBorder errorBorder = const OutlineInputBorder(
-  borderSide: BorderSide(color: Colors.red),
-  borderRadius: BorderRadius.all(Radius.circular(10)),
-);
+InputBorder errorBorder = const OutlineInputBorder(borderSide: BorderSide(color: Colors.red), borderRadius: BorderRadius.all(Radius.circular(10)));
 
 class CustomTextField extends StatefulWidget {
-  const CustomTextField(
-      {super.key,
-      this.widthTextField,
-      this.suffixIconConstraintsMaxHeight,
-      this.kPaddingPrefixIcon,
-      this.kMarginTextField,
-      this.cursorHeight,
-      required this.controller,
-      required this.textInputAction,
-      this.textInputType,
-      required this.textAlign,
-      this.hintText,
-      this.helperText,
-      this.labelText,
-      this.textError,
-      this.titleTextField,
-      this.obscuringCharacter = '•',
-      this.hintStyle,
-      this.textStyle,
-      this.titleTextStyle,
-      this.floatingLabelStyle,
-      this.labelStyle,
-      this.focusedBorder,
-      this.enabledBorder,
-      this.errorBorder,
-      this.onChanged,
-      this.onFieldSubmitted,
-      this.validator,
-      this.onTap,
-      this.focusChanged,
-      this.prefixIcon,
-      this.suffixIcon,
-      this.textColor,
-      this.colorBackGround,
-      this.cursorColor,
-      this.borderColor,
-      this.focusNode,
-      this.margin,
-      this.inputFormatters,
-      this.isObscure = false,
-      this.readOnly = false,
-      this.autoFocus = false,
-      this.focusTextField = true,
-      this.maxLength,
-      this.minLines,
-      this.maxLines,
-      this.contentPadding,
-      this.requiredTextField = false,
-      this.borderRadius,
-      this.autofillHints});
+  const CustomTextField({
+    super.key,
+    this.widthTextField,
+    this.suffixIconConstraintsMaxHeight,
+    this.kPaddingPrefixIcon,
+    this.kMarginTextField,
+    this.cursorHeight,
+    required this.controller,
+    required this.textInputAction,
+    this.textInputType,
+    required this.textAlign,
+    this.hintText,
+    this.helperText,
+    this.labelText,
+    this.textError,
+    this.titleTextField,
+    this.obscuringCharacter = '•',
+    this.hintStyle,
+    this.textStyle,
+    this.titleTextStyle,
+    this.floatingLabelStyle,
+    this.labelStyle,
+    this.focusedBorder,
+    this.enabledBorder,
+    this.errorBorder,
+    this.onChanged,
+    this.onFieldSubmitted,
+    this.validator,
+    this.onTap,
+    this.focusChanged,
+    this.prefixIcon,
+    this.suffixIcon,
+    this.textColor,
+    this.colorBackGround,
+    this.cursorColor,
+    this.borderColor,
+    this.focusNode,
+    this.margin,
+    this.inputFormatters,
+    this.isObscure = false,
+    this.readOnly = false,
+    this.autoFocus = false,
+    this.focusTextField = true,
+    this.maxLength,
+    this.minLines,
+    this.maxLines,
+    this.contentPadding,
+    this.requiredTextField = false,
+    this.borderRadius,
+    this.autofillHints,
+  });
 
-  final double? widthTextField,
-      suffixIconConstraintsMaxHeight,
-      kPaddingPrefixIcon,
-      kMarginTextField,
-      cursorHeight;
+  final double? widthTextField, suffixIconConstraintsMaxHeight, kPaddingPrefixIcon, kMarginTextField, cursorHeight;
 
   final bool isObscure, readOnly, autoFocus, focusTextField, requiredTextField;
   final int? maxLength, minLines, maxLines;
@@ -71,17 +65,8 @@ class CustomTextField extends StatefulWidget {
   final TextInputAction textInputAction;
   final TextInputType? textInputType;
   final TextAlign textAlign;
-  final String? hintText,
-      labelText,
-      textError,
-      titleTextField,
-      obscuringCharacter,
-      helperText;
-  final TextStyle? hintStyle,
-      textStyle,
-      titleTextStyle,
-      floatingLabelStyle,
-      labelStyle;
+  final String? hintText, labelText, textError, titleTextField, obscuringCharacter, helperText;
+  final TextStyle? hintStyle, textStyle, titleTextStyle, floatingLabelStyle, labelStyle;
   final InputBorder? focusedBorder, enabledBorder, errorBorder;
 
   final Function(String)? onChanged, onFieldSubmitted;
@@ -120,37 +105,24 @@ class _CustomTextFieldState extends State<CustomTextField> {
         Visibility(
           visible: widget.titleTextField != null,
           child: Padding(
-              padding: const EdgeInsets.only(bottom: 5, left: 5),
-              child: RichText(
-                text: TextSpan(
-                  text: widget.titleTextField ?? '',
-                  style: widget.titleTextStyle ??
-                      TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[600]),
-                  children: widget.requiredTextField
-                      ? <TextSpan>[
-                          TextSpan(
-                              text: '*',
-                              style: TextStyle(
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16.sp)),
-                        ]
-                      : [],
-                ),
-              )
-
-              // Text(
-              //   widget.titleTextField ?? '',
-              //   style: widget.titleTextStyle ??
-              //       const TextStyle(
-              //           fontSize: 14,
-              //           fontWeight: FontWeight.w500,
-              //           color: Color.fromARGB(255, 19, 19, 19)),
-              // ),
+            padding: const EdgeInsets.only(bottom: 5, left: 5),
+            child: RichText(
+              text: TextSpan(
+                text: widget.titleTextField ?? '',
+                style: widget.titleTextStyle ?? TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]),
+                children: widget.requiredTextField ? <TextSpan>[TextSpan(text: '*', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16.sp))] : [],
               ),
+            ),
+
+            // Text(
+            //   widget.titleTextField ?? '',
+            //   style: widget.titleTextStyle ??
+            //       const TextStyle(
+            //           fontSize: 14,
+            //           fontWeight: FontWeight.w500,
+            //           color: Color.fromARGB(255, 19, 19, 19)),
+            // ),
+          ),
         ),
         Focus(
           focusNode: widget.focusTextField ? widget.focusNode : null,
@@ -167,7 +139,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
             inputFormatters: widget.inputFormatters,
             onFieldSubmitted: widget.onFieldSubmitted,
             autocorrect: false,
-            
+
             stylusHandwritingEnabled: false,
             textAlign: widget.textAlign,
             controller: widget.controller,
@@ -180,87 +152,56 @@ class _CustomTextFieldState extends State<CustomTextField> {
             keyboardType: widget.textInputType ?? TextInputType.text,
             textInputAction: widget.textInputAction,
             obscureText: widget.isObscure ? passwordVisible : widget.isObscure,
-            style: TextStyle(
-              color: widget.textColor,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w400,
-            ),
+            style: TextStyle(color: widget.textColor, fontSize: 14.sp, fontWeight: FontWeight.w400),
             autofillHints: widget.autofillHints,
             decoration: InputDecoration(
               filled: true,
               alignLabelWithHint: false,
               helperStyle: const TextStyle(color: Colors.green),
               counterText: '',
+              hintStyle: widget.hintStyle ?? TextStyle(color: Colors.grey[600]),
               fillColor: Theme.of(context).colorScheme.surfaceContainer,
-              border: OutlineInputBorder(
-                borderRadius: widget.borderRadius ?? BorderRadius.circular(10),
-                borderSide: BorderSide(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest),
-              ),
+              border: OutlineInputBorder(borderRadius: widget.borderRadius ?? BorderRadius.circular(10), borderSide: BorderSide(color: Theme.of(context).colorScheme.surfaceContainerHighest)),
               isDense: true,
               hintText: widget.hintText,
-              prefixIcon:widget.prefixIcon,
-              suffixIconConstraints: BoxConstraints(
-                maxHeight: widget.suffixIconConstraintsMaxHeight ?? 25.h,
-              ),
+              hintMaxLines:1,
+              prefixIcon: widget.prefixIcon,
+              suffixIconConstraints: BoxConstraints(maxHeight: widget.suffixIconConstraintsMaxHeight ?? 25.h),
               helperText: widget.helperText,
-              contentPadding: widget.contentPadding ??
-                  EdgeInsets.symmetric(horizontal: 9.w, vertical: 14.h),
-              focusedBorder: widget.focusedBorder ??
+              contentPadding: widget.contentPadding ?? EdgeInsets.symmetric(horizontal: 9.w, vertical: 14.h),
+              focusedBorder:
+                  widget.focusedBorder ??
                   OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color: widget.borderColor ??
-                            Theme.of(context).colorScheme.primary),
-                    borderRadius: widget.borderRadius ??
-                        const BorderRadius.all(Radius.circular(10)),
+                    borderSide: BorderSide(color: widget.borderColor ?? Theme.of(context).colorScheme.primary),
+                    borderRadius: widget.borderRadius ?? const BorderRadius.all(Radius.circular(10)),
                   ),
-              enabledBorder: widget.enabledBorder ??
+              enabledBorder:
+                  widget.enabledBorder ??
                   OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color: widget.borderColor ??
-                            Theme.of(context).colorScheme.surfaceContainerHighest),
-                    borderRadius: widget.borderRadius ??
-                        const BorderRadius.all(Radius.circular(10)),
+                    borderSide: BorderSide(color: widget.borderColor ?? Theme.of(context).colorScheme.surfaceContainerHighest),
+                    borderRadius: widget.borderRadius ?? const BorderRadius.all(Radius.circular(10)),
                   ),
-              suffixIcon: widget.isObscure == true
-                  ? IconButton(
-                      style: ButtonStyle(
-                        padding: WidgetStateProperty.all(EdgeInsets.zero),
-                        minimumSize:
-                            WidgetStateProperty.all(Size(25.w, 25.h)),
-                      ),
-                      icon: passwordVisible
-                          ? Icon(Icons.visibility, size: 18.sp)
-                          : Icon(
-                              Icons.visibility_off,
-                              color: Theme.of(context).colorScheme.primary,
-                              size: 18.sp,
-                            ),
-                      onPressed: () {
-                        setState(
-                          () {
+              suffixIcon:
+                  widget.isObscure == true
+                      ? IconButton(
+                        style: ButtonStyle(padding: WidgetStateProperty.all(EdgeInsets.zero), minimumSize: WidgetStateProperty.all(Size(25.w, 25.h))),
+                        icon: passwordVisible ? Icon(Icons.visibility, size: 18.sp) : Icon(Icons.visibility_off, color: Theme.of(context).colorScheme.primary, size: 18.sp),
+                        onPressed: () {
+                          setState(() {
                             passwordVisible = !passwordVisible;
-                          },
-                        );
-                      },
-                    )
-                  : widget.suffixIcon,
-              errorBorder: widget.textError != '' || widget.focusNode!.hasFocus
-                  ? OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.red),
-                      borderRadius: widget.borderRadius ??
-                          const BorderRadius.all(Radius.circular(10)),
-                    )
-                  : errorBorder,
+                          });
+                        },
+                      )
+                      : widget.suffixIcon,
+              errorBorder:
+                  widget.textError != '' || widget.focusNode!.hasFocus
+                      ? OutlineInputBorder(borderSide: const BorderSide(color: Colors.red), borderRadius: widget.borderRadius ?? const BorderRadius.all(Radius.circular(10)))
+                      : errorBorder,
               errorText: widget.textError == '' ? null : widget.textError,
-              errorStyle: TextStyle(
-                color: Colors.red,
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w400,
-              ),
+              errorStyle: TextStyle(color: Colors.red, fontSize: 12.sp, fontWeight: FontWeight.w400),
             ),
           ),
-        )
+        ),
       ],
     );
   }

@@ -1,3 +1,5 @@
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/statistic_text.dart';
 import 'package:cybersafe_pro/providers/statistic_provider.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/account_list_tile_widgets.dart';
@@ -11,7 +13,7 @@ class SamePasswordsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Mật khẩu trùng lặp'), elevation: 0, scrolledUnderElevation: 0, backgroundColor: Theme.of(context).colorScheme.surface),
+      appBar: AppBar(title: Text(context.trStatistic(StatisticText.totalAccountSamePassword)), elevation: 0, scrolledUnderElevation: 0, backgroundColor: Theme.of(context).colorScheme.surface),
       body: Padding(
         padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
         child: Consumer<StatisticProvider>(
@@ -25,7 +27,7 @@ class SamePasswordsView extends StatelessWidget {
                     shrinkWrap: true,
                     itemBuilder: (context, parentIndex) {
                       return CardItem(
-                        title: "Tài khoản trùng lặp: ${value.accountSamePassword[parentIndex].length}",
+                        title: "${context.trStatistic(StatisticText.totalAccountSamePassword)}: ${value.accountSamePassword[parentIndex].length}",
                         items: value.accountSamePassword[parentIndex],
                         itemBuilder: (item, index) {
                           return AccountItemWidget(

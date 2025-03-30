@@ -29,7 +29,7 @@ class _PasswordGenerateScreenState extends State<PasswordGenerateScreen> {
       case DeviceType.desktop:
         return const PasswordGenerateDesktopLayout();
       case DeviceType.tablet:
-        return const PasswordGenarateTabletLayout();
+        return const PasswordGenerateMobileLayout();
       case DeviceType.mobile:
         return const PasswordGenerateMobileLayout();
     }

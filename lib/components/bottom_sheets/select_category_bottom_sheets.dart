@@ -1,5 +1,8 @@
 import 'package:cybersafe_pro/components/bottom_sheets/create_category_bottom_sheet.dart';
 import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
+import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
@@ -36,7 +39,7 @@ class SelectCategoryBottomSheet extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Padding(padding: EdgeInsets.symmetric(horizontal: 16.w), child: Text("${isFromChangeCategory? "Đổi":"Chọn"} danh mục ($count)", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600))),
+                  Padding(padding: EdgeInsets.symmetric(horizontal: 16.w), child: Text("${isFromChangeCategory? context.trHome(HomeLocale.changeCategory): context.trCreateAccount(CreateAccountText.chooseCategory)} ($count)", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600))),
                   Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: IconButton(
@@ -67,6 +70,7 @@ class SelectCategoryBottomSheet extends StatelessWidget {
                     final category = categories[index];
 
                     return ListTile(
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
                       selected: selectedCategory == category,
                       onTap: () {
                         onSelected(category);

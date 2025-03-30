@@ -51,7 +51,7 @@ class _DetailsAccountScreenState extends State<DetailsAccountScreen> {
       case DeviceType.desktop:
         return const DetailsAccountDesktopLayout();
       case DeviceType.tablet:
-        return const DetailsAccountTabletLayout();
+        return DetailsAccountMobileLayout(accountOjbModel: accountOjbModel);
       case DeviceType.mobile:
         return DetailsAccountMobileLayout(
           accountOjbModel: accountOjbModel,

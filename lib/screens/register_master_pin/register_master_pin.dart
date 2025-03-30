@@ -18,7 +18,7 @@ class _RegisterMasterPinState extends State<RegisterMasterPin> {
   final GlobalKey<AppPinCodeFieldsState> appPinCodeCreateKey = GlobalKey<AppPinCodeFieldsState>();
   final GlobalKey<AppPinCodeFieldsState> appPinCodeConfirmKey = GlobalKey<AppPinCodeFieldsState>();
 
-    final GlobalKey<FormState> formCreateKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> formCreateKey = GlobalKey<FormState>();
   final GlobalKey<FormState> formConfirmKey = GlobalKey<FormState>();
 
   @override
@@ -26,9 +26,21 @@ class _RegisterMasterPinState extends State<RegisterMasterPin> {
     final deviceType = DeviceInfo.getDeviceType(context);
     switch (deviceType) {
       case DeviceType.desktop:
-        return const DesktopLayout();
+        return DesktopLayout(
+          appPinCodeCreateKey: appPinCodeCreateKey,
+          appPinCodeConfirmKey: appPinCodeConfirmKey,
+          formCreateKey: formCreateKey,
+          formConfirmKey: formConfirmKey,
+          isChangePin: widget.isChangePin,
+        );
       case DeviceType.tablet:
-        return const TabletLayout();
+        return TabletLayout(
+          appPinCodeCreateKey: appPinCodeCreateKey,
+          appPinCodeConfirmKey: appPinCodeConfirmKey,
+          formCreateKey: formCreateKey,
+          formConfirmKey: formConfirmKey,
+          isChangePin: widget.isChangePin,
+        );
       case DeviceType.mobile:
         return MobileLayout(
           appPinCodeCreateKey: appPinCodeCreateKey,

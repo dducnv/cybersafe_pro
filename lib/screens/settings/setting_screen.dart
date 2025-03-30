@@ -15,7 +15,7 @@ class SettingScreen extends StatelessWidget {
       case DeviceType.desktop:
         return const DesktopLayout();
       case DeviceType.tablet:
-        return const TabletLayout();
+        return const MobileLayout();
       case DeviceType.mobile:
         return const MobileLayout();
     }

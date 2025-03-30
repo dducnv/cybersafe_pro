@@ -1,4 +1,5 @@
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
+import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:local_auth/local_auth.dart';
@@ -17,7 +18,7 @@ class LocalAuthConfig {
 
   // Kiểm tra xem thiết bị có hỗ trợ phương thức xác thực phù hợp không
   bool get isAvailableBiometrics {
-    print("isAvailableBiometrics: $_canCheckBiometrics $_availableBiometrics");
+    logInfo("isAvailableBiometrics: $_canCheckBiometrics $_availableBiometrics");
     if (_canCheckBiometrics != true) return false;
     if (_availableBiometrics == null) return false;
 
@@ -84,7 +85,7 @@ class LocalAuthConfig {
         availableBiometrics.removeWhere((type) => type != BiometricType.fingerprint && type != BiometricType.strong);
       }
     } on PlatformException catch (e) {
-      debugPrint("error getAvailableBiometrics: $e");
+      logError("error getAvailableBiometrics: $e");
       availableBiometrics = [];
     }
     _availableBiometrics = availableBiometrics;
@@ -102,7 +103,7 @@ class LocalAuthConfig {
 
       authenticated = await auth.authenticate(localizedReason: reason, options: const AuthenticationOptions(stickyAuth: true, biometricOnly: true));
     } on PlatformException catch (e) {
-      debugPrint("error authenticate: $e");
+      logError("error authenticate: $e");
       return false;
     }
     return authenticated;
@@ -119,7 +120,7 @@ class LocalAuthConfig {
 
   // Lưu trạng thái sử dụng sinh trắc học
   Future<void> setUseBiometric(bool enable) async {
-    await SecureStorage.instance.save(key: SecureStorageKeys.isEnableLocalAuth.name, value: enable.toString());
+    await SecureStorage.instance.save(key: SecureStorageKey.isEnableLocalAuth, value: enable.toString());
     _isOpenUseBiometric = enable;
   }
 }

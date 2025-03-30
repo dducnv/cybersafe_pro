@@ -1,4 +1,10 @@
+import 'package:cybersafe_pro/components/bottom_sheets/choose_lang_bottom_sheet.dart';
 import 'package:cybersafe_pro/constants/secure_storage_key.dart' show SecureStorageKey;
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/app_locale.dart';
+import 'package:cybersafe_pro/localization/keys/onboarding_text.dart';
+import 'package:cybersafe_pro/localization/screens/onboarding/onboarding_locale.dart';
+import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
@@ -8,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -43,8 +50,14 @@ class OnboardingScreenState extends State<OnboardingScreen> {
         extendBodyBehindAppBar: true,
         extendBody: true,
         backgroundColor: theme.colorScheme.secondaryContainer,
-        body: Stack(alignment: Alignment.bottomCenter, children: [buildBackground(width), buildContent(theme), buildBottomSection(theme)]),
+        body: Stack(alignment: Alignment.bottomCenter, children: [buildVNFlagMapBg(), buildBackground(width), buildContent(theme), buildBottomSection(theme)]),
       ),
+    );
+  }
+
+  Positioned buildVNFlagMapBg() {
+    return Positioned.fill(
+      child: Padding(padding: const EdgeInsets.all(16), child: SvgPicture.asset("assets/images/flag_map.svg", color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2))),
     );
   }
 
@@ -100,9 +113,16 @@ class OnboardingScreenState extends State<OnboardingScreen> {
   Widget buildLanguageSelector(ThemeData theme) {
     return GestureDetector(
       onTap: () {
-        // bottomSheetChooseLanguage(context, () {});
+        showLanguageBottomSheet(context);
       },
-      child: Row(mainAxisSize: MainAxisSize.min, children: [Text("Vietnamese", style: theme.textTheme.titleSmall), const Icon(Icons.arrow_drop_down_rounded)]),
+      child: Selector<AppLocale, (Locale, String)>(
+        selector: (_, provider) => (provider.locale, provider.currentLocaleModel.languageNativeName),
+        shouldRebuild: (prev, next) => prev.$1 != next.$1,
+        builder: (context, data, child) {
+          final (locale, nativeName) = data;
+          return Row(mainAxisSize: MainAxisSize.min, children: [Text(nativeName, style: theme.textTheme.titleSmall), const Icon(Icons.arrow_drop_down_rounded)]);
+        },
+      ),
     );
   }
 
@@ -119,43 +139,6 @@ class OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Future<void> bottomSheetChooseLanguage(BuildContext context, Function() callBack) async {
-    await showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return SizedBox(
-          height: 300.h,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(padding: const EdgeInsets.all(16), child: Text("Chọn ngôn ngữ", style: Theme.of(context).textTheme.titleMedium)),
-              // Expanded(
-              //   child: ListView.builder(
-              //       itemCount: ,
-              //       itemBuilder: (context, index) {
-              //         return ListTile(
-              //           title: Text("Vietnamese"),
-              //           selected: context.read<RootPR>().appLanguage ==
-              //               AppLangsList().appLangs[index].code,
-              //           onTap: () {
-              //             context.read<RootPR>().language(
-              //                   AppLangsList().appLangs[index].code,
-              //                 );
-
-              //             callBack.call();
-              //             Navigator.pop(context);
-              //           },
-              //         );
-              //       }),
-              // ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Future<void> privacyBottomSheet(BuildContext context) async {
     return showModalBottomSheet(
       context: context,
@@ -167,9 +150,9 @@ class OnboardingScreenState extends State<OnboardingScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SettingItemWidget(icon: Icons.arrow_forward_ios_rounded, titleWidth: 400, title: "Chính sách bảo mật", onTap: () {}),
+                SettingItemWidget(icon: Icons.arrow_forward_ios_rounded, titleWidth: 400, title: context.appLocale.onboardingLocale.getText(OnboardingText.policy), onTap: () {}),
                 const SizedBox(height: 10),
-                SettingItemWidget(icon: Icons.arrow_forward_ios_rounded, titleWidth: 400, title: "Điều khoản dịch vụ", onTap: () {}),
+                SettingItemWidget(icon: Icons.arrow_forward_ios_rounded, titleWidth: 400, title: context.appLocale.onboardingLocale.getText(OnboardingText.terms), onTap: () {}),
                 const SizedBox(height: 5),
                 ValueListenableBuilder(
                   valueListenable: isDegreed,
@@ -189,7 +172,12 @@ class OnboardingScreenState extends State<OnboardingScreen> {
                                 onTap: () {
                                   isDegreed.value = !isDegreed.value;
                                 },
-                                child: Text("Đồng ý với chính sách và điều khoản", maxLines: 2, style: TextStyle(fontSize: 14.sp), overflow: TextOverflow.ellipsis),
+                                child: Text(
+                                  context.appLocale.onboardingLocale.getText(OnboardingText.termsAndConditions),
+                                  maxLines: 2,
+                                  style: TextStyle(fontSize: 14.sp),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ),
                           ],
@@ -199,12 +187,13 @@ class OnboardingScreenState extends State<OnboardingScreen> {
                           isDisabled: !value,
                           kMargin: 0,
                           onPressed: () async {
+                            await context.read<CategoryProvider>().initDataCategory(context);
                             await SecureStorage.instance.save(key: SecureStorageKey.firstOpenApp, value: "false");
                             if (context.mounted) {
                               Navigator.pushNamed(context, AppRoutes.registerMasterPin);
                             }
                           },
-                          text: "Tiếp tục",
+                          text: context.appLocale.onboardingLocale.getText(OnboardingText.continueText),
                         ),
                       ],
                     );

@@ -3,6 +3,8 @@ import 'package:cybersafe_pro/services/otp.dart';
 import 'package:cybersafe_pro/utils/refetch_totp.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
+import 'package:cybersafe_pro/utils/app_error.dart';
+import 'package:cybersafe_pro/localization/keys/error_text.dart';
 import 'package:cybersafe_pro/widgets/circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter/material.dart';
 
@@ -34,10 +36,10 @@ class OtpTextWithCountdown extends StatefulWidget {
 
   static String _validateAndFormatKey(String key) {
     if (key.isEmpty) {
-      throw Exception("keySecret is empty");
+      throwAppError(ErrorText.emptySecretKey);
     }
     if (!OTP.isKeyValid(key)) {
-      throw Exception("keySecret is invalid");
+      throwAppError(ErrorText.invalidSecretKey);
     }
     return key.toUpperCase();
   }

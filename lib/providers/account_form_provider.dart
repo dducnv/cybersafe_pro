@@ -1,14 +1,18 @@
 import 'package:cybersafe_pro/database/boxes/icon_custom_box.dart';
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:cybersafe_pro/database/models/icon_custom_model.dart';
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
 import 'package:cybersafe_pro/resources/brand_logo.dart';
+import 'package:cybersafe_pro/utils/global_keys.dart';
+import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/type_text_field.dart';
 import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
 import 'package:password_strength_checker/password_strength_checker.dart';
 
-final List<TypeTextField> typeTextFields = [TypeTextField(title: "Văn bản", type: 'text'), TypeTextField(title: "Văn bản bảo mật", type: 'password')];
+final List<TypeTextField> typeTextFields = [TypeTextField(title: "Text", type: 'text'), TypeTextField(title: "Password", type: 'password')];
 
 class AccountFormProvider extends ChangeNotifier {
   final formKey = GlobalKey<FormState>();
@@ -127,7 +131,7 @@ class AccountFormProvider extends ChangeNotifier {
       // Notify listeners of changes
       notifyListeners();
     } catch (e) {
-      debugPrint('Error loading account to form: $e');
+      logError('Error loading account to form: $e');
       rethrow;
     }
   }
@@ -182,8 +186,9 @@ class AccountFormProvider extends ChangeNotifier {
 
   // Validate từng trường
   bool validateAppName() {
+    final context = GlobalKeys.appRootNavigatorKey.currentContext!;
     if (appNameController.text.trim().isEmpty) {
-      appNameError = 'Vui lòng nhập tên ứng dụng';
+      appNameError = context.trCreateAccount(CreateAccountText.appNameValidation);
       notifyListeners();
       return false;
     }
@@ -193,8 +198,9 @@ class AccountFormProvider extends ChangeNotifier {
   }
 
   bool validateCategory() {
+    final context = GlobalKeys.appRootNavigatorKey.currentContext!;
     if (selectedCategory == null) {
-      categoryError = 'Vui lòng chọn danh mục';
+      categoryError = context.trCreateAccount(CreateAccountText.categoryValidation);
       notifyListeners();
       return false;
     }

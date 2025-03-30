@@ -1,3 +1,4 @@
+import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:flutter/material.dart';
 
 class CardCustomWidget extends StatelessWidget {
@@ -11,7 +12,7 @@ class CardCustomWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding:
-          padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+          padding ?? EdgeInsets.symmetric(horizontal: 16, vertical: 10.h),
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainer,

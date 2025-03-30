@@ -35,4 +35,8 @@ class TOTPBox {
   static Stream<List<TOTPOjbModel>> watchAll() {
     return box.query().watch(triggerImmediately: true).map((query) => query.find());
   }
-} 
+
+  static Future<void> deleteAllAsync() async {
+    await box.removeAllAsync();
+  }
+}

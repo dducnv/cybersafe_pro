@@ -14,7 +14,7 @@ class HomeScreen extends StatelessWidget {
       case DeviceType.desktop:
         return const HomeDesktopLayout();
       case DeviceType.tablet:
-        return const HomeTabletLayout();
+        return const HomeMobileLayout();
       case DeviceType.mobile:
         return const HomeMobileLayout();
     }

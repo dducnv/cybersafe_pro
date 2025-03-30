@@ -1,5 +1,7 @@
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/local_auth_provider.dart';
+import 'package:cybersafe_pro/utils/logger.dart';
+import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:flutter/material.dart';
 import 'package:cybersafe_pro/utils/device_type.dart';
@@ -19,11 +21,34 @@ class LoginMasterPassword extends StatefulWidget {
 }
 
 class _LoginMasterPasswordState extends State<LoginMasterPassword> {
+  bool _mounted = true;
+
   @override
   void initState() {
-    context.read<AppProvider>().stopTimer();
-    context.read<LocalAuthProvider>().init();
     super.initState();
+
+    // Đảm bảo SecureApplicationUtil được khởi tạo
+    SecureApplicationUtil.instance.init();
+    // Tạo mới provider
+    final provider = Provider.of<LocalAuthProvider>(context, listen: false);
+    provider.init(widget.showBiometric && widget.isFromBackup == false);
+
+    // Khởi tạo LocalAuthProvider
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_mounted) return;
+      try {
+        // Dừng timer
+        context.read<AppProvider>().stopTimer();
+      } catch (e) {
+        logError('Error initializing login screen: $e');
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _mounted = false;
+    super.dispose();
   }
 
   @override
@@ -33,7 +58,7 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
       case DeviceType.desktop:
         return const DesktopLayout();
       case DeviceType.tablet:
-        return const TabletLayout();
+        return  TabletLayout(showBiometric: widget.showBiometric, isFromBackup: widget.isFromBackup, callBackLoginSuccess: widget.callBackLoginSuccess);
       case DeviceType.mobile:
         return MobileLayout(showBiometric: widget.showBiometric, isFromBackup: widget.isFromBackup, callBackLoginSuccess: widget.callBackLoginSuccess);
     }

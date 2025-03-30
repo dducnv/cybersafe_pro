@@ -1,13 +1,14 @@
 import 'dart:convert';
+import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:pointycastle/export.dart' as pc;
 import 'package:flutter/foundation.dart';
 import 'package:crypto/crypto.dart';
 
-class EncryptData {
-  static final instance = EncryptData._internal();
+class EncryptService {
+  static final instance = EncryptService._internal();
 
-  EncryptData._internal();
+  EncryptService._internal();
 
   static const int _keyLength = 32; // 256 bits
   static const int _ivLength = 12; // 96 bits for GCM
@@ -96,11 +97,11 @@ class EncryptData {
       }
       
       final elapsedTime = stopwatch.elapsed;
-      debugPrint('encryptFernet: ${value.length} chars - Thao tác hoàn thành trong: ${elapsedTime.inMilliseconds}ms');
+      logInfo('encryptFernet: ${value.length} chars - Thao tác hoàn thành trong: ${elapsedTime.inMilliseconds}ms');
       
       return result;
     } catch (e) {
-      debugPrint("Encryption error: $e");
+      logError("Encryption error: $e");
       return value;
     }
   }
@@ -206,7 +207,7 @@ class EncryptData {
       
       return result;
     } catch (e) {
-      debugPrint("Decryption error: $e");
+      logError("Decryption error: $e");
       return value;
     }
   }
@@ -308,7 +309,7 @@ class EncryptData {
       
       return json.encode(package);
     } catch (e) {
-      debugPrint("Fast encryption error: $e");
+      logError("Fast encryption error: $e");
       return value;
     }
   }

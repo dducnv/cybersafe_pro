@@ -27,7 +27,7 @@ class AccountItemWidget extends StatelessWidget {
           AppRoutes.navigateTo(context, AppRoutes.detailsAccount, arguments: {"accountId": accountModel.id});
         },
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
+          padding:  EdgeInsets.symmetric(horizontal: 10),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -64,10 +64,11 @@ class AccountItemWidget extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: DecoratedBox(
+                child: Container(
                   decoration: BoxDecoration(border: isLastItem ? null : Border(bottom: BorderSide(color: Theme.of(context).colorScheme.surfaceContainerHighest))),
+                  
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 14.2),
+                    padding:  EdgeInsets.symmetric(vertical: 14.h),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,

@@ -2,7 +2,10 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
+import 'package:cybersafe_pro/localization/keys/error_text.dart';
+import 'package:cybersafe_pro/utils/app_error.dart';
 import 'package:cybersafe_pro/utils/base32.dart';
+import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:flutter/material.dart';
 
 enum Type { hotp, totp }
@@ -65,13 +68,13 @@ class OTP {
     int interval = 30;
 
     if (u.scheme != 'otpauth') {
-      throw Exception('uri had scheme ${u.scheme}, not otpauth');
+      throwAppError(ErrorText.invalidUriScheme, error: 'uri had scheme ${u.scheme}, not otpauth');
     }
 
     Type type = u.host == 'totp' ? Type.totp : Type.hotp;
 
     if (u.queryParameters['issuer'] == null && !u.path.contains(':')) {
-      throw Exception('uri is missing issuer, uri: $uri');
+      throwAppError(ErrorText.missingIssuer, error: 'uri is missing issuer, uri: $uri');
     }
     String issuer = u.queryParameters['issuer'] != null
         ? u.queryParameters['issuer']!
@@ -80,7 +83,7 @@ class OTP {
     String accountName = u.path.contains(':') ? u.path.split(':')[1] : u.path;
 
     if (u.queryParameters['secret'] == null) {
-      throw Exception('uri had no secret parameter, uri: $uri');
+      throwAppError(ErrorText.missingSecret, error: 'uri had no secret parameter, uri: $uri');
     }
     String secret = u.queryParameters['secret']!;
 
@@ -96,8 +99,8 @@ class OTP {
           algorithm = Algorithm.SHA512;
           break;
         default:
-          throw Exception(
-              'uri had invalid algorithm, uri: $uri, algorithm: ${u.queryParameters['algorithm']}');
+          throwAppError(ErrorText.invalidAlgorithm, 
+              error: 'uri had invalid algorithm, uri: $uri, algorithm: ${u.queryParameters['algorithm']}');
       }
     }
 
@@ -154,7 +157,7 @@ class OTP {
       Algorithm algorithm = Algorithm.SHA256,
       bool isGoogle = false}) {
     if (isKeyValid(secret) == false) {
-      throw Exception('Invalid secret key');
+      throwAppError(ErrorText.invalidSecretKey);
     }
 
     final code =
@@ -312,7 +315,7 @@ class OTP {
 
   static void _showHOTPWarning(Hash mac) {
     if (mac == sha256 || mac == sha512) {
-      debugPrint("Using non-SHA1 hashing with HOTP is not part of the RFC for HOTP and may cause incompatibilities between different library implementatiions. This library attempts to match behavior with other libraries as best it can.");
+      logInfo("Using non-SHA1 hashing with HOTP is not part of the RFC for HOTP and may cause incompatibilities between different library implementatiions. This library attempts to match behavior with other libraries as best it can.");
     }
   }
 
@@ -325,8 +328,6 @@ class OTP {
         return sha512;
       case Algorithm.SHA1:
         return sha1;
-      default:
-        return sha256;
     }
   }
 
@@ -339,8 +340,6 @@ class OTP {
         return 64;
       case Algorithm.SHA1:
         return 20;
-      default:
-        return 32; // For SHA256
     }
   }
 }

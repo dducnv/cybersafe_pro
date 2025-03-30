@@ -1,5 +1,9 @@
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
+import 'package:cybersafe_pro/database/boxes/account_custom_field_box.dart';
+import 'package:cybersafe_pro/database/boxes/password_history_box.dart';
+import 'package:cybersafe_pro/database/boxes/totp_box.dart';
+import 'package:cybersafe_pro/utils/logger.dart';
 import '../../objectbox.g.dart';
 import '../objectbox.dart';
 
@@ -123,11 +127,66 @@ class AccountBox {
   }
 
   // Xóa tài khoản theo ID
-  static Future<bool> delete(int id) async => await box.removeAsync(id);
-  static Future<int> deleteMultiple(List<int> ids) async =>  await box.removeManyAsync(ids);
+  static Future<bool> delete(int id) async {
+    final account = await box.getAsync(id);
+    if (account == null) return false;
+
+    try {
+      return await ObjectBox.instance.store.runInTransaction(TxMode.write, () {
+        // Xóa custom fields
+        for (var field in account.customFields) {
+          AccountCustomFieldBox.removeById(field.id);
+        }
+
+        // Xóa password histories
+        for (var history in account.passwordHistories) {
+          PasswordHistoryBox.removeById(history.id);
+        }
+
+        // Xóa TOTP
+        if (account.getTotp != null) {
+          TOTPBox.delete(account.getTotp!.id);
+        }
+
+        // Xóa account
+        return box.remove(id);
+      });
+    } catch (e) {
+      logError('Error deleting account: $e');
+      return false;
+    }
+  }
+
+  // Xóa nhiều tài khoản
+  static Future<int> deleteMany(List<int> ids) async {
+    try {
+      return await ObjectBox.instance.store.runInTransaction(TxMode.write, () {
+        for (var id in ids) {
+          delete(id);
+        }
+        return ids.length;
+      });
+    } catch (e) {
+      logError('Error deleting accounts: $e');
+      return 0;
+    }
+  }
 
   // Xóa tất cả tài khoản
-  static void deleteAll() => box.removeAll();
+  static Future<void> deleteAll() async {
+    try {
+      final accounts = await box.getAllAsync();
+      for (var account in accounts) {
+        delete(account.id);
+      }
+    } catch (e) {
+      logError('Error deleting all accounts: $e');
+    }
+  }
+
+  static Future<void> deleteAllAsync() async {
+    await box.removeAllAsync();
+  }
 
   // Theo dõi thay đổi tất cả tài khoản
   static Stream<List<AccountOjbModel>> watchAll() {

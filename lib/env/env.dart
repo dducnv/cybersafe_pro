@@ -37,4 +37,7 @@ abstract class Env {
 
   @EnviedField(varName: 'VERSION_KEY', obfuscate: true)
   static final String versionKey = _Env.versionKey;
+
+  @EnviedField(varName: 'BACKUP_FILE_ENCRYPT_KEY', obfuscate: true)
+  static final String backupFileEncryptKey = _Env.backupFileEncryptKey;
 }

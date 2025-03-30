@@ -6,6 +6,7 @@ import 'package:cybersafe_pro/database/models/icon_custom_model.dart';
 import 'package:cybersafe_pro/database/models/password_history_model.dart';
 import 'package:cybersafe_pro/database/models/totp_ojb_model.dart';
 import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
+import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:intl/intl.dart';
 import 'package:objectbox/objectbox.dart';
 
@@ -106,7 +107,7 @@ class AccountOjbModel {
         }
       }
     } catch (e) {
-      print('Error setting relationships: $e');
+      logError('Error setting relationships: $e');
     }
   }
 
@@ -152,7 +153,7 @@ class AccountOjbModel {
 
       return newAccount;
     } catch (e) {
-      print('Error creating account from model: $e');
+      logError('Error creating account from model: $e');
       rethrow;
     }
   }
@@ -216,11 +217,11 @@ class AccountOjbModel {
       'password': await _encryptAppDataService.decryptPassword(password ?? ''),
       'notes': await _encryptAppDataService.decryptInfo(notes ?? ''),
       'icon': icon,
-      'customFields': getCustomFields.map((e) => e.toDecryptedJson()).toList(),
-      'totp': getTotp?.toDecryptedJson(),
+      'customFields': await Future.wait(getCustomFields.map((e) => e.toDecryptedJson())),
+      'totp': getTotp != null ? await getTotp!.toDecryptedJson() : null,
       'category': getCategory?.toJson(),
       'passwordUpdatedAt': passwordUpdatedAt?.toIso8601String(),
-      'passwordHistories': getPasswordHistories.map((e) => e.toDecryptedJson()).toList(),
+      'passwordHistories': await Future.wait(getPasswordHistories.map((e) => e.toDecryptedJson())),
       'iconCustom': getIconCustom?.toJson(),
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),

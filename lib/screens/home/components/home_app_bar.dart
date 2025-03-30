@@ -1,6 +1,8 @@
 import 'package:cybersafe_pro/components/bottom_sheets/select_category_bottom_sheets.dart';
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
@@ -70,7 +72,7 @@ class _HomeAppBarCustomState extends State<HomeAppBarCustom> {
                           context: context,
                           builder: (context) {
                             return AlertDialog(
-                              content: Text("Xoá tài khoản đã chọn"),
+                              content: Text(context.trHome(HomeLocale.deleteAllAccount)),
                               actionsPadding: const EdgeInsets.only(bottom: 2, right: 5),
                               contentPadding: const EdgeInsets.only(top: 16, left: 16, right: 16),
                               actions: [
@@ -78,14 +80,14 @@ class _HomeAppBarCustomState extends State<HomeAppBarCustom> {
                                   onPressed: () {
                                     Navigator.pop(context);
                                   },
-                                  child: Text("Huỷ"),
+                                  child: Text(context.trHome(HomeLocale.cancel)),
                                 ),
                                 TextButton(
                                   onPressed: () {
                                     context.read<AccountProvider>().handleDeleteAllAccount();
                                     Navigator.pop(context);
                                   },
-                                  child: Text("Xoá tất cả"),
+                                  child: Text(context.trHome(HomeLocale.delete)),
                                 ),
                               ],
                             );

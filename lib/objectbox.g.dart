@@ -8,18 +8,18 @@
 
 import 'dart:typed_data';
 
-import 'package:cybersafe_pro/database/models/account_custom_field.dart';
-import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
-import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
-import 'package:cybersafe_pro/database/models/icon_custom_model.dart';
-import 'package:cybersafe_pro/database/models/password_history_model.dart';
-import 'package:cybersafe_pro/database/models/totp_ojb_model.dart';
-
 import 'package:flat_buffers/flat_buffers.dart' as fb;
 import 'package:objectbox/internal.dart'
     as obx_int; // generated code can access "internal" functionality
 import 'package:objectbox/objectbox.dart' as obx;
 import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
+
+import 'database/models/account_custom_field.dart';
+import 'database/models/account_ojb_model.dart';
+import 'database/models/category_ojb_model.dart';
+import 'database/models/icon_custom_model.dart';
+import 'database/models/password_history_model.dart';
+import 'database/models/totp_ojb_model.dart';
 
 export 'package:objectbox/objectbox.dart'; // so that callers only have to import this file
 
@@ -191,7 +191,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(4, 3018443929711597194),
       name: 'PasswordHistory',
-      lastPropertyId: const obx_int.IdUid(4, 7289120895696701836),
+      lastPropertyId: const obx_int.IdUid(5, 5623166496235733287),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -210,11 +210,11 @@ final _entities = <obx_int.ModelEntity>[
             type: 10,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 7289120895696701836),
+            id: const obx_int.IdUid(5, 5623166496235733287),
             name: 'accountId',
             type: 11,
             flags: 520,
-            indexId: const obx_int.IdUid(4, 8616999152411792910),
+            indexId: const obx_int.IdUid(7, 6579639089864751933),
             relationTarget: 'AccountOjbModel')
       ],
       relations: <obx_int.ModelRelation>[],
@@ -332,12 +332,12 @@ obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
       entities: _entities,
       lastEntityId: const obx_int.IdUid(6, 965409409935003527),
-      lastIndexId: const obx_int.IdUid(6, 925758013839913807),
+      lastIndexId: const obx_int.IdUid(7, 6579639089864751933),
       lastRelationId: const obx_int.IdUid(0, 0),
       lastSequenceId: const obx_int.IdUid(0, 0),
       retiredEntityUids: const [],
-      retiredIndexUids: const [],
-      retiredPropertyUids: const [],
+      retiredIndexUids: const [8616999152411792910],
+      retiredPropertyUids: const [7289120895696701836],
       retiredRelationUids: const [],
       modelVersion: 5,
       modelVersionParserMinimum: 5,
@@ -402,7 +402,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
                   object.id,
                   (AccountCustomFieldOjbModel srcObject) =>
                       srcObject.account): object.customFields,
-              obx_int.RelInfo<PasswordHistory>.toOneBacklink(4, object.id,
+              obx_int.RelInfo<PasswordHistory>.toOneBacklink(5, object.id,
                       (PasswordHistory srcObject) => srcObject.account):
                   object.passwordHistories
             },
@@ -496,7 +496,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           obx_int.InternalToManyAccess.setRelInfo<AccountOjbModel>(
               object.passwordHistories,
               store,
-              obx_int.RelInfo<PasswordHistory>.toOneBacklink(4, object.id,
+              obx_int.RelInfo<PasswordHistory>.toOneBacklink(5, object.id,
                   (PasswordHistory srcObject) => srcObject.account));
           return object;
         }),
@@ -518,18 +518,14 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, categoryNameOffset);
           fbb.addInt64(2, object.indexPos);
-          fbb.addInt64(3, object.createdAt?.millisecondsSinceEpoch);
-          fbb.addInt64(4, object.updatedAt?.millisecondsSinceEpoch);
+          fbb.addInt64(3, object.createdAt.millisecondsSinceEpoch);
+          fbb.addInt64(4, object.updatedAt.millisecondsSinceEpoch);
           fbb.finish(fbb.endTable());
           return object.id;
         },
         objectFromFB: (obx.Store store, ByteData fbData) {
           final buffer = fb.BufferContext(fbData);
           final rootOffset = buffer.derefObject(0);
-          final createdAtValue =
-              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 10);
-          final updatedAtValue =
-              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 12);
           final idParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
           final categoryNameParam =
@@ -537,12 +533,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
                   .vTableGet(buffer, rootOffset, 6, '');
           final indexPosParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0);
-          final createdAtParam = createdAtValue == null
-              ? null
-              : DateTime.fromMillisecondsSinceEpoch(createdAtValue);
-          final updatedAtParam = updatedAtValue == null
-              ? null
-              : DateTime.fromMillisecondsSinceEpoch(updatedAtValue);
+          final createdAtParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0));
+          final updatedAtParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0));
           final object = CategoryOjbModel(
               id: idParam,
               categoryName: categoryNameParam,
@@ -566,30 +560,27 @@ obx_int.ModelDefinition getObjectBoxModel() {
         },
         objectToFB: (PasswordHistory object, fb.Builder fbb) {
           final passwordOffset = fbb.writeString(object.password);
-          fbb.startTable(5);
+          fbb.startTable(6);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, passwordOffset);
-          fbb.addInt64(2, object.createdAt?.millisecondsSinceEpoch);
-          fbb.addInt64(3, object.account.targetId);
+          fbb.addInt64(2, object.createdAt.millisecondsSinceEpoch);
+          fbb.addInt64(4, object.account.targetId);
           fbb.finish(fbb.endTable());
           return object.id;
         },
         objectFromFB: (obx.Store store, ByteData fbData) {
           final buffer = fb.BufferContext(fbData);
           final rootOffset = buffer.derefObject(0);
-          final createdAtValue =
-              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 8);
           final idParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
           final passwordParam = const fb.StringReader(asciiOptimization: true)
               .vTableGet(buffer, rootOffset, 6, '');
-          final createdAtParam = createdAtValue == null
-              ? null
-              : DateTime.fromMillisecondsSinceEpoch(createdAtValue);
+          final createdAtParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0));
           final object = PasswordHistory(
               id: idParam, password: passwordParam, createdAt: createdAtParam);
           object.account.targetId =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0);
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0);
           object.account.attach(store);
           return object;
         }),
@@ -607,8 +598,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, secretKeyOffset);
           fbb.addBool(2, object.isShowToHome);
-          fbb.addInt64(3, object.createdAt?.millisecondsSinceEpoch);
-          fbb.addInt64(4, object.updatedAt?.millisecondsSinceEpoch);
+          fbb.addInt64(3, object.createdAt.millisecondsSinceEpoch);
+          fbb.addInt64(4, object.updatedAt.millisecondsSinceEpoch);
           fbb.addInt64(5, object.account.targetId);
           fbb.finish(fbb.endTable());
           return object.id;
@@ -616,22 +607,16 @@ obx_int.ModelDefinition getObjectBoxModel() {
         objectFromFB: (obx.Store store, ByteData fbData) {
           final buffer = fb.BufferContext(fbData);
           final rootOffset = buffer.derefObject(0);
-          final createdAtValue =
-              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 10);
-          final updatedAtValue =
-              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 12);
           final idParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
           final secretKeyParam = const fb.StringReader(asciiOptimization: true)
               .vTableGet(buffer, rootOffset, 6, '');
           final isShowToHomeParam =
               const fb.BoolReader().vTableGet(buffer, rootOffset, 8, false);
-          final createdAtParam = createdAtValue == null
-              ? null
-              : DateTime.fromMillisecondsSinceEpoch(createdAtValue);
-          final updatedAtParam = updatedAtValue == null
-              ? null
-              : DateTime.fromMillisecondsSinceEpoch(updatedAtValue);
+          final createdAtParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0));
+          final updatedAtParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0));
           final object = TOTPOjbModel(
               id: idParam,
               secretKey: secretKeyParam,

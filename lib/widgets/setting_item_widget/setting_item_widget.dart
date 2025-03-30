@@ -8,8 +8,9 @@ class SettingItemWidget extends StatelessWidget {
   final IconData? icon;
   final double? titleWidth;
   final Widget? suffix;
+  final TextStyle? titleStyle;
   final EdgeInsetsGeometry? padding;
-  const SettingItemWidget({super.key, this.onTap, required this.title, this.icon, this.titleWidth, this.suffix, this.padding});
+  const SettingItemWidget({super.key, this.onTap, required this.title, this.icon, this.titleWidth, this.suffix, this.titleStyle, this.padding});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,7 @@ class SettingItemWidget extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(child: Text(title, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500), overflow: TextOverflow.ellipsis, maxLines: 1)),
+                Expanded(child: Text(title, style: titleStyle ?? TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500), overflow: TextOverflow.ellipsis, maxLines: 1)),
                 icon != null ? Icon(icon, size: 22.sp) : suffix ?? const SizedBox(),
                 //switch
               ],
