@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/login_text.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/local_auth_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
@@ -15,9 +17,10 @@ import 'package:provider/provider.dart';
 class MobileLayout extends StatefulWidget {
   final bool showBiometric;
   final bool isFromBackup;
+  final bool isFromRestore;
   final Function({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey})? callBackLoginSuccess;
 
-  const MobileLayout({super.key, this.showBiometric = true, this.isFromBackup = false, this.callBackLoginSuccess});
+  const MobileLayout({super.key, this.showBiometric = true, this.isFromBackup = false, this.isFromRestore = false, this.callBackLoginSuccess});
 
   @override
   State<MobileLayout> createState() => _MobileLayoutState();
@@ -49,7 +52,7 @@ class _MobileLayoutState extends State<MobileLayout> {
       },
       validator: (value) {
         if (value!.length < 6) {
-          return "Please enter a valid master password";
+          return context.trLogin(LoginText.pinCodeRequired);
         }
         return null;
       },
@@ -61,7 +64,7 @@ class _MobileLayoutState extends State<MobileLayout> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.showBiometric ? AppBar(elevation: 0, backgroundColor: Theme.of(context).colorScheme.surface, scrolledUnderElevation: 0) : null,
+      appBar: widget.isFromBackup ? AppBar(elevation: 0, backgroundColor: Theme.of(context).colorScheme.surface, scrolledUnderElevation: 0) : null,
       body: Consumer<LocalAuthProvider>(
         builder: (context, provider, child) {
           // Buộc kiểm tra lại trạng thái khóa mỗi khi build
@@ -70,9 +73,27 @@ class _MobileLayoutState extends State<MobileLayout> {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("Login with Master Password", style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+              Text(
+                widget.isFromBackup ? context.trLogin(LoginText.enterAnyPin) : context.trLogin(LoginText.enterPin), 
+                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)
+              ),
               const SizedBox(height: 20),
-              
+              if (widget.isFromBackup)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
+                child: Text(context.trLogin(LoginText.backupNote),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
+                ),
+              ),
+              if (widget.isFromRestore)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
+                child: Text(context.trLogin(LoginText.restoreNote),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
+                ),
+              ),
               // Hiển thị thông báo khi tài khoản bị khóa
               if (isCurrentlyLocked)
                 Padding(
@@ -80,22 +101,17 @@ class _MobileLayoutState extends State<MobileLayout> {
                   child: Column(
                     children: [
                       Text(
-                        "Tài khoản đã bị khóa do nhập sai mật khẩu nhiều lần",
+                        context.trLogin(LoginText.loginLockDescription),
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        "Vui lòng thử lại sau ${provider.formattedRemainingTime}",
+                        context.trLogin(LoginText.pleaseTryAgainLater).replaceAll("{0}", provider.formattedRemainingTime),
                         textAlign: TextAlign.center,
                         style: TextStyle(fontWeight: FontWeight.w500),
                       ),
                       const SizedBox(height: 5),
-                      Text(
-                        "Thời gian chờ sẽ tăng sau mỗi lần đăng nhập không thành công",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
-                      ),
                       // Timer để cập nhật đếm ngược
                       _buildCountdownTimer(provider),
                     ],
@@ -105,7 +121,7 @@ class _MobileLayoutState extends State<MobileLayout> {
               // Hiện PinCodeFields chỉ khi không bị khóa
               if (!isCurrentlyLocked)
                 _buildPinCodeFields(),
-                
+              if(!isCurrentlyLocked)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: Row(
@@ -140,7 +156,7 @@ class _MobileLayoutState extends State<MobileLayout> {
   }
 
   Future<void> handleLogin() async {
-    if (widget.isFromBackup) {
+    if (widget.isFromBackup || widget.isFromRestore) {
       if (widget.callBackLoginSuccess != null && context.read<LocalAuthProvider>().textEditingController != null) {
         widget.callBackLoginSuccess!(isLoginSuccess: true, pin: context.read<LocalAuthProvider>().textEditingController!.text, appPinCodeKey: context.read<LocalAuthProvider>().appPinCodeKey);
       }
@@ -188,7 +204,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                 
                 if (mounted && context.mounted) {
                   // Đảm bảo trạng thái được cập nhật đúng
-                  context.read<LocalAuthProvider>().init(widget.showBiometric && !widget.isFromBackup);
+                  context.read<LocalAuthProvider>().init(widget.showBiometric && !widget.isFromBackup && !widget.isFromRestore);
                   setState(() {});
                 }
               }
@@ -200,7 +216,7 @@ class _MobileLayoutState extends State<MobileLayout> {
           margin: const EdgeInsets.only(top: 10),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.errorContainer.withOpacity(0.3),
+            color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(

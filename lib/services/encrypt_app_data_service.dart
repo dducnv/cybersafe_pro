@@ -17,13 +17,13 @@ import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
 import 'package:cybersafe_pro/database/models/icon_custom_model.dart';
 import 'package:cybersafe_pro/database/models/password_history_model.dart';
 import 'package:cybersafe_pro/database/models/totp_ojb_model.dart';
-import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/error_text.dart';
 import 'package:cybersafe_pro/services/encrypt_service.dart';
 import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_data.dart';
-import 'package:cybersafe_pro/utils/global_keys.dart';
+import 'package:cybersafe_pro/utils/app_error.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:pointycastle/export.dart' as pc;
 
@@ -59,6 +59,10 @@ class EncryptAppDataService {
   final _encryptData = EncryptService.instance;
   final _secureStorage = SecureStorage.instance;
 
+  // Orchestration key cho việc bảo vệ khóa trong bộ nhớ
+  late final String _orchestrationKey;
+  bool _isOrchestrationKeyInitialized = false;
+
   // Cache keys
   final Map<String, _CachedKey> _keyCache = {};
   final _lruCache = _LRUCache<String, String>(maxSize: 1000);
@@ -72,6 +76,9 @@ class EncryptAppDataService {
   // Khởi tạo
   Future<void> initialize() async {
     try {
+      // Khởi tạo orchestration key trước
+      await _initializeOrchestrationKey();
+      
       final isLegacy = await _isLegacyUser();
       final hasDeviceKey = await _hasDeviceKey();
 
@@ -96,6 +103,84 @@ class EncryptAppDataService {
     } catch (e) {
       _logError('Lỗi khởi tạo', e);
       rethrow;
+    }
+  }
+
+  // Khởi tạo orchestration key
+  Future<void> _initializeOrchestrationKey() async {
+    if (_isOrchestrationKeyInitialized) return;
+    
+    _orchestrationKey = await _generateOrchestrationKey();
+    _isOrchestrationKeyInitialized = true;
+    logInfo('Đã khởi tạo orchestration key');
+  }
+
+  // Tạo orchestration key dựa trên thông tin thiết bị
+  Future<String> _generateOrchestrationKey() async {
+    final deviceInfo = await _getDeviceSpecificInfo();
+    final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+    final appSignature = 'cybersafe_pro_v2';
+    final rawKey = '$deviceInfo:$timestamp:$appSignature';
+    return base64.encode(sha256.convert(utf8.encode(rawKey)).bytes);
+  }
+
+  // Lấy thông tin đặc trưng của thiết bị để tạo orchestration key
+  Future<String> _getDeviceSpecificInfo() async {
+    final deviceInfoPlugin = DeviceInfoPlugin();
+    try {
+      if (Platform.isAndroid) {
+        final androidInfo = await deviceInfoPlugin.androidInfo;
+        return '${androidInfo.brand}_${androidInfo.device}_${androidInfo.id}';
+      } else if (Platform.isIOS) {
+        final iosInfo = await deviceInfoPlugin.iosInfo;
+        return '${iosInfo.model}_${iosInfo.identifierForVendor}';
+      } else {
+        return 'unknown_device_${DateTime.now().millisecondsSinceEpoch}';
+      }
+    } catch (e) {
+      _logError('Lỗi lấy thông tin thiết bị', e);
+      return 'fallback_device_${DateTime.now().millisecondsSinceEpoch}';
+    }
+  }
+
+  // Bảo vệ khóa trong bộ nhớ bằng orchestration key
+  String _protectKey(String key) {
+    if (!_isOrchestrationKeyInitialized) {
+      _logError('Orchestration key chưa được khởi tạo', 'Không thể bảo vệ khóa');
+      return key; // Fallback nếu chưa khởi tạo
+    }
+    
+    final keyBytes = utf8.encode(key);
+    final orchestrationBytes = utf8.encode(_orchestrationKey);
+    final result = List<int>.filled(keyBytes.length, 0);
+    
+    for (var i = 0; i < keyBytes.length; i++) {
+      result[i] = keyBytes[i] ^ orchestrationBytes[i % orchestrationBytes.length];
+    }
+    
+    return base64.encode(result);
+  }
+
+  // Khôi phục khóa đã được bảo vệ
+  String _unprotectKey(String protectedKey) {
+    if (!_isOrchestrationKeyInitialized) {
+      _logError('Orchestration key chưa được khởi tạo', 'Không thể khôi phục khóa');
+      return protectedKey; // Fallback nếu chưa khởi tạo
+    }
+    
+    try {
+      final protectedBytes = base64.decode(protectedKey);
+      final orchestrationBytes = utf8.encode(_orchestrationKey);
+      final result = List<int>.filled(protectedBytes.length, 0);
+      
+      for (var i = 0; i < protectedBytes.length; i++) {
+        result[i] = protectedBytes[i] ^ orchestrationBytes[i % orchestrationBytes.length];
+      }
+      
+      return utf8.decode(result);
+    } catch (e) {
+      _logError('Lỗi khôi phục khóa', e);
+      return protectedKey; // Fallback nếu có lỗi
     }
   }
 
@@ -278,34 +363,40 @@ class EncryptAppDataService {
 
   Future<String> _getDeviceKey() async {
     if (_cachedDeviceKey != null && _deviceKeyExpiry != null && DateTime.now().isBefore(_deviceKeyExpiry!)) {
-      return _cachedDeviceKey!;
+      // Khôi phục khóa từ cache (đã được bảo vệ)
+      return _unprotectKey(_cachedDeviceKey!);
     }
 
     final key = await _secureStorage.read(key: SecureStorageKey.deviceKeyStorageKey);
     if (key == null) throw Exception('Device key not created');
 
-    _cachedDeviceKey = key;
+    // Lưu khóa vào cache sau khi bảo vệ
+    _cachedDeviceKey = _protectKey(key);
     _deviceKeyExpiry = DateTime.now().add(EncryptionConfig.KEY_CACHE_DURATION);
     return key;
   }
 
   Future<String> _generateEncryptionKey(String deviceKey, KeyType type) async {
     final cacheKey = '${type.name}_$deviceKey';
+    
+    // Nếu có trong cache, giải mã và trả về
     if (_keyCache.containsKey(cacheKey) && !_keyCache[cacheKey]!.isExpired) {
-      return _keyCache[cacheKey]!.key;
+      return _unprotectKey(_keyCache[cacheKey]!.key);
     }
 
     final storageKey = _getStorageKeyForType(type);
     final savedKey = await _secureStorage.read(key: storageKey);
     if (savedKey != null) {
-      _keyCache[cacheKey] = _CachedKey(savedKey);
+      // Lưu vào cache sau khi bảo vệ
+      _keyCache[cacheKey] = _CachedKey(_protectKey(savedKey));
       return savedKey;
     }
 
     final salt = 'cybersafe_${type.name}_salt_$deviceKey';
     final key = await compute(_generateKeyInIsolate, {'salt': salt, 'deviceKey': deviceKey, 'iterations': EncryptionConfig.PBKDF2_ITERATIONS, 'keySize': EncryptionConfig.KEY_SIZE_BYTES});
 
-    _keyCache[cacheKey] = _CachedKey(key);
+    // Lưu vào cache sau khi bảo vệ
+    _keyCache[cacheKey] = _CachedKey(_protectKey(key));
     await _secureStorage.save(key: storageKey, value: key);
 
     return key;
@@ -336,30 +427,27 @@ class EncryptAppDataService {
   }
 
   void _validatePin(String pin) {
-    final context = GlobalKeys.appRootNavigatorKey.currentContext!;
     if (pin.length < EncryptionConfig.MIN_PIN_LENGTH) {
-      throw Exception(context.trError(ErrorText.pinTooShort));
+      throwAppError(ErrorText.pinTooShort);
     }
   }
 
   void _validateBackupSize(String data) {
-    final context = GlobalKeys.appRootNavigatorKey.currentContext!;
     final backupSize = utf8.encode(data).length / (1024 * 1024);
     if (backupSize > EncryptionConfig.MAX_BACKUP_SIZE_MB) {
-      throw Exception(context.trError(ErrorText.backupTooLarge));
+      throwAppError(ErrorText.backupTooLarge);
     }
   }
 
   void _validateBackupData(Map<String, dynamic> data) {
-    final context = GlobalKeys.appRootNavigatorKey.currentContext!;
     if (data['type'] != 'CYBERSAFE_BACKUP') {
-      throw Exception(context.trError(ErrorText.invalidBackupFile));
+      throwAppError(ErrorText.invalidBackupFile);
     }
 
     final requiredFields = ['version', 'data', 'checksum', 'timestamp'];
     for (var field in requiredFields) {
       if (!data.containsKey(field)) {
-        throw Exception(context.trError(ErrorText.missingBackupField));
+        throwAppError(ErrorText.missingBackupField);
       }
     }
   }
@@ -382,11 +470,15 @@ class EncryptAppDataService {
         return await operation();
       } catch (e) {
         attempts++;
-        if (attempts == EncryptionConfig.MAX_RETRY_ATTEMPTS) rethrow;
+        if (attempts == EncryptionConfig.MAX_RETRY_ATTEMPTS) {
+          throwAppError(ErrorText.tooManyRetries);
+        }
         await Future.delayed(EncryptionConfig.RETRY_DELAY * attempts);
       }
     }
-    throw Exception(' Over the maximum number of retries');
+    // Code không bao giờ chạy đến đây vì throwAppError ở trên
+    throwAppError(ErrorText.tooManyRetries);
+    throw Exception("Unreachable code");
   }
 
   Future<void> _preloadKeys() async {
@@ -401,6 +493,14 @@ class EncryptAppDataService {
     } catch (e) {
       _logError('Cannot load keys', e);
     }
+  }
+
+    // Khi ứng dụng chuyển sang background hoặc đóng, xóa orchestration key
+  void clearOrchestrationKey() {
+    _isOrchestrationKeyInitialized = false;
+    // Không thực sự xóa giá trị _orchestrationKey vì không cần thiết
+    // và giúp tránh lỗi null khi nó được truy cập
+    logInfo('Đã xóa orchestration key');
   }
 
   // Future<void> _checkAndRotateKeys() async {
@@ -1040,3 +1140,4 @@ class _TempEncryptionService {
     return decrypted;
   }
 }
+

@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 
 class CategoryProvider extends ChangeNotifier {
   final Map<int, CategoryOjbModel> _categories = {};
-  final TextEditingController txtCategoryName = TextEditingController();
+  TextEditingController txtCategoryName = TextEditingController();
   bool _isLoading = false;
   String? _error;
   bool isChangedCategoryIndex = false;

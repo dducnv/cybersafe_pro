@@ -26,4 +26,5 @@ extension BuildContextExtension<T> on BuildContext {
   String trOnboarding(String key) => appLocale.onboardingLocale.getText(key);
   String trLogin(String key) => appLocale.loginLocale.getText(key);
   String trError(String key) => appLocale.errorLocale.getText(key);
+  String trCreatePinCode(String key) => appLocale.authLocale.getText(key);
 }

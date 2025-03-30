@@ -1,5 +1,6 @@
 import 'package:cybersafe_pro/localization/base_locale.dart';
 import 'package:cybersafe_pro/localization/app_locale.dart';
+import 'package:cybersafe_pro/localization/keys/login_text.dart';
 
 class AuthLocale extends BaseLocale {
   final AppLocale appLocale;
@@ -19,91 +20,88 @@ class AuthLocale extends BaseLocale {
 
   @override
   Map<String, String> get vi => {
-    'login': 'Đăng nhập',
-    'register': 'Đăng ký',
-    'enter_pin': 'Nhập mã PIN',
-    'confirm_pin': 'Xác nhận mã PIN',
-    'pin_not_match': 'Mã PIN không khớp',
-    'pin_required': 'Vui lòng nhập mã PIN',
-    'biometric_login': 'Đăng nhập bằng sinh trắc học',
+    LoginText.createPinCode: 'Tạo mã PIN',
+    LoginText.confirmPinCode: 'Xác nhận mã PIN',
+    LoginText.pinCodeNotMatch: 'Mã PIN không khớp',
+    LoginText.pinCodeRequired: 'Vui lòng nhập đủ 6 số',
+  };
+
+  @override
+  Map<String, String> get en => {
+    LoginText.createPinCode: 'Create PIN',
+    LoginText.confirmPinCode: 'Confirm PIN',
+    LoginText.pinCodeNotMatch: 'PINs do not match',
+    LoginText.pinCodeRequired: 'PIN is required',
   };
 
   @override
   Map<String, String> get en_GB => {
-    'login': 'Login',
-    'register': 'Register',
-    'enter_pin': 'Enter PIN',
-    'confirm_pin': 'Confirm PIN',
-    'pin_not_match': 'PINs do not match',
-    'pin_required': 'PIN is required',
-    'biometric_login': 'Biometric Login',
+    LoginText.createPinCode: 'Create PIN',
+    LoginText.confirmPinCode: 'Confirm PIN',
+    LoginText.pinCodeNotMatch: 'PINs do not match',
+    LoginText.pinCodeRequired: 'PIN is required',
   };
 
   @override
-  Map<String, String> get en_US => {'login': 'Login', 'register': 'Register', 'enter_pin': 'Enter PIN', 'confirm_pin': 'Confirm PIN'};
+  Map<String, String> get en_US => {
+    LoginText.createPinCode: 'Create PIN',
+    LoginText.confirmPinCode: 'Confirm PIN',
+    LoginText.pinCodeNotMatch: 'PINs do not match',
+    LoginText.pinCodeRequired: 'PIN is required',
+  };
   @override
   Map<String, String> get pt_PT => {
-    'login': 'Entrar',
-    'register': 'Registrar',
-    'enter_pin': 'Digite o PIN',
-    'confirm_pin': 'Confirme o PIN',
-    'pin_not_match': 'PINs não correspondem',
-    'pin_required': 'PIN é obrigatório',
-    'biometric_login': 'Login Biométrico',
+    LoginText.createPinCode: 'Criar PIN',
+    LoginText.confirmPinCode: 'Confirmar PIN',
+    LoginText.pinCodeNotMatch: 'PINs não correspondem',
+    LoginText.pinCodeRequired: 'PIN é obrigatório',
   };
 
   @override
-  Map<String, String> get pt_BR => {'login': 'Entrar', 'register': 'Registrar'};
+  Map<String, String> get pt_BR => {
+    LoginText.createPinCode: 'Criar PIN',
+    LoginText.confirmPinCode: 'Confirmar PIN',
+    LoginText.pinCodeNotMatch: 'PINs não correspondem',
+    LoginText.pinCodeRequired: 'PIN é obrigatório',
+  };
 
   @override
   Map<String, String> get hi => {
-    'login': 'लॉग इन करें',
-    'register': 'पंजीकरण करें',
-    'enter_pin': 'पिन दर्ज करें',
-    'confirm_pin': 'पिन की पुष्टि करें',
-    'pin_not_match': 'पिन मेल नहीं खाते',
-    'pin_required': 'पिन आवश्यक है',
-    'biometric_login': 'बायोमेट्रिक लॉगिन',
+    LoginText.createPinCode: 'PIN बनाना',
+    LoginText.confirmPinCode: 'PIN सुनिश्चित करना',
+    LoginText.pinCodeNotMatch: 'PIN मेल नहीं खाते',
+    LoginText.pinCodeRequired: 'PIN आवश्यक है',
   };
 
   @override
   Map<String, String> get ja => {
-    'login': 'ログイン',
-    'register': '登録',
-    'enter_pin': 'PINを入力',
-    'confirm_pin': 'PINを確認',
-    'pin_not_match': 'PINが一致しません',
-    'pin_required': 'PINが必要です',
-    'biometric_login': '生体認証ログイン',
+    LoginText.createPinCode: 'PIN ログイン',
+    LoginText.confirmPinCode: 'PIN 確認',
+    LoginText.pinCodeNotMatch: 'PIN が一致しません',
+    LoginText.pinCodeRequired: 'PIN が必要です',
   };
 
   @override
   Map<String, String> get ru => {
-    'login': 'Вход',
-    'register': 'Регистрация',
-    'enter_pin': 'Введите PIN',
-    'confirm_pin': 'Подтвердите PIN',
-    'pin_not_match': 'PIN-коды не совпадают',
-    'pin_required': 'Требуется PIN',
-    'biometric_login': 'Биометрический вход',
+    LoginText.createPinCode: 'PIN ログイン',
+    LoginText.confirmPinCode: 'PIN 確認',
+    LoginText.pinCodeNotMatch: 'PIN が一致しません',
+    LoginText.pinCodeRequired: 'PIN が必要です',
   };
 
   @override
   Map<String, String> get id => {
-    'login': 'Masuk',
-    'register': 'Daftar',
-    'enter_pin': 'Masukkan PIN',
-    'confirm_pin': 'Konfirmasi PIN',
-    'pin_not_match': 'PIN tidak cocok',
-    'pin_required': 'PIN diperlukan',
-    'biometric_login': 'Login Biometrik',
+    LoginText.createPinCode: 'PIN Masuk',
+    LoginText.confirmPinCode: 'PIN Konfirmasi',
+    LoginText.pinCodeNotMatch: 'PIN tidak cocok',
+    LoginText.pinCodeRequired: 'PIN diperlukan',
   };
-  
+
   @override
-  // TODO: implement en
-  Map<String, String> get en => throw UnimplementedError();
-  
-  @override
-  // TODO: implement pt
-  Map<String, String> get pt => throw UnimplementedError();
+  Map<String, String> get pt => {
+    LoginText.createPinCode: 'Criar PIN',
+    LoginText.confirmPinCode: 'Confirmar PIN',
+    LoginText.pinCodeNotMatch: 'PINs não correspondem',
+    LoginText.pinCodeRequired: 'PIN é obrigatório',
+  };
 }

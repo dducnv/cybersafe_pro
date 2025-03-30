@@ -9,6 +9,7 @@ import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/screens/login_master_password/login_master_password.dart';
 import 'package:cybersafe_pro/screens/onboarding/onboarding_screen.dart';
 import 'package:cybersafe_pro/screens/register_master_pin/register_master_pin.dart';
+import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
@@ -52,6 +53,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     if (state == AppLifecycleState.paused) {
       logInfo("Ứng dụng đang chạy nền");  
       context.read<AppProvider>().handleAppBackground();
+      // Xóa orchestration key khi ứng dụng chuyển sang background
+      EncryptAppDataService.instance.clearOrchestrationKey();
     } else if (state == AppLifecycleState.resumed) {
       logInfo("Ứng dụng đang chạy lại");
       SecureApplicationUtil.instance.init();

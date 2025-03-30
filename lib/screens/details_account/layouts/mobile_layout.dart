@@ -162,6 +162,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                 children: [if (accountOjbModel.passwordHistories.isNotEmpty) _buildPasswordHistoryWidget(accountOjbModel), const SizedBox(height: 10), _buildUpdatedAtWidget(accountOjbModel)],
               ),
             ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -259,7 +260,10 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
         const SizedBox(height: 16),
         Column(
           children: [
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(context.trDetails(DetailsAccountText.note), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]))]),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [Text(context.trDetails(DetailsAccountText.note), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]))],
+            ),
             const SizedBox(height: 5),
             FutureBuilder(
               future: decryptService.decryptInfo(accountOjbModel.notes ?? ""),
@@ -335,9 +339,14 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () {
+                onTap: () async {
                   HapticFeedback.selectionClick();
-                  clipboardCustom(context: context, text: "");
+                  final decryptService = EncryptAppDataService.instance;
+                  final decryptPassword = await decryptService.decryptTOTPKey(account.totp.target!.secretKey);
+                  final otpCode = generateTOTPCode(keySecret: decryptPassword);
+                  if (otpCode.isNotEmpty && mounted) {  
+                    clipboardCustom(context: context, text: otpCode);
+                  }
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(top: 10, bottom: 10, left: 10, right: 16),
@@ -413,7 +422,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
       context: context,
       builder: (BuildContext context) {
         return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.3,
+          height: MediaQuery.of(context).size.height * 0.6,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Column(
@@ -447,8 +456,10 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                           icon: const Icon(Icons.copy),
                           onPressed: () async {
                             final decryptService = EncryptAppDataService.instance;
-                            final decryptPassword = await decryptService.decryptInfo(passwordHistory.password);
-                            clipboardCustom(context: context, text: decryptPassword);
+                            final decryptPassword = await decryptService.decryptPassword(passwordHistory.password);
+                            if (decryptPassword.isNotEmpty && context.mounted) {  
+                              clipboardCustom(context: context, text: decryptPassword);
+                            }
                           },
                         ),
                       );

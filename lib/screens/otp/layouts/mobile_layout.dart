@@ -192,6 +192,8 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
                         Navigator.pop(context);
                         if (totp.totp.target?.secretKey == null) return;
                         String secretKey = await EncryptAppDataService.instance.decryptTOTPKey(totp.totp.target?.secretKey ?? "");
+                              
+                      if(!context.mounted) return;
                         clipboardCustom(context: context, text: generateTOTPCode(keySecret: secretKey));
                       },
                       icon: Icon(Icons.copy, size: 20.sp),

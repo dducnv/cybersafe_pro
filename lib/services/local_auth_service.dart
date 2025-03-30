@@ -1,7 +1,6 @@
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
-import 'package:flutter/foundation.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
@@ -15,6 +14,7 @@ class LocalAuthConfig {
   bool? _canCheckBiometrics;
   bool? _isOpenUseBiometric;
   List<BiometricType>? _availableBiometrics;
+  bool _isAuthenticating = false;
 
   // Kiểm tra xem thiết bị có hỗ trợ phương thức xác thực phù hợp không
   bool get isAvailableBiometrics {
@@ -30,6 +30,7 @@ class LocalAuthConfig {
   }
 
   bool get isOpenUseBiometric => _isOpenUseBiometric!;
+  bool get isAuthenticating => _isAuthenticating;
 
   List<BiometricType> get availableBiometrics => _availableBiometrics!;
 
@@ -92,20 +93,62 @@ class LocalAuthConfig {
     return _availableBiometrics!;
   }
 
+  // Hủy xác thực hiện tại nếu đang diễn ra
+  Future<bool> cancelAuthentication() async {
+    if (!_isAuthenticating) {
+      return true;
+    }
+    
+    try {
+      _isAuthenticating = false;
+      return await auth.stopAuthentication();
+    } on PlatformException catch (e) {
+      logError("error cancelAuthentication: $e");
+      return false;
+    }
+  }
+
   Future<bool> authenticate() async {
     if (!isAvailableBiometrics) {
       return false;
     }
 
+    // Kiểm tra xem đã có quá trình xác thực đang diễn ra không
+    if (_isAuthenticating) {
+      logInfo("Authentication already in progress, cancelling previous attempt");
+      await cancelAuthentication();
+      // Đợi một chút để đảm bảo quá trình xác thực trước đó đã bị hủy
+      await Future.delayed(const Duration(milliseconds: 300));
+    }
+
     bool authenticated = false;
     try {
-      final String reason = Platform.isIOS ? 'Vui lòng sử dụng Face ID để xác thực' : 'Vui lòng quét vân tay để xác thực';
+      _isAuthenticating = true;
+      final String reason = Platform.isIOS 
+          ? 'Vui lòng sử dụng Face ID để xác thực' 
+          : 'Vui lòng quét vân tay để xác thực';
 
-      authenticated = await auth.authenticate(localizedReason: reason, options: const AuthenticationOptions(stickyAuth: true, biometricOnly: true));
+      authenticated = await auth.authenticate(
+        localizedReason: reason, 
+        options: const AuthenticationOptions(
+          stickyAuth: true, 
+          biometricOnly: true,
+        ),
+      );
     } on PlatformException catch (e) {
       logError("error authenticate: $e");
-      return false;
+      // Xử lý riêng lỗi auth_in_progress
+      if (e.code == 'auth_in_progress') {
+        logInfo("Authentication already in progress, retrying after cancel");
+        await cancelAuthentication();
+        await Future.delayed(const Duration(milliseconds: 500));
+        return authenticate(); // Thử lại sau khi hủy
+      }
+      authenticated = false;
+    } finally {
+      _isAuthenticating = false;
     }
+    
     return authenticated;
   }
 

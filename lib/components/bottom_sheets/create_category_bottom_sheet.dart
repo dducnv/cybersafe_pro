@@ -43,17 +43,16 @@ class CreateCategoryBottomSheet extends StatefulWidget {
 }
 
 class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
-  final textController = TextEditingController();
-
   @override
   void initState() {
     super.initState();
-    textController.text = widget.categoryOjbModel?.categoryName ?? "";
+    final categoryProvider = context.read<CategoryProvider>();
+    categoryProvider.txtCategoryName = TextEditingController();
+    categoryProvider.txtCategoryName.text = widget.categoryOjbModel?.categoryName ?? "";
   }
 
   @override
   void dispose() {
-    textController.dispose();
     super.dispose();
   }
 
@@ -88,7 +87,7 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
               autoFocus: true,
               requiredTextField: true,
               titleTextField: context.trCategory(CategoryText.categoryName),
-              controller: textController,
+              controller: provider.txtCategoryName,
               textInputAction: TextInputAction.done,
               textAlign: TextAlign.start,
               maxLines: 1,

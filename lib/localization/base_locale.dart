@@ -32,9 +32,11 @@ abstract class BaseLocale {
       'ru' => ru,
       'id' => id,
       'en' when locale.countryCode == 'GB' => en_GB,
-      'en' => en_US,
+      'en' when locale.countryCode == 'US' => en_US,
       'pt' when locale.countryCode == 'BR' => pt_BR,
-      'pt' => pt_PT,
+      'pt' when locale.countryCode == 'PT' => pt_PT,
+      'pt' => pt,
+      'en' => en,
       _ => en_US, // fallback to English
     };
     return translations[key] ?? key;

@@ -66,8 +66,9 @@ class _ItemCopyValueState extends State<ItemCopyValue> {
       onPressed: () async {
         final decryptService = EncryptAppDataService.instance;
         final decryptedValue = widget.isPrivateValue ? await decryptService.decryptPassword(widget.value) : await decryptService.decryptInfo(widget.value);
-
-        clipboardCustom(context: context, text: decryptedValue);
+        if (decryptedValue.isNotEmpty && mounted) {
+          clipboardCustom(context: context, text: decryptedValue);
+        }
       },
       icon: Icon(Icons.copy, size: 20.sp),
     );

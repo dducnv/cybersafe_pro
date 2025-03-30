@@ -36,6 +36,7 @@ class SettingsLocale extends BaseLocale {
   static const String deleteDataConfirmation = 'delete_data_confirmation';
   static const String confirm = 'confirm';
   static const String lockOnBackground = 'lock_on_background';
+  static const String dataIsEmpty = 'data_is_empty';
 
   @override
   Map<String, String> get vi => {
@@ -58,6 +59,7 @@ class SettingsLocale extends BaseLocale {
     deleteDataConfirmation: 'Xác nhận xóa dữ liệu',
     confirm: 'Xác nhận',
     lockOnBackground: 'Khóa khi ứng dụng ở nền',
+    dataIsEmpty: 'Dữ liệu trống',
   };
 
   @override
@@ -81,6 +83,7 @@ class SettingsLocale extends BaseLocale {
     deleteDataConfirmation: 'Delete Data Confirmation',
     confirm: 'Confirm',
     lockOnBackground: 'Lock on Background',
+    dataIsEmpty: 'Data is empty',
   };
 
   @override
@@ -104,6 +107,7 @@ class SettingsLocale extends BaseLocale {
     deleteDataConfirmation: 'Delete Data Confirmation',
     confirm: 'Confirm',
     lockOnBackground: 'Lock on Background',
+    dataIsEmpty: 'Data is empty',
   };
 
   // Thêm các bản dịch cho các ngôn ngữ khác tương tự
@@ -128,6 +132,7 @@ class SettingsLocale extends BaseLocale {
     deleteDataConfirmation: 'Confirmação de apagar dados',
     confirm: 'Confirmar',
     lockOnBackground: 'Bloquear quando o aplicativo está em segundo plano',
+    dataIsEmpty: 'Dados vazios',
   };
   @override
   Map<String, String> get pt_BR => {
@@ -150,6 +155,7 @@ class SettingsLocale extends BaseLocale {
     deleteDataConfirmation: 'Confirmação de apagar dados',
     confirm: 'Confirmar',
     lockOnBackground: 'Bloquear quando o aplicativo está em segundo plano',
+    dataIsEmpty: 'Dados vazios',
   };
   @override
   Map<String, String> get hi => {
@@ -172,6 +178,7 @@ class SettingsLocale extends BaseLocale {
     deleteDataConfirmation: 'डेटा हटाने की पुष्टि',
     confirm: 'सुनिश्चित करें',
     lockOnBackground: 'पृष्ठभूमि पर अनलॉक करें',
+    dataIsEmpty: 'डेटा खाली है',
   };
   @override
   Map<String, String> get ja => {
@@ -194,6 +201,7 @@ class SettingsLocale extends BaseLocale {
     deleteDataConfirmation: 'データを削除することを確認',
     confirm: '確認',
     lockOnBackground: 'バックグラウンドでアプリケーションをロック',
+    dataIsEmpty: 'データが空です',
   };
   @override
   Map<String, String> get ru => {
@@ -216,6 +224,7 @@ class SettingsLocale extends BaseLocale {
     deleteDataConfirmation: 'Подтверждение удаления данных',
     confirm: 'Подтвердить',
     lockOnBackground: 'Блокировать при фоновом режиме',
+    dataIsEmpty: 'Данные пусты',
   };
   @override
   Map<String, String> get id => {
@@ -261,6 +270,7 @@ class SettingsLocale extends BaseLocale {
     deleteDataConfirmation: 'Delete Data Confirmation',
     confirm: 'Confirm',
     lockOnBackground: 'Lock on Background',
+    dataIsEmpty: 'Data is empty',
   };
 
   @override
@@ -284,5 +294,6 @@ class SettingsLocale extends BaseLocale {
     deleteDataConfirmation: 'Confirmação de apagar dados',
     confirm: 'Confirmar',
     lockOnBackground: 'Bloquear quando o aplicativo está em segundo plano',
+    dataIsEmpty: 'Dados vazios',
   };
 }

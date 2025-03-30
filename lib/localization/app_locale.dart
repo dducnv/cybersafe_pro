@@ -49,15 +49,15 @@ class AppLocaleModel extends BaseLocale {
 }
 
 final List<AppLocaleModel> appLocales = [
-   AppLocaleModel(languageCode: 'vi', countryCode: 'VN', languageName: 'Vietnamese', languageNativeName: 'Tiếng Việt', flagEmoji: '🇻🇳'),
-   AppLocaleModel(languageCode: 'en', countryCode: 'US', languageName: 'English (US)', languageNativeName: 'English (US)', flagEmoji: '🇺🇸'),
-   AppLocaleModel(languageCode: 'en', countryCode: 'GB', languageName: 'English (UK)', languageNativeName: 'English (UK)', flagEmoji: '🇬🇧'),
-   AppLocaleModel(languageCode: 'pt', countryCode: 'PT', languageName: 'Portuguese (Portugal)', languageNativeName: 'Português (Portugal)', flagEmoji: '🇵🇹'),
-   AppLocaleModel(languageCode: 'pt', countryCode: 'BR', languageName: 'Portuguese (Brazil)', languageNativeName: 'Português (Brasil)', flagEmoji: '🇧🇷'),
-   AppLocaleModel(languageCode: 'hi', countryCode: 'IN', languageName: 'Hindi', languageNativeName: 'हिन्दी', flagEmoji: '🇮🇳'),
-   AppLocaleModel(languageCode: 'ja', countryCode: 'JP', languageName: 'Japanese', languageNativeName: '日本語', flagEmoji: '🇯🇵'),
-   AppLocaleModel(languageCode: 'ru', countryCode: 'RU', languageName: 'Russian', languageNativeName: 'Русский', flagEmoji: '🇷🇺'),
-   AppLocaleModel(languageCode: 'id', countryCode: 'ID', languageName: 'Indonesian', languageNativeName: 'Bahasa Indonesia', flagEmoji: '🇮🇩'),
+  AppLocaleModel(languageCode: 'vi', countryCode: 'VN', languageName: 'Vietnamese', languageNativeName: 'Tiếng Việt', flagEmoji: '🇻🇳'),
+  AppLocaleModel(languageCode: 'en', countryCode: 'US', languageName: 'English (US)', languageNativeName: 'English (US)', flagEmoji: '🇺🇸'),
+  AppLocaleModel(languageCode: 'en', countryCode: 'GB', languageName: 'English (UK)', languageNativeName: 'English (UK)', flagEmoji: '🇬🇧'),
+  AppLocaleModel(languageCode: 'pt', countryCode: 'PT', languageName: 'Portuguese (Portugal)', languageNativeName: 'Português (Portugal)', flagEmoji: '🇵🇹'),
+  AppLocaleModel(languageCode: 'pt', countryCode: 'BR', languageName: 'Portuguese (Brazil)', languageNativeName: 'Português (Brasil)', flagEmoji: '🇧🇷'),
+  AppLocaleModel(languageCode: 'hi', countryCode: 'IN', languageName: 'Hindi', languageNativeName: 'हिन्दी', flagEmoji: '🇮🇳'),
+  AppLocaleModel(languageCode: 'ja', countryCode: 'JP', languageName: 'Japanese', languageNativeName: '日本語', flagEmoji: '🇯🇵'),
+  AppLocaleModel(languageCode: 'ru', countryCode: 'RU', languageName: 'Russian', languageNativeName: 'Русский', flagEmoji: '🇷🇺'),
+  AppLocaleModel(languageCode: 'id', countryCode: 'ID', languageName: 'Indonesian', languageNativeName: 'Bahasa Indonesia', flagEmoji: '🇮🇩'),
 ];
 
 class AppLocale extends ChangeNotifier {
@@ -80,7 +80,7 @@ class AppLocale extends ChangeNotifier {
   late final authLocale = AuthLocale(this);
   late final homeLocale = HomeLocale(this);
   late final settingsLocale = SettingsLocale(this);
-  
+
   // Thêm các màn hình locale khác
   late final categoryLocale = CategoryLocale(this);
   late final sidebarLocale = SidebarLocale(this);
@@ -101,12 +101,16 @@ class AppLocale extends ChangeNotifier {
   String getText(String key) {
     final translations = switch (locale.languageCode) {
       'vi' => currentLocaleModel.vi,
-      'en' => currentLocaleModel.en,
-      'pt' => currentLocaleModel.pt,
       'hi' => currentLocaleModel.hi,
       'ja' => currentLocaleModel.ja,
       'ru' => currentLocaleModel.ru,
       'id' => currentLocaleModel.id,
+      'pt' when locale.countryCode == 'PT' => currentLocaleModel.pt_PT,
+      'pt' when locale.countryCode == 'BR' => currentLocaleModel.pt_BR,
+      'en' when locale.countryCode == 'GB' => currentLocaleModel.en_GB,
+      'en' when locale.countryCode == 'US' => currentLocaleModel.en_US,
+      'pt' => currentLocaleModel.pt,
+      'en' => currentLocaleModel.en,
       _ => currentLocaleModel.en, // fallback to English
     };
     return translations[key] ?? key;
@@ -114,9 +118,6 @@ class AppLocale extends ChangeNotifier {
 
   // Lấy AppLocaleModel hiện tại
   AppLocaleModel get currentLocaleModel {
-    return appLocales.firstWhere(
-      (locale) => locale.languageCode == _locale.languageCode && locale.countryCode == _locale.countryCode, 
-      orElse: () => appLocales.first
-    );
+    return appLocales.firstWhere((locale) => locale.languageCode == _locale.languageCode && locale.countryCode == _locale.countryCode, orElse: () => appLocales.first);
   }
 }

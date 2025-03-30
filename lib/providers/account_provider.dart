@@ -587,19 +587,18 @@ class AccountProvider extends ChangeNotifier {
       notifyListeners();
 
       // Danh sách tên category
-      final categoryNames = ['Mạng xã hội', 'Ngân hàng', 'Email', 'Mua sắm', 'Giải trí', 'Công việc', 'Học tập', 'Trò chơi', 'Khác'];
+      final categoryNames = ['📱 Social Network', '🏦 Finance', '🛒 Shopping', '🎮 Entertainment', '💼 Work', '🎓 Study', '🎮 Game', 'Other'];
 
       // Danh sách tên dịch vụ phổ biến cho mỗi category
       final servicesByCategory = {
-        'Mạng xã hội': ['Facebook', 'Instagram', 'Twitter', 'LinkedIn', 'TikTok', 'Pinterest', 'Reddit', 'Snapchat', 'Tumblr', 'Discord'],
-        'Ngân hàng': ['Vietcombank', 'Techcombank', 'BIDV', 'VPBank', 'ACB', 'MBBank', 'TPBank', 'VIB', 'Sacombank', 'HDBank'],
-        'Email': ['Gmail', 'Outlook', 'Yahoo Mail', 'Zoho Mail', 'ProtonMail', 'Mail.com', 'iCloud Mail', 'AOL Mail', 'GMX Mail', 'Yandex Mail'],
-        'Mua sắm': ['Shopee', 'Lazada', 'Tiki', 'Amazon', 'Sendo', 'Alibaba', 'eBay', 'Zalora', 'Fado', 'Tiki'],
-        'Giải trí': ['Netflix', 'Spotify', 'YouTube', 'Disney+', 'HBO', 'Apple TV+', 'Amazon Prime', 'VieON', 'FPT Play', 'Galaxy Play'],
-        'Công việc': ['Slack', 'Trello', 'Asana', 'Jira', 'Microsoft Teams', 'Notion', 'Monday.com', 'ClickUp', 'Basecamp', 'Todoist'],
-        'Học tập': ['Coursera', 'Udemy', 'edX', 'Khan Academy', 'Duolingo', 'Quizlet', 'Memrise', 'Brilliant', 'Skillshare', 'Codecademy'],
-        'Trò chơi': ['Steam', 'Epic Games', 'Origin', 'Ubisoft Connect', 'Battle.net', 'PlayStation Network', 'Xbox Live', 'Nintendo', 'Garena', 'Riot Games'],
-        'Khác': ['Dropbox', 'Google Drive', 'OneDrive', 'iCloud', 'Evernote', 'LastPass', 'NordVPN', 'ExpressVPN', 'Adobe', 'Canva'],
+        '📱 Social Network': ['Facebook', 'Instagram', 'Twitter', 'LinkedIn', 'TikTok', 'Pinterest', 'Reddit', 'Snapchat', 'Tumblr', 'Discord'],
+        '🏦 Finance': ['Vietcombank', 'Techcombank', 'BIDV', 'VPBank', 'ACB', 'MBBank', 'TPBank', 'VIB', 'Sacombank', 'HDBank'],
+        '🛒 Shopping': ['Shopee', 'Lazada', 'Tiki', 'Amazon', 'Sendo', 'Alibaba', 'eBay', 'Zalora', 'Fado', 'Tiki'],
+        '🎮 Entertainment': ['Netflix', 'Spotify', 'YouTube', 'Disney+', 'HBO', 'Apple TV+', 'Amazon Prime', 'VieON', 'FPT Play', 'Galaxy Play'],
+        '💼 Work': ['Slack', 'Trello', 'Asana', 'Jira', 'Microsoft Teams', 'Notion', 'Monday.com', 'ClickUp', 'Basecamp', 'Todoist'],
+        '🎓 Study': ['Coursera', 'Udemy', 'edX', 'Khan Academy', 'Duolingo', 'Quizlet', 'Memrise', 'Brilliant', 'Skillshare', 'Codecademy'],
+        '🎮 Game': ['Steam', 'Epic Games', 'Origin', 'Ubisoft Connect', 'Battle.net', 'PlayStation Network', 'Xbox Live', 'Nintendo', 'Garena', 'Riot Games'],
+        'Other': ['Dropbox', 'Google Drive', 'OneDrive', 'iCloud', 'Evernote', 'LastPass', 'NordVPN', 'ExpressVPN', 'Adobe', 'Canva'],
       };
 
       // Tạo các category

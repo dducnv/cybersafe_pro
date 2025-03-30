@@ -55,12 +55,12 @@ class _TabletLayoutState extends State<TabletLayout> {
                         appPinCodeCreateKey: widget.appPinCodeCreateKey,
                         formCreateKey: widget.formCreateKey,
                         pageController: pageController,
+                        isChangePin: widget.isChangePin ?? false,
                       ),
                       ConfirmPinCodeWidget(
                         appPinCodeConfirmKey: widget.appPinCodeConfirmKey,
                         formConfirmKey: widget.formConfirmKey,
                         pageController: pageController,
-                        isChangePin: widget.isChangePin ?? false,
                       ),
                     ],
                   ),

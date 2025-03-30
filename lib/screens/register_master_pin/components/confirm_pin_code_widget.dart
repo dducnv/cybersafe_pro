@@ -1,3 +1,5 @@
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/login_text.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/local_auth_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
@@ -31,7 +33,10 @@ class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text("Xác nhận mã PIN", style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+        Text(
+          context.trCreatePinCode(LoginText.confirmPinCode),
+          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 20),
         Container(
           constraints: const BoxConstraints(maxWidth: 430),
@@ -44,11 +49,11 @@ class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
             autoFocus: true,
             validator: (value) {
               if (value!.isEmpty) {
-                return "Vui lòng nhập mã PIN";
+                return context.trCreatePinCode(LoginText.pinCodeRequired);
               }
               bool isVerified = Provider.of<LocalAuthProvider>(context, listen: false).verifyRegisterPinCode(value);
               if (!isVerified) {
-                return "Mã PIN không khớp";
+                return context.trCreatePinCode(LoginText.pinCodeNotMatch);
               }
               return null;
             },

@@ -34,6 +34,7 @@ class _MobileLayoutState extends State<MobileLayout> {
             appPinCodeCreateKey: widget.appPinCodeCreateKey,
             formCreateKey: widget.formCreateKey,
             pageController: pageController,
+            isChangePin: widget.isChangePin ?? false,
           ),
           ConfirmPinCodeWidget(
             appPinCodeConfirmKey: widget.appPinCodeConfirmKey,

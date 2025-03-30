@@ -257,7 +257,7 @@ class DataManagerService {
           builder: (context) {
             return LoginMasterPassword(
               showBiometric: false,
-              isFromBackup: true,
+              isFromRestore: true,
               callBackLoginSuccess: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
                 if (isLoginSuccess == true && pin != null && GlobalKeys.appRootNavigatorKey.currentContext != null) {
                   try {
@@ -413,7 +413,6 @@ class DataManagerService {
                                 builder:
                                     (context) => LoginMasterPassword(
                                       showBiometric: false,
-                                      isFromBackup: false,
                                       callBackLoginSuccess: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
                                         if (isLoginSuccess == true && pin != null) {
                                           final success = await deleteData();

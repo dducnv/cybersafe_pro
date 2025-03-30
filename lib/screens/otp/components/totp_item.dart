@@ -68,6 +68,7 @@ class _TotpItemState extends State<TotpItem> {
                     onPressed: () async {
                       if (widget.secretKey.isEmpty) return;
                       String secretKey = await EncryptAppDataService.instance.decryptTOTPKey(widget.secretKey);
+                      if(!context.mounted) return;
                       clipboardCustom(context: context, text: generateTOTPCode(keySecret: secretKey));
                     },
                     icon: Icon(Icons.copy, size: 20.sp),

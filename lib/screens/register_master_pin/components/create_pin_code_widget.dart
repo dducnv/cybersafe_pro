@@ -1,3 +1,5 @@
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/login_text.dart';
 import 'package:cybersafe_pro/providers/local_auth_provider.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
@@ -9,7 +11,8 @@ class CreatePinCodeWidget extends StatefulWidget {
   final GlobalKey<AppPinCodeFieldsState> appPinCodeCreateKey;
   final GlobalKey<FormState> formCreateKey;
   final PageController pageController;
-  const CreatePinCodeWidget({super.key, required this.appPinCodeCreateKey, required this.formCreateKey, required this.pageController});
+  final bool isChangePin;
+  const CreatePinCodeWidget({super.key, required this.appPinCodeCreateKey, required this.formCreateKey, required this.pageController, this.isChangePin = false});
 
   @override
   State<CreatePinCodeWidget> createState() => _CreatePinCodeWidgetState();
@@ -27,7 +30,10 @@ class _CreatePinCodeWidgetState extends State<CreatePinCodeWidget> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text("Tạo mã PIN", style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+        Text(
+          widget.isChangePin ? context.trLogin(LoginText.changePinCode) : context.trCreatePinCode(LoginText.createPinCode),
+          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 20),
         Container(
           constraints: const BoxConstraints(maxWidth: 430),
@@ -40,7 +46,7 @@ class _CreatePinCodeWidgetState extends State<CreatePinCodeWidget> {
             autoFocus: true,
             validator: (value) {
               if (value!.length < 6) {
-                return "Vui lòng nhập đủ 6 số";
+                return context.trCreatePinCode(LoginText.pinCodeRequired);
               }
               return null;
             },

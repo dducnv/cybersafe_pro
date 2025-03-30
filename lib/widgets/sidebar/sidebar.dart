@@ -19,7 +19,7 @@ class Sidebar extends StatelessWidget {
           child: Column(
             children: [
               Image.asset('assets/images/app_icon_trans.png', width: 100.w, height: 100.h),
-              Text(context.trSidebar(SidebarText.appName), style: TextStyle(color: Colors.white, fontSize: 25.sp, fontWeight: FontWeight.bold)),
+              Text("CyberSafe", style: TextStyle(color: Colors.white, fontSize: 25.sp, fontWeight: FontWeight.bold)),
             ],
           ), //UserAccountDrawerHeader
         ),

@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/login_text.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/local_auth_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
@@ -46,7 +48,7 @@ class _TabletLayoutState extends State<TabletLayout> {
       },
       validator: (value) {
         if (value!.length < 6) {
-          return "Please enter a valid master password";
+          return context.trLogin(LoginText.pinCodeRequired);
         }
         return null;
       },

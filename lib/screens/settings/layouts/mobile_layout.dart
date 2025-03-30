@@ -122,16 +122,17 @@ class MobileLayout extends StatelessWidget {
               const SizedBox(height: 5),
               SettingItemWidget(
                 title: context.appLocale.settingsLocale.getText(SettingsLocale.backupData),
-                icon: Icons.backup,
+                icon: Icons.backup_outlined,
                 onTap: () {
                   if (!DataManagerService.checkData(context)) {
-                    showToast("Không có dữ liệu để sao lưu", context: context);
+                    showToast(context.appLocale.settingsLocale.getText(SettingsLocale.dataIsEmpty), context: context);
                     return;
                   }
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) {
                         return LoginMasterPassword(
+                          isFromBackup: true,
                           showBiometric: false,
                           callBackLoginSuccess: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
                             if (isLoginSuccess == true && pin != null) {
