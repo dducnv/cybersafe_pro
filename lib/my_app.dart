@@ -78,9 +78,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       // await accountProvider.generateFakeData();
       await categoryProvider.getCategories();
       await accountProvider.getAccounts();
-      if (mounted) {
-        FlutterNativeSplash.remove();
-      }
     });
   }
 

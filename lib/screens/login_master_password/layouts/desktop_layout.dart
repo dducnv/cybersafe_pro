@@ -7,7 +7,6 @@ import 'package:cybersafe_pro/services/local_auth_service.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
-import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
@@ -24,11 +23,6 @@ class DesktopLayout extends StatefulWidget {
 }
 
 class _DesktopLayoutState extends State<DesktopLayout> {
-  @override
-  void initState() {
-    super.initState();
-    context.read<LocalAuthProvider>().init(widget.showBiometric && !widget.isFromBackup);
-  }
 
   Widget _buildPinCodeFields() {
     final localAuthProvider = Provider.of<LocalAuthProvider>(context, listen: false);

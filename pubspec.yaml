@@ -1,7 +1,7 @@
 name: cybersafe_pro
 description: "A new Flutter project."
 publish_to: "none"
-version: 1.7.0+66
+version: 1.7.0+67
 
 environment:
   sdk: ^3.7.0

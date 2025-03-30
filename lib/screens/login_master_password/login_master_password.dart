@@ -5,6 +5,7 @@ import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:flutter/material.dart';
 import 'package:cybersafe_pro/utils/device_type.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
 import 'layouts/desktop_layout.dart';
 import 'layouts/mobile_layout.dart';
@@ -30,16 +31,19 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
 
     // Đảm bảo SecureApplicationUtil được khởi tạo
     SecureApplicationUtil.instance.init();
-    // Tạo mới provider
-    final provider = Provider.of<LocalAuthProvider>(context, listen: false);
-    provider.init(widget.showBiometric && widget.isFromBackup == false);
 
     // Khởi tạo LocalAuthProvider
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!_mounted) return;
       try {
+        // Tạo mới provider
+        final provider = Provider.of<LocalAuthProvider>(context, listen: false);
+        provider.init(widget.showBiometric && widget.isFromBackup == false);
         // Dừng timer
-        context.read<AppProvider>().stopTimer();
+        if (mounted) {
+          context.read<AppProvider>().stopTimer();
+          FlutterNativeSplash.remove();
+        }
       } catch (e) {
         logError('Error initializing login screen: $e');
       }
@@ -59,7 +63,7 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
       case DeviceType.desktop:
         return const DesktopLayout();
       case DeviceType.tablet:
-        return  TabletLayout(showBiometric: widget.showBiometric, isFromBackup: widget.isFromBackup, callBackLoginSuccess: widget.callBackLoginSuccess);
+        return TabletLayout(showBiometric: widget.showBiometric, isFromBackup: widget.isFromBackup, callBackLoginSuccess: widget.callBackLoginSuccess);
       case DeviceType.mobile:
         return MobileLayout(showBiometric: widget.showBiometric, isFromBackup: widget.isFromBackup, isFromRestore: widget.isFromRestore, callBackLoginSuccess: widget.callBackLoginSuccess);
     }

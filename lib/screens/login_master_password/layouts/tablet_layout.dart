@@ -26,11 +26,6 @@ class TabletLayout extends StatefulWidget {
 }
 
 class _TabletLayoutState extends State<TabletLayout> {
-  @override
-  void initState() {
-    super.initState();
-    context.read<LocalAuthProvider>().init(widget.showBiometric && !widget.isFromBackup);
-  }
 
   Widget _buildPinCodeFields() {
     final localAuthProvider = Provider.of<LocalAuthProvider>(context, listen: false);

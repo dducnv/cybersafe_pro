@@ -48,7 +48,6 @@ class MobileLayout extends StatelessWidget {
                         child: Row(
                           children: [
                             Expanded(child: Text("${category.categoryName} (${category.accounts.length})", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500))),
-
                             IconButton(
                               onPressed: () {
                                 showCreateCategoryBottomSheet(context, isUpdate: true, categoryOjbModel: category);

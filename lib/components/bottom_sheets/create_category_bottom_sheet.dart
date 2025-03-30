@@ -8,35 +8,25 @@ import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-Future<void> showCreateCategoryBottomSheet(BuildContext context, {
-  bool isUpdate = false,
-  CategoryOjbModel? categoryOjbModel
-}) async {
+Future<void> showCreateCategoryBottomSheet(BuildContext context, {bool isUpdate = false, CategoryOjbModel? categoryOjbModel}) async {
   await showModalBottomSheet(
     isScrollControlled: true,
     context: context,
-  
-    builder: (context) => SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 16.w,
-          right: 16.w,
-          top: 16.h,
+
+    builder:
+        (context) => SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 16.w, right: 16.w, top: 16.h),
+            child: CreateCategoryBottomSheet(isUpdate: isUpdate, categoryOjbModel: categoryOjbModel),
+          ),
         ),
-        child:  CreateCategoryBottomSheet(
-          isUpdate: isUpdate,
-          categoryOjbModel: categoryOjbModel,
-        ),
-      ),
-    ),
   );
 }
 
 class CreateCategoryBottomSheet extends StatefulWidget {
   final bool isUpdate;
   final CategoryOjbModel? categoryOjbModel;
-  const CreateCategoryBottomSheet({super.key,  this.categoryOjbModel, this.isUpdate = false});
+  const CreateCategoryBottomSheet({super.key, this.categoryOjbModel, this.isUpdate = false});
 
   @override
   State<CreateCategoryBottomSheet> createState() => _CreateCategoryBottomSheetState();
@@ -62,16 +52,17 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
     final navigator = Navigator.of(context);
     final categoryProvider = context.read<CategoryProvider>();
     final scaffoldMessenger = ScaffoldMessenger.of(context);
+    bool success = false;
 
-    final success = await categoryProvider.createCategory(
-      CategoryOjbModel(categoryName: name.trim())
-    );
+    if (widget.isUpdate) {
+      success = await categoryProvider.updateCategory(CategoryOjbModel(categoryName: name.trim(), id: widget.categoryOjbModel!.id));
+    } else {
+      success = await categoryProvider.createCategory(CategoryOjbModel(categoryName: name.trim()));
+    }
     if (success) {
       navigator.pop();
     } else if (categoryProvider.error != null) {
-      scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text(categoryProvider.error!)),
-      );
+      scaffoldMessenger.showSnackBar(SnackBar(content: Text(categoryProvider.error!)));
     }
   }
 
@@ -100,24 +91,14 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
                 return CustomButtonWidget(
                   margin: EdgeInsets.zero,
                   isDisabled: value.text.trim().isEmpty,
-                  onPressed: () => _handleCreateCategory(
-                    context, 
-                    value.text,
-                  ),
+                  onPressed: () => _handleCreateCategory(context, value.text),
                   text: context.trCategory(CategoryText.createCategory),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.add, color: Colors.white, size: 20.sp),
                       SizedBox(width: 8.w),
-                      Text(
-                        context.trCategory(CategoryText.createCategory),
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
+                      Text(context.trCategory(CategoryText.createCategory), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.white)),
                     ],
                   ),
                 );

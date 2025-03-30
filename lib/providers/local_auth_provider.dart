@@ -84,9 +84,8 @@ class LocalAuthProvider extends ChangeNotifier {
   }
 
   Future<void> init(bool canUseBiometric) async {
-    // Tạo mới các controller và key
+    // Tạo mới các controller và ke
     _initControllers();
-    
     // Kiểm tra xem tài khoản có đang bị khóa không
     await _checkLockStatus();
     
@@ -108,18 +107,6 @@ class LocalAuthProvider extends ChangeNotifier {
         focusNode.requestFocus();
       });
     }
-
-    // Tăng thời gian delay và đảm bảo luôn focus
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      focusNode.requestFocus();
-    });
-
-    // Thêm một delay dài hơn để đảm bảo focus hoạt động
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (!focusNode.hasFocus) {
-        focusNode.requestFocus();
-      }
-    });
   }
 
   void authenticate() {

@@ -28,36 +28,35 @@ class MobileLayout extends StatefulWidget {
 
 class _MobileLayoutState extends State<MobileLayout> {
 
-  @override
-  void initState() {
-    super.initState();
-    context.read<LocalAuthProvider>().init(widget.showBiometric && !widget.isFromBackup);
-  }
-
-
 
   Widget _buildPinCodeFields() {
-    final localAuthProvider = Provider.of<LocalAuthProvider>(context, listen: false);
-    return AppPinCodeFields(
-      autoFocus: localAuthProvider.focusNode.hasFocus,
-      key: localAuthProvider.appPinCodeKey,
-      formKey: localAuthProvider.formKey,
-      textEditingController: localAuthProvider.textEditingController!,
-      focusNode: localAuthProvider.focusNode,
-      onSubmitted: (value) async {
-        await handleLogin();
-      },
-      onEnter: () async {
-        await handleLogin();
-      },
-      validator: (value) {
-        if (value!.length < 6) {
-          return context.trLogin(LoginText.pinCodeRequired);
+    return Consumer<LocalAuthProvider>(
+      builder: (context, provider, child) {
+        if(context.mounted){
+          return AppPinCodeFields(
+            autoFocus: provider.focusNode.hasFocus,
+            key: provider.appPinCodeKey,
+            formKey: provider.formKey,
+            textEditingController: provider.textEditingController,
+            focusNode: provider.focusNode,
+          onSubmitted: (value) async {
+            await handleLogin();
+          },
+          onEnter: () async {
+            await handleLogin();
+          },
+          validator: (value) {
+            if (value!.length < 6) {
+              return context.trLogin(LoginText.pinCodeRequired);
+            }
+            return null;
+          },
+          onCompleted: (value, state) {},
+            onChanged: (value) {},
+          );
         }
-        return null;
+        return const SizedBox.shrink();
       },
-      onCompleted: (value, state) {},
-      onChanged: (value) {},
     );
   }
 
@@ -69,42 +68,29 @@ class _MobileLayoutState extends State<MobileLayout> {
         builder: (context, provider, child) {
           // Buộc kiểm tra lại trạng thái khóa mỗi khi build
           final isCurrentlyLocked = provider.isLocked;
-          
+
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                widget.isFromBackup ? context.trLogin(LoginText.enterAnyPin) : context.trLogin(LoginText.enterPin), 
-                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)
-              ),
+              Text(widget.isFromBackup ? context.trLogin(LoginText.enterAnyPin) : context.trLogin(LoginText.enterPin), style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
               if (widget.isFromBackup)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
-                child: Text(context.trLogin(LoginText.backupNote),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
+                  child: Text(context.trLogin(LoginText.backupNote), textAlign: TextAlign.center, style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
                 ),
-              ),
               if (widget.isFromRestore)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
-                child: Text(context.trLogin(LoginText.restoreNote),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
+                  child: Text(context.trLogin(LoginText.restoreNote), textAlign: TextAlign.center, style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
                 ),
-              ),
               // Hiển thị thông báo khi tài khoản bị khóa
               if (isCurrentlyLocked)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
                   child: Column(
                     children: [
-                      Text(
-                        context.trLogin(LoginText.loginLockDescription),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                      ),
+                      Text(context.trLogin(LoginText.loginLockDescription), textAlign: TextAlign.center, style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 10),
                       Text(
                         context.trLogin(LoginText.pleaseTryAgainLater).replaceAll("{0}", provider.formattedRemainingTime),
@@ -117,40 +103,42 @@ class _MobileLayoutState extends State<MobileLayout> {
                     ],
                   ),
                 ),
-                
+
               // Hiện PinCodeFields chỉ khi không bị khóa
+              if (!isCurrentlyLocked) _buildPinCodeFields(),
               if (!isCurrentlyLocked)
-                _buildPinCodeFields(),
-              if(!isCurrentlyLocked)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    if (widget.showBiometric && LocalAuthConfig.instance.isAvailableBiometrics && LocalAuthConfig.instance.isOpenUseBiometric)
-                      IconButton(
-                        onPressed: () {
-                          context.read<LocalAuthProvider>().onBiometric();
-                        },
-                        icon: Platform.isIOS ? SvgPicture.asset('assets/icons/face_id.svg', width: 20.w, height: 20.h, color: Theme.of(context).colorScheme.primary) : const Icon(Icons.fingerprint),
-                      ),
-                  ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (widget.showBiometric && LocalAuthConfig.instance.isAvailableBiometrics && LocalAuthConfig.instance.isOpenUseBiometric)
+                        IconButton(
+                          onPressed: () {
+                            context.read<LocalAuthProvider>().onBiometric();
+                          },
+                          icon: Platform.isIOS ? SvgPicture.asset('assets/icons/face_id.svg', width: 20.w, height: 20.h, color: Theme.of(context).colorScheme.primary) : const Icon(Icons.fingerprint),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
               SizedBox(height: 20.h),
               CustomButtonWidget(
                 borderRaidus: 100,
                 width: 75.h,
                 height: 75.h,
-                onPressed: isCurrentlyLocked ? null : () async {
-                  await handleLogin();
-                },
+                onPressed:
+                    isCurrentlyLocked
+                        ? null
+                        : () async {
+                          await handleLogin();
+                        },
                 text: "",
                 child: Icon(Icons.arrow_forward, size: 24.sp, color: isCurrentlyLocked ? Colors.grey : Colors.white),
               ),
             ],
           );
-        }
+        },
       ),
     );
   }
@@ -196,12 +184,12 @@ class _MobileLayoutState extends State<MobileLayout> {
             if (mounted) {
               // Làm mới widget để cập nhật thời gian
               setState(() {});
-              
+
               // Nếu thời gian đã hết, cập nhật trạng thái
               if (provider.remainingLockTimeSeconds <= 0) {
                 // Kiểm tra và cập nhật trạng thái khóa
                 await provider.checkAndUpdateLockStatus();
-                
+
                 if (mounted && context.mounted) {
                   // Đảm bảo trạng thái được cập nhật đúng
                   context.read<LocalAuthProvider>().init(widget.showBiometric && !widget.isFromBackup && !widget.isFromRestore);
@@ -211,22 +199,12 @@ class _MobileLayoutState extends State<MobileLayout> {
             }
           });
         }
-        
+
         return Container(
           margin: const EdgeInsets.only(top: 10),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            provider.formattedRemainingTime,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-              color: Theme.of(context).colorScheme.error,
-            ),
-          ),
+          decoration: BoxDecoration(color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(20)),
+          child: Text(provider.formattedRemainingTime, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Theme.of(context).colorScheme.error)),
         );
       },
     );
