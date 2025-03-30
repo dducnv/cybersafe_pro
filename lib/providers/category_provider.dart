@@ -67,9 +67,8 @@ class CategoryProvider extends ChangeNotifier {
     logInfo("initDataCategory");
     List<String> listCategory = [CategoryText.bank, CategoryText.job, CategoryText.study, CategoryText.shopping, CategoryText.entertainment];
     for (var category in listCategory) {
-      logInfo("category: $category");
+      if (!context.mounted) return;
       final newCategory = CategoryOjbModel(categoryName: context.read<AppLocale>().categoryLocale.getText(category));
-      logInfo("newCategory: ${newCategory.categoryName}");
       await createCategory(newCategory);
     }
   }
