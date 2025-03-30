@@ -7,6 +7,7 @@ import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/decrypt_text/decrypt_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+// ignore: unnecessary_import
 import 'package:characters/characters.dart';
 
 class IconShowComponent extends StatelessWidget {
