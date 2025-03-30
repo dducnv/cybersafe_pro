@@ -7,6 +7,7 @@ import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/decrypt_text/decrypt_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:characters/characters.dart';
 
 class IconShowComponent extends StatelessWidget {
   final AccountOjbModel account;
@@ -37,17 +38,36 @@ class IconShowComponent extends StatelessWidget {
       return Center(
         child:
             isDecrypted
-                ? Text(account.title[0].toUpperCase(), style: textStyle ?? TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold))
+                ? Text(account.title.isNotEmpty ? _getSafeFirstCharacter(account.title) : "?", style: textStyle ?? TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold))
                 : DecryptText(
                   showLoading: false,
                   style: textStyle ?? TextStyle(fontSize: 30.sp, fontWeight: FontWeight.bold),
                   value: account.title,
                   decryptTextType: DecryptTextType.info,
                   builder: (context, value) {
-                    return Text(value[0].toUpperCase(), style: textStyle ?? TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold));
+                    return Text(value.isNotEmpty ? _getSafeFirstCharacter(value) : "?", style: textStyle ?? TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold));
                   },
                 ),
       );
     }
+  }
+
+  String _getSafeFirstCharacter(String text) {
+    if (text.isEmpty) return "?";
+
+    try {
+      // Sử dụng package characters để xử lý đúng các ký tự Unicode
+      final firstChar = text.characters.first;
+      // Emoji không cần chuyển đổi chữ hoa/thường
+      if (_isEmoji(firstChar)) return firstChar;
+      return firstChar.toUpperCase();
+    } catch (e) {
+      return "?";
+    }
+  }
+
+  bool _isEmoji(String text) {
+    // Kiểm tra đơn giản nếu là emoji (có thể mở rộng)
+    return text.codeUnits.length > 1;
   }
 }

@@ -1,6 +1,5 @@
 import 'package:cybersafe_pro/database/boxes/category_box.dart';
 import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
-import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/app_locale.dart';
 import 'package:cybersafe_pro/localization/keys/category_text.dart';
 import 'package:cybersafe_pro/localization/keys/error_text.dart';
