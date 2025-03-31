@@ -21,19 +21,11 @@ class CreatePinCodeWidget extends StatefulWidget {
 class _CreatePinCodeWidgetState extends State<CreatePinCodeWidget> {
   TextEditingController pinCodeController = TextEditingController();
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
-          widget.isChangePin ? context.trLogin(LoginText.changePinCode) : context.trCreatePinCode(LoginText.createPinCode),
-          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-        ),
+        Text(widget.isChangePin ? context.trLogin(LoginText.changePinCode) : context.trCreatePinCode(LoginText.createPinCode), style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
         const SizedBox(height: 20),
         Container(
           constraints: const BoxConstraints(maxWidth: 430),

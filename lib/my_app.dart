@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/app_locale.dart';
@@ -17,13 +19,18 @@ import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
 import 'package:secure_application/secure_application.dart';
 
 class MyApp extends StatefulWidget {
   final String initialRoute;
-  const MyApp({super.key, required this.initialRoute});
+  final Locale initialLocale;
+
+  const MyApp({
+    super.key,
+    required this.initialRoute,
+    required this.initialLocale,
+  });
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -33,12 +40,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    // Đăng ký observer để theo dõi trạng thái ứng dụng
     WidgetsBinding.instance.addObserver(this);
-
-    // Khởi tạo lại SecureApplicationUtil trước khi sử dụng
-    SecureApplicationUtil.instance.init();
     initApp();
+    // Không cần gọi _initLocale nữa vì đã được khởi tạo trong main
   }
 
   @override
@@ -51,7 +55,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
-      logInfo("Ứng dụng đang chạy nền");  
+      logInfo("Ứng dụng đang chạy nền");
       context.read<AppProvider>().handleAppBackground();
       // Xóa orchestration key khi ứng dụng chuyển sang background
       EncryptAppDataService.instance.clearOrchestrationKey();
@@ -62,16 +66,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   Future<void> initApp() async {
-    // Đợi cho việc khởi tạo SecureApplicationUtil hoàn tất
+    _initLocale();
     await SecureApplicationUtil.instance.initDone;
-
-    if (!mounted) return;
-
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       // Đảm bảo đợi một khoảng thời gian ngắn để cho phép việc khởi tạo hoàn tất
       await Future.delayed(const Duration(milliseconds: 100));
       if (!mounted) return;
-      _initLocale();
 
       final categoryProvider = Provider.of<CategoryProvider>(context, listen: false);
       final accountProvider = Provider.of<AccountProvider>(context, listen: false);
@@ -84,14 +84,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   // Khởi tạo ngôn ngữ từ storage
   Future<void> _initLocale() async {
     final savedLang = await SecureStorage.instance.read(key: SecureStorageKey.appLang);
-
     if (savedLang != null && mounted) {
       final languageCode = savedLang.split('_').first;
       final countryCode = savedLang.split('_').last;
       final savedLocale = appLocales.firstWhere((locale) => locale.languageCode == languageCode && locale.countryCode == countryCode, orElse: () => appLocales.first);
-      if (mounted) {
-        context.read<AppLocale>().setLocale(Locale(savedLocale.languageCode, savedLocale.countryCode));
-      }
+      context.read<AppLocale>().setLocale(Locale(savedLocale.languageCode, savedLocale.countryCode));
+      setState(() {});
+    } else {
+      final String defaultLocale = Platform.localeName;
+      final languageCode = defaultLocale.split('_').first;
+      final countryCode = defaultLocale.split('_').last;
+      final savedLocale = appLocales.firstWhere((locale) => locale.languageCode == languageCode && locale.countryCode == countryCode, orElse: () => appLocales.first);
+      context.read<AppLocale>().setLocale(Locale(savedLocale.languageCode, savedLocale.countryCode));
+      setState(() {});
     }
   }
 

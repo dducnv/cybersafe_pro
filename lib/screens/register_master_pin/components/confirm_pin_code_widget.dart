@@ -24,19 +24,11 @@ class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
   TextEditingController pinCodeController = TextEditingController();
   int timeCorrect = 0;
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
-          context.trCreatePinCode(LoginText.confirmPinCode),
-          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-        ),
+        Text(context.trCreatePinCode(LoginText.confirmPinCode), style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
         const SizedBox(height: 20),
         Container(
           constraints: const BoxConstraints(maxWidth: 430),

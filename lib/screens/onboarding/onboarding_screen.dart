@@ -3,7 +3,6 @@ import 'package:cybersafe_pro/constants/secure_storage_key.dart' show SecureStor
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/app_locale.dart';
 import 'package:cybersafe_pro/localization/keys/onboarding_text.dart';
-import 'package:cybersafe_pro/localization/screens/onboarding/onboarding_locale.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
@@ -12,6 +11,7 @@ import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
 import 'package:cybersafe_pro/widgets/setting_item_widget/setting_item_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -32,7 +32,9 @@ class OnboardingScreenState extends State<OnboardingScreen> {
     initialization();
   }
 
-  void initialization() async {}
+  void initialization() async {
+    FlutterNativeSplash.remove();
+  }
 
   @override
   Widget build(BuildContext context) {

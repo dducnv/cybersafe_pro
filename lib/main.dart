@@ -18,10 +18,10 @@ import 'package:provider/provider.dart';
 import 'database/objectbox.dart';
 import 'package:timezone/data/latest.dart' as timezone;
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+Future<void> initApp() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   timezone.initializeTimeZones();
+  
   // Khởi tạo ObjectBox
   await SharedPreferencesHelper.init();
   await clearSecureStorageOnReinstall();
@@ -31,13 +31,40 @@ void main() async {
   final themeProvider = ThemeProvider();
   await themeProvider.initTheme();
   await encryptService.initialize();
+  
   // Xác định route ban đầu
   final initialRoute = await _determineInitialRoute();
-  final String defaultLocale = Platform.localeName;
-  await initializeDateFormatting(defaultLocale, null);
+  
+  // Khởi tạo locale
+  final savedLang = await SecureStorage.instance.read(key: SecureStorageKey.appLang);
+  Locale initialLocale;
+  
+  if (savedLang != null) {
+    final languageCode = savedLang.split('_').first;
+    final countryCode = savedLang.split('_').last;
+    initialLocale = Locale(languageCode, countryCode);
+  } else {
+    final String defaultLocale = Platform.localeName;
+    final languageCode = defaultLocale.split('_').first;
+    final countryCode = defaultLocale.split('_').last;
+    initialLocale = Locale(languageCode, countryCode);
+  }
+  
+  await initializeDateFormatting(initialLocale.toString(), null);
   SecureApplicationUtil.instance.init();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  runApp(MultiProvider(providers: ListProvider.providers, child: MyApp(initialRoute: initialRoute)));
+  
+  runApp(MultiProvider(
+    providers: ListProvider.providers, 
+    child: MyApp(
+      initialRoute: initialRoute,
+      initialLocale: initialLocale,
+    )
+  ));
+}
+
+void main() {
+  initApp();
 }
 
 Future<String> _determineInitialRoute() async {

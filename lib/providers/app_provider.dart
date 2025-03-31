@@ -55,6 +55,7 @@ class AppProvider extends ChangeNotifier {
         ? Duration(seconds: 30) 
         : Duration(minutes: _timeAutoLock);
     _rootTimer = Timer(time, () {
+
       logInfo('Auto lock timer expired');
       logOutUser();
     });
@@ -101,11 +102,8 @@ class AppProvider extends ChangeNotifier {
       logAction('Khóa ứng dụng do chạy nền');
       
       try {
-        // Khóa ứng dụng
-        SecureApplicationUtil.instance.lock();
         // Dừng bộ đếm thời gian
         _rootTimer.cancel();
-        
         // Tạo trễ ngắn để đảm bảo giao diện cập nhật trước khi đăng xuất
         Future.delayed(const Duration(milliseconds: 100), () {
           logOutUser();
