@@ -17,6 +17,15 @@ class SecureApplicationUtil {
   Future<void> get initDone => _initCompleter.future;
   bool get isInitialized => _isInitialized;
 
+  // Phương thức reset instance
+  void resetInstance() {
+    dispose();
+    _isInitialized = false;
+    if (!_initCompleter.isCompleted) {
+      _initCompleter.complete();
+    }
+  }
+
   Future<void> init() async {
     try {
       // Nếu controller đã bị dispose, tạo mới nó

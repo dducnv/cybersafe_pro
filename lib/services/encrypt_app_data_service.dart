@@ -60,12 +60,11 @@ class EncryptAppDataService {
   final _secureStorage = SecureStorage.instance;
 
   // Orchestration key cho việc bảo vệ khóa trong bộ nhớ
-  late final String _orchestrationKey;
+  late String _orchestrationKey;
   bool _isOrchestrationKeyInitialized = false;
 
   // Cache keys
   final Map<String, _CachedKey> _keyCache = {};
-  final _lruCache = _LRUCache<String, String>(maxSize: 1000);
   String? _cachedDeviceKey;
   DateTime? _deviceKeyExpiry;
 
@@ -142,6 +141,8 @@ class EncryptAppDataService {
       return 'fallback_device_${DateTime.now().millisecondsSinceEpoch}';
     }
   }
+
+
 
   // Bảo vệ khóa trong bộ nhớ bằng orchestration key
   String _protectKey(String key) {
@@ -477,8 +478,7 @@ class EncryptAppDataService {
       }
     }
     // Code không bao giờ chạy đến đây vì throwAppError ở trên
-    throwAppError(ErrorText.tooManyRetries);
-    throw Exception("Unreachable code");
+    throw AppError.instance.createException(ErrorText.tooManyRetries);
   }
 
   Future<void> _preloadKeys() async {
@@ -495,13 +495,7 @@ class EncryptAppDataService {
     }
   }
 
-    // Khi ứng dụng chuyển sang background hoặc đóng, xóa orchestration key
-  void clearOrchestrationKey() {
-    _isOrchestrationKeyInitialized = false;
-    // Không thực sự xóa giá trị _orchestrationKey vì không cần thiết
-    // và giúp tránh lỗi null khi nó được truy cập
-    logInfo('Đã xóa orchestration key');
-  }
+
 
   // Future<void> _checkAndRotateKeys() async {
   //   final keyCreationTime = await _secureStorage.read(key: SecureStorageKey.encryptionKeyCreationTime);
@@ -616,7 +610,7 @@ class EncryptAppDataService {
       }
 
       // Xóa cache cũ
-      _clearCache();
+      clearCache();
       onSuccess.call();
       timer.stop();
       logInfo('[EncryptAppDataService] Hoàn thành rotate keys trong ${timer.elapsed.inSeconds}s');
@@ -626,7 +620,7 @@ class EncryptAppDataService {
       onError.call();
       // Rollback - không cần rollback storage vì chưa lưu keys mới
       logInfo('[EncryptAppDataService] Bắt đầu rollback...');
-      _clearCache();
+      clearCache();
       _keyCache.addAll(oldKeys.map((k, v) => MapEntry(k, _CachedKey(v))));
       logInfo('[EncryptAppDataService] Đã rollback xong');
 
@@ -966,11 +960,12 @@ class EncryptAppDataService {
     }
   }
 
-  void _clearCache() {
+  void clearCache() {
     _keyCache.clear();
     _cachedDeviceKey = null;
     _deviceKeyExpiry = null;
-    _lruCache.clear();
+    _orchestrationKey = "";
+    _isOrchestrationKeyInitialized = false;
   }
 
   // Tạo device key mới nhưng không lưu
@@ -1005,31 +1000,6 @@ class _CachedKey {
   _CachedKey(this.key) : expiresAt = DateTime.now().add(EncryptionConfig.KEY_CACHE_DURATION);
 
   bool get isExpired => DateTime.now().isAfter(expiresAt);
-}
-
-class _LRUCache<K, V> {
-  final int maxSize;
-  final LinkedHashMap<K, V> _cache = LinkedHashMap<K, V>();
-
-  _LRUCache({required this.maxSize});
-
-  V? get(K key) {
-    if (!_cache.containsKey(key)) return null;
-    final value = _cache.remove(key);
-    _cache[key] = value as V;
-    return value;
-  }
-
-  void put(K key, V value) {
-    if (_cache.containsKey(key)) {
-      _cache.remove(key);
-    } else if (_cache.length >= maxSize) {
-      _cache.remove(_cache.keys.first);
-    }
-    _cache[key] = value;
-  }
-
-  void clear() => _cache.clear();
 }
 
 // Thêm extension cho EncryptAppDataService

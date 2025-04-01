@@ -125,7 +125,7 @@ class MobileLayout extends StatelessWidget {
                 icon: Icons.backup_outlined,
                 onTap: () {
                   if (!DataManagerService.checkData(context)) {
-                    showToast(context.appLocale.settingsLocale.getText(SettingsLocale.dataIsEmpty), context: context);
+                    showToast(context.trSafe(SettingsLocale.dataIsEmpty), context: context);
                     return;
                   }
                   Navigator.of(context).push(

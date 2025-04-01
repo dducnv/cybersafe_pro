@@ -33,9 +33,9 @@ class _MobileLayoutState extends State<MobileLayout> {
 
     setState(() {
       dataMap = {
-        context.trStatistic(StatisticText.strongPasswords): strongPasswords,
-        context.trStatistic(StatisticText.weakPasswords): weakPasswords,
-        context.trStatistic(StatisticText.duplicatePasswords): duplicatePasswords,
+        context.trSafe(StatisticText.strongPasswords): strongPasswords,
+        context.trSafe(StatisticText.weakPasswords): weakPasswords,
+        context.trSafe(StatisticText.duplicatePasswords): duplicatePasswords,
       };
 
       // Tính điểm bảo mật (thang điểm 100)
@@ -51,9 +51,9 @@ class _MobileLayoutState extends State<MobileLayout> {
     super.initState();
 
     dataMap = {
-      context.trStatistic(StatisticText.strongPasswords): 0,
-      context.trStatistic(StatisticText.weakPasswords): 0,
-      context.trStatistic(StatisticText.duplicatePasswords): 0,
+      context.trSafe(StatisticText.strongPasswords): 0,
+      context.trSafe(StatisticText.weakPasswords): 0,
+      context.trSafe(StatisticText.duplicatePasswords): 0,
     };
     score = 0;
   }

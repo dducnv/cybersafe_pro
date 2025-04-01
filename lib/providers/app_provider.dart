@@ -29,6 +29,13 @@ class AppProvider extends ChangeNotifier {
   bool _lockOnBackground = false;
   bool get lockOnBackground => _lockOnBackground;
 
+  // Quản lý timer tốt hơn trong dispose
+  @override
+  void dispose() {
+    stopTimer();
+    super.dispose();
+  }
+
   Future<void> checkRotateKey() async {
     final keyCreationTime = await _secureStorage.read(key: SecureStorageKey.encryptionKeyCreationTime);
     if (keyCreationTime == null || DateTime.now().difference(DateTime.parse(keyCreationTime)) > Duration(days: _durationRotateKey)) {
@@ -44,7 +51,6 @@ class AppProvider extends ChangeNotifier {
     
     _timeAutoLock = timeAutoLock;
     _lockOnBackground = lockOnBackground;
-    
     if (autoLock == null || !autoLock) {
       _isOpenAutoLock = false;
       return;

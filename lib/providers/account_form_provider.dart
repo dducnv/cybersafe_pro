@@ -188,7 +188,7 @@ class AccountFormProvider extends ChangeNotifier {
   bool validateAppName() {
     final context = GlobalKeys.appRootNavigatorKey.currentContext!;
     if (appNameController.text.trim().isEmpty) {
-      appNameError = context.trCreateAccount(CreateAccountText.appNameValidation);
+      appNameError = context.trSafe(CreateAccountText.appNameValidation);
       notifyListeners();
       return false;
     }
@@ -200,7 +200,7 @@ class AccountFormProvider extends ChangeNotifier {
   bool validateCategory() {
     final context = GlobalKeys.appRootNavigatorKey.currentContext!;
     if (selectedCategory == null) {
-      categoryError = context.trCreateAccount(CreateAccountText.categoryValidation);
+      categoryError = context.trSafe(CreateAccountText.categoryValidation);
       notifyListeners();
       return false;
     }
@@ -309,6 +309,7 @@ class AccountFormProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    print("hello");
     txtFieldTitle.dispose();
     appNameController.dispose();
     usernameController.dispose();

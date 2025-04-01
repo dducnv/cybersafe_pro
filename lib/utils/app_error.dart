@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cybersafe_pro/localization/keys/error_text.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
@@ -24,7 +23,7 @@ class AppError {
     
     // Cố gắng lấy context và dịch thông báo lỗi
     if (_context != null) {
-      return _context!.trError(errorKey);
+      return _context!.trSafe(errorKey);
     }
     
     // Fallback trong trường hợp không có context
@@ -38,7 +37,7 @@ class AppError {
 
   /// Hiển thị SnackBar với thông báo lỗi đa ngôn ngữ
   void showErrorSnackBar(BuildContext context, String errorKey, {Duration? duration}) {
-    final message = context.trError(errorKey);
+    final message = context.trSafe(errorKey);
     logError(message);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -51,7 +50,7 @@ class AppError {
 
   /// Hiển thị SnackBar thành công với thông báo đa ngôn ngữ
   void showSuccessSnackBar(BuildContext context, String errorKey, {Duration? duration}) {
-    final message = context.trError(errorKey);
+    final message = context.trSafe(errorKey);
     logInfo(message);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -64,7 +63,7 @@ class AppError {
 
   /// Hiển thị SnackBar thông báo với thông báo đa ngôn ngữ
   void showInfoSnackBar(BuildContext context, String errorKey, {Duration? duration}) {
-    final message = context.trError(errorKey);
+    final message = context.trSafe(errorKey);
     logInfo(message);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

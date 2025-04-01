@@ -223,8 +223,8 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
           child: Column(
             children: [
               if (accountOjbModel.email != null && accountOjbModel.email!.isNotEmpty)
-                ItemCopyValue(title: "${context.trDetails(DetailsAccountText.username)}/Email", value: accountOjbModel.email!, isLastItem: accountOjbModel.password?.isEmpty ?? true),
-              if (accountOjbModel.password != null) Padding(padding: EdgeInsets.symmetric(vertical: 5.h), child: Divider(color: Theme.of(context).colorScheme.surfaceContainerHighest)),
+                ItemCopyValue(title: context.trDetails(DetailsAccountText.username), value: accountOjbModel.email!, isLastItem: accountOjbModel.password?.isEmpty ?? true),
+              if (accountOjbModel.password != null && accountOjbModel.password!.isNotEmpty) Padding(padding: EdgeInsets.symmetric(vertical: 5.h), child: Divider(color: Theme.of(context).colorScheme.surfaceContainerHighest)),
               if (accountOjbModel.password != null && accountOjbModel.password!.isNotEmpty)
                 ItemCopyValue(title: context.trDetails(DetailsAccountText.password), value: accountOjbModel.password!, isLastItem: true, isPrivateValue: true),
             ],
@@ -291,8 +291,6 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
             ),
           ],
         ),
-
-        const SizedBox(height: 10),
       ],
     );
   }
@@ -301,6 +299,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 16),
         Text(context.trDetails(DetailsAccountText.customFields), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
         const SizedBox(height: 5),
         CardCustomWidget(

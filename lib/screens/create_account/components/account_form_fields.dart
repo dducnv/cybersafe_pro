@@ -75,7 +75,7 @@ class AccountFormFields extends StatelessWidget {
 
   Widget _buildUsernameField(BuildContext context) {
     return CustomTextField(
-      titleTextField: context.appLocale.createAccountLocale.getText(CreateAccountText.username),
+      titleTextField: context.trCreateAccount(CreateAccountText.username),
       hintText: "Email, Phone, Username,...",
       controller: formProvider.usernameController,
       autofillHints: const [AutofillHints.username],
@@ -97,7 +97,7 @@ class AccountFormFields extends StatelessWidget {
                 requiredTextField: false,
                 controller: formProvider.passwordController,
                 isObscure: true,
-                hintText: context.appLocale.createAccountLocale.getText(CreateAccountText.password),
+                hintText: context.trCreateAccount(CreateAccountText.password),
                 autofillHints: const [AutofillHints.password],
                 suffixIcon: IconButton(icon: const Icon(Icons.loop), onPressed: () {}),
                 textInputAction: TextInputAction.next,
@@ -119,20 +119,20 @@ class AccountFormFields extends StatelessWidget {
                       return AlertDialog(
                         actionsPadding: const EdgeInsets.only(bottom: 2, right: 10),
                         contentPadding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 10),
-                        content: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.overwritePassword), style: TextStyle(fontSize: 16.sp)),
+                        content: Text(context.trCreateAccount(CreateAccountText.overwritePassword), style: TextStyle(fontSize: 16.sp)),
                         actions: [
                           TextButton(
                             onPressed: () {
                               Navigator.of(context).pop();
                             },
-                            child: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.cancel), style: TextStyle(fontSize: 14.sp)),
+                            child: Text(context.trCreateAccount(CreateAccountText.cancel), style: TextStyle(fontSize: 14.sp)),
                           ),
                           TextButton(
                             onPressed: () {
                               Navigator.of(context).pop();
                               _toGenPass(context);
                             },
-                            child: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.confirm), style: TextStyle(fontSize: 14.sp)),
+                            child: Text(context.trCreateAccount(CreateAccountText.confirm), style: TextStyle(fontSize: 14.sp)),
                           ),
                         ],
                       );
@@ -157,11 +157,11 @@ class AccountFormFields extends StatelessWidget {
   Widget _buildCategoryField(BuildContext context) {
     return CustomTextField(
       requiredTextField: true,
-      titleTextField: context.appLocale.createAccountLocale.getText(CreateAccountText.category),
+      titleTextField: context.trCreateAccount(CreateAccountText.category),
       controller: formProvider.categoryController,
       textInputAction: TextInputAction.next,
       textAlign: TextAlign.start,
-      hintText: context.appLocale.createAccountLocale.getText(CreateAccountText.chooseCategory),
+      hintText: context.trCreateAccount(CreateAccountText.chooseCategory),
       maxLines: 1,
       isObscure: false,
       readOnly: true,
@@ -177,13 +177,13 @@ class AccountFormFields extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(padding: const EdgeInsets.only(bottom: 5, left: 5), child: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.twoFactorAuth), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey[600]))),
+        Padding(padding: const EdgeInsets.only(bottom: 5, left: 5), child: Text(context.trCreateAccount(CreateAccountText.twoFactorAuth), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey[600]))),
         Row(
           children: [
             Expanded(
               child: CustomTextField(
                 controller: formProvider.otpController,
-                hintText: context.appLocale.createAccountLocale.getText(CreateAccountText.enterKey),
+                hintText: context.trCreateAccount(CreateAccountText.enterKey),
                 prefixIcon: const Icon(Icons.key),
                 textInputAction: TextInputAction.done,
                 textAlign: TextAlign.start,
@@ -193,7 +193,7 @@ class AccountFormFields extends StatelessWidget {
                     if (OTP.isKeyValid(value)) {
                       formProvider.handleAddTOTP();
                     } else {
-                      formProvider.otpError = context.trCreateAccount(CreateAccountText.otpError);
+                      formProvider.otpError = context.trSafe(CreateAccountText.otpError);
                     }
                   }
                 },
@@ -232,7 +232,7 @@ class AccountFormFields extends StatelessWidget {
 
   Widget _buildNotesField(BuildContext context) {
     return CustomTextField(
-      titleTextField: context.appLocale.createAccountLocale.getText(CreateAccountText.note),
+      titleTextField: context.trCreateAccount(CreateAccountText.note),
       controller: formProvider.noteController,
       textInputType: TextInputType.multiline,
       minLines: 1,

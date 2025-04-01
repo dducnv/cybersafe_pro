@@ -33,7 +33,7 @@ class _TabletLayoutState extends State<TabletLayout> {
       autoFocus: localAuthProvider.focusNode.hasFocus,
       key: localAuthProvider.appPinCodeKey,
       formKey: localAuthProvider.formKey,
-      textEditingController: localAuthProvider.textEditingController!,
+      textEditingController: localAuthProvider.textEditingController,
       focusNode: localAuthProvider.focusNode,
       onSubmitted: (value) async {
         await handleLogin();
@@ -43,7 +43,7 @@ class _TabletLayoutState extends State<TabletLayout> {
       },
       validator: (value) {
         if (value!.length < 6) {
-          return context.trLogin(LoginText.pinCodeRequired);
+          return context. trSafe(LoginText.pinCodeRequired);
         }
         return null;
       },
@@ -126,8 +126,8 @@ class _TabletLayoutState extends State<TabletLayout> {
 
   Future<void> handleLogin() async {
     if (widget.isFromBackup) {
-      if (widget.callBackLoginSuccess != null && context.read<LocalAuthProvider>().textEditingController != null) {
-        widget.callBackLoginSuccess!(isLoginSuccess: true, pin: context.read<LocalAuthProvider>().textEditingController!.text, appPinCodeKey: context.read<LocalAuthProvider>().appPinCodeKey);
+      if (widget.callBackLoginSuccess != null) {
+        widget.callBackLoginSuccess!(isLoginSuccess: true, pin: context.read<LocalAuthProvider>().textEditingController.text, appPinCodeKey: context.read<LocalAuthProvider>().appPinCodeKey);
       }
       return;
     }
@@ -136,8 +136,8 @@ class _TabletLayoutState extends State<TabletLayout> {
 
     // Kiểm tra mounted trước khi sử dụng context
     if (isLoginSuccess && mounted) {
-      if (widget.callBackLoginSuccess != null && context.read<LocalAuthProvider>().textEditingController != null) {
-        widget.callBackLoginSuccess!(isLoginSuccess: true, pin: context.read<LocalAuthProvider>().textEditingController!.text, appPinCodeKey: context.read<LocalAuthProvider>().appPinCodeKey);
+      if (widget.callBackLoginSuccess != null) {
+        widget.callBackLoginSuccess!(isLoginSuccess: true, pin: context.read<LocalAuthProvider>().textEditingController.text, appPinCodeKey: context.read<LocalAuthProvider>().appPinCodeKey);
         return;
       }
 

@@ -1,4 +1,6 @@
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/services/local_auth_service.dart';
 import 'package:cybersafe_pro/services/otp.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
@@ -10,7 +12,7 @@ import 'package:timezone/timezone.dart' as timezone;
 Future<void> clipboardCustom({required BuildContext context, required String text}) async {
   await Clipboard.setData(ClipboardData(text: text)).then((value) {
     if (!context.mounted) return;
-    showToast("Sao chép thành công", context: context, backgroundColor: Theme.of(context).colorScheme.primary, textStyle: const TextStyle(color: Colors.white));
+    showToast(context.trSafe(HomeLocale.copySuccess), context: context, backgroundColor: Theme.of(context).colorScheme.primary, textStyle: const TextStyle(color: Colors.white));
   });
 }
 

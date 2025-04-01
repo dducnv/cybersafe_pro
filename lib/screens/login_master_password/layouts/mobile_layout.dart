@@ -62,106 +62,105 @@ class _MobileLayoutState extends State<MobileLayout> {
       body: Consumer<LocalAuthProvider>(
         builder: (context, provider, child) {
           final isCurrentlyLocked = provider.isLocked;
-          
-          return Center(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      widget.isFromBackup ? context.trLogin(LoginText.enterAnyPin) : context.trLogin(LoginText.enterPin), 
-                      style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 20),
-                    if (widget.isFromBackup)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
-                        child: Text(context.trLogin(LoginText.backupNote), textAlign: TextAlign.center, style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
-                      ),
-                    if (widget.isFromRestore)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
-                        child: Text(context.trLogin(LoginText.restoreNote), textAlign: TextAlign.center, style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
-                      ),
-                    // Hiển thị thông báo khi tài khoản bị khóa
-                    if (isCurrentlyLocked)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-                        child: Column(
-                          children: [
-                            Text(context.trLogin(LoginText.loginLockDescription), textAlign: TextAlign.center, style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 10),
-                            Text(
-                              context.trLogin(LoginText.pleaseTryAgainLater).replaceAll("{0}", provider.formattedRemainingTime),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontWeight: FontWeight.w500),
-                            ),
-                            const SizedBox(height: 5),
-                            // Timer để cập nhật đếm ngược
-                            _buildCountdownTimer(provider),
-                          ],
-                        ),
-                      ),
 
-                    // Hiện PinCodeFields chỉ khi không bị khóa
-                    if (!isCurrentlyLocked)
-                      AppPinCodeFields(
-                        autoFocus: provider.focusNode.hasFocus,
-                        key: provider.appPinCodeKey,
-                        formKey: provider.formKey,
-                        textEditingController: provider.textEditingController,
-                        focusNode: provider.focusNode,
-                        onSubmitted: (value) async {
-                          await handleLogin();
-                        },
-                        onEnter: () async {
-                          await handleLogin();
-                        },
-                        validator: (value) {
-                          if (value!.length < 6) {
-                            return context.trLogin(LoginText.pinCodeRequired);
-                          }
-                          return null;
-                        },
-                        onCompleted: (value, state) {},
-                        onChanged: (value) {},
-                      ),
-                    if (!isCurrentlyLocked)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 40),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            if (widget.showBiometric && LocalAuthConfig.instance.isAvailableBiometrics && LocalAuthConfig.instance.isOpenUseBiometric)
-                              IconButton(
-                                onPressed: () {
-                                  context.read<LocalAuthProvider>().onBiometric();
-                                },
-                                icon: Platform.isIOS ? SvgPicture.asset('assets/icons/face_id.svg', width: 20.w, height: 20.h, color: Theme.of(context).colorScheme.primary) : const Icon(Icons.fingerprint),
-                              ),
-                          ],
-                        ),
-                      ),
-                    SizedBox(height: 20.h),
-                    CustomButtonWidget(
-                      borderRaidus: 100,
-                      width: 75.h,
-                      height: 75.h,
-                      onPressed:
-                          isCurrentlyLocked
-                              ? null
-                              : () async {
-                                await handleLogin();
-                              },
-                      text: "",
-                      child: Icon(Icons.arrow_forward, size: 24.sp, color: isCurrentlyLocked ? Colors.grey : Colors.white),
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 300),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    widget.isFromBackup ? context.trLogin(LoginText.enterAnyPin) : context.trLogin(LoginText.enterPin),
+                    style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  if (widget.isFromBackup)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
+                      child: Text(context.trLogin(LoginText.backupNote), textAlign: TextAlign.center, style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
                     ),
-                  ],
-                ),
+                  if (widget.isFromRestore)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
+                      child: Text(context.trLogin(LoginText.restoreNote), textAlign: TextAlign.center, style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
+                    ),
+                  // Hiển thị thông báo khi tài khoản bị khóa
+                  if (isCurrentlyLocked)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10).copyWith(bottom: 24),
+                      child: Column(
+                        children: [
+                          Text(context.trLogin(LoginText.loginLockDescription), textAlign: TextAlign.center, style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 10),
+                          Text(
+                            context.trLogin(LoginText.pleaseTryAgainLater).replaceAll("{0}", provider.formattedRemainingTime),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(height: 5),
+                          // Timer để cập nhật đếm ngược
+                          _buildCountdownTimer(provider),
+                        ],
+                      ),
+                    ),
+
+                  // Hiện PinCodeFields chỉ khi không bị khóa
+                  if (!isCurrentlyLocked)
+                    AppPinCodeFields(
+                      autoFocus: provider.focusNode.hasFocus,
+                      key: provider.appPinCodeKey,
+                      formKey: provider.formKey,
+                      textEditingController: provider.textEditingController,
+                      focusNode: provider.focusNode,
+                      onSubmitted: (value) async {
+                        await handleLogin();
+                      },
+                      onEnter: () async {
+                        await handleLogin();
+                      },
+                      validator: (value) {
+                        if (value!.length < 6) {
+                          return context.trSafe(LoginText.pinCodeRequired);
+                        }
+                        return null;
+                      },
+                      onCompleted: (value, state) {},
+                      onChanged: (value) {},
+                    ),
+                  if (!isCurrentlyLocked)
+                    if (widget.showBiometric && LocalAuthConfig.instance.isAvailableBiometrics && LocalAuthConfig.instance.isOpenUseBiometric) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              context.read<LocalAuthProvider>().onBiometric();
+                            },
+                            icon:
+                                Platform.isIOS ? SvgPicture.asset('assets/icons/face_id.svg', width: 20.w, height: 20.h, color: Theme.of(context).colorScheme.primary) : const Icon(Icons.fingerprint),
+                          ),
+                        ],
+                      ),
+                    ] else ...[
+                      SizedBox(height: 20),
+                    ],
+
+                  CustomButtonWidget(
+                    borderRaidus: 100,
+                    width: 75.h,
+                    height: 75.h,
+                    onPressed:
+                        isCurrentlyLocked
+                            ? null
+                            : () async {
+                              await handleLogin();
+                            },
+                    text: "",
+                    child: Icon(Icons.arrow_forward, size: 24.sp, color: isCurrentlyLocked ? Colors.grey : Colors.white),
+                  ),
+                ],
               ),
             ),
           );

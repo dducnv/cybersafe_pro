@@ -36,6 +36,7 @@ class HomeLocale extends BaseLocale {
   static const String cancel = 'cancel';
   static const String delete = 'delete';
   static const String changeCategory = 'change_category';
+  static const String copySuccess = 'copy_success';
 
   @override
   Map<String, String> get vi => {
@@ -59,6 +60,7 @@ class HomeLocale extends BaseLocale {
     cancel: 'Huỷ',
     delete: 'Xoá',
     changeCategory: 'Thay đổi danh mục',
+    copySuccess: 'Sao chép thành công',
   };
 
   @override
@@ -82,6 +84,7 @@ class HomeLocale extends BaseLocale {
     deleteAllAccount: 'Delete all selected accounts',
     delete: 'Delete',
     changeCategory: 'Change Category',
+    copySuccess: 'Copy success',
   };
 
   @override
@@ -106,6 +109,7 @@ class HomeLocale extends BaseLocale {
     cancel: 'Cancel',
     delete: 'Delete',
     changeCategory: 'Change Category',
+    copySuccess: 'Copy success',
   };
   @override
   Map<String, String> get hi => {
@@ -129,6 +133,7 @@ class HomeLocale extends BaseLocale {
     cancel: 'बंद करें',
     delete: 'हटाएं',
     changeCategory: 'श्रेणी बदलें',
+    copySuccess: 'कॉपी सफलतापूर्वक हो गई',
   };
   @override
   Map<String, String> get ja => {
@@ -152,6 +157,7 @@ class HomeLocale extends BaseLocale {
     cancel: 'キャンセル',
     delete: '削除',
     changeCategory: 'カテゴリを変更',
+    copySuccess: 'コピーに成功しました',
   };
   @override
   Map<String, String> get ru => {
@@ -175,6 +181,7 @@ class HomeLocale extends BaseLocale {
     cancel: 'Отмена',
     delete: 'Удалить',
     changeCategory: 'Изменить категорию',
+    copySuccess: 'Копирование прошло успешно',
   };
   @override
   Map<String, String> get id => {
@@ -198,6 +205,7 @@ class HomeLocale extends BaseLocale {
     cancel: 'Batal',
     delete: 'Hapus',
     changeCategory: 'Ubah Kategori',
+    copySuccess: 'Salinan berhasil',
   };
   @override
   Map<String, String> get pt_PT => {
@@ -221,6 +229,7 @@ class HomeLocale extends BaseLocale {
     cancel: 'Cancelar',
     delete: 'Deletar',
     changeCategory: 'Mudar Categoria',
+    copySuccess: 'Cópia realizada com sucesso',
   };
   @override
   Map<String, String> get pt_BR => {
@@ -244,6 +253,7 @@ class HomeLocale extends BaseLocale {
     cancel: 'Cancelar',
     delete: 'Deletar',
     changeCategory: 'Mudar Categoria',
+    copySuccess: 'Cópia realizada com sucesso',
   };
 
   @override
@@ -268,6 +278,7 @@ class HomeLocale extends BaseLocale {
     cancel: 'Cancel',
     delete: 'Delete',
     changeCategory: 'Change Category',
+    copySuccess: 'Copy success',
   };
 
   @override
@@ -292,6 +303,7 @@ class HomeLocale extends BaseLocale {
     cancel: 'Cancelar',
     delete: 'Deletar',
     changeCategory: 'Mudar Categoria',
+    copySuccess: 'Cópia realizada com sucesso',
   };
 }
 

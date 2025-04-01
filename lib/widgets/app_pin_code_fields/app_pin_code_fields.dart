@@ -80,62 +80,56 @@ class AppPinCodeFieldsState extends State<AppPinCodeFields> {
     
     return Form(
       key: widget.formKey,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: 8,
-          horizontal: 50,
+      child: PinCodeTextField(
+        appContext: context,
+        focusNode: widget.focusNode,
+        pastedTextStyle: TextStyle(
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.bold,
         ),
-        child: PinCodeTextField(
-          appContext: context,
-          focusNode: widget.focusNode,
-          pastedTextStyle: TextStyle(
-            color: Theme.of(context).colorScheme.primary,
-            fontWeight: FontWeight.bold,
-          ),
-          length: 6,
-          autoFocus: widget.autoFocus ?? false,
-          obscureText: true,
-          obscuringCharacter: '*',
-          blinkWhenObscuring: false,
-          showCursor: true,
-          animationType: AnimationType.fade,
-          
-          validator: widget.validator,
-          onSubmitted: (value) {
-            widget.onSubmitted(value);
-          },
-          pinTheme: PinTheme(
-              shape: PinCodeFieldShape.underline,
-              borderRadius: BorderRadius.circular(5),
-              fieldHeight: 60,
-              fieldWidth: 40,
-              borderWidth: 10,
-              inactiveFillColor:
-                  Theme.of(context).colorScheme.surfaceContainerHighest,
-              selectedColor: Theme.of(context).colorScheme.primary,
-              selectedFillColor:
-                  Theme.of(context).colorScheme.surfaceContainerHighest,
-              activeFillColor: Theme.of(context).colorScheme.surface,
-              activeColor: Theme.of(context).colorScheme.primary),
-          cursorColor: Theme.of(context).colorScheme.primary,
-          animationDuration: const Duration(milliseconds: 300),
-          enableActiveFill: true,
-          errorAnimationController: errorController,
-          controller: widget.textEditingController,
-          keyboardType: TextInputType.number,
-          errorTextMargin: const EdgeInsets.only(top: 10),
-          boxShadows: const [
-            BoxShadow(
-              offset: Offset(0, 1),
-              color: Colors.black12,
-              blurRadius: 10,
-            )
-          ],
-          onCompleted: (v) {
-            widget.onCompleted(v, this);
-          },
-          onChanged: widget.onChanged,
-        ),
+        length: 6,
+        autoFocus: widget.autoFocus ?? false,
+        obscureText: true,
+        obscuringCharacter: '*',
+        blinkWhenObscuring: false,
+        showCursor: true,
+        animationType: AnimationType.fade,
+        
+        validator: widget.validator,
+        onSubmitted: (value) {
+          widget.onSubmitted(value);
+        },
+        pinTheme: PinTheme(
+            shape: PinCodeFieldShape.underline,
+            borderRadius: BorderRadius.circular(5),
+            fieldHeight: 60,
+            fieldWidth: 40,
+            borderWidth: 10,
+            inactiveFillColor:
+                Theme.of(context).colorScheme.surfaceContainerHighest,
+            selectedColor: Theme.of(context).colorScheme.primary,
+            selectedFillColor:
+                Theme.of(context).colorScheme.surfaceContainerHighest,
+            activeFillColor: Theme.of(context).colorScheme.surface,
+            activeColor: Theme.of(context).colorScheme.primary),
+        cursorColor: Theme.of(context).colorScheme.primary,
+        animationDuration: const Duration(milliseconds: 300),
+        enableActiveFill: true,
+        errorAnimationController: errorController,
+        controller: widget.textEditingController,
+        keyboardType: TextInputType.number,
+        errorTextMargin: const EdgeInsets.only(top: 10),
+        boxShadows: const [
+          BoxShadow(
+            offset: Offset(0, 1),
+            color: Colors.black12,
+            blurRadius: 10,
+          )
+        ],
+        onCompleted: (v) {
+          widget.onCompleted(v, this);
+        },
+        onChanged: widget.onChanged,
       ),
     );
   }

@@ -47,12 +47,12 @@ class DataManagerService {
       );
 
       if (result == null || result.files.isEmpty) {
-        throw Exception(context.trError(ErrorText.fileNotSelected));
+        throw Exception(context.trSafe(ErrorText.fileNotSelected));
       }
 
       final fileBytes = result.files.first.bytes;
       if (fileBytes == null) {
-        throw Exception(context.trError(ErrorText.cannotReadFile));
+        throw Exception(context.trSafe(ErrorText.cannotReadFile));
       }
 
       // Thử các encoding khác nhau
@@ -208,7 +208,7 @@ class DataManagerService {
       // Bước 1: Chọn file
       FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.any);
       if (result == null || result.files.isEmpty) {
-        throw Exception(context.trError(ErrorText.fileNotSelected));
+        throw Exception(context.trSafe(ErrorText.fileNotSelected));
       }
 
       final filePath = result.files.first.path;
@@ -282,7 +282,7 @@ class DataManagerService {
                       appPinCodeKey?.currentState?.triggerErrorAnimation();
                     } else {
                       // Các lỗi khác trong quá trình khôi phục
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.trError(ErrorText.restoreFailed)), backgroundColor: Colors.red, duration: const Duration(seconds: 3)));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.trSafe(ErrorText.restoreFailed)), backgroundColor: Colors.red, duration: const Duration(seconds: 3)));
                     }
                   }
                 } else {

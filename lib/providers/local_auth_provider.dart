@@ -1,4 +1,5 @@
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
+import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/services/local_auth_service.dart';
@@ -9,6 +10,8 @@ import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
+
+import 'package:provider/provider.dart';
 
 class LocalAuthProvider extends ChangeNotifier {
   bool isAuthenticated = false;
@@ -109,17 +112,19 @@ class LocalAuthProvider extends ChangeNotifier {
     await checkAndUpdateLockStatus();
 
     if (LocalAuthConfig.instance.isAvailableBiometrics && LocalAuthConfig.instance.isOpenUseBiometric && canUseBiometric) {
-      bool isAuth = await checkLocalAuth();
-      if (isAuth) {
-        navigatorToHome();
-      } else {
-        Future.delayed(const Duration(milliseconds: 250), () {
-          focusNode.requestFocus();
-        });
-      }
+      await Future.delayed(const Duration(milliseconds: 500), () async {
+        bool isAuth = await checkLocalAuth();
+        if (isAuth) {
+          navigatorToHome();
+        } else {
+          await Future.delayed(const Duration(milliseconds: 250), () {
+            focusNode.requestFocus();
+          });
+        }
+      });
     } else {
       logInfo('init: canUseBiometric: $canUseBiometric ${LocalAuthConfig.instance.isAvailableBiometrics} ${LocalAuthConfig.instance.isOpenUseBiometric}');
-      Future.delayed(const Duration(milliseconds: 250), () {
+      await Future.delayed(const Duration(milliseconds: 250), () {
         focusNode.requestFocus();
       });
     }
@@ -188,7 +193,7 @@ class LocalAuthProvider extends ChangeNotifier {
           } catch (e) {
             logError('Error clearing text: $e');
           }
-        
+
           // Sử dụng addPostFrameCallback để tránh setState trong build cycle
           WidgetsBinding.instance.addPostFrameCallback((_) {
             try {
@@ -245,6 +250,7 @@ class LocalAuthProvider extends ChangeNotifier {
     try {
       var context = GlobalKeys.appRootNavigatorKey.currentContext;
       if (context != null) {
+        context.read<AppProvider>().initializeTimer();
         AppRoutes.navigateAndRemoveUntil(context, AppRoutes.home);
       }
     } catch (e) {
@@ -352,5 +358,13 @@ class LocalAuthProvider extends ChangeNotifier {
       // Thời gian khóa đã hết, reset trạng thái
       await _resetLockStatus();
     }
+  }
+
+  @override
+  void dispose() {
+    focusNode.dispose();
+    textEditingController.dispose();
+    appPinCodeKey.currentState?.dispose();
+    super.dispose();
   }
 }

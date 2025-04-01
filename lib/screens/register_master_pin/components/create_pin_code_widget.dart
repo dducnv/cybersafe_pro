@@ -28,7 +28,7 @@ class _CreatePinCodeWidgetState extends State<CreatePinCodeWidget> {
         Text(widget.isChangePin ? context.trLogin(LoginText.changePinCode) : context.trCreatePinCode(LoginText.createPinCode), style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
         const SizedBox(height: 20),
         Container(
-          constraints: const BoxConstraints(maxWidth: 430),
+          constraints: const BoxConstraints(maxWidth: 300),
           child: AppPinCodeFields(
             key: widget.appPinCodeCreateKey,
             formKey: widget.formCreateKey,
@@ -38,7 +38,7 @@ class _CreatePinCodeWidgetState extends State<CreatePinCodeWidget> {
             autoFocus: true,
             validator: (value) {
               if (value!.length < 6) {
-                return context.trCreatePinCode(LoginText.pinCodeRequired);
+                return context.trSafe(LoginText.pinCodeRequired);
               }
               return null;
             },

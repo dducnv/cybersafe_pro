@@ -274,7 +274,7 @@ class _AddTOTPWithKeyboardBottomSheetState extends State<AddTOTPWithKeyboardBott
                 requiredTextField: true,
                 validator: (value) {
                   if (value?.isEmpty ?? true) {
-                    return context.trCreateAccount(CreateAccountText.appNameValidation);
+                    return context.trSafe(CreateAccountText.appNameValidation);
                   }
                   return null;
                 },
@@ -292,7 +292,7 @@ class _AddTOTPWithKeyboardBottomSheetState extends State<AddTOTPWithKeyboardBott
                 requiredTextField: true,
                 validator: (value) {
                   if (value?.isEmpty ?? true) {
-                    return context.trCreateAccount(CreateAccountText.usernameValidation);
+                    return context.trSafe(CreateAccountText.usernameValidation);
                   }
                   return null;
                 },
@@ -310,10 +310,10 @@ class _AddTOTPWithKeyboardBottomSheetState extends State<AddTOTPWithKeyboardBott
                 isObscure: true,
                 validator: (value) {
                   if (value?.isEmpty ?? true) {
-                    return context.trOtp(OtpText.secretKeyValidation);
+                    return context.trSafe(OtpText.secretKeyValidation);
                   }
                   if (!OTP.isKeyValid(value ?? '')) {
-                    return context.trOtp(OtpText.invalidSecretKey);
+                    return context.trSafe(OtpText.invalidSecretKey);
                   }
                   return null;
                 },

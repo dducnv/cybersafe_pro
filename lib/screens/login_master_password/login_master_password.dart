@@ -28,26 +28,20 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
   @override
   void initState() {
     super.initState();
-
     // Đảm bảo SecureApplicationUtil được khởi tạo
     SecureApplicationUtil.instance.init();
-
-    // Khởi tạo LocalAuthProvider
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!_mounted) return;
-      try {
-        // Tạo mới provider
-        final provider = Provider.of<LocalAuthProvider>(context, listen: false);
-        provider.init(widget.showBiometric && widget.isFromBackup == false);
-        // Dừng timer
-        if (mounted) {
-          context.read<AppProvider>().stopTimer();
-          FlutterNativeSplash.remove();
-        }
-      } catch (e) {
-        logError('Error initializing login screen: $e');
+    FlutterNativeSplash.remove();
+    try {
+      // Tạo mới provider
+      final provider = Provider.of<LocalAuthProvider>(context, listen: false);
+      provider.init(widget.showBiometric && widget.isFromBackup == false);
+      // Dừng timer
+      if (mounted) {
+        context.read<AppProvider>().stopTimer();
       }
-    });
+    } catch (e) {
+      logError('Error initializing login screen: $e');
+    }
   }
 
   @override

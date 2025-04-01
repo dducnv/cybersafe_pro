@@ -7,6 +7,7 @@ import 'package:cybersafe_pro/utils/app_error.dart';
 import 'package:cybersafe_pro/localization/keys/error_text.dart';
 import 'package:cybersafe_pro/widgets/circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
 
 class OtpTextWithCountdown extends StatefulWidget {
   final String keySecret;
@@ -53,6 +54,7 @@ class OtpTextWithCountdownState extends State<OtpTextWithCountdown> {
   late RefetchTotp refetchTotp;
   late int nowValueCountDown;
   final CountDownController countDownController = CountDownController();
+  StreamSubscription? _subscription;
 
   @override
   void initState() {
@@ -67,7 +69,9 @@ class OtpTextWithCountdownState extends State<OtpTextWithCountdown> {
       },
     );
 
-    refetchTotp.elapsedStream.listen(null);
+    _subscription = refetchTotp.elapsedStream.listen((event) {
+      // Có thể xử lý event nếu cần
+    });
   }
 
   void _initializeCountDown() {
@@ -83,8 +87,8 @@ class OtpTextWithCountdownState extends State<OtpTextWithCountdown> {
 
   @override
   void dispose() {
+    _subscription?.cancel();
     refetchTotp.dispose();
-    refetchTotp.elapsedStream.drain();
     super.dispose();
   }
 

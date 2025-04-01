@@ -58,10 +58,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       logInfo("Ứng dụng đang chạy nền");
       context.read<AppProvider>().handleAppBackground();
       // Xóa orchestration key khi ứng dụng chuyển sang background
-      EncryptAppDataService.instance.clearOrchestrationKey();
+      // Làm sạch cache để giảm bộ nhớ
+      EncryptAppDataService.instance.clearCache();
     } else if (state == AppLifecycleState.resumed) {
       logInfo("Ứng dụng đang chạy lại");
       SecureApplicationUtil.instance.init();
+      EncryptAppDataService.instance.initialize();
+    } else if (state == AppLifecycleState.detached) {
+      // Làm sạch tài nguyên khi app bị detach
+      EncryptAppDataService.instance.clearCache();
+      context.read<AppProvider>().stopTimer();
     }
   }
 

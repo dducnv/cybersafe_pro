@@ -31,7 +31,7 @@ class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
         Text(context.trCreatePinCode(LoginText.confirmPinCode), style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
         const SizedBox(height: 20),
         Container(
-          constraints: const BoxConstraints(maxWidth: 430),
+          constraints: const BoxConstraints(maxWidth: 300),
           child: AppPinCodeFields(
             key: widget.appPinCodeConfirmKey,
             formKey: widget.formConfirmKey,
@@ -41,11 +41,11 @@ class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
             autoFocus: true,
             validator: (value) {
               if (value!.isEmpty) {
-                return context.trCreatePinCode(LoginText.pinCodeRequired);
+                return context.trSafe(LoginText.pinCodeRequired);
               }
               bool isVerified = Provider.of<LocalAuthProvider>(context, listen: false).verifyRegisterPinCode(value);
               if (!isVerified) {
-                return context.trCreatePinCode(LoginText.pinCodeNotMatch);
+                return context.trSafe(LoginText.pinCodeNotMatch);
               }
               return null;
             },
