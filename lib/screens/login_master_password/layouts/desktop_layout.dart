@@ -30,7 +30,7 @@ class _DesktopLayoutState extends State<DesktopLayout> {
       autoFocus: localAuthProvider.focusNode.hasFocus,
       key: localAuthProvider.appPinCodeKey,
       formKey: localAuthProvider.formKey,
-      textEditingController: localAuthProvider.textEditingController!,
+      textEditingController: localAuthProvider.textEditingController,
       focusNode: localAuthProvider.focusNode,
       onSubmitted: (value) async {
         await handleLogin();
@@ -288,10 +288,10 @@ class _DesktopLayoutState extends State<DesktopLayout> {
 
   Future<void> handleLogin() async {
     if (widget.isFromBackup) {
-      if (widget.callBackLoginSuccess != null && context.read<LocalAuthProvider>().textEditingController != null) {
+      if (widget.callBackLoginSuccess != null) {
         widget.callBackLoginSuccess!(
           isLoginSuccess: true, 
-          pin: context.read<LocalAuthProvider>().textEditingController!.text, 
+          pin: context.read<LocalAuthProvider>().textEditingController.text, 
           appPinCodeKey: context.read<LocalAuthProvider>().appPinCodeKey
         );
       }
@@ -302,10 +302,10 @@ class _DesktopLayoutState extends State<DesktopLayout> {
 
     // Kiểm tra mounted trước khi sử dụng context
     if (isLoginSuccess && mounted) {
-      if (widget.callBackLoginSuccess != null && context.read<LocalAuthProvider>().textEditingController != null) {
+      if (widget.callBackLoginSuccess != null) {
         widget.callBackLoginSuccess!(
           isLoginSuccess: true, 
-          pin: context.read<LocalAuthProvider>().textEditingController!.text, 
+          pin: context.read<LocalAuthProvider>().textEditingController.text, 
           appPinCodeKey: context.read<LocalAuthProvider>().appPinCodeKey
         );
         return;
@@ -343,7 +343,7 @@ class _DesktopLayoutState extends State<DesktopLayout> {
                 
                 if (mounted && context.mounted) {
                   // Đảm bảo trạng thái được cập nhật đúng
-                  context.read<LocalAuthProvider>().init(widget.showBiometric && !widget.isFromBackup);
+                  // context.read<LocalAuthProvider>().init(widget.showBiometric && !widget.isFromBackup);
                   setState(() {});
                 }
               }

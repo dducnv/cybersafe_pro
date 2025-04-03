@@ -24,6 +24,18 @@ class AuthLocale extends BaseLocale {
     LoginText.confirmPinCode: 'Xác nhận mã PIN',
     LoginText.pinCodeNotMatch: 'Mã PIN không khớp',
     LoginText.pinCodeRequired: 'Vui lòng nhập đủ 6 số',
+    LoginText.enterPin: 'Nhập mã PIN',
+    LoginText.enterAnyPin: 'Nhập mã PIN bất kỳ',
+    LoginText.backupNote: 'Vui lòng nhập mã PIN để xác nhận sao lưu',
+    LoginText.restoreNote: 'Vui lòng nhập mã PIN để xác nhận khôi phục',
+    LoginText.loginLockDescription: 'Tài khoản đã bị khóa',
+    LoginText.pleaseTryAgainLater: 'Vui lòng thử lại sau {0}',
+    
+    // Thêm các text đã dịch cho dialog xác nhận thoát
+    LoginText.confirmExit: 'Xác nhận thoát',
+    LoginText.confirmExitMessage: 'Bạn có chắc chắn muốn thoát? Các thao tác đang thực hiện có thể bị gián đoạn.',
+    LoginText.cancel: 'Hủy',
+    LoginText.exit: 'Thoát',
   };
 
   @override
@@ -32,6 +44,18 @@ class AuthLocale extends BaseLocale {
     LoginText.confirmPinCode: 'Confirm PIN',
     LoginText.pinCodeNotMatch: 'PINs do not match',
     LoginText.pinCodeRequired: 'PIN is required',
+    LoginText.enterPin: 'Enter PIN',
+    LoginText.enterAnyPin: 'Enter any PIN',
+    LoginText.backupNote: 'Please enter PIN to confirm backup',
+    LoginText.restoreNote: 'Please enter PIN to confirm restore',
+    LoginText.loginLockDescription: 'Account is locked',
+    LoginText.pleaseTryAgainLater: 'Please try again in {0}',
+    
+    // Thêm các text đã dịch cho dialog xác nhận thoát
+    LoginText.confirmExit: 'Confirm Exit',
+    LoginText.confirmExitMessage: 'Are you sure you want to exit? Current operations may be interrupted.',
+    LoginText.cancel: 'Cancel',
+    LoginText.exit: 'Exit',
   };
 
   @override

@@ -16,7 +16,14 @@ class LoginMasterPassword extends StatefulWidget {
   final bool isFromBackup;
   final bool isFromRestore;
   final Function({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey})? callBackLoginSuccess;
-  const LoginMasterPassword({super.key, this.showBiometric = true, this.isFromBackup = false, this.isFromRestore = false, this.callBackLoginSuccess});
+  
+  const LoginMasterPassword({
+    super.key, 
+    this.showBiometric = true, 
+    this.isFromBackup = false, 
+    this.isFromRestore = false, 
+    this.callBackLoginSuccess
+  });
 
   @override
   State<LoginMasterPassword> createState() => _LoginMasterPasswordState();
@@ -28,15 +35,26 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
   @override
   void initState() {
     super.initState();
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    if (!_mounted) return;
+    
     // Đảm bảo SecureApplicationUtil được khởi tạo
     SecureApplicationUtil.instance.init();
     FlutterNativeSplash.remove();
+
     try {
-      // Tạo mới provider
-      final provider = Provider.of<LocalAuthProvider>(context, listen: false);
-      provider.init(widget.showBiometric && widget.isFromBackup == false);
+      // Sử dụng provider có sẵn thay vì tạo mới
+      final authProvider = Provider.of<LocalAuthProvider>(context, listen: false);
+      print('widget.showBiometric: ${widget.showBiometric}');
+      print('widget.isFromBackup: ${widget.isFromBackup}');
+      print('widget.isFromRestore: ${widget.isFromRestore}');
+      await authProvider.init(widget.showBiometric && !widget.isFromBackup && !widget.isFromRestore);
+      
       // Dừng timer
-      if (mounted) {
+      if (_mounted) {
         context.read<AppProvider>().stopTimer();
       }
     } catch (e) {
@@ -53,13 +71,26 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
   @override
   Widget build(BuildContext context) {
     final deviceType = DeviceInfo.getDeviceType(context);
+    return _buildLayout(deviceType);
+  }
+
+  Widget _buildLayout(DeviceType deviceType) {
     switch (deviceType) {
       case DeviceType.desktop:
         return const DesktopLayout();
       case DeviceType.tablet:
-        return TabletLayout(showBiometric: widget.showBiometric, isFromBackup: widget.isFromBackup, callBackLoginSuccess: widget.callBackLoginSuccess);
+        return MobileLayout(
+          showBiometric: widget.showBiometric,
+          isFromBackup: widget.isFromBackup,
+          callBackLoginSuccess: widget.callBackLoginSuccess
+        );
       case DeviceType.mobile:
-        return MobileLayout(showBiometric: widget.showBiometric, isFromBackup: widget.isFromBackup, isFromRestore: widget.isFromRestore, callBackLoginSuccess: widget.callBackLoginSuccess);
+        return MobileLayout(
+          showBiometric: widget.showBiometric,
+          isFromBackup: widget.isFromBackup,
+          isFromRestore: widget.isFromRestore,
+          callBackLoginSuccess: widget.callBackLoginSuccess
+        );
     }
   }
 }

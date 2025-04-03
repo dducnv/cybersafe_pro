@@ -30,6 +30,9 @@ class OnboardingLocale extends BaseLocale {
     OnboardingText.terms: 'Điều khoản dịch vụ',
     OnboardingText.policy: 'Chính sách bảo mật',
     OnboardingText.continueText: 'Tiếp tục',
+    OnboardingText.agreeRedirectLink: 'Đồng ý và đi đến đường dẫn',
+    OnboardingText.doNotAgreeRedirectLink: 'Bạn có đồng ý đi đến đường dẫn không?',
+    OnboardingText.showLink: 'Hiển thị đường dẫn',
   };
 
   @override
@@ -44,6 +47,9 @@ class OnboardingLocale extends BaseLocale {
     OnboardingText.terms: 'Terms and conditions',
     OnboardingText.policy: 'Privacy policy',
     OnboardingText.continueText: 'Continue',
+    OnboardingText.agreeRedirectLink: 'Agree and go to the link',
+    OnboardingText.doNotAgreeRedirectLink: 'Do you agree to go to the link?',
+    OnboardingText.showLink: 'Show link',
   };
 
   @override
@@ -58,6 +64,9 @@ class OnboardingLocale extends BaseLocale {
     OnboardingText.terms: 'Termos e condições',
     OnboardingText.policy: 'Política de privacidade',
     OnboardingText.continueText: 'Continuar',
+    OnboardingText.agreeRedirectLink: 'Concordar e ir para o link',
+    OnboardingText.doNotAgreeRedirectLink: 'Você concorda em ir para o link?',
+    OnboardingText.showLink: 'Mostrar link',
   };
 
   @override
@@ -72,6 +81,9 @@ class OnboardingLocale extends BaseLocale {
     OnboardingText.terms: 'नियम और शर्तों',
     OnboardingText.policy: 'गोपनीयता नीति',
     OnboardingText.continueText: 'जारी रखें',
+    OnboardingText.agreeRedirectLink: 'सहमत हो और लिंक पर जाएं',
+    OnboardingText.doNotAgreeRedirectLink: 'क्या आप लिंक पर जाना चाहते हैं?',
+    OnboardingText.showLink: 'लिंक दिखाएं',
   };
 
   @override
@@ -86,6 +98,9 @@ class OnboardingLocale extends BaseLocale {
     OnboardingText.terms: '利用規約',
     OnboardingText.policy: 'プライバシーポリシー',
     OnboardingText.continueText: '続ける',
+    OnboardingText.agreeRedirectLink: '同意してリンクに移動',
+    OnboardingText.doNotAgreeRedirectLink: 'リンクに移動しますか？',
+    OnboardingText.showLink: 'リンクを表示',
   };
 
   @override
@@ -100,6 +115,9 @@ class OnboardingLocale extends BaseLocale {
     OnboardingText.terms: 'Условия использования',
     OnboardingText.policy: 'Политика конфиденциальности',
     OnboardingText.continueText: 'Продолжить',
+    OnboardingText.agreeRedirectLink: 'Согласен и перейти по ссылке',
+    OnboardingText.doNotAgreeRedirectLink: 'Вы согласны перейти по ссылке?',
+    OnboardingText.showLink: 'Показать ссылку',
   };
 
   @override
@@ -114,5 +132,8 @@ class OnboardingLocale extends BaseLocale {
     OnboardingText.terms: 'Syarat dan ketentuan',
     OnboardingText.policy: 'Kebijakan privasi',
     OnboardingText.continueText: 'Lanjutkan',
+    OnboardingText.agreeRedirectLink: 'Setuju dan pergi ke link',
+    OnboardingText.doNotAgreeRedirectLink: 'Apakah Anda setuju untuk pergi ke link?',
+    OnboardingText.showLink: 'Tampilkan tautan',
   };
 } 

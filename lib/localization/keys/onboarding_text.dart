@@ -9,4 +9,7 @@ class OnboardingText {
   static const String terms = 'terms';
   static const String policy = 'policy';
   static const String continueText = 'continue_text';
+  static const String agreeRedirectLink = 'agree_redirect_link';
+  static const String doNotAgreeRedirectLink = 'do_not_agree_redirect_link';
+  static const String showLink = 'show_link';
 } 

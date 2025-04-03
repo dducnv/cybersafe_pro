@@ -14,9 +14,14 @@ import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'database/objectbox.dart';
 import 'package:timezone/data/latest.dart' as timezone;
+import 'package:in_app_review/in_app_review.dart';
+
+final InAppReview inAppReview = InAppReview.instance;
+late final PackageInfo packageInfo;
 
 Future<void> initApp() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +36,7 @@ Future<void> initApp() async {
   final themeProvider = ThemeProvider();
   await themeProvider.initTheme();
   await encryptService.initialize();
-  
+  packageInfo = await PackageInfo.fromPlatform();
   // Xác định route ban đầu
   final initialRoute = await _determineInitialRoute();
   

@@ -1,3 +1,4 @@
+import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/components/icon_show_component.dart';
 import 'package:cybersafe_pro/database/boxes/account_box.dart';
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
@@ -33,7 +34,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
 
   // Thêm các biến điều khiển animation
   final List<bool> _isVisible = List.generate(7, (_) => false);
-  final Duration _animationDuration = const Duration(milliseconds: 300);
+  final Duration _animationDuration = const Duration(milliseconds: 250);
   final Duration _staggeredDelay = const Duration(milliseconds: 100);
 
   @override
@@ -106,31 +107,20 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                             title: Text(context.trDetails(DetailsAccountText.deleteAccount), style: TextStyle(color: Theme.of(context).colorScheme.error)),
                             onTap: () {
                               Navigator.of(context).pop();
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text(context.trDetails(DetailsAccountText.deleteAccount)),
-                                    content: Text(context.trDetails(DetailsAccountText.deleteAccountQuestion)),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text(context.trDetails(DetailsAccountText.cancel)),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          context.read<CategoryProvider>().refresh();
-                                          context.read<AccountProvider>().deleteAccount(widget.accountOjbModel);
-                                          Navigator.of(context).pop();
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text(context.trDetails(DetailsAccountText.deleteAccount), style: TextStyle(color: Theme.of(context).colorScheme.error)),
-                                      ),
-                                    ],
-                                  );
-                                },
+                              showAppCustomDialog(
+                                context,
+                                AppCustomDialog(
+                                  title: context.trSafe(DetailsAccountText.deleteAccount),
+                                  message: context.trSafe(DetailsAccountText.deleteAccountQuestion),
+                                  confirmText: context.trSafe(DetailsAccountText.deleteAccount),
+                                  cancelText: context.trSafe(DetailsAccountText.cancel),
+                                  onConfirm: () {
+                                    context.read<CategoryProvider>().refresh();
+                                    context.read<AccountProvider>().deleteAccount(widget.accountOjbModel);
+                                    Navigator.of(context).pop();
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
                               );
                             },
                           ),
@@ -224,7 +214,8 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
             children: [
               if (accountOjbModel.email != null && accountOjbModel.email!.isNotEmpty)
                 ItemCopyValue(title: context.trDetails(DetailsAccountText.username), value: accountOjbModel.email!, isLastItem: accountOjbModel.password?.isEmpty ?? true),
-              if (accountOjbModel.password != null && accountOjbModel.password!.isNotEmpty) Padding(padding: EdgeInsets.symmetric(vertical: 5.h), child: Divider(color: Theme.of(context).colorScheme.surfaceContainerHighest)),
+              if (accountOjbModel.password != null && accountOjbModel.password!.isNotEmpty)
+                Padding(padding: EdgeInsets.symmetric(vertical: 5.h), child: Divider(color: Theme.of(context).colorScheme.surfaceContainerHighest)),
               if (accountOjbModel.password != null && accountOjbModel.password!.isNotEmpty)
                 ItemCopyValue(title: context.trDetails(DetailsAccountText.password), value: accountOjbModel.password!, isLastItem: true, isPrivateValue: true),
             ],
@@ -343,7 +334,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                   final decryptService = EncryptAppDataService.instance;
                   final decryptPassword = await decryptService.decryptTOTPKey(account.totp.target!.secretKey);
                   final otpCode = generateTOTPCode(keySecret: decryptPassword);
-                  if (otpCode.isNotEmpty && mounted) {  
+                  if (otpCode.isNotEmpty && mounted) {
                     clipboardCustom(context: context, text: otpCode);
                   }
                 },
@@ -456,7 +447,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                           onPressed: () async {
                             final decryptService = EncryptAppDataService.instance;
                             final decryptPassword = await decryptService.decryptPassword(passwordHistory.password);
-                            if (decryptPassword.isNotEmpty && context.mounted) {  
+                            if (decryptPassword.isNotEmpty && context.mounted) {
                               clipboardCustom(context: context, text: decryptPassword);
                             }
                           },

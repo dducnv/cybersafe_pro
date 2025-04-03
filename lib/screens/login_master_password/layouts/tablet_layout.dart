@@ -173,7 +173,7 @@ class _TabletLayoutState extends State<TabletLayout> {
 
                 if (mounted && context.mounted) {
                   // Đảm bảo trạng thái được cập nhật đúng
-                  context.read<LocalAuthProvider>().init(widget.showBiometric && !widget.isFromBackup);
+                  // context.read<LocalAuthProvider>().init(widget.showBiometric && !widget.isFromBackup);
                   setState(() {});
                 }
               }

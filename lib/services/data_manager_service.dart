@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:csv/csv.dart';
+import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/database/boxes/account_box.dart';
 import 'package:cybersafe_pro/database/boxes/account_custom_field_box.dart' show AccountCustomFieldBox;
@@ -13,6 +14,7 @@ import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
 import 'package:cybersafe_pro/env/env.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/error_text.dart';
+import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/screens/login_master_password/login_master_password.dart';
@@ -33,6 +35,8 @@ class DataManagerService {
   static final DataManagerService _instance = DataManagerService._internal();
   factory DataManagerService() => _instance;
   DataManagerService._internal();
+
+  static bool canLockApp = true;
 
   //import data from browser
   static Future<void> importDataFromBrowser(BuildContext context) async {
@@ -205,6 +209,7 @@ class DataManagerService {
 
   static Future<void> restoreData(BuildContext context) async {
     try {
+      canLockApp = false;
       // Bước 1: Chọn file
       FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.any);
       if (result == null || result.files.isEmpty) {
@@ -296,8 +301,10 @@ class DataManagerService {
           },
         ),
       );
+      canLockApp = true;
     } catch (e) {
       // Xử lý các lỗi chung
+      canLockApp = true;
       hideLoadingDialog();
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}'), backgroundColor: Colors.red, duration: const Duration(seconds: 3)));
@@ -371,96 +378,57 @@ class DataManagerService {
   //wait 5s
 
   static Future<void> deleteAllDataPopup({required BuildContext context}) async {
-    bool canDelete = false;
-    int countdown = 5;
+    showAppCustomDialog(
+      context,
+      AppCustomDialog(
+        title: context.trSafe(SettingsLocale.deleteData),
+        message: context.trSafe(SettingsLocale.deleteDataQuestion),
+        confirmText: context.trSafe(SettingsLocale.deleteData),
+        cancelText: context.trSafe(SettingsLocale.cancel),
+        isCountDownTimer: true,
+        onConfirm: () {
+          Navigator.of(context).pop();
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder:
+                  (context) => LoginMasterPassword(
+                    showBiometric: false,
+                    callBackLoginSuccess: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
+                      if (isLoginSuccess == true && pin != null) {
+                        final success = await deleteData();
 
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            if (!canDelete) {
-              Future.delayed(const Duration(seconds: 1), () {
-                if (countdown > 0 && context.mounted) {
-                  setState(() {
-                    countdown--;
-                  });
-                  if (countdown == 0) {
-                    setState(() {
-                      canDelete = true;
-                    });
-                  }
-                }
-              });
-            } else {
-              countdown = 5;
-              canDelete = true;
-            }
-
-            return AlertDialog(
-              title: const Text("Delete all"),
-              content: Column(mainAxisSize: MainAxisSize.min, children: [Text("Are you sure you want to delete all data?"), const SizedBox(height: 10)]),
-              actions: [
-                TextButton(
-                  onPressed:
-                      canDelete
-                          ? () async {
-                            Navigator.of(context).pop();
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => LoginMasterPassword(
-                                      showBiometric: false,
-                                      callBackLoginSuccess: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
-                                        if (isLoginSuccess == true && pin != null) {
-                                          final success = await deleteData();
-
-                                          if (success && GlobalKeys.appRootNavigatorKey.currentContext != null) {
-                                            // Làm mới dữ liệu
-                                            try {
-                                              await GlobalKeys.appRootNavigatorKey.currentContext!.read<CategoryProvider>().refresh();
-                                              await GlobalKeys.appRootNavigatorKey.currentContext!.read<AccountProvider>().refreshAccounts();
-                                            } catch (e) {
-                                              logError('Lỗi làm mới dữ liệu sau khi xóa: $e');
-                                            }
-
-                                            // Hiển thị thông báo thành công
-                                            ScaffoldMessenger.of(
-                                              GlobalKeys.appRootNavigatorKey.currentContext!,
-                                            ).showSnackBar(const SnackBar(content: Text('Delete data successfully'), backgroundColor: Colors.green, duration: Duration(seconds: 2)));
-
-                                            // Quay về màn hình chính
-                                            Navigator.of(GlobalKeys.appRootNavigatorKey.currentContext!).pop();
-                                          } else {
-                                            if (GlobalKeys.appRootNavigatorKey.currentContext != null) {
-                                              ScaffoldMessenger.of(
-                                                GlobalKeys.appRootNavigatorKey.currentContext!,
-                                              ).showSnackBar(const SnackBar(content: Text('Delete data failed'), backgroundColor: Colors.red, duration: Duration(seconds: 2)));
-                                              Navigator.of(GlobalKeys.appRootNavigatorKey.currentContext!).pop();
-                                            }
-                                          }
-                                        }
-                                      },
-                                    ),
-                              ),
-                            );
+                        if (success && GlobalKeys.appRootNavigatorKey.currentContext != null) {
+                          // Làm mới dữ liệu
+                          try {
+                            await GlobalKeys.appRootNavigatorKey.currentContext!.read<CategoryProvider>().refresh();
+                            await GlobalKeys.appRootNavigatorKey.currentContext!.read<AccountProvider>().refreshAccounts();
+                          } catch (e) {
+                            logError('Lỗi làm mới dữ liệu sau khi xóa: $e');
                           }
-                          : null,
-                  child: Text("Delete ${!canDelete ? "($countdown)" : ""}", style: TextStyle(color: canDelete ? Colors.redAccent : Colors.grey)),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text("Cancel", style: TextStyle(color: Theme.of(context).colorScheme.primary)),
-                ),
-              ],
-            );
-          },
-        );
-      },
+
+                          // Hiển thị thông báo thành công
+                          ScaffoldMessenger.of(
+                            GlobalKeys.appRootNavigatorKey.currentContext!,
+                          ).showSnackBar(const SnackBar(content: Text('Delete data successfully'), backgroundColor: Colors.green, duration: Duration(seconds: 2)));
+
+                          // Quay về màn hình chính
+                          Navigator.of(GlobalKeys.appRootNavigatorKey.currentContext!).pop();
+                        } else {
+                          if (GlobalKeys.appRootNavigatorKey.currentContext != null) {
+                            ScaffoldMessenger.of(
+                              GlobalKeys.appRootNavigatorKey.currentContext!,
+                            ).showSnackBar(const SnackBar(content: Text('Delete data failed'), backgroundColor: Colors.red, duration: Duration(seconds: 2)));
+                            Navigator.of(GlobalKeys.appRootNavigatorKey.currentContext!).pop();
+                          }
+                        }
+                      }
+                    },
+                  ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

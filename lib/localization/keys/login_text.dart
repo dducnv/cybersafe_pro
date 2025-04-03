@@ -9,15 +9,21 @@ class LoginText {
   static const String confirmReset = 'confirm_reset';
   static const String resetWarning = 'reset_warning';
 
-  static const String createPinCode = 'create_pin_code';
-  static const String confirmPinCode = 'confirm_pin_code';
-  static const String pinCodeNotMatch = 'pin_code_not_match';
-  static const String pinCodeRequired = 'pin_code_required';
+  static const String createPinCode = 'createPinCode';
+  static const String confirmPinCode = 'confirmPinCode';
+  static const String pinCodeNotMatch = 'pinCodeNotMatch';
+  static const String pinCodeRequired = 'pinCodeRequired';
 
   static const String changePinCode = 'change_pin_code';
 
-  static const String loginLockDescription = 'login_lock_description';
-  static const String pleaseTryAgainLater = 'please_try_again_later';
+  static const String loginLockDescription = 'loginLockDescription';
+  static const String pleaseTryAgainLater = 'pleaseTryAgainLater';
 
-  static const String restoreNote = 'restore_note';
+  static const String restoreNote = 'restoreNote';
+
+  // Thêm các key cho dialog xác nhận thoát
+  static const String confirmExit = 'confirmExit';
+  static const String confirmExitMessage = 'confirmExitMessage';
+  static const String cancel = 'cancel';
+  static const String exit = 'exit';
 } 

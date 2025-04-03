@@ -1,4 +1,5 @@
 import 'package:cybersafe_pro/components/bottom_sheets/create_category_bottom_sheet.dart';
+import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/category_text.dart';
@@ -56,7 +57,7 @@ class MobileLayout extends StatelessWidget {
                             ),
                             IconButton(
                               onPressed: () {
-                                deleteCategoryPopup(context: context, category: category);
+                                _showDeleteCategoryPopup(context: context, category: category);
                               },
                               icon: Icon(Icons.delete, color: Colors.red[600], size: 21.sp),
                             ),
@@ -78,71 +79,88 @@ class MobileLayout extends StatelessWidget {
     );
   }
 
-  Future<void> deleteCategoryPopup({required BuildContext context, required CategoryOjbModel category}) async {
-    bool canDelete = false;
-    int countdown = 5;
-
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            if (!canDelete && category.accounts.isNotEmpty) {
-              Future.delayed(const Duration(seconds: 1), () {
-                if (countdown > 0 && context.mounted) {
-                  setState(() {
-                    countdown--;
-                  });
-                  if (countdown == 0) {
-                    setState(() {
-                      canDelete = true;
-                    });
-                  }
-                }
-              });
-            } else {
-              countdown = 5;
-              canDelete = true;
-            }
-
-            return AlertDialog(
-              title: Text(context.trCategory(CategoryText.deleteCategory), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500)),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    category.accounts.isNotEmpty
-                        ? context.trCategory(CategoryText.deleteWarningWithAccounts)
-                        : context.trCategory(CategoryText.deleteWarningEmpty),
-                  ),
-                  const SizedBox(height: 10),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed:
-                      canDelete
-                          ? () async {
-                            bool result = await context.read<CategoryProvider>().deleteCategory(category);
-                            if (result && context.mounted) {
-                              Navigator.pop(context);
-                            }
-                          }
-                          : null,
-                  child: Text("${context.trCategory(CategoryText.deleteCategory)} ${!canDelete ? "($countdown)" : ""}", style: TextStyle(color: canDelete ? Colors.redAccent : Colors.grey)),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text(context.trCategory(CategoryText.cancel), style: TextStyle(color: Theme.of(context).colorScheme.primary)),
-                ),
-              ],
-            );
-          },
-        );
-      },
+  _showDeleteCategoryPopup({required BuildContext context, required CategoryOjbModel category}) async {
+    return showAppCustomDialog(
+      context,
+      AppCustomDialog(
+        title: context.trSafe(CategoryText.deleteCategory),
+        message: category.accounts.isNotEmpty ? context.trSafe(CategoryText.deleteWarningWithAccounts) : context.trSafe(CategoryText.deleteWarningEmpty),
+        confirmText: context.trSafe(CategoryText.deleteCategory),
+        cancelText: context.trSafe(CategoryText.cancel),
+        cancelButtonColor: Theme.of(context).colorScheme.primary,
+        confirmButtonColor: Theme.of(context).colorScheme.error,
+        isCountDownTimer: true,
+        onConfirm: () async {
+          bool result = await context.read<CategoryProvider>().deleteCategory(category);
+          if (result && context.mounted) {
+            Navigator.pop(context);
+          }
+        },
+      ),
     );
   }
+
+  // Future<void> deleteCategoryPopup({required BuildContext context, required CategoryOjbModel category}) async {
+  //   bool canDelete = false;
+  //   int countdown = 5;
+
+  //   await showDialog(
+  //     context: context,
+  //     barrierDismissible: false,
+  //     builder: (context) {
+  //       return StatefulBuilder(
+  //         builder: (context, setState) {
+  //           if (!canDelete && category.accounts.isNotEmpty) {
+  //             Future.delayed(const Duration(seconds: 1), () {
+  //               if (countdown > 0 && context.mounted) {
+  //                 setState(() {
+  //                   countdown--;
+  //                 });
+  //                 if (countdown == 0) {
+  //                   setState(() {
+  //                     canDelete = true;
+  //                   });
+  //                 }
+  //               }
+  //             });
+  //           } else {
+  //             countdown = 5;
+  //             canDelete = true;
+  //           }
+
+  //           return AlertDialog(
+  //             title: Text(context.trCategory(CategoryText.deleteCategory), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500)),
+  //             content: Column(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: [
+  //                 Text(category.accounts.isNotEmpty ? context.trCategory(CategoryText.deleteWarningWithAccounts) : context.trCategory(CategoryText.deleteWarningEmpty)),
+  //                 const SizedBox(height: 10),
+  //               ],
+  //             ),
+  //             actions: [
+  //               TextButton(
+  //                 onPressed:
+  //                     canDelete
+  //                         ? () async {
+  //                           bool result = await context.read<CategoryProvider>().deleteCategory(category);
+  //                           if (result && context.mounted) {
+  //                             Navigator.pop(context);
+  //                           }
+  //                         }
+  //                         : null,
+  //                 child: Text("${context.trCategory(CategoryText.deleteCategory)} ${!canDelete ? "($countdown)" : ""}", style: TextStyle(color: canDelete ? Colors.redAccent : Colors.grey)),
+  //               ),
+  //               TextButton(
+  //                 onPressed: () {
+  //                   Navigator.pop(context);
+  //                 },
+  //                 child: Text(context.trCategory(CategoryText.cancel), style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+  //               ),
+  //             ],
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
 }

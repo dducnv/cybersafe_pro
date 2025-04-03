@@ -1,4 +1,5 @@
 import 'package:cybersafe_pro/components/bottom_sheets/select_category_bottom_sheets.dart';
+import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
@@ -57,10 +58,10 @@ class _HomeAppBarCustomState extends State<HomeAppBarCustom> {
                       onPressed: () {
                         showSelectCategoryBottomSheet(
                           context,
-                          onSelected:(CategoryOjbModel category){
+                          onSelected: (CategoryOjbModel category) {
                             context.read<AccountProvider>().handleChangeCategory(category);
                           },
-                          isFromChangeCategory: true
+                          isFromChangeCategory: true,
                         );
                       },
                       icon: Icon(Icons.drive_file_move, color: Colors.white, size: 24.sp),
@@ -68,30 +69,21 @@ class _HomeAppBarCustomState extends State<HomeAppBarCustom> {
                     const SizedBox(width: 10),
                     ElevatedButton(
                       onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              content: Text(context.trHome(HomeLocale.deleteAllAccount)),
-                              actionsPadding: const EdgeInsets.only(bottom: 2, right: 5),
-                              contentPadding: const EdgeInsets.only(top: 16, left: 16, right: 16),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text(context.trHome(HomeLocale.cancel)),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    context.read<AccountProvider>().handleDeleteAllAccount();
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text(context.trHome(HomeLocale.delete)),
-                                ),
-                              ],
-                            );
-                          },
+                        showAppCustomDialog(
+                          context,
+                          AppCustomDialog(
+                            title: "",
+                            message: context.trSafe(HomeLocale.deleteAllAccount),
+                            confirmText: context.trSafe(HomeLocale.delete),
+                            cancelText: context.trSafe(HomeLocale.cancel),
+                            confirmButtonColor: Colors.red,
+                            cancelButtonColor: Theme.of(context).colorScheme.primary,
+                            isCountDownTimer: true,
+                            onConfirm: () {
+                              Navigator.pop(context);
+                              context.read<AccountProvider>().handleDeleteAllAccount();
+                            },
+                          ),
                         );
                       },
                       child: Row(

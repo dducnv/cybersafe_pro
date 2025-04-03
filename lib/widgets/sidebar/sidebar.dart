@@ -1,8 +1,11 @@
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/sidebar_text.dart';
+import 'package:cybersafe_pro/main.dart';
+import 'package:cybersafe_pro/resources/app_config.dart';
 import 'package:cybersafe_pro/resources/size_text_icon.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 class Sidebar extends StatelessWidget {
@@ -33,29 +36,47 @@ class Sidebar extends StatelessWidget {
           },
         ),
         ListTile(
-          leading: Icon(Icons.info_rounded, size: 24.sp), 
-          title: Text(context.trSidebar(SidebarText.about), style: drawerTitleStyle), 
-          onTap: () {}
+          leading: Icon(Icons.star, size: 24.sp),
+          title: Text(context.trSidebar(SidebarText.rateApp), style: drawerTitleStyle),
+          onTap: () async {
+            Navigator.of(context).pop();
+            if (await inAppReview.isAvailable()) {
+              inAppReview.requestReview();
+            }
+          },
         ),
         ListTile(
-          leading: Icon(Icons.question_mark_rounded, size: 24.sp), 
-          title: Text(context.trSidebar(SidebarText.faqs), style: drawerTitleStyle), 
-          onTap: () {}
+          leading: Icon(Icons.info_rounded, size: 24.sp),
+          title: Text(context.trSidebar(SidebarText.about), style: drawerTitleStyle),
+          onTap: () {
+            AppRoutes.navigateTo(context, AppRoutes.aboutApp);
+          },
+        ),
+        // ListTile(
+        //   leading: Icon(Icons.question_mark_rounded, size: 24.sp),
+        //   title: Text(context.trSidebar(SidebarText.faqs), style: drawerTitleStyle),
+        //   onTap: () {}
+        // ),
+        ListTile(
+          leading: Icon(Icons.mail_rounded, size: 24.sp),
+          title: Text(context.trSidebar(SidebarText.featureRequest), style: drawerTitleStyle),
+          onTap: () {
+            openUrl("mailto:contact.ducnv@gmail.com?subject=[CyberSafe] Feature Request", context: context);
+          },
         ),
         ListTile(
-          leading: Icon(Icons.mail_rounded, size: 24.sp), 
-          title: Text(context.trSidebar(SidebarText.featureRequest), style: drawerTitleStyle), 
-          onTap: () {}
+          leading: Icon(Icons.privacy_tip, size: 24.sp),
+          title: Text(context.trSidebar(SidebarText.privacyPolicy), style: drawerTitleStyle),
+          onTap: () {
+            AppConfig.showDialogRedirectLink(context, url: AppConfig.privacyPolicyUrl(context.localeRead.languageCode));
+          },
         ),
         ListTile(
-          leading: Icon(Icons.privacy_tip, size: 24.sp), 
-          title: Text(context.trSidebar(SidebarText.privacyPolicy), style: drawerTitleStyle), 
-          onTap: () {}
-        ),
-        ListTile(
-          leading: Icon(Icons.article, size: 24.sp), 
-          title: Text(context.trSidebar(SidebarText.termsOfService), style: drawerTitleStyle), 
-          onTap: () {}
+          leading: Icon(Icons.article, size: 24.sp),
+          title: Text(context.trSidebar(SidebarText.termsOfService), style: drawerTitleStyle),
+          onTap: () {
+            AppConfig.showDialogRedirectLink(context, url: AppConfig.termsOfServiceUrl(context.localeRead.languageCode));
+          },
         ),
       ],
     );

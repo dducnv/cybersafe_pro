@@ -6,4 +6,5 @@ class SidebarText {
   static const String featureRequest = 'feature_request';
   static const String privacyPolicy = 'privacy_policy';
   static const String termsOfService = 'terms_of_service';
+  static const String rateApp = 'rate_app';
 } 

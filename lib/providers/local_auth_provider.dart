@@ -14,27 +14,59 @@ import 'dart:async';
 import 'package:provider/provider.dart';
 
 class LocalAuthProvider extends ChangeNotifier {
-  bool isAuthenticated = false;
   final encryptAppDataService = EncryptAppDataService.instance;
 
-  // login master password
-  FocusNode focusNode = FocusNode();
-  TextEditingController textEditingController = TextEditingController();
-  GlobalKey<AppPinCodeFieldsState> appPinCodeKey = GlobalKey<AppPinCodeFieldsState>();
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  // Controllers
+  late FocusNode focusNode;
+  late TextEditingController textEditingController;
+  late GlobalKey<AppPinCodeFieldsState> appPinCodeKey;
+  late GlobalKey<FormState> formKey;
 
+  // State variables
+  bool isAuthenticated = false;
   String _pinCodeConfirm = '';
 
-  // Biến theo dõi số lần đăng nhập sai và trạng thái khoá
+  // Lock related variables
   int _loginFailCount = 0;
   bool _isLocked = false;
   DateTime? _lockUntil;
   int _lockDurationMultiplier = 1;
 
-  // Cấu hình khoá tài khoản
-  final int _maxLoginAttempts = 3; // Số lần đăng nhập thất bại tối đa
-  final int _baseLockDurationMinutes = 1; // Thời gian khoá cơ bản (phút)
-  final int _maxLockDurationMinutes = 30; // Thời gian khoá tối đa (phút)
+  // Configuration
+  static const int _maxLoginAttempts = 3;
+  static const int _baseLockDurationMinutes = 1;
+  static const int _maxLockDurationMinutes = 30;
+
+  Future<void> init(bool canUseBiometric) async {
+    await _checkLockStatus();
+    await checkAndUpdateLockStatus();
+    if (_shouldUseBiometric(canUseBiometric)) {
+      await _handleBiometricAuth();
+    } else {
+      await _focusPinInput();
+    }
+  }
+
+  bool _shouldUseBiometric(bool canUseBiometric) {
+    return LocalAuthConfig.instance.isAvailableBiometrics && LocalAuthConfig.instance.isOpenUseBiometric && canUseBiometric;
+  }
+
+  Future<void> _handleBiometricAuth() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    bool isAuth = await checkLocalAuth();
+
+    if (isAuth) {
+      navigatorToHome();
+    } else {
+      await _focusPinInput();
+    }
+  }
+
+  Future<void> _focusPinInput() async {
+    await Future.delayed(const Duration(milliseconds: 250));
+    if (focusNode.hasFocus) return;
+    focusNode.requestFocus();
+  }
 
   // Getter để kiểm tra trạng thái khoá
   bool get isLocked {
@@ -90,46 +122,6 @@ class LocalAuthProvider extends ChangeNotifier {
     return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 
-  void _initControllers() {
-    try {
-      // Tạo mới controllers
-      focusNode = FocusNode();
-      textEditingController = TextEditingController();
-      appPinCodeKey = GlobalKey<AppPinCodeFieldsState>();
-      formKey = GlobalKey<FormState>();
-    } catch (e) {
-      logError('Error initializing controllers: $e');
-    }
-  }
-
-  Future<void> init(bool canUseBiometric) async {
-    // Tạo mới các controller và ke
-    _initControllers();
-    // Kiểm tra xem tài khoản có đang bị khóa không
-    await _checkLockStatus();
-
-    // Kiểm tra và cập nhật trạng thái khóa trong trường hợp thời gian đã hết
-    await checkAndUpdateLockStatus();
-
-    if (LocalAuthConfig.instance.isAvailableBiometrics && LocalAuthConfig.instance.isOpenUseBiometric && canUseBiometric) {
-      await Future.delayed(const Duration(milliseconds: 500), () async {
-        bool isAuth = await checkLocalAuth();
-        if (isAuth) {
-          navigatorToHome();
-        } else {
-          await Future.delayed(const Duration(milliseconds: 250), () {
-            focusNode.requestFocus();
-          });
-        }
-      });
-    } else {
-      logInfo('init: canUseBiometric: $canUseBiometric ${LocalAuthConfig.instance.isAvailableBiometrics} ${LocalAuthConfig.instance.isOpenUseBiometric}');
-      await Future.delayed(const Duration(milliseconds: 250), () {
-        focusNode.requestFocus();
-      });
-    }
-  }
-
   void authenticate() {
     isAuthenticated = true;
   }
@@ -155,15 +147,8 @@ class LocalAuthProvider extends ChangeNotifier {
 
   Future<bool> handleLogin() async {
     try {
-      // Kiểm tra xem tài khoản có đang bị khóa không
       if (isLocked) {
-        if (appPinCodeKey.currentState != null) {
-          try {
-            appPinCodeKey.currentState!.triggerErrorAnimation();
-          } catch (e) {
-            logError('Error triggering animation: $e');
-          }
-        }
+        _triggerErrorAnimation();
         return false;
       }
 
@@ -175,52 +160,44 @@ class LocalAuthProvider extends ChangeNotifier {
       if (pinCode.length == 6) {
         bool verify = await verifyLoginPinCode(pinCode);
         if (!verify) {
-          // Tăng số lần đăng nhập thất bại
-          await _incrementFailCount();
-
-          if (appPinCodeKey.currentState != null) {
-            try {
-              appPinCodeKey.currentState!.triggerErrorAnimation();
-              textEditingController.clear();
-              focusNode.requestFocus();
-            } catch (e) {
-              logError('Error triggering animation: $e');
-            }
-          }
-
-          try {
-            textEditingController.clear();
-          } catch (e) {
-            logError('Error clearing text: $e');
-          }
-
-          // Sử dụng addPostFrameCallback để tránh setState trong build cycle
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            try {
-              focusNode.requestFocus();
-            } catch (e) {
-              logError('Error requesting focus: $e');
-            }
-          });
+          await _handleLoginFailure();
           return false;
         }
-
-        // Đăng nhập thành công, reset trạng thái khóa
         await _resetLockStatus();
         return true;
-      } else {
-        if (appPinCodeKey.currentState != null) {
-          try {
-            appPinCodeKey.currentState!.triggerErrorAnimation();
-          } catch (e) {
-            logError('Error triggering animation: $e');
-          }
-        }
       }
+      _triggerErrorAnimation();
     } catch (e) {
       logError('Error handling login: $e');
     }
     return false;
+  }
+
+  Future<void> _handleLoginFailure() async {
+    await _incrementFailCount();
+    _triggerErrorAnimation();
+    _clearAndFocusInput();
+  }
+
+  void _triggerErrorAnimation() {
+    if (appPinCodeKey.currentState != null) {
+      try {
+        appPinCodeKey.currentState!.triggerErrorAnimation();
+      } catch (e) {
+        logError('Error triggering animation: $e');
+      }
+    }
+  }
+
+  void _clearAndFocusInput() {
+    try {
+      textEditingController.clear();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        focusNode.requestFocus();
+      });
+    } catch (e) {
+      logError('Error clearing text and focusing: $e');
+    }
   }
 
   void onBiometric() async {
@@ -362,9 +339,15 @@ class LocalAuthProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    focusNode.dispose();
-    textEditingController.dispose();
-    appPinCodeKey.currentState?.dispose();
+    // Chỉ dispose các controller khi provider thực sự bị dispose
+    if (!_isDisposed) {
+      focusNode.dispose();
+      textEditingController.dispose();
+      appPinCodeKey.currentState?.dispose();
+      _isDisposed = true;
+    }
     super.dispose();
   }
+
+  bool _isDisposed = false;
 }

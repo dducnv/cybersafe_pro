@@ -1,4 +1,5 @@
 import 'package:cybersafe_pro/components/bottom_sheets/select_category_bottom_sheets.dart';
+import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
 import 'package:cybersafe_pro/resources/brand_logo.dart';
@@ -44,23 +45,33 @@ class AccountFormFields extends StatelessWidget {
         _buildCategoryField(context),
         const SizedBox(height: 10),
         Selector<AccountFormProvider, bool>(
-          builder: (context, value, child) => !value ? _buildTOTPField(context) : Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(padding: const EdgeInsets.only(left: 5, bottom: 5), child: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.twoFactorAuth), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]))),
-              Row(
-                children: [
-                  Expanded(child: CardCustomWidget(child: OtpTextWithCountdown(keySecret: formProvider.otpController.text))),
-                  IconButton(
-                    onPressed: () {
-                      formProvider.handleDeleteTOTP();
-                    },
-                    icon: const Icon(Icons.close),
-                  ),
-                  ],
-                ),
-            ],
-          ),
+          builder:
+              (context, value, child) =>
+                  !value
+                      ? _buildTOTPField(context)
+                      : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 5, bottom: 5),
+                            child: Text(
+                              context.appLocale.createAccountLocale.getText(CreateAccountText.twoFactorAuth),
+                              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]),
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Expanded(child: CardCustomWidget(child: OtpTextWithCountdown(keySecret: formProvider.otpController.text))),
+                              IconButton(
+                                onPressed: () {
+                                  formProvider.handleDeleteTOTP();
+                                },
+                                icon: const Icon(Icons.close),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
           selector: (context, provider) => provider.isAddedTOTP,
         ),
         const SizedBox(height: 10),
@@ -88,7 +99,10 @@ class AccountFormFields extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(padding: const EdgeInsets.only(left: 5), child: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.password), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]))),
+        Padding(
+          padding: const EdgeInsets.only(left: 5),
+          child: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.password), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+        ),
         const SizedBox(height: 5),
         Row(
           children: [
@@ -113,30 +127,22 @@ class AccountFormFields extends StatelessWidget {
               icon: const Icon(Icons.loop_rounded),
               onPressed: () {
                 if (formProvider.passwordController.text.isNotEmpty) {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        actionsPadding: const EdgeInsets.only(bottom: 2, right: 10),
-                        contentPadding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 10),
-                        content: Text(context.trCreateAccount(CreateAccountText.overwritePassword), style: TextStyle(fontSize: 16.sp)),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text(context.trCreateAccount(CreateAccountText.cancel), style: TextStyle(fontSize: 14.sp)),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              _toGenPass(context);
-                            },
-                            child: Text(context.trCreateAccount(CreateAccountText.confirm), style: TextStyle(fontSize: 14.sp)),
-                          ),
-                        ],
-                      );
-                    },
+                  showAppCustomDialog(
+                    context,
+                    AppCustomDialog(
+                      canConfirmInitially: true,
+                      title: context.trSafe(CreateAccountText.overwritePassword),
+                      message: context.trSafe(CreateAccountText.overwritePasswordMessage),
+                      confirmText: context.trSafe(CreateAccountText.confirm),
+                      cancelText: context.trSafe(CreateAccountText.cancel),
+                      onConfirm: () {
+                        Navigator.of(context).pop();
+                        _toGenPass(context);
+                      },
+                      onCancel: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
                   );
                 } else {
                   _toGenPass(context);
@@ -177,7 +183,10 @@ class AccountFormFields extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(padding: const EdgeInsets.only(bottom: 5, left: 5), child: Text(context.trCreateAccount(CreateAccountText.twoFactorAuth), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey[600]))),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 5, left: 5),
+          child: Text(context.trCreateAccount(CreateAccountText.twoFactorAuth), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+        ),
         Row(
           children: [
             Expanded(
@@ -252,7 +261,7 @@ class AccountFormFields extends StatelessWidget {
   }
 
   Widget _buildAddFieldButton(BuildContext context) {
-    return OutlinedButton.icon(onPressed: onAddField, icon: const Icon(Icons.add), label:  Text(context.trCreateAccount(CreateAccountText.addField)));
+    return OutlinedButton.icon(onPressed: onAddField, icon: const Icon(Icons.add), label: Text(context.trCreateAccount(CreateAccountText.addField)));
   }
 
   Future _toGenPass(BuildContext context) {

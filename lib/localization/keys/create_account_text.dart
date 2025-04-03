@@ -8,6 +8,7 @@ class CreateAccountText {
   static const String twoFactorAuth = 'two_factor_auth';
   static const String password = 'password';
   static const String overwritePassword = 'overwrite_password';
+  static const String overwritePasswordMessage = 'overwrite_password_message';
   static const String cancel = 'cancel';
   static const String confirm = 'confirm';
   static const String addField = 'add_field';

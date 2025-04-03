@@ -7,7 +7,9 @@ extension BuildContextExtension<T> on BuildContext {
   // Các phương thức watch - chỉ sử dụng trong build method
   bool get darkMode => watch<ThemeProvider>().isDarkMode;
   AppLocale get appLocale => watch<AppLocale>();
+  AppLocale get appLocaleRead => read<AppLocale>();
   Locale get locale => appLocale.locale;  
+  Locale get localeRead => appLocaleRead.locale;
   // Các phương thức read - an toàn để sử dụng trong callbacks, async functions
   bool get readDarkMode => read<ThemeProvider>().isDarkMode;
   
@@ -35,6 +37,7 @@ extension BuildContextExtension<T> on BuildContext {
       ...appLocaleRead.onboardingLocale.getText(key) != key ? {key: appLocaleRead.onboardingLocale.getText(key)} : {},
       ...appLocaleRead.loginLocale.getText(key) != key ? {key: appLocaleRead.loginLocale.getText(key)} : {},
       ...appLocaleRead.errorLocale.getText(key) != key ? {key: appLocaleRead.errorLocale.getText(key)} : {},
+      ...appLocaleRead.aboutLocale.getText(key) != key ? {key: appLocaleRead.aboutLocale.getText(key)} : {},
     };
     
     return translations[key] ?? key;
@@ -57,4 +60,5 @@ extension BuildContextExtension<T> on BuildContext {
   String trLogin(String key) => appLocale.loginLocale.getText(key);
   String trError(String key) => appLocale.errorLocale.getText(key);
   String trCreatePinCode(String key) => appLocale.authLocale.getText(key);
+  String trAbout(String key) => appLocale.aboutLocale.getText(key);
 }

@@ -946,6 +946,7 @@ class EncryptAppDataService {
       final accountEncrypted = await _encryptAccountWithKeys(accountNew);
       accountsEncrypted.add(accountEncrypted);
     }
+    logInfo("accountsEncrypted: ${accountsEncrypted.length}");
     await AccountBox.putMany(accountsEncrypted);
   }
 

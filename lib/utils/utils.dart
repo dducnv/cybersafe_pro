@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:timezone/timezone.dart' as timezone;
+import 'package:url_launcher/url_launcher.dart';
 
 Future<void> clipboardCustom({required BuildContext context, required String text}) async {
   await Clipboard.setData(ClipboardData(text: text)).then((value) {
@@ -47,4 +48,14 @@ Future<bool> checkLocalAuth() async {
   bool authenticated = await LocalAuthConfig.instance.authenticate();
 
   return authenticated;
+}
+
+void openUrl(String link, {LaunchMode? mode, required BuildContext context}) async {
+  if (await canLaunchUrl(Uri.parse(link))) {
+    await launchUrl(Uri.parse(link), mode: mode ?? LaunchMode.externalApplication);
+  } else {
+    if (context.mounted) {
+      showToast("Could not launch link", context: context, backgroundColor: Theme.of(context).colorScheme.primary, textStyle: const TextStyle(color: Colors.white));
+    }
+  }
 }

@@ -1,4 +1,5 @@
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
+import 'package:cybersafe_pro/localization/screens/about/about_locale.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -92,7 +93,7 @@ class AppLocale extends ChangeNotifier {
   late final createAccountLocale = CreateAccountLocale(this);
   late final detailsLocale = DetailsAccountLocale(this);
   late final errorLocale = ErrorLocale(this);
-
+  late final aboutLocale = AboutLocale(this);
   // Helper method để lấy locale từ context
   static AppLocale of(BuildContext context) {
     return Provider.of<AppLocale>(context, listen: false);

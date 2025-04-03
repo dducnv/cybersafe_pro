@@ -38,6 +38,9 @@ class SettingsLocale extends BaseLocale {
   static const String lockOnBackground = 'lock_on_background';
   static const String dataIsEmpty = 'data_is_empty';
 
+  static const String deleteDataQuestion = 'delete_data_question';
+  static const String cancel = 'cancel';
+
   @override
   Map<String, String> get vi => {
     settings: 'Cài đặt',
@@ -60,6 +63,7 @@ class SettingsLocale extends BaseLocale {
     confirm: 'Xác nhận',
     lockOnBackground: 'Khóa khi ứng dụng ở nền',
     dataIsEmpty: 'Dữ liệu trống',
+    deleteDataQuestion: 'Bạn có chắc chắn muốn xóa tất cả dữ liệu?',
   };
 
   @override
@@ -84,6 +88,7 @@ class SettingsLocale extends BaseLocale {
     confirm: 'Confirm',
     lockOnBackground: 'Lock on Background',
     dataIsEmpty: 'Data is empty',
+    deleteDataQuestion: 'Are you sure you want to delete all data?',
   };
 
   @override
@@ -133,6 +138,7 @@ class SettingsLocale extends BaseLocale {
     confirm: 'Confirmar',
     lockOnBackground: 'Bloquear quando o aplicativo está em segundo plano',
     dataIsEmpty: 'Dados vazios',
+    deleteDataQuestion: 'Tem certeza que deseja apagar todos os dados?',
   };
   @override
   Map<String, String> get pt_BR => {
@@ -156,6 +162,7 @@ class SettingsLocale extends BaseLocale {
     confirm: 'Confirmar',
     lockOnBackground: 'Bloquear quando o aplicativo está em segundo plano',
     dataIsEmpty: 'Dados vazios',
+    deleteDataQuestion: 'Tem certeza que deseja apagar todos os dados?',
   };
   @override
   Map<String, String> get hi => {
@@ -179,6 +186,7 @@ class SettingsLocale extends BaseLocale {
     confirm: 'सुनिश्चित करें',
     lockOnBackground: 'पृष्ठभूमि पर अनलॉक करें',
     dataIsEmpty: 'डेटा खाली है',
+    deleteDataQuestion: 'क्या आप सुनिश्चित हैं कि आप सभी डेटा हटाना चाहते हैं?',
   };
   @override
   Map<String, String> get ja => {
@@ -202,6 +210,7 @@ class SettingsLocale extends BaseLocale {
     confirm: '確認',
     lockOnBackground: 'バックグラウンドでアプリケーションをロック',
     dataIsEmpty: 'データが空です',
+    deleteDataQuestion: '本当にすべてのデータを削除しますか？',
   };
   @override
   Map<String, String> get ru => {
@@ -247,6 +256,7 @@ class SettingsLocale extends BaseLocale {
     deleteDataConfirmation: 'Konfirmasi Hapus Data',
     confirm: 'Konfirmasi',
     lockOnBackground: 'Memblokir saat aplikasi berada di latar belakang',
+    deleteDataQuestion: 'Apakah Anda yakin ingin menghapus semua data?',
   };
 
   @override
@@ -271,6 +281,7 @@ class SettingsLocale extends BaseLocale {
     confirm: 'Confirm',
     lockOnBackground: 'Lock on Background',
     dataIsEmpty: 'Data is empty',
+    deleteDataQuestion: 'Are you sure you want to delete all data?',
   };
 
   @override
@@ -295,5 +306,6 @@ class SettingsLocale extends BaseLocale {
     confirm: 'Confirmar',
     lockOnBackground: 'Bloquear quando o aplicativo está em segundo plano',
     dataIsEmpty: 'Dados vazios',
+    deleteDataQuestion: 'Tem certeza que deseja apagar todos os dados?',
   };
 }

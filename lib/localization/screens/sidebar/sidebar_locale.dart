@@ -27,6 +27,7 @@ class SidebarLocale extends BaseLocale {
     SidebarText.featureRequest: 'Yêu cầu tính năng',
     SidebarText.privacyPolicy: 'Chính sách bảo mật',
     SidebarText.termsOfService: 'Điều khoản dịch vụ',
+    SidebarText.rateApp: 'Đánh giá ứng dụng',
   };
 
   @override
@@ -38,6 +39,7 @@ class SidebarLocale extends BaseLocale {
     SidebarText.featureRequest: 'Feature Request',
     SidebarText.privacyPolicy: 'Privacy Policy',
     SidebarText.termsOfService: 'Terms of Service',
+    SidebarText.rateApp: 'Rate App',
   };
 
   @override
@@ -49,6 +51,7 @@ class SidebarLocale extends BaseLocale {
     SidebarText.featureRequest: 'Solicitar Recurso',
     SidebarText.privacyPolicy: 'Política de Privacidade',
     SidebarText.termsOfService: 'Termos de Serviço',
+    SidebarText.rateApp: 'Avaliar Aplicativo',
   };
 
   @override
@@ -60,6 +63,7 @@ class SidebarLocale extends BaseLocale {
     SidebarText.featureRequest: 'सुविधा अनुरोध',
     SidebarText.privacyPolicy: 'गोपनीयता नीति',
     SidebarText.termsOfService: 'सेवा की शर्तें',
+    SidebarText.rateApp: 'ऐप का मूल्यांकन करें',
   };
 
   @override
@@ -71,6 +75,7 @@ class SidebarLocale extends BaseLocale {
     SidebarText.featureRequest: '機能リクエスト',
     SidebarText.privacyPolicy: 'プライバシーポリシー',
     SidebarText.termsOfService: '利用規約',
+    SidebarText.rateApp: 'アプリを評価する',
   };
 
   @override
@@ -82,6 +87,7 @@ class SidebarLocale extends BaseLocale {
     SidebarText.featureRequest: 'Запрос функции',
     SidebarText.privacyPolicy: 'Политика конфиденциальности',
     SidebarText.termsOfService: 'Условия использования',
+    SidebarText.rateApp: 'Оценить приложение',
   };
 
   @override
@@ -93,5 +99,6 @@ class SidebarLocale extends BaseLocale {
     SidebarText.featureRequest: 'Permintaan Fitur',
     SidebarText.privacyPolicy: 'Kebijakan Privasi',
     SidebarText.termsOfService: 'Ketentuan Layanan',
+    SidebarText.rateApp: 'Evaluasi Aplikasi',
   };
 } 

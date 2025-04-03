@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
+import 'package:cybersafe_pro/services/data_manager_service.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
@@ -104,7 +105,7 @@ class AppProvider extends ChangeNotifier {
   
   // Xử lý khi ứng dụng chuyển sang chế độ nền
   void handleAppBackground() {
-    if (_lockOnBackground) {
+    if (_lockOnBackground && DataManagerService.canLockApp) {
       logAction('Khóa ứng dụng do chạy nền');
       
       try {

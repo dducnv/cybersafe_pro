@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cybersafe_pro/screens/about_app/about_app_screen.dart';
 import 'package:cybersafe_pro/screens/category_manager/category_manager_screen.dart';
 import 'package:cybersafe_pro/screens/create_account/create_account_screen.dart';
 import 'package:cybersafe_pro/screens/details_account/details_account_screen.dart' show DetailsAccountScreen;
@@ -33,7 +34,7 @@ class AppRoutes {
   static const String statistic = '/statistic';
   static const String accountPasswordWeak = '/account_password_weak';
   static const String accountSamePassword = '/account_same_password';
-
+  static const String aboutApp = '/about_app';
   // Danh sách các màn hình cần SecureAppSwitcher
   static const List<String> securedRoutes = [home, detailsAccount, statistic, accountPasswordWeak, accountSamePassword];
 
@@ -121,6 +122,9 @@ class AppRoutes {
         break;
       case loginMasterPin:
         screen = const LoginMasterPassword();
+        break;
+      case aboutApp:
+        screen = const AboutAppScreen();
         break;
       default:
         screen = const LoginMasterPassword();
