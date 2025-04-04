@@ -54,20 +54,7 @@ class MobileLayout extends StatelessWidget {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) {
-                        return LoginMasterPassword(
-                          showBiometric: false,
-                          callBackLoginSuccess: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) {
-                            if (isLoginSuccess == true) {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) {
-                                    return const RegisterMasterPin(isChangePin: true);
-                                  },
-                                ),
-                              );
-                            }
-                          },
-                        );
+                        return const RegisterMasterPin(isChangePin: true);
                       },
                     ),
                   );
@@ -122,7 +109,7 @@ class MobileLayout extends StatelessWidget {
               const SizedBox(height: 5),
               SettingItemWidget(
                 title: context.appLocale.settingsLocale.getText(SettingsLocale.backupData),
-                icon: Icons.backup_outlined,
+                icon: Icons.file_download,
                 onTap: () {
                   if (!DataManagerService.checkData(context)) {
                     showToast(context.trSafe(SettingsLocale.dataIsEmpty), context: context);

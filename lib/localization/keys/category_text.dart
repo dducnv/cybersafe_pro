@@ -15,6 +15,7 @@ class  CategoryText {
   static const String deleteCategoryPopupWithAccounts = 'delete_category_popup_with_accounts';
   static const String deleteCategoryPopupEmpty = 'delete_category_popup_empty';
   static const String cancel = 'cancel';
+  static const String updateCategory = 'update_category';
   //initial category
   //Ngân hàng
   static const String bank = 'bank';

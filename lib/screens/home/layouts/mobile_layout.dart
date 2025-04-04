@@ -327,7 +327,7 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                 if (accountModel.email != null && accountModel.email != "")
                   ListTile(
                     leading: Icon(Icons.account_circle_rounded, size: 24.sp),
-                    title: Text("${context.trHome(HomeLocale.copyUsername)}/Email", style: titleHomeOptiomItemStyle),
+                    title: Text(context.trHome(HomeLocale.copyUsername), style: titleHomeOptiomItemStyle),
                     onTap: () async {
                       Navigator.pop(context);
                       clipboardCustom(context: context, text: accountModel.email ?? "");
@@ -356,6 +356,7 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                         message: context.trSafe(DetailsAccountText.deleteAccountQuestion),
                         confirmText: context.trSafe(DetailsAccountText.deleteAccount),
                         cancelText: context.trSafe(DetailsAccountText.cancel),
+                        isCountDownTimer: true,
                         onConfirm: () {
                           context.read<CategoryProvider>().refresh();
                           context.read<AccountProvider>().deleteAccount(accountModel);

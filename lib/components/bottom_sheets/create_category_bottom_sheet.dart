@@ -96,9 +96,11 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.add, color: Colors.white, size: 20.sp),
-                      SizedBox(width: 8.w),
-                      Text(context.trCategory(CategoryText.createCategory), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.white)),
+                      if (!widget.isUpdate) ...[Icon(Icons.add, color: Colors.white, size: 20.sp), SizedBox(width: 8.w)],
+                      Text(
+                        context.trCategory(widget.isUpdate ? CategoryText.updateCategory : CategoryText.createCategory),
+                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.white),
+                      ),
                     ],
                   ),
                 );

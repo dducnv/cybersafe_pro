@@ -114,6 +114,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                                   message: context.trSafe(DetailsAccountText.deleteAccountQuestion),
                                   confirmText: context.trSafe(DetailsAccountText.deleteAccount),
                                   cancelText: context.trSafe(DetailsAccountText.cancel),
+                                  isCountDownTimer: true,
                                   onConfirm: () {
                                     context.read<CategoryProvider>().refresh();
                                     context.read<AccountProvider>().deleteAccount(widget.accountOjbModel);

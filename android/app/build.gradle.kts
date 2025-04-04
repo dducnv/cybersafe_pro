@@ -31,7 +31,7 @@ val keystoreProperties = Properties().apply {
 }
 
 android {
-    namespace = flutterApplicationId
+    namespace ="com.example.cybersafe_pro"
     compileSdk = 35
 
     ndkVersion = "28.0.12674087 rc2"

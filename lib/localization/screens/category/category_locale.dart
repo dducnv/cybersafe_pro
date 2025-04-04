@@ -4,9 +4,9 @@ import 'package:cybersafe_pro/localization/keys/category_text.dart';
 
 class CategoryLocale extends BaseLocale {
   final AppLocale appLocale;
-  
+
   CategoryLocale(this.appLocale);
-  
+
   @override
   String get languageCode => appLocale.currentLocaleModel.languageCode;
   @override
@@ -39,6 +39,7 @@ class CategoryLocale extends BaseLocale {
     CategoryText.shopping: '🛍️ Mua sắm',
     CategoryText.entertainment: '🎮 Giải trí',
     CategoryText.other: '🔍 Khác',
+    CategoryText.updateCategory: 'Cập nhật danh mục',
   };
 
   @override
@@ -61,6 +62,8 @@ class CategoryLocale extends BaseLocale {
     CategoryText.study: '🎓 Education',
     CategoryText.shopping: '🛍️ Shopping',
     CategoryText.entertainment: '🎮 Entertainment',
+    CategoryText.other: '🔍 Other',
+    CategoryText.updateCategory: 'Update Category',
   };
 
   @override
@@ -85,6 +88,9 @@ class CategoryLocale extends BaseLocale {
     CategoryText.study: '🎓 Education',
     CategoryText.shopping: '🛍️ Shopping',
     CategoryText.entertainment: '🎮 Entertainment',
+    CategoryText.other: '🔍 Other',
+
+    CategoryText.updateCategory: 'Atualizar Categoria',
   };
 
   @override
@@ -108,6 +114,9 @@ class CategoryLocale extends BaseLocale {
     CategoryText.study: '🎓 शिक्षा',
     CategoryText.shopping: '🛍️ खरीदारी',
     CategoryText.entertainment: '🎮 मनोरंजन',
+    CategoryText.other: '🔍 अन्य',
+
+    CategoryText.updateCategory: 'श्रेणी अपडेट करें',
   };
 
   @override
@@ -132,6 +141,9 @@ class CategoryLocale extends BaseLocale {
     CategoryText.study: '🎓 勉強',
     CategoryText.shopping: '🛍️ 買い物',
     CategoryText.entertainment: '🎮 楽しい',
+    CategoryText.other: '🔍 その他',
+
+    CategoryText.updateCategory: 'カテゴリを更新',
   };
 
   @override
@@ -155,6 +167,8 @@ class CategoryLocale extends BaseLocale {
     CategoryText.study: '🎓 Учеба',
     CategoryText.shopping: '🛍️ Покупки',
     CategoryText.entertainment: '🎮 Развлечения',
+    CategoryText.other: '🔍 Другое',
+    CategoryText.updateCategory: 'Обновить категорию',
   };
 
   @override
@@ -178,5 +192,7 @@ class CategoryLocale extends BaseLocale {
     CategoryText.study: '🎓 Belajar',
     CategoryText.shopping: '🛍️ Belanja',
     CategoryText.entertainment: '🎮 Hiburan',
+    CategoryText.other: '🔍 Lainnya',
+    CategoryText.updateCategory: 'Perbarui Kategori',
   };
-} 
+}
