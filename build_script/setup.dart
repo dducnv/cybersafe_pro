@@ -1,4 +1,3 @@
-import 'package:cybersafe_pro/utils/logger.dart';
 
 import 'change_app_info.dart';
 import 'configs.dart';
@@ -11,12 +10,12 @@ void main(List<String> args) async {
     return;
   }
   final String appVersion = args[0];
-  logInfo('App version: $appVersion');
-  logInfo('Start setup app Info........');
+  logWarning('App version: $appVersion');
+  logWarning('Start setup app Info........');
   await changeAppInfo(appVersion);
   logSuccess('Setup app Info done');
-  logInfo('Start copy res folder........');
+  logWarning('Start copy res folder........');
   await copyResFolderAndroid(appVersion);
-  logInfo('Start copy asset images.');
+  logWarning('Start copy asset images.');
   await copyImagesAssets(appVersion);
 }

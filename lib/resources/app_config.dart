@@ -9,7 +9,7 @@ class AppConfig {
   static final instance = AppConfig._internal();
   AppConfig._internal();
 
-  static bool isProApp = true;
+  static bool isProApp = false;
 
   static String privacyPolicyUrl(String languageCode) {
     if (languageCode == "vi") {

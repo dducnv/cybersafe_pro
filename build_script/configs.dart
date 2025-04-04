@@ -4,7 +4,7 @@ class Config {
   static String get appDataPath {
     var user = Platform.environment['USER'];
     if (user != null && user.isNotEmpty) {
-      return "/Users/$user/Documents/Projects/Personal/cybersafe_assets";
+      return "/Users/$user/cybersafe_assets";
     }
     return "${Directory.current.path}/assets";
   }
