@@ -43,13 +43,32 @@ class _HomeAppBarCustomState extends State<HomeAppBarCustom> {
                   )
                   : widget.scaffoldKey != null
                   ? IconButton(
-                    icon: const Icon(Icons.menu),
+                    icon: const Icon(Icons.sort_rounded),
                     onPressed: () {
                       widget.scaffoldKey?.currentState?.openDrawer();
                     },
                   )
                   : null,
-          title: !isHasAccountSelected ? const Text("CyberSafe PRO", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)) : null,
+          title:
+              !isHasAccountSelected
+                  ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text("CyberSafe", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: context.darkMode ? Colors.white : Colors.black)),
+                      Container(
+                        margin: EdgeInsets.only(left: 10),
+                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2),
+                          gradient: LinearGradient(colors: [Theme.of(context).colorScheme.primary.withValues(alpha: 0.6), Theme.of(context).colorScheme.primary]),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text("PRO", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                      ),
+                    ],
+                  )
+                  : null,
           scrolledUnderElevation: 0,
           actions:
               isHasAccountSelected

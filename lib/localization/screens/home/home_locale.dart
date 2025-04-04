@@ -38,6 +38,14 @@ class HomeLocale extends BaseLocale {
   static const String changeCategory = 'change_category';
   static const String copySuccess = 'copy_success';
 
+  static const String selectAccount = 'select_account';
+  static const String unSelectAccount = 'un_select_account';
+  static const String updateAccount = 'update_account';
+  static const String accountDetails = 'account_details';
+  static const String copyUsername = 'copy_username';
+  static const String copyPassword = 'copy_password';
+  static const String deleteAccount = 'delete_account';
+
   @override
   Map<String, String> get vi => {
     home: 'Trang chủ',
@@ -61,6 +69,13 @@ class HomeLocale extends BaseLocale {
     delete: 'Xoá',
     changeCategory: 'Thay đổi danh mục',
     copySuccess: 'Sao chép thành công',
+    selectAccount: 'Chọn tài khoản',
+    unSelectAccount: 'Bỏ chọn tài khoản',
+    accountDetails: 'Chi tiết tài khoản',
+    updateAccount: 'Cập nhật tài khoản',
+    copyUsername: 'Sao chép tên tài khoản',
+    copyPassword: 'Sao chép mật khẩu',
+    deleteAccount: 'Xoá tài khoản',
   };
 
   @override
@@ -85,6 +100,13 @@ class HomeLocale extends BaseLocale {
     delete: 'Delete',
     changeCategory: 'Change Category',
     copySuccess: 'Copy success',
+    selectAccount: 'Select account',
+    unSelectAccount: 'Unselect account',
+    accountDetails: 'Account details',
+    updateAccount: 'Update account',
+    copyUsername: 'Copy username',
+    copyPassword: 'Copy password',
+    deleteAccount: 'Delete account',
   };
 
   @override
@@ -110,6 +132,13 @@ class HomeLocale extends BaseLocale {
     delete: 'Delete',
     changeCategory: 'Change Category',
     copySuccess: 'Copy success',
+    selectAccount: 'Select account',
+    unSelectAccount: 'Unselect account',
+    accountDetails: 'Account details',
+    updateAccount: 'Update account',
+    copyUsername: 'Copy username',
+    copyPassword: 'Copy password',
+    deleteAccount: 'Delete account',
   };
   @override
   Map<String, String> get hi => {
@@ -134,6 +163,13 @@ class HomeLocale extends BaseLocale {
     delete: 'हटाएं',
     changeCategory: 'श्रेणी बदलें',
     copySuccess: 'कॉपी सफलतापूर्वक हो गई',
+    selectAccount: 'खाता चुनें',
+    unSelectAccount: 'खाता बंद करें',
+    accountDetails: 'खाता विवरण',
+    updateAccount: 'खाता अपडेट करें',
+    copyUsername: 'खाता नाम कॉपी करें',
+    copyPassword: 'खाता पासवर्ड कॉपी करें',
+    deleteAccount: 'खाता हटाएं',
   };
   @override
   Map<String, String> get ja => {
@@ -158,6 +194,13 @@ class HomeLocale extends BaseLocale {
     delete: '削除',
     changeCategory: 'カテゴリを変更',
     copySuccess: 'コピーに成功しました',
+    selectAccount: 'アカウントを選択',
+    unSelectAccount: 'アカウントを選択解除',
+    accountDetails: 'アカウントの詳細',
+    updateAccount: 'アカウントを更新',
+    copyUsername: 'アカウント名をコピー',
+    copyPassword: 'パスワードをコピー',
+    deleteAccount: 'アカウントを削除',
   };
   @override
   Map<String, String> get ru => {
@@ -182,6 +225,10 @@ class HomeLocale extends BaseLocale {
     delete: 'Удалить',
     changeCategory: 'Изменить категорию',
     copySuccess: 'Копирование прошло успешно',
+    selectAccount: 'Выбрать аккаунт',
+    unSelectAccount: 'Снять выбор с аккаунта',
+    accountDetails: 'Детали аккаунта',
+    updateAccount: 'Обновить аккаунт',
   };
   @override
   Map<String, String> get id => {
@@ -206,6 +253,13 @@ class HomeLocale extends BaseLocale {
     delete: 'Hapus',
     changeCategory: 'Ubah Kategori',
     copySuccess: 'Salinan berhasil',
+    selectAccount: 'Pilih akun',
+    unSelectAccount: 'Hapus pilihan akun',
+    accountDetails: 'Detail akun',
+    updateAccount: 'Update account',
+    copyUsername: 'Salin nama akun',
+    copyPassword: 'Salin password',
+    deleteAccount: 'Hapus akun',
   };
   @override
   Map<String, String> get pt_PT => {
@@ -230,6 +284,13 @@ class HomeLocale extends BaseLocale {
     delete: 'Deletar',
     changeCategory: 'Mudar Categoria',
     copySuccess: 'Cópia realizada com sucesso',
+    selectAccount: 'Selecionar conta',
+    unSelectAccount: 'Desmarcar conta',
+    accountDetails: 'Detalhes da conta',
+    updateAccount: 'Atualizar conta',
+    copyUsername: 'Copiar nome de usuário',
+    copyPassword: 'Copiar senha',
+    deleteAccount: 'Deletar conta',
   };
   @override
   Map<String, String> get pt_BR => {
@@ -254,6 +315,13 @@ class HomeLocale extends BaseLocale {
     delete: 'Deletar',
     changeCategory: 'Mudar Categoria',
     copySuccess: 'Cópia realizada com sucesso',
+    selectAccount: 'Selecionar conta',
+    unSelectAccount: 'Desmarcar conta',
+    accountDetails: 'Detalhes da conta',
+    updateAccount: 'Atualizar conta',
+    copyUsername: 'Copiar nome de usuário',
+    copyPassword: 'Copiar senha',
+    deleteAccount: 'Deletar conta',
   };
 
   @override
@@ -279,6 +347,13 @@ class HomeLocale extends BaseLocale {
     delete: 'Delete',
     changeCategory: 'Change Category',
     copySuccess: 'Copy success',
+    selectAccount: 'Select account',
+    unSelectAccount: 'Unselect account',
+    accountDetails: 'Account details',
+    updateAccount: 'Update account',
+    copyUsername: 'Copy username',
+    copyPassword: 'Copy password',
+    deleteAccount: 'Delete account',
   };
 
   @override
@@ -304,6 +379,13 @@ class HomeLocale extends BaseLocale {
     delete: 'Deletar',
     changeCategory: 'Mudar Categoria',
     copySuccess: 'Cópia realizada com sucesso',
+    selectAccount: 'Selecionar conta',
+    unSelectAccount: 'Desmarcar conta',
+    accountDetails: 'Detalhes da conta',
+    updateAccount: 'Atualizar conta',
+    copyUsername: 'Copiar nome de usuário',
+    copyPassword: 'Copiar senha',
+    deleteAccount: 'Deletar conta',
   };
 }
 

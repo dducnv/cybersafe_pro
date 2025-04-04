@@ -28,7 +28,7 @@ class Sidebar extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         ListTile(
-          leading: Icon(Icons.category, size: 24.sp),
+          leading: Icon(Icons.category, size: 24),
           title: Text(context.trSidebar(SidebarText.categoryManager), style: drawerTitleStyle),
           onTap: () {
             AppRoutes.pop(context);
@@ -36,7 +36,7 @@ class Sidebar extends StatelessWidget {
           },
         ),
         ListTile(
-          leading: Icon(Icons.star, size: 24.sp),
+          leading: Icon(Icons.star, size: 24),
           title: Text(context.trSidebar(SidebarText.rateApp), style: drawerTitleStyle),
           onTap: () async {
             Navigator.of(context).pop();
@@ -46,7 +46,7 @@ class Sidebar extends StatelessWidget {
           },
         ),
         ListTile(
-          leading: Icon(Icons.info_rounded, size: 24.sp),
+          leading: Icon(Icons.info_rounded, size: 24),
           title: Text(context.trSidebar(SidebarText.about), style: drawerTitleStyle),
           onTap: () {
             AppRoutes.navigateTo(context, AppRoutes.aboutApp);
@@ -58,21 +58,21 @@ class Sidebar extends StatelessWidget {
         //   onTap: () {}
         // ),
         ListTile(
-          leading: Icon(Icons.mail_rounded, size: 24.sp),
+          leading: Icon(Icons.mail_rounded, size: 24),
           title: Text(context.trSidebar(SidebarText.featureRequest), style: drawerTitleStyle),
           onTap: () {
             openUrl("mailto:contact.ducnv@gmail.com?subject=[CyberSafe] Feature Request", context: context);
           },
         ),
         ListTile(
-          leading: Icon(Icons.privacy_tip, size: 24.sp),
+          leading: Icon(Icons.privacy_tip, size: 24),
           title: Text(context.trSidebar(SidebarText.privacyPolicy), style: drawerTitleStyle),
           onTap: () {
             AppConfig.showDialogRedirectLink(context, url: AppConfig.privacyPolicyUrl(context.localeRead.languageCode));
           },
         ),
         ListTile(
-          leading: Icon(Icons.article, size: 24.sp),
+          leading: Icon(Icons.article, size: 24),
           title: Text(context.trSidebar(SidebarText.termsOfService), style: drawerTitleStyle),
           onTap: () {
             AppConfig.showDialogRedirectLink(context, url: AppConfig.termsOfServiceUrl(context.localeRead.languageCode));

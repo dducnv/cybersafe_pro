@@ -2,13 +2,18 @@ import 'dart:io';
 
 import 'package:cybersafe_pro/components/bottom_sheets/create_category_bottom_sheet.dart';
 import 'package:cybersafe_pro/components/bottom_sheets/search_bottom_sheet.dart';
+import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/details_account_text.dart';
 import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
+import 'package:cybersafe_pro/resources/size_text_icon.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
+import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/account_list_tile_widgets.dart';
 import 'package:cybersafe_pro/widgets/card_item.dart';
 import 'package:cybersafe_pro/widgets/sidebar/sidebar.dart';
@@ -65,8 +70,7 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: HomeAppBarCustom(scaffoldKey: _scaffoldKey),
-      drawer: Drawer(
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(30), bottomRight: Radius.circular(30))), child: Sidebar()),
+      drawer: Drawer(shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(30), bottomRight: Radius.circular(30))), child: Sidebar()),
       floatingActionButton: SizedBox(
         width: 61.h,
         height: 61.h,
@@ -184,7 +188,7 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                                   onCallBackPop: () {},
 
                                   onTapSubButton: () {
-                                    AppRoutes.navigateTo(context, AppRoutes.updateAccount, arguments: {"accountId": accounts[itemIndex].id});
+                                    bottomSheetOptionAccountItem(context: context, viewModel: accountProvider, accountModel: account);
                                   },
                                   onSelect: () {
                                     context.read<AccountProvider>().handleSelectOrRemoveAccount(account);
@@ -217,6 +221,7 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
             height: 40.h,
             child: Row(
               children: [
+                SizedBox(width: 10),
                 IconButton(
                   style: ButtonStyle(minimumSize: WidgetStateProperty.all(Size(40.h, 40.h))),
                   onPressed: () {
@@ -232,7 +237,7 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                       builder: (context, categoryProvider, accountProvider, child) {
                         final categories = categoryProvider.categoryList;
                         return ScrollablePositionedList.separated(
-                          separatorBuilder: (context, index) =>  SizedBox(width: 10.w),
+                          separatorBuilder: (context, index) => SizedBox(width: 10.w),
                           scrollDirection: Axis.horizontal,
                           itemScrollController: itemScrollController,
                           itemCount: categories.length,
@@ -258,7 +263,7 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                                           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 2.w).copyWith(right: isSelected ? 0 : 20.w),
                                           child: Center(child: Text(category.categoryName, style: TextStyle(fontSize: 14.sp, color: isSelected ? Theme.of(context).colorScheme.onPrimary : null))),
                                         ),
-                                        if (isSelected) Padding(padding:  EdgeInsets.all(8.h), child: Icon(Icons.close, size: 18.sp, color: Theme.of(context).colorScheme.onPrimary)),
+                                        if (isSelected) Padding(padding: EdgeInsets.all(8.h), child: Icon(Icons.close, size: 18.sp, color: Theme.of(context).colorScheme.onPrimary)),
                                       ],
                                     ),
                                   ),
@@ -276,6 +281,96 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> bottomSheetOptionAccountItem({required BuildContext context, required AccountProvider viewModel, required AccountOjbModel accountModel}) async {
+    return showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Container(width: 40.w, height: 4.h, decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(10))),
+
+                Selector<AccountProvider, bool>(
+                  selector: (context, viewModel) => viewModel.accountSelected.contains(accountModel),
+                  builder: (context, isSelected, child) {
+                    return ListTile(
+                      leading: isSelected ? Icon(Icons.cancel_outlined, size: 24.sp) : Icon(Icons.check_circle_outline_rounded, size: 24.sp),
+                      title: Text(isSelected ? context.trHome(HomeLocale.unSelectAccount) : context.trHome(HomeLocale.selectAccount), style: titleHomeOptiomItemStyle),
+                      onTap: () {
+                        viewModel.handleSelectOrRemoveAccount(accountModel);
+                        Navigator.pop(context);
+                      },
+                    );
+                  },
+                ),
+
+                ListTile(
+                  leading: Icon(Icons.info, size: 24.sp),
+                  title: Text(context.trHome(HomeLocale.accountDetails), style: titleHomeOptiomItemStyle),
+                  onTap: () {
+                    Navigator.pop(context);
+                    AppRoutes.navigateTo(context, AppRoutes.detailsAccount, arguments: {"accountId": accountModel.id});
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.edit, size: 24.sp),
+                  title: Text(context.trHome(HomeLocale.updateAccount), style: titleHomeOptiomItemStyle),
+                  onTap: () async {
+                    AppRoutes.navigateTo(context, AppRoutes.updateAccount, arguments: {"accountId": accountModel.id});
+                  },
+                ),
+                if (accountModel.email != null && accountModel.email != "")
+                  ListTile(
+                    leading: Icon(Icons.account_circle_rounded, size: 24.sp),
+                    title: Text("${context.trHome(HomeLocale.copyUsername)}/Email", style: titleHomeOptiomItemStyle),
+                    onTap: () async {
+                      Navigator.pop(context);
+                      clipboardCustom(context: context, text: accountModel.email ?? "");
+                    },
+                  ),
+                if (accountModel.password != null && accountModel.password != "")
+                  ListTile(
+                    leading: Icon(Icons.password, size: 24.sp),
+                    title: Text(context.trHome(HomeLocale.copyPassword), style: titleHomeOptiomItemStyle),
+                    onTap: () async {
+                      Navigator.pop(context);
+                      String password = await EncryptAppDataService.instance.decryptPassword(accountModel.password ?? "");
+                      if (!context.mounted) return;
+                      clipboardCustom(context: context, text: password);
+                    },
+                  ),
+                ListTile(
+                  leading: Icon(Icons.delete, color: Colors.red, size: 24.sp),
+                  title: Text(context.trHome(HomeLocale.deleteAccount), style: TextStyle(color: Colors.red, fontSize: 16.sp)),
+                  onTap: () {
+                    Navigator.pop(context);
+                    showAppCustomDialog(
+                      context,
+                      AppCustomDialog(
+                        title: context.trSafe(DetailsAccountText.deleteAccount),
+                        message: context.trSafe(DetailsAccountText.deleteAccountQuestion),
+                        confirmText: context.trSafe(DetailsAccountText.deleteAccount),
+                        cancelText: context.trSafe(DetailsAccountText.cancel),
+                        onConfirm: () {
+                          context.read<CategoryProvider>().refresh();
+                          context.read<AccountProvider>().deleteAccount(accountModel);
+                          Navigator.of(context).pop();
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

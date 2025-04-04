@@ -13,7 +13,14 @@ import 'package:url_launcher/url_launcher.dart';
 Future<void> clipboardCustom({required BuildContext context, required String text}) async {
   await Clipboard.setData(ClipboardData(text: text)).then((value) {
     if (!context.mounted) return;
-    showToast(context.trSafe(HomeLocale.copySuccess), context: context, backgroundColor: Theme.of(context).colorScheme.primary, textStyle: const TextStyle(color: Colors.white));
+    showToast(
+      context.trSafe(HomeLocale.copySuccess),
+      context: context,
+      animation: StyledToastAnimation.fade,
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      textStyle: const TextStyle(color: Colors.white),
+      position: StyledToastPosition.center,
+    );
   });
 }
 

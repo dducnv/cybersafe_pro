@@ -37,15 +37,19 @@ class MobileLayout extends StatefulWidget {
 class _MobileLayoutState extends State<MobileLayout> {
   StreamSubscription? _lockStatusSubscription;
   LocalAuthProvider? _authProvider;
-  final TextEditingController _pinCodeController = TextEditingController();
-  final FocusNode _pinCodeFocusNode = FocusNode();
-  final GlobalKey<AppPinCodeFieldsState> _pinCodeKey = GlobalKey<AppPinCodeFieldsState>();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late TextEditingController _pinCodeController;
+  late FocusNode _pinCodeFocusNode;
+  late GlobalKey<AppPinCodeFieldsState> _pinCodeKey;
+  late GlobalKey<FormState> _formKey;
 
   @override
   void initState() {
     super.initState();
     _setupLockStatusCheck();
+    _pinCodeController = TextEditingController();
+    _pinCodeFocusNode = FocusNode();
+    _pinCodeKey = GlobalKey<AppPinCodeFieldsState>();
+    _formKey = GlobalKey<FormState>();
     _authProvider = context.read<LocalAuthProvider>();
     _authProvider?.textEditingController = _pinCodeController;
     _authProvider?.focusNode = _pinCodeFocusNode;
@@ -67,98 +71,105 @@ class _MobileLayoutState extends State<MobileLayout> {
   @override
   void dispose() {
     _lockStatusSubscription?.cancel();
+    
+    // Xóa tham chiếu đến các controller trong authProvider
+    if (_authProvider != null) {
+      // Tách biệt TextEditingController từ authProvider trước khi dispose
+      _authProvider!.textEditingController = TextEditingController();
+      _authProvider!.focusNode = FocusNode();
+      _authProvider!.appPinCodeKey = GlobalKey<AppPinCodeFieldsState>();
+      _authProvider!.formKey = GlobalKey<FormState>();
+    }
+    
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      child: Scaffold(
-        appBar: widget.isFromBackup ? AppBar(
-          elevation: 0, 
-          backgroundColor: Theme.of(context).colorScheme.surface, 
-          scrolledUnderElevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () async {
-              final result = await showConfirmExitDialog(context);
-              if (result == true && mounted) {
-                Navigator.of(context).pop();
-              }
-            },
-          ),
-        ) : null,
-        body: Consumer<LocalAuthProvider>(
-          builder: (context, provider, child) {
-            final isCurrentlyLocked = provider.isLocked;
-
-            return Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 300),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      widget.isFromBackup ? context.trLogin(LoginText.enterAnyPin) : context.trLogin(LoginText.enterPin),
-                      style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 20),
-                    if (widget.isFromBackup)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
-                        child: Text(context.trLogin(LoginText.backupNote), textAlign: TextAlign.center, style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
-                      ),
-                    if (widget.isFromRestore)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
-                        child: Text(context.trLogin(LoginText.restoreNote), textAlign: TextAlign.center, style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
-                      ),
-                    if (isCurrentlyLocked)
-                      _buildLockedStatus(provider),
-
-                    if (!isCurrentlyLocked)
-                      _buildPinCodeFields(provider),
-
-                    if (!isCurrentlyLocked)
-                      if (widget.showBiometric && LocalAuthConfig.instance.isAvailableBiometrics && LocalAuthConfig.instance.isOpenUseBiometric) ...[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            IconButton(
-                              onPressed: () {
-                                _authProvider?.onBiometric();
-                              },
-                              icon:
-                                  Platform.isIOS ? SvgPicture.asset('assets/icons/face_id.svg', width: 20.w, height: 20.h, color: Theme.of(context).colorScheme.primary) : const Icon(Icons.fingerprint),
-                            ),
-                          ],
-                        ),
-                      ] else ...[
-                        SizedBox(height: 20),
-                      ],
-
-                    CustomButtonWidget(
-                      borderRaidus: 100,
-                      width: 75.h,
-                      height: 75.h,
-                      onPressed:
-                          isCurrentlyLocked
-                              ? null
-                              : () async {
-                                await handleLogin();
-                              },
-                      text: "",
-                      child: Icon(Icons.arrow_forward, size: 24.sp, color: isCurrentlyLocked ? Colors.grey : Colors.white),
-                    ),
-                  ],
-                ),
-              ),
-            );
+    return Scaffold(
+      appBar: widget.isFromBackup || widget.isFromRestore ? AppBar(
+        elevation: 0, 
+        backgroundColor: Theme.of(context).colorScheme.surface, 
+        scrolledUnderElevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () async {
+            final result = await showConfirmExitDialog(context);
+            if (result == true && context.mounted) {
+              Navigator.of(context).pop();
+            }
           },
         ),
+      ) : null,
+      body: Consumer<LocalAuthProvider>(
+        builder: (context, provider, child) {
+          final isCurrentlyLocked = provider.isLocked;
+    
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 300),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    widget.isFromBackup ? context.trLogin(LoginText.enterAnyPin) : context.trLogin(LoginText.enterPin),
+                    style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  if (widget.isFromBackup)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
+                      child: Text(context.trLogin(LoginText.backupNote), textAlign: TextAlign.center, style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
+                    ),
+                  if (widget.isFromRestore)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
+                      child: Text(context.trLogin(LoginText.restoreNote), textAlign: TextAlign.center, style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
+                    ),
+                  if (isCurrentlyLocked)
+                    _buildLockedStatus(provider),
+    
+                  if (!isCurrentlyLocked)
+                    _buildPinCodeFields(),
+    
+                  if (!isCurrentlyLocked)
+                    if (widget.showBiometric && LocalAuthConfig.instance.isAvailableBiometrics && LocalAuthConfig.instance.isOpenUseBiometric) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              _authProvider?.onBiometric();
+                            },
+                            icon:
+                                Platform.isIOS ? SvgPicture.asset('assets/icons/face_id.svg', width: 20.w, height: 20.h, color: Theme.of(context).colorScheme.primary) : const Icon(Icons.fingerprint),
+                          ),
+                        ],
+                      ),
+                    ] else ...[
+                      SizedBox(height: 20),
+                    ],
+    
+                  CustomButtonWidget(
+                    borderRaidus: 100,
+                    width: 75.h,
+                    height: 75.h,
+                    onPressed:
+                        isCurrentlyLocked
+                            ? null
+                            : () async {
+                              await handleLogin();
+                            },
+                    text: "",
+                    child: Icon(Icons.arrow_forward, size: 24.sp, color: isCurrentlyLocked ? Colors.grey : Colors.white),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -206,15 +217,15 @@ class _MobileLayoutState extends State<MobileLayout> {
     );
   }
 
-  Widget _buildPinCodeFields(LocalAuthProvider provider) {
+  Widget _buildPinCodeFields() {
     if (!mounted) return const SizedBox.shrink();
     
     return AppPinCodeFields(
-      autoFocus: provider.focusNode.hasFocus,
-      key: provider.appPinCodeKey,
-      formKey: provider.formKey,
-      textEditingController: provider.textEditingController,
-      focusNode: provider.focusNode,
+      autoFocus: _pinCodeFocusNode.hasFocus,
+      key: _pinCodeKey,
+      formKey: _formKey,
+      textEditingController: _pinCodeController,
+      focusNode: _pinCodeFocusNode,
       onSubmitted: (value) async {
         if (!mounted) return;
         await handleLogin();

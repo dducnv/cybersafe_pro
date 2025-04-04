@@ -340,11 +340,22 @@ class LocalAuthProvider extends ChangeNotifier {
   @override
   void dispose() {
     // Chỉ dispose các controller khi provider thực sự bị dispose
+    // và các controller này không được quản lý bởi một widget khác
     if (!_isDisposed) {
-      focusNode.dispose();
-      textEditingController.dispose();
-      appPinCodeKey.currentState?.dispose();
-      _isDisposed = true;
+      try {
+        // Kiểm tra xem các controller còn tồn tại trước khi dispose
+        if (focusNode.hasListeners) {
+          focusNode.dispose();
+        }
+        
+        if (textEditingController.hasListeners) {
+          textEditingController.dispose();
+        }
+
+        _isDisposed = true;
+      } catch (e) {
+        logError('Error disposing controllers in LocalAuthProvider: $e');
+      }
     }
     super.dispose();
   }

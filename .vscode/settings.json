@@ -2,5 +2,6 @@
     "cSpell.words": [
         "cybersafe",
         "totp"
-    ]
+    ],
+    "dart.flutterSdkPath": "~/development/flutter"
 }

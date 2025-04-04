@@ -41,6 +41,7 @@ class DataManagerService {
   //import data from browser
   static Future<void> importDataFromBrowser(BuildContext context) async {
     showLoadingDialog();
+    canLockApp = false;
     try {
       // Chọn file CSV
       final result = await FilePicker.platform.pickFiles(
@@ -148,7 +149,9 @@ class DataManagerService {
         hideLoadingDialog();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Import successfully $successCount accounts'), backgroundColor: Colors.green));
       }
+      canLockApp = true;
     } catch (e) {
+      canLockApp = true;
       if (context.mounted) {
         hideLoadingDialog();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}'), backgroundColor: Colors.red));

@@ -48,11 +48,7 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
     try {
       // Sử dụng provider có sẵn thay vì tạo mới
       final authProvider = Provider.of<LocalAuthProvider>(context, listen: false);
-      print('widget.showBiometric: ${widget.showBiometric}');
-      print('widget.isFromBackup: ${widget.isFromBackup}');
-      print('widget.isFromRestore: ${widget.isFromRestore}');
       await authProvider.init(widget.showBiometric && !widget.isFromBackup && !widget.isFromRestore);
-      
       // Dừng timer
       if (_mounted) {
         context.read<AppProvider>().stopTimer();
@@ -71,7 +67,14 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
   @override
   Widget build(BuildContext context) {
     final deviceType = DeviceInfo.getDeviceType(context);
-    return _buildLayout(deviceType);
+    
+    // Sử dụng ChangeNotifierProvider.value để đảm bảo rằng provider không bị
+    // tạo mới và không bị dispose khi widget này dispose
+    return Consumer<LocalAuthProvider>(
+      builder: (context, authProvider, _) {
+        return _buildLayout(deviceType);
+      },
+    );
   }
 
   Widget _buildLayout(DeviceType deviceType) {
