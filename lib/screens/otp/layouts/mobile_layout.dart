@@ -68,14 +68,7 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
                     email: account.email ?? '',
                     icon: account.icon ?? '',
                     onTap: () {
-                      seeDetailTOTPBottomSheet(
-                        context,
-                        account,
-                        callBackSuccess: () {
-                          context.read<CategoryProvider>().refresh();
-                          _loadOTPAccounts();
-                        },
-                      );
+                      seeDetailTOTPBottomSheet(context, account);
                     },
                   );
                 },
@@ -100,7 +93,14 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
             shape: const CircleBorder(),
             child: const Icon(Icons.keyboard_alt_rounded),
             onTap: () {
-              addTOTPWithKeyboard(context);
+              addTOTPWithKeyboard(
+                context,
+                callBackSuccess: () {
+                  context.read<CategoryProvider>().refresh();
+                  context.read<AccountProvider>().refreshAccounts();
+                  _loadOTPAccounts();
+                },
+              );
             },
           ),
         ],
@@ -108,12 +108,12 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
     );
   }
 
-  Future<void> addTOTPWithKeyboard(BuildContext context) async {
+  Future<void> addTOTPWithKeyboard(BuildContext context, {Function? callBackSuccess}) async {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) {
-        return const AddTOTPWithKeyboardBottomSheet();
+        return AddTOTPWithKeyboardBottomSheet(callBackSuccess: callBackSuccess);
       },
     );
   }
@@ -132,7 +132,7 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
     }
   }
 
-  Future<void> seeDetailTOTPBottomSheet(BuildContext context, AccountOjbModel totp, {Function? callBackSuccess}) async {
+  Future<void> seeDetailTOTPBottomSheet(BuildContext context, AccountOjbModel totp) async {
     await showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -192,8 +192,8 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
                         Navigator.pop(context);
                         if (totp.totp.target?.secretKey == null) return;
                         String secretKey = await EncryptAppDataService.instance.decryptTOTPKey(totp.totp.target?.secretKey ?? "");
-                              
-                      if(!context.mounted) return;
+
+                        if (!context.mounted) return;
                         clipboardCustom(context: context, text: generateTOTPCode(keySecret: secretKey));
                       },
                       icon: Icon(Icons.copy, size: 20.sp),
@@ -223,13 +223,22 @@ class _AddTOTPWithKeyboardBottomSheetState extends State<AddTOTPWithKeyboardBott
   final controllerSecretKey = TextEditingController();
   final controllerIssuer = TextEditingController();
   final controllerAccountName = TextEditingController();
+  bool isCreating = false;
 
-  void _handleSubmit() {
+  void _handleSubmit(BuildContext context) async {
     if (_formKey.currentState?.validate() ?? false) {
-      if (controllerAccountName.text.isNotEmpty && controllerIssuer.text.isNotEmpty && controllerSecretKey.text.isNotEmpty) {
-        context.read<AccountProvider>().createAccountOnlyOtp(secretKey: controllerSecretKey.text, appName: controllerIssuer.text, accountName: controllerAccountName.text);
+      if (controllerAccountName.text.isNotEmpty && controllerIssuer.text.isNotEmpty && controllerSecretKey.text.isNotEmpty && !isCreating) {
+        setState(() {
+          isCreating = true;
+        });
+        await context.read<AccountProvider>().createAccountOnlyOtp(secretKey: controllerSecretKey.text, appName: controllerIssuer.text, accountName: controllerAccountName.text);
         widget.callBackSuccess?.call();
+        if (!context.mounted) return;
         Navigator.pop(context);
+        if (!mounted) return;
+        setState(() {
+          isCreating = false;
+        });
       }
     }
   }
@@ -257,8 +266,8 @@ class _AddTOTPWithKeyboardBottomSheetState extends State<AddTOTPWithKeyboardBott
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
-                  Expanded(child: Center(child: Text(context.trOtp(OtpText.enterManually), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey[800])))),
-                  IconButton(onPressed: _handleSubmit, icon: const Icon(Icons.check)),
+                  Expanded(child: Center(child: Text(context.trOtp(OtpText.enterManually), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)))),
+                  IconButton(onPressed: () => _handleSubmit(context), icon: const Icon(Icons.check)),
                 ],
               ),
               const SizedBox(height: 10),
@@ -282,7 +291,7 @@ class _AddTOTPWithKeyboardBottomSheetState extends State<AddTOTPWithKeyboardBott
               ),
               const SizedBox(height: 10),
               CustomTextField(
-                titleTextField: context.trOtp(OtpText.accountName),
+                titleTextField: context.trCreateAccount(CreateAccountText.username),
                 controller: controllerAccountName,
                 textInputAction: TextInputAction.next,
                 textAlign: TextAlign.start,
@@ -317,7 +326,7 @@ class _AddTOTPWithKeyboardBottomSheetState extends State<AddTOTPWithKeyboardBott
                   }
                   return null;
                 },
-                onFieldSubmitted: (value) => _handleSubmit(),
+                onFieldSubmitted: (value) => _handleSubmit(context),
                 onChanged: (value) {},
               ),
               const SizedBox(height: 16),

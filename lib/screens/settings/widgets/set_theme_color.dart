@@ -6,6 +6,7 @@ import 'package:cybersafe_pro/theme/app_colors.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/app_custom_switch/app_custom_switch.dart';
 import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
+import 'package:cybersafe_pro/widgets/request_pro/request_pro.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -104,22 +105,24 @@ class _SetThemeColorState extends State<SetThemeColor> with SingleTickerProvider
                           builder: (context, scale, child) {
                             return Transform.scale(
                               scale: scale,
-                              child: GestureDetector(
-                                onTap: () => provider.changeAccentColor(color),
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    Container(
-                                      height: 40,
-                                      width: 40,
-                                      decoration: BoxDecoration(
-                                        color: color,
-                                        shape: BoxShape.circle,
-                                        boxShadow: isSelected ? [BoxShadow(color: color.withOpacity(0.4), blurRadius: 8, spreadRadius: 2)] : null,
+                              child: RequestPro(
+                                child: GestureDetector(
+                                  onTap: () => provider.changeAccentColor(color),
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      Container(
+                                        height: 40,
+                                        width: 40,
+                                        decoration: BoxDecoration(
+                                          color: color,
+                                          shape: BoxShape.circle,
+                                          boxShadow: isSelected ? [BoxShadow(color: color.withOpacity(0.4), blurRadius: 8, spreadRadius: 2)] : null,
+                                        ),
                                       ),
-                                    ),
-                                    if (isSelected) const Align(alignment: Alignment.center, child: Icon(Icons.check, color: Colors.white)),
-                                  ],
+                                      if (isSelected) const Align(alignment: Alignment.center, child: Icon(Icons.check, color: Colors.white)),
+                                    ],
+                                  ),
                                 ),
                               ),
                             );

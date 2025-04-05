@@ -40,7 +40,7 @@ class _RegisterMasterPinState extends State<RegisterMasterPin> {
           isChangePin: widget.isChangePin,
         );
       case DeviceType.tablet:
-        return TabletLayout(
+        return MobileLayout(
           appPinCodeCreateKey: appPinCodeCreateKey,
           appPinCodeConfirmKey: appPinCodeConfirmKey,
           formCreateKey: formCreateKey,

@@ -261,7 +261,15 @@ class AccountFormFields extends StatelessWidget {
   }
 
   Widget _buildAddFieldButton(BuildContext context) {
-    return OutlinedButton.icon(onPressed: onAddField, icon: const Icon(Icons.add), label: Text(context.trCreateAccount(CreateAccountText.addField)));
+    return OutlinedButton.icon(
+      
+      style: OutlinedButton.styleFrom(
+        side: BorderSide(color: Theme.of(context).colorScheme.primary),
+      ),
+      onPressed: onAddField,
+      icon: const Icon(Icons.add),
+      label: Text(context.trCreateAccount(CreateAccountText.addField)),
+    );
   }
 
   Future _toGenPass(BuildContext context) {

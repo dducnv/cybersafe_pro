@@ -6,7 +6,6 @@ import 'package:cybersafe_pro/services/data_manager_service.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
-import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:flutter/material.dart';
 
 class AppProvider extends ChangeNotifier {

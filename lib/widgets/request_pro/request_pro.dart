@@ -1,3 +1,4 @@
+import 'package:cybersafe_pro/components/bottom_sheets/pro_intro_bottom_sheet.dart';
 import 'package:cybersafe_pro/resources/app_config.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,7 @@ class RequestPro extends StatelessWidget {
         Positioned.fill(
           child: GestureDetector(
             onTap: () {
-              logInfo("upgrade pro");
+              showProIntroBottomSheet(context);
             },
             child: Container(
               color: Colors.transparent,

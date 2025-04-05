@@ -10,6 +10,8 @@ class AppConfig {
   AppConfig._internal();
 
   static bool isProApp = true;
+  static String proPackageId = "com.duc_app_lab_ind.cyber_safe";
+  static String proPlayStoreUrl = "https://play.google.com/store/apps/details?id=com.duc_app_lab_ind.cyber_safe";
 
   static String privacyPolicyUrl(String languageCode) {
     if (languageCode == "vi") {

@@ -392,14 +392,16 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                 ],
               ),
             ),
-            InkWell(
-              borderRadius: BorderRadius.circular(50),
-              onTap: () {
-                bottomSheetPasswordHistory(context: context, accountOjbModel: account);
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
-                child: Text(context.trDetails(DetailsAccountText.passwordHistoryDetail), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary)),
+            RequestPro(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(50),
+                onTap: () {
+                  bottomSheetPasswordHistory(context: context, accountOjbModel: account);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
+                  child: Text(context.trDetails(DetailsAccountText.passwordHistoryDetail), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary)),
+                ),
               ),
             ),
           ],

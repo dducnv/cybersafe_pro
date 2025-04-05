@@ -1,6 +1,7 @@
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
+import 'package:cybersafe_pro/resources/app_config.dart';
 import 'package:cybersafe_pro/resources/size_text_icon.dart';
 import 'package:cybersafe_pro/screens/login_master_password/login_master_password.dart';
 import 'package:cybersafe_pro/screens/register_master_pin/register_master_pin.dart';
@@ -99,9 +100,19 @@ class MobileLayout extends StatelessWidget {
               const SizedBox(height: 16),
               Padding(padding: const EdgeInsets.only(left: 16), child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.backup), style: settingTitleCardStyle)),
               const SizedBox(height: 5),
+              if (!AppConfig.isProApp)
+                SettingItemWidget(
+                  isGradientBg: true,
+                  titleStyle: settingTitleItemStyle.copyWith(color: Colors.white),
+                  title: "Xuất dữ liệu sang bản Pro",
+                  icon: Icons.import_export_rounded,
+                  onTap: () {
+                  },
+                ),
+              const SizedBox(height: 5),
               SettingItemWidget(
                 title: context.appLocale.settingsLocale.getText(SettingsLocale.importDataFromBrowser),
-                icon: Icons.browser_updated,
+                icon: Icons.browser_updated_rounded,
                 onTap: () {
                   DataManagerService.importDataFromBrowser(context);
                 },
@@ -109,7 +120,7 @@ class MobileLayout extends StatelessWidget {
               const SizedBox(height: 5),
               SettingItemWidget(
                 title: context.appLocale.settingsLocale.getText(SettingsLocale.backupData),
-                icon: Icons.file_download,
+                icon: Icons.upload_file,
                 onTap: () {
                   if (!DataManagerService.checkData(context)) {
                     showToast(context.trSafe(SettingsLocale.dataIsEmpty), context: context);
@@ -203,7 +214,7 @@ class MobileLayout extends StatelessWidget {
                               itemCount: 5,
                               minValue: 0,
                               maxValue: 30,
-                              itemWidth: 70.w,
+                              itemWidth: 70.h,
                               itemHeight: 70.h,
                               decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2)),
                               axis: Axis.horizontal,

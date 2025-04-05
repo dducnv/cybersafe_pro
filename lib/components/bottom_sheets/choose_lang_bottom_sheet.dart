@@ -15,21 +15,23 @@ void showLanguageBottomSheet(BuildContext context) {
   showModalBottomSheet(
     context: context,
     builder: (context) {
-      return Consumer<AppLocale>(
-        builder: (context, appLocale, child) {
-          return Container(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(context.appLocale.settingsLocale.getText(SettingsLocale.chooseLanguage), style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 16),
-                Expanded(child: ListView(children: items)),
-              ],
-            ),
-          );
-        },
+      return SafeArea(
+        child: Consumer<AppLocale>(
+          builder: (context, appLocale, child) {
+            return Container(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(context.appLocale.settingsLocale.getText(SettingsLocale.chooseLanguage), style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
+                  Expanded(child: ListView(children: items)),
+                ],
+              ),
+            );
+          },
+        ),
       );
     },
   );

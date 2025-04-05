@@ -70,7 +70,7 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: HomeAppBarCustom(scaffoldKey: _scaffoldKey),
-      drawer: Drawer(shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(30), bottomRight: Radius.circular(30))), child: Sidebar()),
+      drawer: SafeArea(child: Drawer(shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(30), bottomRight: Radius.circular(30))), child: Sidebar())),
       floatingActionButton: SizedBox(
         width: 61.h,
         height: 61.h,

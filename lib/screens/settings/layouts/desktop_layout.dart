@@ -1,3 +1,4 @@
+import 'package:cybersafe_pro/widgets/not_support/not_support_widget.dart';
 import 'package:flutter/material.dart';
 
 class DesktopLayout extends StatelessWidget {
@@ -5,8 +6,6 @@ class DesktopLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
-    );
+    return const NotSupportWidget();
   }
 }

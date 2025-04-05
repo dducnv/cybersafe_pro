@@ -1,10 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-feature android:name="android.hardware.screen.portrait"
         android:required="true" />
-    <compatible-screens>
-        <screen android:screenSize="small" android:screenDensity="hdpi" />
-        <screen android:screenSize="normal" android:screenDensity="hdpi" />
-    </compatible-screens>
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

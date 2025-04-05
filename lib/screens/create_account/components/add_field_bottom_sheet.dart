@@ -1,5 +1,6 @@
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
+import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/type_text_field.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +43,7 @@ class AddFieldBottomSheet extends StatelessWidget {
                   child: Center(
                     child: Text(
                       context.trCreateAccount(CreateAccountText.addField),
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey[800]),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
@@ -86,8 +87,8 @@ class AddFieldBottomSheet extends StatelessWidget {
     return RichText(
       text: TextSpan(
         text: context.trCreateAccount(CreateAccountText.fieldType),
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey[800]),
-        children: [TextSpan(text: '*', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16))],
+        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]),
+        children: [TextSpan(text: '*', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 14.sp))],
       ),
     );
   }

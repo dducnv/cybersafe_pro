@@ -56,6 +56,7 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
             IconPicker(onTap: () => _showIconPicker(context, formProvider)),
             const SizedBox(height: 10),
             AccountFormFields(formProvider: formProvider, onAddField: () => _showAddFieldBottomSheet(context)),
+            const SizedBox(height: 90),
           ],
         ),
       ),

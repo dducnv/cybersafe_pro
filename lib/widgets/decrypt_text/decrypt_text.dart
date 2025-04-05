@@ -130,8 +130,8 @@ class _DecryptTextState extends State<DecryptText> {
   Widget build(BuildContext context) {
     if (_isLoading && widget.showLoading) {
       return Shimmer.fromColors(
-        baseColor: Colors.white38,
-        highlightColor: Colors.white,
+        baseColor: Theme.of(context).colorScheme.primary.withValues(alpha: .4),
+        highlightColor: Theme.of(context).colorScheme.primary,
         child: Text(
           'Decrypting...',
           textAlign: TextAlign.start,

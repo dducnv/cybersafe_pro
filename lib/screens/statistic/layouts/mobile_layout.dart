@@ -150,7 +150,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                             const SizedBox(height: 10),
                             RequestPro(
                               child: SecurityCheckItem(
-                                title: context.trStatistic(StatisticText.totalAccountPasswordWeak),
+                                title: context.trStatistic(StatisticText.totalAccountSamePassword),
                                 value: statisticProvider.accountSamePassword.length,
                                 icon: Icons.copy_rounded,
                                 subIcon: Icons.arrow_forward_ios_rounded,
