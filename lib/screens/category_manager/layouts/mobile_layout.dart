@@ -90,6 +90,7 @@ class MobileLayout extends StatelessWidget {
         cancelButtonColor: Theme.of(context).colorScheme.primary,
         confirmButtonColor: Theme.of(context).colorScheme.error,
         isCountDownTimer: category.accounts.isNotEmpty,
+        canConfirmInitially: category.accounts.isEmpty,
         onConfirm: () async {
           bool result = await context.read<CategoryProvider>().deleteCategory(category);
           if (result && context.mounted) {

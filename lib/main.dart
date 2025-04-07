@@ -9,6 +9,7 @@ import 'package:cybersafe_pro/resources/shared_preferences/shared_preferences_he
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/services/local_auth_service.dart';
+import 'package:cybersafe_pro/utils/deep_link_handler.dart';
 import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +27,7 @@ late final PackageInfo packageInfo;
 Future<void> initApp() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   timezone.initializeTimeZones();
-  
+
   // Khởi tạo ObjectBox
   await SharedPreferencesHelper.init();
   await clearSecureStorageOnReinstall();
@@ -39,11 +40,11 @@ Future<void> initApp() async {
   packageInfo = await PackageInfo.fromPlatform();
   // Xác định route ban đầu
   final initialRoute = await _determineInitialRoute();
-  
+
   // Khởi tạo locale
   final savedLang = await SecureStorage.instance.read(key: SecureStorageKey.appLang);
   Locale initialLocale;
-  
+
   if (savedLang != null) {
     final languageCode = savedLang.split('_').first;
     final countryCode = savedLang.split('_').last;
@@ -54,18 +55,11 @@ Future<void> initApp() async {
     final countryCode = defaultLocale.split('_').last;
     initialLocale = Locale(languageCode, countryCode);
   }
-  
+
   await initializeDateFormatting(initialLocale.toString(), null);
   SecureApplicationUtil.instance.init();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  
-  runApp(MultiProvider(
-    providers: ListProvider.providers, 
-    child: MyApp(
-      initialRoute: initialRoute,
-      initialLocale: initialLocale,
-    )
-  ));
+  runApp(MultiProvider(providers: ListProvider.providers, child: MyApp(initialRoute: initialRoute, initialLocale: initialLocale)));
 }
 
 void main() {

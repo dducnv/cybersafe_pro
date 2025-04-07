@@ -1,5 +1,6 @@
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/general.dart';
+import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
 import 'package:cybersafe_pro/resources/app_config.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
@@ -102,7 +103,7 @@ class ProIntroBottomSheet extends StatelessWidget {
                 onPressed: () {
                   openUrl(AppConfig.proPlayStoreUrl, context: context);
                 },
-                text: context.trAbout(GeneralText.updateNowText),
+                text: context.trSettings(SettingsLocale.installNow),
               ),
             ),
 

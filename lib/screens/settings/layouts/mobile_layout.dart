@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:cybersafe_pro/components/bottom_sheets/pro_intro_bottom_sheet.dart';
+import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
@@ -11,7 +15,9 @@ import 'package:cybersafe_pro/screens/settings/widgets/set_theme_mode_widget.dar
 import 'package:cybersafe_pro/screens/settings/widgets/use_biometric_login.dart';
 import 'package:cybersafe_pro/services/data_manager_service.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
+import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/app_custom_switch/app_custom_switch.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
@@ -20,6 +26,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class MobileLayout extends StatelessWidget {
   const MobileLayout({super.key});
@@ -100,15 +108,37 @@ class MobileLayout extends StatelessWidget {
               const SizedBox(height: 16),
               Padding(padding: const EdgeInsets.only(left: 16), child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.backup), style: settingTitleCardStyle)),
               const SizedBox(height: 5),
-              if (!AppConfig.isProApp)
+              if (!AppConfig.isProApp && !Platform.isMacOS && !Platform.isWindows)
                 SettingItemWidget(
                   isGradientBg: true,
                   titleStyle: settingTitleItemStyle.copyWith(color: Colors.white),
-                  title: "Xuất dữ liệu sang bản Pro",
+                  title: context.appLocale.settingsLocale.getText(SettingsLocale.transferData),
                   icon: Icons.import_export_rounded,
-                  onTap: () {
-                  },
-                ),
+                  onTap: () async {
+                  showAppCustomDialog(
+                    context,
+                    AppCustomDialog(
+                      title: context.trSafe(SettingsLocale.transferData),
+                      message: context.trSafe(SettingsLocale.transferDataMessage),
+                      confirmText: context.trSafe(SettingsLocale.confirm),
+                      canConfirmInitially: true,
+                      cancelText: context.trSafe(SettingsLocale.cancel),
+                      onConfirm: () async {
+                        try {
+                          bool checkUri = await canLaunchUrlString("cybersafepro://transfer");
+                          if (checkUri) {
+                            DataManagerService.transferData(context);
+                          } else {
+                            openUrl(AppConfig.proPlayStoreUrl, context: context);
+                          }
+                        } catch (e) {
+                          logError(e.toString());
+                        }
+                      },
+                    ),
+                  );
+                },
+              ),
               const SizedBox(height: 5),
               SettingItemWidget(
                 title: context.appLocale.settingsLocale.getText(SettingsLocale.importDataFromBrowser),

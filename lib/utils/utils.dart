@@ -3,12 +3,15 @@ import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/services/local_auth_service.dart';
 import 'package:cybersafe_pro/services/otp.dart';
+import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:timezone/timezone.dart' as timezone;
 import 'package:url_launcher/url_launcher.dart';
+
+MethodChannel platform = const MethodChannel('cybersafe/nativeCalls');
 
 Future<void> clipboardCustom({required BuildContext context, required String text}) async {
   await Clipboard.setData(ClipboardData(text: text)).then((value) {
@@ -57,12 +60,24 @@ Future<bool> checkLocalAuth() async {
   return authenticated;
 }
 
-void openUrl(String link, {LaunchMode? mode, required BuildContext context}) async {
-  if (await canLaunchUrl(Uri.parse(link))) {
+void openUrl(String link, {LaunchMode? mode, required BuildContext context, Function(String)? onError}) async {
+  try {
     await launchUrl(Uri.parse(link), mode: mode ?? LaunchMode.externalApplication);
-  } else {
+  } catch (e) {
+    logError(e.toString());
     if (context.mounted) {
       showToast("Could not launch link", context: context, backgroundColor: Theme.of(context).colorScheme.primary, textStyle: const TextStyle(color: Colors.white));
     }
+    onError?.call(e.toString());
+  }
+}
+
+Future<bool> checkAppInstalled(String packageName) async {
+  try {
+    final bool installed = await platform.invokeMethod('isAppInstalled', {"packageName": packageName});
+    return installed;
+  } catch (e) {
+    logError(e.toString());
+    return false;
   }
 }

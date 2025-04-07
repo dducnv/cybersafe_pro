@@ -1,5 +1,5 @@
+import 'dart:async';
 import 'dart:io';
-
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/app_locale.dart';
@@ -26,23 +26,19 @@ class MyApp extends StatefulWidget {
   final String initialRoute;
   final Locale initialLocale;
 
-  const MyApp({
-    super.key,
-    required this.initialRoute,
-    required this.initialLocale,
-  });
+  const MyApp({super.key, required this.initialRoute, required this.initialLocale});
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     initApp();
-    // Không cần gọi _initLocale nữa vì đã được khởi tạo trong main
   }
 
   @override

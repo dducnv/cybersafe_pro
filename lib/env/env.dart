@@ -40,4 +40,7 @@ abstract class Env {
 
   @EnviedField(varName: 'BACKUP_FILE_ENCRYPT_KEY', obfuscate: true)
   static final String backupFileEncryptKey = _Env.backupFileEncryptKey;
+
+  @EnviedField(varName: 'TRANSFER_FILE_ENCRYPT_KEY', obfuscate: true)
+  static final String transferFileEncryptKey = _Env.transferFileEncryptKey;
 }

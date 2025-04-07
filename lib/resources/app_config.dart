@@ -9,9 +9,10 @@ class AppConfig {
   static final instance = AppConfig._internal();
   AppConfig._internal();
 
-  static bool isProApp = true;
+  static bool isProApp = false;
   static String proPackageId = "com.duc_app_lab_ind.cyber_safe";
   static String proPlayStoreUrl = "https://play.google.com/store/apps/details?id=com.duc_app_lab_ind.cyber_safe";
+  static String proUriSchemeTransfer = "cybersafepro://";
 
   static String privacyPolicyUrl(String languageCode) {
     if (languageCode == "vi") {

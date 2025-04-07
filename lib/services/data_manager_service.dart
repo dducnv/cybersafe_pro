@@ -17,18 +17,25 @@ import 'package:cybersafe_pro/localization/keys/error_text.dart';
 import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
+import 'package:cybersafe_pro/resources/app_config.dart';
 import 'package:cybersafe_pro/screens/login_master_password/login_master_password.dart';
 import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/services/encrypt_service.dart';
 import 'package:cybersafe_pro/services/permission_service.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
+import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:downloadsfolder/downloadsfolder.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_sharing_intent/flutter_sharing_intent.dart';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DataManagerService {
   //instance
@@ -36,6 +43,8 @@ class DataManagerService {
   factory DataManagerService() => _instance;
   DataManagerService._internal();
 
+  static const String transferFileName = "cyber_safe_transfer.enc";
+  static const String TRANSFER_FOLDER = "CyberSafeTransfer";
   static bool canLockApp = true;
 
   //import data from browser
@@ -223,6 +232,10 @@ class DataManagerService {
       if (filePath == null) {
         throw Exception('File not found');
       }
+      // Kiểm tra đuôi file
+      if (!filePath.endsWith('.enc')) {
+        throw Exception('File is not a backup file');
+      }
 
       // Bước 2: Đọc và giải mã file
       File file = File(filePath);
@@ -276,7 +289,7 @@ class DataManagerService {
                     if (result) {
                       // Bước 7: Khôi phục thành công
                       await GlobalKeys.appRootNavigatorKey.currentContext!.read<CategoryProvider>().refresh();
-                      await GlobalKeys.appRootNavigatorKey.currentContext!.read<AccountProvider>().refreshAccounts();
+                      GlobalKeys.appRootNavigatorKey.currentContext!.read<AccountProvider>().refreshAccounts();
                       Navigator.of(GlobalKeys.appRootNavigatorKey.currentContext!).pop();
                       ScaffoldMessenger.of(
                         GlobalKeys.appRootNavigatorKey.currentContext!,
@@ -405,7 +418,7 @@ class DataManagerService {
                           // Làm mới dữ liệu
                           try {
                             await GlobalKeys.appRootNavigatorKey.currentContext!.read<CategoryProvider>().refresh();
-                            await GlobalKeys.appRootNavigatorKey.currentContext!.read<AccountProvider>().refreshAccounts();
+                            GlobalKeys.appRootNavigatorKey.currentContext!.read<AccountProvider>().refreshAccounts();
                           } catch (e) {
                             logError('Lỗi làm mới dữ liệu sau khi xóa: $e');
                           }
@@ -433,5 +446,206 @@ class DataManagerService {
         },
       ),
     );
+  }
+
+  static Future<bool> transferData(BuildContext context) async {
+    try {
+      if (!await PermissionService.instance.requestStoragePermission()) {
+        return false;
+      }
+      logInfo('requestStoragePermission: ${await PermissionService.instance.requestStoragePermission()}');
+      showLoadingDialog();
+      final backupService = EncryptAppDataService.instance;
+      final backup = await backupService.createBackup(Env.transferFileEncryptKey, "cyber_safe_transfer", isTransfer: true);
+      // Tạo thư mục cyber_safe
+      Directory downloadDirectory = await getDownloadDirectory();
+      final backupDir = Directory(path.join(downloadDirectory.path, 'cyber_safe/$TRANSFER_FOLDER'));
+      if (!backupDir.existsSync()) {
+        logInfo('Tạo thư mục cyber_safe');
+        await backupDir.create();
+      }
+      //foder files
+      for (var file in backupDir.listSync(recursive: true)) {
+        if (file.path.endsWith('.enc')) {
+          try {
+            await file.delete(recursive: true);
+          } catch (e) {
+            logError('Error delete file: ${e.toString()}');
+          }
+        }
+      }
+
+      File transferFile = File('${backupDir.path}/cyber_safe_transfer_data.enc');
+      // 6. Log đường dẫn file để debug
+      logInfo('Creating transfer file at: ${transferFile.path}');
+      final backupJson = jsonEncode(backup);
+      final codeEncrypted = EncryptService.instance.encryptFernetBytes(data: utf8.encode(backupJson), key: Env.backupFileEncryptKey);
+      await transferFile.writeAsBytes(codeEncrypted);
+
+      launchProApp(context);
+      logInfo('Transfer successfully to ${transferFile.path}');
+      return true;
+    } catch (e) {
+      hideLoadingDialog();
+      logError('Error transfer data: ${e.toString()}');
+      return false;
+    }
+  }
+
+  //import transfer data
+  static Future<bool> importTransferData() async {
+    try {
+      showLoadingDialog();
+      Directory? externalDirectory = await getDownloadDirectory();
+      // Lấy đường dẫn file
+      FilePickerResult? result = await FilePicker.platform.pickFiles(initialDirectory: "${externalDirectory.path}/cyber_safe/$TRANSFER_FOLDER");
+      if (result == null || result.files.isEmpty) {
+        throw Exception('File not selected');
+      }
+      Directory? directory = Directory(result.files.first.path!);
+      if (directory.path.isEmpty) {
+        throw Exception('File not selected');
+      }
+      //yêu cầu đuôi file
+      if (!directory.path.endsWith('.enc')) {
+        throw Exception('File is not a transfer file');
+      }
+      String filePath = directory.path;
+      // 2. Kiểm tra file
+      File file = File(filePath);
+      logInfo('Checking file at: ${file.path}');
+
+      if (!file.existsSync()) {
+        // Log thêm thông tin để debug
+        final dir = file.parent;
+        final dirExists = await dir.exists();
+        final dirContents = dirExists ? await dir.list().toList() : [];
+
+        logError('''
+          File not found at: ${file.path}
+          Parent directory exists: $dirExists
+          Parent directory path: ${dir.path}
+          Directory contents: ${dirContents.map((e) => e.path).join('\n')}
+      ''');
+
+        throw Exception("${file.path} not found");
+      }
+
+      // 3. Đọc file với try-catch chi tiết
+      List<int> fileBytes;
+      try {
+        fileBytes = file.readAsBytesSync();
+        logInfo('Successfully read ${fileBytes.length} bytes from file');
+      } catch (e) {
+        logError('Error reading file: $e');
+        throw Exception("Cannot read file: $e");
+      }
+
+      // 4. Giải mã và xử lý dữ liệu
+      List<int> dataBackup = EncryptService.instance.decryptFernetBytes(encryptedData: fileBytes, key: Env.backupFileEncryptKey);
+
+      if (dataBackup.isEmpty) {
+        throw Exception("Decrypted data is empty");
+      }
+
+      String jsonString = utf8.decode(dataBackup);
+
+      // 5. Khôi phục dữ liệu
+      final resultRestore = await EncryptAppDataService.instance.restoreBackup(jsonString, Env.transferFileEncryptKey);
+
+      // 6. Xử lý kết quả
+      if (resultRestore) {
+        // Xóa file sau khi restore thành công
+        try {
+          await file.delete(recursive: true);
+        } catch (e) {
+          for (var file in directory.listSync(recursive: true)) {
+            if (file.path.endsWith('.enc')) {
+              try {
+                await file.delete(recursive: true);
+          } catch (e) {
+            logError('Error delete file: ${e.toString()}');
+              }
+            }
+          }
+          logError('Warning: Could not delete transfer file: $e');
+        }
+        Navigator.of(GlobalKeys.appRootNavigatorKey.currentContext!).pop();
+        await GlobalKeys.appRootNavigatorKey.currentContext!.read<CategoryProvider>().refresh();
+        GlobalKeys.appRootNavigatorKey.currentContext!.read<AccountProvider>().refreshAccounts();
+
+        hideLoadingDialog();
+        return true;
+      } else {
+        hideLoadingDialog();
+        return false;
+      }
+    } catch (e, stackTrace) {
+      hideLoadingDialog();
+      logError('Error import transfer data: ${e.toString()}\nStack trace: $stackTrace');
+      return false;
+    }
+  }
+
+  static Future<void> launchProApp(BuildContext context) async {
+    final proAppScheme = 'cybersafepro://transfer';
+    openUrl(
+      proAppScheme,
+      context: context,
+      onError: (error) {
+        openUrl(AppConfig.proPlayStoreUrl, context: context);
+      },
+    );
+  }
+
+  static Future<Directory> getSharedDirectory() async {
+    // Kiểm tra quyền trước
+    await PermissionService.instance.requestStoragePermission();
+
+    Directory downloadDirectory = await getDownloadDirectory();
+    final transferDir = Directory(path.join(downloadDirectory.path, "cyber_safe"));
+    final transferFolder = Directory(path.join(transferDir.path, TRANSFER_FOLDER));
+
+    // Đảm bảo thư mục tồn tại
+    if (!transferFolder.existsSync()) {
+      try {
+        await transferFolder.create(recursive: true);
+        logInfo('Created directory: ${transferFolder.path}');
+      } catch (e) {
+        logError('Error creating directory: $e');
+        // Thử tạo thư mục trong bộ nhớ ứng dụng nếu không tạo được trong Downloads
+        final appDir = await getApplicationDocumentsDirectory();
+        final appTransferDir = Directory(path.join(appDir.path, TRANSFER_FOLDER));
+        if (!appTransferDir.existsSync()) {
+          await appTransferDir.create(recursive: true);
+        }
+        return appTransferDir;
+      }
+    }
+
+    // Kiểm tra quyền ghi vào thư mục
+    try {
+      final testFile = File('${transferDir.path}/test_permission.txt');
+      await testFile.writeAsString('test');
+      await testFile.delete();
+      logInfo('Transfer directory: ${transferDir.path}');
+      return transferDir;
+    } catch (e) {
+      logError('No write permission to directory: $e');
+      // Sử dụng thư mục ứng dụng thay thế
+      final appDir = await getApplicationDocumentsDirectory();
+      final appTransferDir = Directory(path.join(appDir.path, TRANSFER_FOLDER));
+      if (!appTransferDir.existsSync()) {
+        await appTransferDir.create(recursive: true);
+      }
+      return appTransferDir;
+    }
+  }
+
+  static deleteFile(String filePath) {
+    File file = File(filePath);
+    if (file.existsSync()) {
+      file.deleteSync();
+    }
   }
 }

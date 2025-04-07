@@ -77,7 +77,7 @@ class EncryptAppDataService {
     try {
       // Khởi tạo orchestration key trước
       await _initializeOrchestrationKey();
-      
+
       final isLegacy = await _isLegacyUser();
       final hasDeviceKey = await _hasDeviceKey();
 
@@ -108,7 +108,7 @@ class EncryptAppDataService {
   // Khởi tạo orchestration key
   Future<void> _initializeOrchestrationKey() async {
     if (_isOrchestrationKeyInitialized) return;
-    
+
     _orchestrationKey = await _generateOrchestrationKey();
     _isOrchestrationKeyInitialized = true;
     logInfo('Đã khởi tạo orchestration key');
@@ -142,23 +142,21 @@ class EncryptAppDataService {
     }
   }
 
-
-
   // Bảo vệ khóa trong bộ nhớ bằng orchestration key
   String _protectKey(String key) {
     if (!_isOrchestrationKeyInitialized) {
       _logError('Orchestration key chưa được khởi tạo', 'Không thể bảo vệ khóa');
       return key; // Fallback nếu chưa khởi tạo
     }
-    
+
     final keyBytes = utf8.encode(key);
     final orchestrationBytes = utf8.encode(_orchestrationKey);
     final result = List<int>.filled(keyBytes.length, 0);
-    
+
     for (var i = 0; i < keyBytes.length; i++) {
       result[i] = keyBytes[i] ^ orchestrationBytes[i % orchestrationBytes.length];
     }
-    
+
     return base64.encode(result);
   }
 
@@ -168,16 +166,16 @@ class EncryptAppDataService {
       _logError('Orchestration key chưa được khởi tạo', 'Không thể khôi phục khóa');
       return protectedKey; // Fallback nếu chưa khởi tạo
     }
-    
+
     try {
       final protectedBytes = base64.decode(protectedKey);
       final orchestrationBytes = utf8.encode(_orchestrationKey);
       final result = List<int>.filled(protectedBytes.length, 0);
-      
+
       for (var i = 0; i < protectedBytes.length; i++) {
         result[i] = protectedBytes[i] ^ orchestrationBytes[i % orchestrationBytes.length];
       }
-      
+
       return utf8.decode(result);
     } catch (e) {
       _logError('Lỗi khôi phục khóa', e);
@@ -283,9 +281,8 @@ class EncryptAppDataService {
   }
 
   // Tạo backup
-  Future<Map<String, dynamic>> createBackup(String pin, String backupName) async {
-    _validatePin(pin);
-
+  Future<Map<String, dynamic>> createBackup(String pin, String backupName, {bool isTransfer = false}) async {
+    if (!isTransfer) _validatePin(pin);
     try {
       final deviceKey = await _getDeviceKey();
       final accounts = await AccountBox.getAll();
@@ -379,7 +376,7 @@ class EncryptAppDataService {
 
   Future<String> _generateEncryptionKey(String deviceKey, KeyType type) async {
     final cacheKey = '${type.name}_$deviceKey';
-    
+
     // Nếu có trong cache, giải mã và trả về
     if (_keyCache.containsKey(cacheKey) && !_keyCache[cacheKey]!.isExpired) {
       return _unprotectKey(_keyCache[cacheKey]!.key);
@@ -494,8 +491,6 @@ class EncryptAppDataService {
       _logError('Cannot load keys', e);
     }
   }
-
-
 
   // Future<void> _checkAndRotateKeys() async {
   //   final keyCreationTime = await _secureStorage.read(key: SecureStorageKey.encryptionKeyCreationTime);
@@ -1111,4 +1106,3 @@ class _TempEncryptionService {
     return decrypted;
   }
 }
-
