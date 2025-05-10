@@ -14,8 +14,20 @@ class AccountItemWidget extends StatelessWidget {
   final Function()? onLongPress;
   final Function()? onSelect;
   final Function()? onDragSelect;
+  final Function()? onTap;
   final Widget? subIcon;
-  const AccountItemWidget({super.key, this.onCallBackPop, required this.accountModel, required this.isLastItem, this.onLongPress, this.onTapSubButton, this.onSelect, this.subIcon, this.onDragSelect});
+  const AccountItemWidget({
+    super.key,
+    this.onCallBackPop,
+    required this.accountModel,
+    required this.isLastItem,
+    this.onLongPress,
+    this.onTapSubButton,
+    this.onSelect,
+    this.subIcon,
+    this.onDragSelect,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,11 +35,13 @@ class AccountItemWidget extends StatelessWidget {
       color: const Color.fromRGBO(0, 0, 0, 0),
       child: InkWell(
         onLongPress: onLongPress,
-        onTap: () {
-          AppRoutes.navigateTo(context, AppRoutes.detailsAccount, arguments: {"accountId": accountModel.id});
-        },
+        onTap:
+            onTap ??
+            () {
+              AppRoutes.navigateTo(context, AppRoutes.detailsAccount, arguments: {"accountId": accountModel.id});
+            },
         child: Padding(
-          padding:  EdgeInsets.symmetric(horizontal: 10),
+          padding: EdgeInsets.symmetric(horizontal: 10),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -66,9 +80,9 @@ class AccountItemWidget extends StatelessWidget {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(border: isLastItem ? null : Border(bottom: BorderSide(color: Theme.of(context).colorScheme.surfaceContainerHighest))),
-                  
+
                   child: Padding(
-                    padding:  EdgeInsets.symmetric(vertical: 14.h),
+                    padding: EdgeInsets.symmetric(vertical: 14.h),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,

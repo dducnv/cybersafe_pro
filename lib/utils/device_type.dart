@@ -7,6 +7,9 @@ enum DeviceType {
 }
 
 class DeviceInfo {
+  // Store current screen for desktop mode
+  static final ValueNotifier<String?> currentScreen = ValueNotifier<String?>(null);
+  
   static DeviceType getDeviceType(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     

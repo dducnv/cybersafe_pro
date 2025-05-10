@@ -9,14 +9,14 @@ import 'package:flutter/material.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:provider/provider.dart';
 
-class MobileLayout extends StatefulWidget {
-  const MobileLayout({super.key});
+class StatisticMobileLayout extends StatefulWidget {
+  const StatisticMobileLayout({super.key});
 
   @override
-  State<MobileLayout> createState() => _MobileLayoutState();
+  State<StatisticMobileLayout> createState() => _StatisticMobileLayoutState();
 }
 
-class _MobileLayoutState extends State<MobileLayout> {
+class _StatisticMobileLayoutState extends State<StatisticMobileLayout> {
   Map<String, double> dataMap = {};
   int score = 0;
 
@@ -144,7 +144,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                               icon: Icons.warning_rounded,
                               subIcon: Icons.arrow_forward_ios_rounded,
                               onTap: () {
-                                Navigator.pushNamed(context, AppRoutes.accountPasswordWeak);
+                                AppRoutes.navigateTo(context, AppRoutes.accountPasswordWeak);
                               },
                             ),
                             const SizedBox(height: 10),
@@ -155,7 +155,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                                 icon: Icons.copy_rounded,
                                 subIcon: Icons.arrow_forward_ios_rounded,
                                 onTap: () {
-                                  Navigator.pushNamed(context, AppRoutes.accountSamePassword);
+                                  AppRoutes.navigateTo(context, AppRoutes.accountSamePassword);
                                 },
                               ),
                             ),

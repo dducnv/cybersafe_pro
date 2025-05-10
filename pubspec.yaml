@@ -18,7 +18,7 @@ dependencies:
   #database
   csv: ^6.0.0
   objectbox: ^4.1.0
-  objectbox_flutter_libs: ^4.1.0
+  objectbox_flutter_libs: any
   #security
   crypto: ^3.0.6
   envied: ^1.1.1
@@ -29,6 +29,7 @@ dependencies:
   pointycastle: ^3.7.4
   url_launcher: ^6.3.1
   flutter_secure_storage: ^9.2.4
+  local_auth_darwin: ^1.4.3
   #util
   intl: ^0.19.0
   logger: ^2.5.0

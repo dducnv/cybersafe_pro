@@ -16,7 +16,7 @@ Future<void> showCreateCategoryBottomSheet(BuildContext context, {bool isUpdate 
     builder:
         (context) => SafeArea(
           child: Padding(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 16.w, right: 16.w, top: 16.h),
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 16, right: 16, top: 16),
             child: CreateCategoryBottomSheet(isUpdate: isUpdate, categoryOjbModel: categoryOjbModel),
           ),
         ),

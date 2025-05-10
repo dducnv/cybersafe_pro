@@ -1,3 +1,4 @@
+import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -19,11 +20,18 @@ class NotSupportWidget extends StatelessWidget {
               width: 300.w,
               child: Padding(
                 padding: EdgeInsets.all(20.h),
-                child: Text('This feature is currently not supported on your screen size. We are working to add support in the future.',
+                child: Text(
+                  'This feature is currently not supported on your screen size. We are working to add support in the future.',
                   style: TextStyle(fontSize: 18.sp),
                   textAlign: TextAlign.center,
                 ),
               ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                AppRoutes.navigateAndRemoveUntil(context, AppRoutes.home);
+              },
+              child: Text('Go back'),
             ),
           ],
         ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
@@ -9,7 +10,7 @@ import 'package:cybersafe_pro/resources/shared_preferences/shared_preferences_he
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/services/local_auth_service.dart';
-import 'package:cybersafe_pro/utils/deep_link_handler.dart';
+import 'package:cybersafe_pro/utils/device_type.dart';
 import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,61 @@ import 'package:in_app_review/in_app_review.dart';
 
 final InAppReview inAppReview = InAppReview.instance;
 late final PackageInfo packageInfo;
+
+// Observer để xử lý thay đổi kích thước màn hình
+class ScreenSizeObserver extends StatefulWidget {
+  final Widget child;
+
+  const ScreenSizeObserver({super.key, required this.child});
+
+  @override
+  State<ScreenSizeObserver> createState() => _ScreenSizeObserverState();
+}
+
+class _ScreenSizeObserverState extends State<ScreenSizeObserver> with WidgetsBindingObserver {
+  DeviceType? _lastDeviceType;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final currentDeviceType = DeviceInfo.getDeviceType(context);
+
+      // Nếu trước đó không phải là desktop và bây giờ là desktop
+      if (_lastDeviceType != DeviceType.desktop && currentDeviceType == DeviceType.desktop) {
+        // Lưu màn hình hiện tại cho desktop_layout để mở modal side sheet
+        final currentRoute = ModalRoute.of(context)?.settings.name;
+        if (currentRoute != null && currentRoute != AppRoutes.home) {
+          DeviceInfo.currentScreen.value = currentRoute;
+          // Chuyển về màn hình home
+          Navigator.of(context).pushReplacementNamed(AppRoutes.home);
+        }
+      }
+
+      _lastDeviceType = currentDeviceType;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Khởi tạo loại thiết bị ban đầu
+    _lastDeviceType ??= DeviceInfo.getDeviceType(context);
+    return widget.child;
+  }
+}
 
 Future<void> initApp() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -59,7 +115,7 @@ Future<void> initApp() async {
   await initializeDateFormatting(initialLocale.toString(), null);
   SecureApplicationUtil.instance.init();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  runApp(MultiProvider(providers: ListProvider.providers, child: MyApp(initialRoute: initialRoute, initialLocale: initialLocale)));
+  runApp(MultiProvider(providers: ListProvider.providers, child: ScreenSizeObserver(child: MyApp(initialRoute: initialRoute, initialLocale: initialLocale))));
 }
 
 void main() {

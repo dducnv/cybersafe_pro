@@ -73,6 +73,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   void logOutUser() {
+    print("logout");
     _rootTimer.cancel();
     AppRoutes.navigateAndRemoveUntil(GlobalKeys.appRootNavigatorKey.currentContext!, AppRoutes.loginMasterPin);
   }
@@ -111,9 +112,9 @@ class AppProvider extends ChangeNotifier {
         // Dừng bộ đếm thời gian
         _rootTimer.cancel();
         // Tạo trễ ngắn để đảm bảo giao diện cập nhật trước khi đăng xuất
-        Future.delayed(const Duration(milliseconds: 100), () {
-          logOutUser();
-        });
+        // Future.delayed(const Duration(milliseconds: 100), () {
+        //   logOutUser();
+        // });
       } catch (e) {
         logError('Lỗi khi xử lý ứng dụng chạy nền: $e');
       }

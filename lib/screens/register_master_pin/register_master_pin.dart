@@ -29,32 +29,12 @@ class _RegisterMasterPinState extends State<RegisterMasterPin> {
 
   @override
   Widget build(BuildContext context) {
-    final deviceType = DeviceInfo.getDeviceType(context);
-    switch (deviceType) {
-      case DeviceType.desktop:
-        return DesktopLayout(
-          appPinCodeCreateKey: appPinCodeCreateKey,
-          appPinCodeConfirmKey: appPinCodeConfirmKey,
-          formCreateKey: formCreateKey,
-          formConfirmKey: formConfirmKey,
-          isChangePin: widget.isChangePin,
-        );
-      case DeviceType.tablet:
-        return MobileLayout(
-          appPinCodeCreateKey: appPinCodeCreateKey,
-          appPinCodeConfirmKey: appPinCodeConfirmKey,
-          formCreateKey: formCreateKey,
-          formConfirmKey: formConfirmKey,
-          isChangePin: widget.isChangePin,
-        );
-      case DeviceType.mobile:
-        return MobileLayout(
-          appPinCodeCreateKey: appPinCodeCreateKey,
-          appPinCodeConfirmKey: appPinCodeConfirmKey,
-          formCreateKey: formCreateKey,
-          formConfirmKey: formConfirmKey,
-          isChangePin: widget.isChangePin,
-        );
-    }
+    return MobileLayout(
+      appPinCodeCreateKey: appPinCodeCreateKey,
+      appPinCodeConfirmKey: appPinCodeConfirmKey,
+      formCreateKey: formCreateKey,
+      formConfirmKey: formConfirmKey,
+      isChangePin: widget.isChangePin,
+    );
   }
 }

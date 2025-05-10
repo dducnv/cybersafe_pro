@@ -9,8 +9,8 @@ import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class MobileLayout extends StatelessWidget {
-  const MobileLayout({super.key});
+class CategoryManagerMobileLayout extends StatelessWidget {
+  const CategoryManagerMobileLayout({super.key});
 
   @override
   Widget build(BuildContext context) {

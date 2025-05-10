@@ -14,9 +14,13 @@ import 'package:cybersafe_pro/screens/settings/setting_screen.dart';
 import 'package:cybersafe_pro/screens/statistic/statistic_screen.dart';
 import 'package:cybersafe_pro/screens/statistic/sub_sceens/account_password_weak.dart';
 import 'package:cybersafe_pro/screens/statistic/sub_sceens/same_passwords_view.dart';
+import 'package:cybersafe_pro/utils/device_type.dart';
+import 'package:cybersafe_pro/utils/global_keys.dart';
+import 'package:cybersafe_pro/widgets/modal_side_sheet/modal_side_sheet.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cybersafe_pro/utils/secure_application_util.dart';
+import 'package:secure_application/secure_gate.dart';
 
 class AppRoutes {
   // Route names
@@ -35,31 +39,60 @@ class AppRoutes {
   static const String accountPasswordWeak = '/account_password_weak';
   static const String accountSamePassword = '/account_same_password';
   static const String aboutApp = '/about_app';
+
   // Danh sách các màn hình cần SecureAppSwitcher
   static const List<String> securedRoutes = [home, detailsAccount, statistic, accountPasswordWeak, accountSamePassword];
 
+  // Danh sách các màn hình sẽ hiển thị dưới dạng ModalSideSheet khi ở desktop
+  static const List<String> modalSideSheetRoutes = [
+    createAccount,
+    updateAccount,
+    detailsAccount,
+    passwordGenerator,
+    otpList,
+    settingsRoute,
+    categoryManager,
+    statistic,
+    accountPasswordWeak,
+    accountSamePassword,
+    aboutApp,
+  ];
+
   // Navigation methods
   static Future<T?> navigateTo<T>(BuildContext context, String routeName, {Object? arguments}) {
-    // Nếu điều hướng đến route được bảo mật, khởi tạo lại controller nếu cần
-    if (securedRoutes.contains(routeName)) {
-      SecureApplicationUtil.instance.init();
+    // Cập nhật màn hình hiện tại để desktop mode có thể xử lý
+    DeviceInfo.currentScreen.value = routeName;
+    final deviceType = DeviceInfo.getDeviceType(context);
+    // Kiểm tra nếu đang ở desktop mode và route nằm trong danh sách modalSideSheetRoutes
+    if (deviceType == DeviceType.desktop && modalSideSheetRoutes.contains(routeName)) {
+      return showModalSideSheet<T>(context: context, body: _buildScreen(routeName, arguments));
     }
+
     return Navigator.pushNamed<T>(context, routeName, arguments: arguments);
   }
 
   static Future<T?> navigateToReplacement<T>(BuildContext context, String routeName, {Object? arguments}) {
-    // Nếu điều hướng đến route được bảo mật, khởi tạo lại controller nếu cần
-    if (securedRoutes.contains(routeName)) {
-      SecureApplicationUtil.instance.init();
+    // Cập nhật màn hình hiện tại để desktop mode có thể xử lý
+    DeviceInfo.currentScreen.value = routeName;
+    final deviceType = DeviceInfo.getDeviceType(context);
+    // Kiểm tra nếu đang ở desktop mode và route nằm trong danh sách modalSideSheetRoutes
+    if (deviceType == DeviceType.desktop && modalSideSheetRoutes.contains(routeName)) {
+      return showModalSideSheet<T>(context: context, body: _buildScreen(routeName, arguments));
     }
+
     return Navigator.pushReplacementNamed<T, dynamic>(context, routeName, arguments: arguments);
   }
 
   static Future<T?> navigateAndRemoveUntil<T>(BuildContext context, String routeName, {Object? arguments}) {
-    // Nếu điều hướng đến route được bảo mật, khởi tạo lại controller nếu cần
-    if (securedRoutes.contains(routeName)) {
-      SecureApplicationUtil.instance.init();
+    // Cập nhật màn hình hiện tại để desktop mode có thể xử lý
+    DeviceInfo.currentScreen.value = routeName;
+    final deviceType = DeviceInfo.getDeviceType(context);
+
+    // Kiểm tra nếu đang ở desktop mode và route nằm trong danh sách modalSideSheetRoutes
+    if (deviceType == DeviceType.desktop && modalSideSheetRoutes.contains(routeName)) {
+      return showModalSideSheet<T>(context: context, body: _buildScreen(routeName, arguments));
     }
+
     return Navigator.pushNamedAndRemoveUntil<T>(
       context,
       routeName,
@@ -74,61 +107,56 @@ class AppRoutes {
     }
   }
 
+  // Helper method to build screen based on route name
+  static Widget _buildScreen(String routeName, Object? arguments) {
+    switch (routeName) {
+      case onboarding:
+        return const OnboardingScreen();
+      case home:
+        return const HomeScreen();
+      case passwordGenerator:
+        return const PasswordGenerateScreen();
+      case otpList:
+        return const OtpListScreen();
+      case statistic:
+        return const StatisticScreen();
+      case settingsRoute:
+        return const SettingScreen();
+      case categoryManager:
+        return const CategoryManagerScreen();
+      case createAccount:
+        return const CreateAccountScreen();
+      case updateAccount:
+        final args = arguments as Map<String, dynamic>;
+        return CreateAccountScreen(isUpdate: true, accountId: args["accountId"]);
+      case detailsAccount:
+        final args = arguments as Map<String, dynamic>;
+        return DetailsAccountScreen(accountId: args["accountId"]);
+      case accountPasswordWeak:
+        return const AccountPasswordWeak();
+      case accountSamePassword:
+        return const SamePasswordsView();
+      case registerMasterPin:
+        return const RegisterMasterPin();
+      case loginMasterPin:
+        return const LoginMasterPassword();
+      case aboutApp:
+        return const AboutAppScreen();
+      default:
+        return const LoginMasterPassword();
+    }
+  }
+
   // Route generator for handling dynamic routes and arguments
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
-    Widget screen;
-
-    switch (settings.name) {
-      case onboarding:
-        screen = const OnboardingScreen();
-        break;
-      case home:
-        screen = const HomeScreen();
-        break;
-      case passwordGenerator:
-        screen = const PasswordGenerateScreen();
-        break;
-      case otpList:
-        screen = const OtpListScreen();
-        break;
-      case statistic:
-        screen = const StatisticScreen();
-        break;
-      case settingsRoute:
-        screen = const SettingScreen();
-        break;
-      case categoryManager:
-        screen = const CategoryManagerScreen();
-        break;
-      case createAccount:
-        screen = const CreateAccountScreen();
-        break;
-      case updateAccount:
-        final args = settings.arguments as Map<String, dynamic>;
-        screen = CreateAccountScreen(isUpdate: true, accountId: args["accountId"]);
-        break;
-      case detailsAccount:
-        final args = settings.arguments as Map<String, dynamic>;
-        screen = DetailsAccountScreen(accountId: args["accountId"]);
-        break;
-      case accountPasswordWeak:
-        screen = const AccountPasswordWeak();
-        break;
-      case accountSamePassword:
-        screen = const SamePasswordsView();
-        break;
-      case registerMasterPin:
-        screen = const RegisterMasterPin();
-        break;
-      case loginMasterPin:
-        screen = const LoginMasterPassword();
-        break;
-      case aboutApp:
-        screen = const AboutAppScreen();
-        break;
-      default:
-        screen = const LoginMasterPassword();
-    }
+    Widget screen = SecureGate(
+      lockedBuilder: (context, secureApplicationController) {
+        return LoginMasterPassword(
+          secureApplicationController: secureApplicationController,
+        );
+      },
+      child: _buildScreen(settings.name ?? '', settings.arguments),
+    );
 
     if (Platform.isIOS) {
       return CupertinoPageRoute(builder: (context) => screen, settings: settings);

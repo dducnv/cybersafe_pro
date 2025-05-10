@@ -1,16 +1,13 @@
 import 'package:cybersafe_pro/components/bottom_sheets/choose_lang_bottom_sheet.dart';
-import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/constants/secure_storage_key.dart' show SecureStorageKey;
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/app_locale.dart';
 import 'package:cybersafe_pro/localization/keys/onboarding_text.dart';
-import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/resources/app_config.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
-import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
 import 'package:cybersafe_pro/widgets/setting_item_widget/setting_item_widget.dart';
 import 'package:flutter/material.dart';
@@ -79,7 +76,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [buildLogo(theme), const SizedBox(height: 20), buildWelcomeText(theme), const SizedBox(height: 40), buildAnimation()],
+        children: [buildLogo(theme), const SizedBox(height: 16), buildWelcomeText(theme), const SizedBox(height: 40), buildAnimation()],
       ),
     );
   }
@@ -141,7 +138,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
         privacyBottomSheet(context);
       },
       text: "",
-      child: const Icon(Icons.arrow_forward, color: Colors.white),
+      child: const Icon(Icons.arrow_forward, color: Colors.white, size: 22),
     );
   }
 
@@ -156,13 +153,23 @@ class OnboardingScreenState extends State<OnboardingScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SettingItemWidget(icon: Icons.arrow_forward_ios_rounded, titleWidth: 400, title: context.appLocale.onboardingLocale.getText(OnboardingText.policy), onTap: () {
-                  AppConfig.showDialogRedirectLink(context, url: AppConfig.privacyPolicyUrl(context.localeRead.languageCode));
-                }),
+                SettingItemWidget(
+                  icon: Icons.arrow_forward_ios_rounded,
+                  titleWidth: 400,
+                  title: context.appLocale.onboardingLocale.getText(OnboardingText.policy),
+                  onTap: () {
+                    AppConfig.showDialogRedirectLink(context, url: AppConfig.privacyPolicyUrl(context.localeRead.languageCode));
+                  },
+                ),
                 const SizedBox(height: 10),
-                SettingItemWidget(icon: Icons.arrow_forward_ios_rounded, titleWidth: 400, title: context.appLocale.onboardingLocale.getText(OnboardingText.terms), onTap: () {
-                  AppConfig.showDialogRedirectLink(context, url: AppConfig.termsOfServiceUrl(context.localeRead.languageCode));
-                }),
+                SettingItemWidget(
+                  icon: Icons.arrow_forward_ios_rounded,
+                  titleWidth: 400,
+                  title: context.appLocale.onboardingLocale.getText(OnboardingText.terms),
+                  onTap: () {
+                    AppConfig.showDialogRedirectLink(context, url: AppConfig.termsOfServiceUrl(context.localeRead.languageCode));
+                  },
+                ),
                 const SizedBox(height: 5),
                 ValueListenableBuilder(
                   valueListenable: isDegreed,
@@ -216,6 +223,4 @@ class OnboardingScreenState extends State<OnboardingScreen> {
       },
     );
   }
-
- 
 }

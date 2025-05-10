@@ -39,23 +39,9 @@ class _DetailsAccountScreenState extends State<DetailsAccountScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final deviceType = DeviceInfo.getDeviceType(context);
-    if(isLoading){
-      return Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+    if (isLoading) {
+      return Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    switch (deviceType) {
-      case DeviceType.desktop:
-        return const DetailsAccountDesktopLayout();
-      case DeviceType.tablet:
-        return DetailsAccountMobileLayout(accountOjbModel: accountOjbModel);
-      case DeviceType.mobile:
-        return DetailsAccountMobileLayout(
-          accountOjbModel: accountOjbModel,
-        );
-    }
+    return DetailsAccountMobileLayout(accountOjbModel: accountOjbModel);
   }
 }

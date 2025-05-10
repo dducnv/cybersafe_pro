@@ -466,4 +466,6 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
       },
     );
   }
+
+
 }

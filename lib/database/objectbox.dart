@@ -40,7 +40,7 @@ class ObjectBox {
   static Future<void> create() async {
     final docsDir = await getApplicationDocumentsDirectory();
     final dbPath = path.join(docsDir.path, "cyber_safe");
-    final store = await openStore(directory: dbPath, macosApplicationGroup: "group.com.duc_app_lab_ind.cyber_safe");
+    final store = await openStore(directory: dbPath);
     instance = ObjectBox._create(store);
     logInfo("Đường dẫn db: $dbPath");
   }

@@ -66,21 +66,13 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
     final accountProvider = context.read<AccountProvider>();
     final account = await AccountBox.getById(widget.accountId!);
-    
+
     if (account == null || !mounted) return null;
     return accountProvider.decryptAccount(account);
   }
 
   @override
   Widget build(BuildContext context) {
-    final deviceType = DeviceInfo.getDeviceType(context);
-    switch (deviceType) {
-      case DeviceType.desktop:
-        return const CreateAccountDesktopLayout();
-      case DeviceType.tablet:
-        return const CreateAccountMobileLayout();
-      case DeviceType.mobile:
-        return const CreateAccountMobileLayout();
-    }
+    return CreateAccountMobileLayout();
   }
 }

@@ -1,3 +1,4 @@
+
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
@@ -37,11 +38,11 @@ class LocalAuthProvider extends ChangeNotifier {
   static const int _baseLockDurationMinutes = 1;
   static const int _maxLockDurationMinutes = 30;
 
-  Future<void> init(bool canUseBiometric) async {
+  Future<void> init(bool canUseBiometric, Function() biometricLoginCallBack) async {
     await _checkLockStatus();
     await checkAndUpdateLockStatus();
     if (_shouldUseBiometric(canUseBiometric)) {
-      await _handleBiometricAuth();
+      await _handleBiometricAuth(biometricLoginCallBack);
     } else {
       await _focusPinInput();
     }
@@ -51,12 +52,13 @@ class LocalAuthProvider extends ChangeNotifier {
     return LocalAuthConfig.instance.isAvailableBiometrics && LocalAuthConfig.instance.isOpenUseBiometric && canUseBiometric;
   }
 
-  Future<void> _handleBiometricAuth() async {
-    await Future.delayed(const Duration(milliseconds: 500));
+  Future<void> _handleBiometricAuth(Function() biometricLoginCallBack) async {
+    await Future.delayed(const Duration(milliseconds: 300));
     bool isAuth = await checkLocalAuth();
 
     if (isAuth) {
       navigatorToHome();
+      biometricLoginCallBack.call();
     } else {
       await _focusPinInput();
     }
@@ -347,7 +349,7 @@ class LocalAuthProvider extends ChangeNotifier {
         if (focusNode.hasListeners) {
           focusNode.dispose();
         }
-        
+
         if (textEditingController.hasListeners) {
           textEditingController.dispose();
         }

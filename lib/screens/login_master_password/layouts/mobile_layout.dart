@@ -10,25 +10,22 @@ import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/services/local_auth_service.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
+import 'package:secure_application/secure_application_controller.dart';
 
 class MobileLayout extends StatefulWidget {
   final bool showBiometric;
   final bool isFromBackup;
   final bool isFromRestore;
+  final SecureApplicationController? secureApplicationController;
   final Function({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey})? callBackLoginSuccess;
 
-  const MobileLayout({
-    super.key, 
-    this.showBiometric = true, 
-    this.isFromBackup = false, 
-    this.isFromRestore = false, 
-    this.callBackLoginSuccess
-  });
+  const MobileLayout({super.key, this.showBiometric = true, this.isFromBackup = false, this.isFromRestore = false, this.callBackLoginSuccess, this.secureApplicationController});
 
   @override
   State<MobileLayout> createState() => _MobileLayoutState();
@@ -58,10 +55,7 @@ class _MobileLayoutState extends State<MobileLayout> {
   }
 
   void _setupLockStatusCheck() {
-    _lockStatusSubscription = Stream.periodic(
-      const Duration(seconds: 1),
-      (count) => count,
-    ).listen((_) {
+    _lockStatusSubscription = Stream.periodic(const Duration(seconds: 1), (count) => count).listen((_) {
       if (mounted) {
         _authProvider?.updateLockStatus();
       }
@@ -71,7 +65,7 @@ class _MobileLayoutState extends State<MobileLayout> {
   @override
   void dispose() {
     _lockStatusSubscription?.cancel();
-    
+
     // Xóa tham chiếu đến các controller trong authProvider
     if (_authProvider != null) {
       // Tách biệt TextEditingController từ authProvider trước khi dispose
@@ -80,31 +74,34 @@ class _MobileLayoutState extends State<MobileLayout> {
       _authProvider!.appPinCodeKey = GlobalKey<AppPinCodeFieldsState>();
       _authProvider!.formKey = GlobalKey<FormState>();
     }
-    
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.isFromBackup || widget.isFromRestore ? AppBar(
-        elevation: 0, 
-        backgroundColor: Theme.of(context).colorScheme.surface, 
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () async {
-            final result = await showConfirmExitDialog(context);
-            if (result == true && context.mounted) {
-              Navigator.of(context).pop();
-            }
-          },
-        ),
-      ) : null,
+      appBar:
+          widget.isFromBackup || widget.isFromRestore
+              ? AppBar(
+                elevation: 0,
+                backgroundColor: Theme.of(context).colorScheme.surface,
+                scrolledUnderElevation: 0,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () async {
+                    final result = await showConfirmExitDialog(context);
+                    if (result == true && context.mounted) {
+                      Navigator.of(context).pop();
+                    }
+                  },
+                ),
+              )
+              : null,
       body: Consumer<LocalAuthProvider>(
         builder: (context, provider, child) {
           final isCurrentlyLocked = provider.isLocked;
-    
+
           return Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 300),
@@ -128,12 +125,10 @@ class _MobileLayoutState extends State<MobileLayout> {
                       padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
                       child: Text(context.trLogin(LoginText.restoreNote), textAlign: TextAlign.center, style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
                     ),
-                  if (isCurrentlyLocked)
-                    _buildLockedStatus(provider),
-    
-                  if (!isCurrentlyLocked)
-                    _buildPinCodeFields(),
-    
+                  if (isCurrentlyLocked) _buildLockedStatus(provider),
+
+                  if (!isCurrentlyLocked) _buildPinCodeFields(),
+
                   if (!isCurrentlyLocked)
                     if (widget.showBiometric && LocalAuthConfig.instance.isAvailableBiometrics && LocalAuthConfig.instance.isOpenUseBiometric) ...[
                       Row(
@@ -151,7 +146,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                     ] else ...[
                       SizedBox(height: 20),
                     ],
-    
+
                   CustomButtonWidget(
                     borderRaidus: 100,
                     width: 75.h,
@@ -179,18 +174,9 @@ class _MobileLayoutState extends State<MobileLayout> {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10).copyWith(bottom: 24),
       child: Column(
         children: [
-          Text(
-            context.trLogin(LoginText.loginLockDescription), 
-            textAlign: TextAlign.center, 
-            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
-          ),
+          Text(context.trLogin(LoginText.loginLockDescription), textAlign: TextAlign.center, style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
           const SizedBox(height: 10),
-          Text(
-            context.trLogin(LoginText.pleaseTryAgainLater)
-              .replaceAll("{0}", provider.formattedRemainingTime),
-            textAlign: TextAlign.center,
-            style: TextStyle(fontWeight: FontWeight.w500),
-          ),
+          Text(context.trLogin(LoginText.pleaseTryAgainLater).replaceAll("{0}", provider.formattedRemainingTime), textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w500)),
           const SizedBox(height: 5),
           _buildCountdownDisplay(provider),
         ],
@@ -202,24 +188,14 @@ class _MobileLayoutState extends State<MobileLayout> {
     return Container(
       margin: const EdgeInsets.only(top: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(20)
-      ),
-      child: Text(
-        provider.formattedRemainingTime,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-          color: Theme.of(context).colorScheme.error
-        ),
-      ),
+      decoration: BoxDecoration(color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(20)),
+      child: Text(provider.formattedRemainingTime, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Theme.of(context).colorScheme.error)),
     );
   }
 
   Widget _buildPinCodeFields() {
     if (!mounted) return const SizedBox.shrink();
-    
+
     return AppPinCodeFields(
       autoFocus: _pinCodeFocusNode.hasFocus,
       key: _pinCodeKey,
@@ -247,14 +223,14 @@ class _MobileLayoutState extends State<MobileLayout> {
 
   Future<void> handleLogin() async {
     if (!mounted) return;
-
+    SecureApplicationUtil.instance.secure();
+    if (widget.secureApplicationController != null) {
+      widget.secureApplicationController?.unlock();
+      return;
+    }
     if (widget.isFromBackup || widget.isFromRestore) {
       if (widget.callBackLoginSuccess != null) {
-        widget.callBackLoginSuccess!(
-          isLoginSuccess: true,
-          pin: _authProvider?.textEditingController.text ?? '',
-          appPinCodeKey: _authProvider?.appPinCodeKey
-        );
+        widget.callBackLoginSuccess!(isLoginSuccess: true, pin: _authProvider?.textEditingController.text ?? '', appPinCodeKey: _authProvider?.appPinCodeKey);
       }
       return;
     }
@@ -263,11 +239,7 @@ class _MobileLayoutState extends State<MobileLayout> {
 
     if (isLoginSuccess && mounted) {
       if (widget.callBackLoginSuccess != null) {
-        widget.callBackLoginSuccess!(
-          isLoginSuccess: true,
-          pin: _authProvider?.textEditingController.text ?? '',
-          appPinCodeKey: _authProvider?.appPinCodeKey
-        );
+        widget.callBackLoginSuccess!(isLoginSuccess: true, pin: _authProvider?.textEditingController.text ?? '', appPinCodeKey: _authProvider?.appPinCodeKey);
         return;
       }
 

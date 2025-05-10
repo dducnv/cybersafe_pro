@@ -29,8 +29,8 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-class MobileLayout extends StatelessWidget {
-  const MobileLayout({super.key});
+class SettingMobileLayout extends StatelessWidget {
+  const SettingMobileLayout({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -88,23 +88,23 @@ class MobileLayout extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 5),
-              Consumer<AppProvider>(
-                builder: (context, provider, child) {
-                  return SettingItemWidget(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    title: context.appLocale.settingsLocale.getText(SettingsLocale.lockOnBackground),
-                    suffix: AppCustomSwitch(
-                      value: provider.lockOnBackground,
-                      onChanged: (value) {
-                        provider.setLockOnBackground(value);
-                      },
-                    ),
-                    onTap: () {
-                      provider.setLockOnBackground(!provider.lockOnBackground);
-                    },
-                  );
-                },
-              ),
+              // Consumer<AppProvider>(
+              //   builder: (context, provider, child) {
+              //     return SettingItemWidget(
+              //       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              //       title: context.appLocale.settingsLocale.getText(SettingsLocale.lockOnBackground),
+              //       suffix: AppCustomSwitch(
+              //         value: provider.lockOnBackground,
+              //         onChanged: (value) {
+              //           provider.setLockOnBackground(value);
+              //         },
+              //       ),
+              //       onTap: () {
+              //         provider.setLockOnBackground(!provider.lockOnBackground);
+              //       },
+              //     );
+              //   },
+              // ),
               const SizedBox(height: 16),
               Padding(padding: const EdgeInsets.only(left: 16), child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.backup), style: settingTitleCardStyle)),
               const SizedBox(height: 5),
@@ -115,30 +115,30 @@ class MobileLayout extends StatelessWidget {
                   title: context.appLocale.settingsLocale.getText(SettingsLocale.transferData),
                   icon: Icons.import_export_rounded,
                   onTap: () async {
-                  showAppCustomDialog(
-                    context,
-                    AppCustomDialog(
-                      title: context.trSafe(SettingsLocale.transferData),
-                      message: context.trSafe(SettingsLocale.transferDataMessage),
-                      confirmText: context.trSafe(SettingsLocale.confirm),
-                      canConfirmInitially: true,
-                      cancelText: context.trSafe(SettingsLocale.cancel),
-                      onConfirm: () async {
-                        try {
-                          bool checkUri = await canLaunchUrlString("cybersafepro://transfer");
-                          if (checkUri) {
-                            DataManagerService.transferData(context);
-                          } else {
-                            openUrl(AppConfig.proPlayStoreUrl, context: context);
+                    showAppCustomDialog(
+                      context,
+                      AppCustomDialog(
+                        title: context.trSafe(SettingsLocale.transferData),
+                        message: context.trSafe(SettingsLocale.transferDataMessage),
+                        confirmText: context.trSafe(SettingsLocale.confirm),
+                        canConfirmInitially: true,
+                        cancelText: context.trSafe(SettingsLocale.cancel),
+                        onConfirm: () async {
+                          try {
+                            bool checkUri = await canLaunchUrlString("cybersafepro://transfer");
+                            if (checkUri) {
+                              DataManagerService.transferData(context);
+                            } else {
+                              openUrl(AppConfig.proPlayStoreUrl, context: context);
+                            }
+                          } catch (e) {
+                            logError(e.toString());
                           }
-                        } catch (e) {
-                          logError(e.toString());
-                        }
-                      },
-                    ),
-                  );
-                },
-              ),
+                        },
+                      ),
+                    );
+                  },
+                ),
               const SizedBox(height: 5),
               SettingItemWidget(
                 title: context.appLocale.settingsLocale.getText(SettingsLocale.importDataFromBrowser),
@@ -165,7 +165,10 @@ class MobileLayout extends StatelessWidget {
                           callBackLoginSuccess: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
                             if (isLoginSuccess == true && pin != null) {
                               Navigator.of(context).pop();
-                              await DataManagerService.backupData(GlobalKeys.appRootNavigatorKey.currentContext!, pin);
+                              bool status = await DataManagerService.backupData(GlobalKeys.appRootNavigatorKey.currentContext!, pin);
+                              if (status && context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Backup data successful'), backgroundColor: Colors.green, duration: const Duration(seconds: 3)));
+                              }
                             }
                           },
                         );

@@ -5,9 +5,11 @@ import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
 import 'package:cybersafe_pro/resources/brand_logo.dart';
 import 'package:cybersafe_pro/screens/password_generator/password_generate_screen.dart';
 import 'package:cybersafe_pro/services/otp.dart';
+import 'package:cybersafe_pro/utils/device_type.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
+import 'package:cybersafe_pro/widgets/modal_side_sheet/modal_side_sheet.dart';
 import 'package:cybersafe_pro/widgets/otp_qrcode_scan/otp_qrcode_scan.dart';
 import 'package:cybersafe_pro/widgets/otp_text_with_countdown/otp_text_with_countdown.dart';
 import 'package:flutter/material.dart';
@@ -262,10 +264,7 @@ class AccountFormFields extends StatelessWidget {
 
   Widget _buildAddFieldButton(BuildContext context) {
     return OutlinedButton.icon(
-      
-      style: OutlinedButton.styleFrom(
-        side: BorderSide(color: Theme.of(context).colorScheme.primary),
-      ),
+      style: OutlinedButton.styleFrom(side: BorderSide(color: Theme.of(context).colorScheme.primary)),
       onPressed: onAddField,
       icon: const Icon(Icons.add),
       label: Text(context.trCreateAccount(CreateAccountText.addField)),
@@ -273,6 +272,22 @@ class AccountFormFields extends StatelessWidget {
   }
 
   Future _toGenPass(BuildContext context) {
+    final deviceType = DeviceInfo.getDeviceType(context);
+    if (deviceType == DeviceType.desktop) {
+      return showModalSideSheet(
+        context: context,
+        ignoreAppBar: true,
+        barrierDismissible: true,
+        withCloseControll: false,
+        body: PasswordGenerateScreen(
+          isFromForm: true,
+          onPasswordChanged: (password) {
+            formProvider.passwordController.text = password;
+            formProvider.passNotifier.value = PasswordStrength.calculate(text: password);
+          },
+        ),
+      );
+    }
     return Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) {

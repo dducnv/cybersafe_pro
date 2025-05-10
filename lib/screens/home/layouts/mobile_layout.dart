@@ -85,6 +85,7 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      resizeToAvoidBottomInset: false,
       bottomNavigationBar: BottomAppBar(
         height: 60.h,
         padding: EdgeInsets.zero,

@@ -3,5 +3,8 @@
         "cybersafe",
         "totp"
     ],
-    "dart.flutterSdkPath": "~/development/flutter"
+    "dart.flutterSdkPath": "~/development/flutter",
+    "[dart]": {
+        "editor.defaultFormatter": "Dart-Code.dart-code",
+    }
 }

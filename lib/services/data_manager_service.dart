@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:csv/csv.dart';
 import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
@@ -175,47 +176,61 @@ class DataManagerService {
   }
 
   //backup data
-  static Future<void> backupData(BuildContext context, String pin) async {
+  static Future<bool> backupData(BuildContext context, String pin) async {
     try {
+      final safeContext = GlobalKeys.appRootNavigatorKey.currentContext ?? context;
+      // Check permissions first
       if (!await PermissionService.instance.requestStoragePermission()) {
-        return;
+        throw Exception('Storage permission denied');
       }
-      logInfo('requestStoragePermission: ${await PermissionService.instance.requestStoragePermission()}');
 
       showLoadingDialog();
-      String dateTime = "${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}_${DateTime.now().hour}-${DateTime.now().minute}-${DateTime.now().second}";
-      final backupName = 'backup_cybersafe_$dateTime';
-      final backupService = EncryptAppDataService.instance;
 
-      final backup = await backupService.createBackup(pin, backupName);
+      // Generate backup file name with timestamp
+      final dateTime = DateTime.now().toString().replaceAll(RegExp(r'[:\s]'), '-');
+      final backupName = 'cybersafe_backup_$dateTime';
       final fileName = "$backupName.enc";
 
-      // Tạo thư mục cyber_safe
-      Directory downloadDirectory = await getDownloadDirectory();
-      final backupDir = Directory(path.join(downloadDirectory.path, 'cyber_safe'));
+      // Create backup data
+      final backupService = EncryptAppDataService.instance;
+      final backup = await backupService.createBackup(pin, backupName);
+
+      // Encrypt backup data
+      final backupJson = jsonEncode(backup);
+      final encryptedData = EncryptService.instance.encryptFernetBytes(data: utf8.encode(backupJson), key: Env.backupFileEncryptKey);
+
+      // Get backup directory
+      final downloadDir = await getDownloadDirectory();
+      final backupDir = Directory(path.join(downloadDir.path, 'cyber_safe/backups'));
+
+      // Create directories if they don't exist
       if (!backupDir.existsSync()) {
-        logInfo('Tạo thư mục cyber_safe');
-        await backupDir.create();
+        await backupDir.create(recursive: true);
       }
 
-      // Lưu file
-      final backupFile = File('${backupDir.path}/$fileName');
-      final backupJson = jsonEncode(backup);
-      final codeEncrypted = EncryptService.instance.encryptFernetBytes(data: utf8.encode(backupJson), key: Env.backupFileEncryptKey);
-      await backupFile.writeAsBytes(codeEncrypted);
-      logInfo('Backup successfully to ${backupFile.path}');
-      if (context.mounted) {
-        logInfo("context.mounted");
-        hideLoadingDialog();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Backup successfully to ${backupFile.path}'), backgroundColor: Colors.green, duration: const Duration(seconds: 2)));
-        Navigator.of(context).pop();
+      // Save file using FilePicker
+      final filePath = await FilePicker.platform.saveFile(dialogTitle: 'Save Backup File', fileName: fileName, initialDirectory: backupDir.path, bytes: Uint8List.fromList(encryptedData));
+
+      if (filePath == null) {
+        throw Exception('Backup cancelled by user');
       }
+
+      if (!safeContext.mounted) return false;
+
+      hideLoadingDialog();
+      await Future.delayed(const Duration(milliseconds: 100));
+      if (safeContext.mounted) {
+        Navigator.of(safeContext).pop();
+      }
+      return true;
     } catch (e) {
       hideLoadingDialog();
-      logError('Error backup data: ${e.toString()}');
+      logError('Backup failed: $e');
+
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}'), backgroundColor: Colors.red, duration: const Duration(seconds: 3)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Backup failed: ${e.toString()}'), backgroundColor: Colors.red, duration: const Duration(seconds: 3)));
       }
+      return false;
     }
   }
 
@@ -480,7 +495,9 @@ class DataManagerService {
       logInfo('Creating transfer file at: ${transferFile.path}');
       final backupJson = jsonEncode(backup);
       final codeEncrypted = EncryptService.instance.encryptFernetBytes(data: utf8.encode(backupJson), key: Env.backupFileEncryptKey);
-      await transferFile.writeAsBytes(codeEncrypted);
+
+      // Save file using FilePicker
+       await FilePicker.platform.saveFile(dialogTitle: 'Save Backup File', fileName: transferFileName, initialDirectory: backupDir.path, bytes: Uint8List.fromList(codeEncrypted));
 
       launchProApp(context);
       logInfo('Transfer successfully to ${transferFile.path}');
@@ -563,8 +580,8 @@ class DataManagerService {
             if (file.path.endsWith('.enc')) {
               try {
                 await file.delete(recursive: true);
-          } catch (e) {
-            logError('Error delete file: ${e.toString()}');
+              } catch (e) {
+                logError('Error delete file: ${e.toString()}');
               }
             }
           }

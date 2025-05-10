@@ -31,11 +31,9 @@ class SecureApplicationUtil {
       // Nếu controller đã bị dispose, tạo mới nó
       if (secureApplicationController == null || _isDisposed) {
         _isDisposed = false;
-        secureApplicationController = SecureApplicationController(
-          SecureApplicationState(),
-        );
+        secureApplicationController = SecureApplicationController(SecureApplicationState());
+        secureApplicationController?.open();
         _setupListeners();
-        secureApplicationController?.secure();
         _isInitialized = true;
         if (!_initCompleter.isCompleted) {
           _initCompleter.complete();
@@ -119,14 +117,13 @@ class SecureApplicationUtil {
 
   bool get isLocked {
     try {
-      return !_isDisposed && secureApplicationController != null && 
-             secureApplicationController!.value.locked;
+      return !_isDisposed && secureApplicationController != null && secureApplicationController!.value.locked;
     } catch (e) {
       logError('Error in isLocked getter: $e');
       return false;
     }
   }
-  
+
   bool get isSecured {
     try {
       if (_isDisposed || secureApplicationController == null) {

@@ -12,6 +12,7 @@ import 'package:cybersafe_pro/screens/login_master_password/login_master_passwor
 import 'package:cybersafe_pro/screens/onboarding/onboarding_screen.dart';
 import 'package:cybersafe_pro/screens/register_master_pin/register_master_pin.dart';
 import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
+import 'package:cybersafe_pro/utils/device_type.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
@@ -33,7 +34,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-
   @override
   void initState() {
     super.initState();
@@ -58,8 +58,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       EncryptAppDataService.instance.clearCache();
     } else if (state == AppLifecycleState.resumed) {
       logInfo("Ứng dụng đang chạy lại");
-      SecureApplicationUtil.instance.init();
       EncryptAppDataService.instance.initialize();
+
+      // Kiểm tra xem có sự thay đổi về loại thiết bị không
+      final deviceType = DeviceInfo.getDeviceType(context);
+      if (deviceType == DeviceType.desktop) {
+        // Nếu là desktop, lưu màn hình hiện tại (nếu không phải home)
+        final currentRoute = ModalRoute.of(context)?.settings.name;
+        if (currentRoute != null && currentRoute != AppRoutes.home) {
+          DeviceInfo.currentScreen.value = currentRoute;
+          // Chuyển về màn hình home
+          Navigator.of(context).pushReplacementNamed(AppRoutes.home);
+        }
+      }
     } else if (state == AppLifecycleState.detached) {
       // Làm sạch tài nguyên khi app bị detach
       EncryptAppDataService.instance.clearCache();
@@ -73,8 +84,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       // Đảm bảo đợi một khoảng thời gian ngắn để cho phép việc khởi tạo hoàn tất
       await Future.delayed(const Duration(milliseconds: 100));
-      if (!mounted) return;
-
       final categoryProvider = Provider.of<CategoryProvider>(context, listen: false);
       final accountProvider = Provider.of<AccountProvider>(context, listen: false);
       // await accountProvider.generateFakeData();
@@ -171,12 +180,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         // Nếu chưa khởi tạo, trả về child trực tiếp
         return _buildListenerWidget(child);
       }
-
       // Sử dụng ValueListenableBuilder để lắng nghe thay đổi trạng thái mà không cần truy cập trực tiếp vào widget
       return ValueListenableBuilder<bool>(
         valueListenable: SecureApplicationUtil.instance.lockStateChanged,
         builder: (context, _, __) {
-          return SecureApplication(nativeRemoveDelay: 800, secureApplicationController: SecureApplicationUtil.instance.secureApplicationController, child: _buildListenerWidget(child));
+          return SecureApplication(
+            secureApplicationController: SecureApplicationUtil.instance.secureApplicationController, child: _buildListenerWidget(child));
         },
       );
     } catch (e) {
