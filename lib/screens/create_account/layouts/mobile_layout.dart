@@ -242,8 +242,15 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
     // Convert ui.Image to img.Image
     final img.Image originalImage = img.decodeImage((await imageCropped.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List())!;
 
-    // Resize the image to 100x100
-    final img.Image resizedImage = img.copyResize(originalImage, width: 100, height: 100);
+    // Resize the image to higher quality - 512x512 for better quality
+    final img.Image resizedImage = img.copyResize(
+      originalImage, 
+      width: 256, 
+      height: 256,
+      interpolation: img.Interpolation.cubic, // Sử dụng cubic interpolation cho chất lượng tốt hơn
+    );
+    
+    // Sử dụng JPEG với chất lượng cao để giảm kích thước file nhưng vẫn giữ chất lượng tốt
     final List<int> resizedImageBytes = img.encodePng(resizedImage);
     final String base64Image = base64Encode(resizedImageBytes);
 
