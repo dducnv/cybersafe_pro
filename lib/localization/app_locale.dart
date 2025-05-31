@@ -51,13 +51,13 @@ class AppLocaleModel extends BaseLocale {
 
 final List<AppLocaleModel> appLocales = [
   AppLocaleModel(languageCode: 'vi', countryCode: 'VN', languageName: 'Vietnamese', languageNativeName: 'Tiếng Việt', flagEmoji: '🇻🇳'),
+  AppLocaleModel(languageCode: 'ru', countryCode: 'RU', languageName: 'Russian', languageNativeName: 'Русский', flagEmoji: '🇷🇺'),
   AppLocaleModel(languageCode: 'en', countryCode: 'US', languageName: 'English (US)', languageNativeName: 'English (US)', flagEmoji: '🇺🇸'),
   AppLocaleModel(languageCode: 'en', countryCode: 'GB', languageName: 'English (UK)', languageNativeName: 'English (UK)', flagEmoji: '🇬🇧'),
   AppLocaleModel(languageCode: 'pt', countryCode: 'PT', languageName: 'Portuguese (Portugal)', languageNativeName: 'Português (Portugal)', flagEmoji: '🇵🇹'),
   AppLocaleModel(languageCode: 'pt', countryCode: 'BR', languageName: 'Portuguese (Brazil)', languageNativeName: 'Português (Brasil)', flagEmoji: '🇧🇷'),
   AppLocaleModel(languageCode: 'hi', countryCode: 'IN', languageName: 'Hindi', languageNativeName: 'हिन्दी', flagEmoji: '🇮🇳'),
   AppLocaleModel(languageCode: 'ja', countryCode: 'JP', languageName: 'Japanese', languageNativeName: '日本語', flagEmoji: '🇯🇵'),
-  AppLocaleModel(languageCode: 'ru', countryCode: 'RU', languageName: 'Russian', languageNativeName: 'Русский', flagEmoji: '🇷🇺'),
   AppLocaleModel(languageCode: 'id', countryCode: 'ID', languageName: 'Indonesian', languageNativeName: 'Bahasa Indonesia', flagEmoji: '🇮🇩'),
 ];
 
