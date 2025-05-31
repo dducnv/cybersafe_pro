@@ -12,16 +12,21 @@ import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-Future<void> showSearchBottomSheet(BuildContext context) async {
+Future<void> showSearchBottomSheet(BuildContext context,{
+  Function(AccountOjbModel)? onTapAccount,
+}) async {
   return showModalBottomSheet(
     isScrollControlled: true, 
     context: context, 
-    builder: (context) => SearchBottomSheet()
+    builder: (context) => SearchBottomSheet(
+      onTapAccount: onTapAccount,
+    )
   );
 }
 
 class SearchBottomSheet extends StatefulWidget {
-  const SearchBottomSheet({super.key});
+  final Function(AccountOjbModel)? onTapAccount;
+  const SearchBottomSheet({super.key, this.onTapAccount});
 
   @override
   State<SearchBottomSheet> createState() => _SearchBottomSheetState();
@@ -172,7 +177,11 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
                       ),
                     ) : null,
                     onTap: () {
-                      AppRoutes.navigateTo(context, AppRoutes.detailsAccount, arguments: {"accountId": account.id});
+                      if (widget.onTapAccount != null) {
+                        widget.onTapAccount!(account);
+                      } else {
+                        AppRoutes.navigateTo(context, AppRoutes.detailsAccount, arguments: {"accountId": account.id});
+                      }
                     },
                   );
                 },

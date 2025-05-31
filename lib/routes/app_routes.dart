@@ -16,11 +16,11 @@ import 'package:cybersafe_pro/screens/statistic/sub_sceens/account_password_weak
 import 'package:cybersafe_pro/screens/statistic/sub_sceens/same_passwords_view.dart';
 import 'package:cybersafe_pro/utils/device_type.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
+import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart' show AppPinCodeFields, AppPinCodeFieldsState;
 import 'package:cybersafe_pro/widgets/modal_side_sheet/modal_side_sheet.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:cybersafe_pro/utils/secure_application_util.dart';
-import 'package:secure_application/secure_gate.dart';
+import 'package:secure_application/secure_application.dart';
 
 class AppRoutes {
   // Route names
@@ -39,9 +39,6 @@ class AppRoutes {
   static const String accountPasswordWeak = '/account_password_weak';
   static const String accountSamePassword = '/account_same_password';
   static const String aboutApp = '/about_app';
-
-  // Danh sách các màn hình cần SecureAppSwitcher
-  static const List<String> securedRoutes = [home, detailsAccount, statistic, accountPasswordWeak, accountSamePassword];
 
   // Danh sách các màn hình sẽ hiển thị dưới dạng ModalSideSheet khi ở desktop
   static const List<String> modalSideSheetRoutes = [
@@ -150,11 +147,9 @@ class AppRoutes {
   // Route generator for handling dynamic routes and arguments
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     Widget screen = SecureGate(
-      lockedBuilder: (context, secureApplicationController) {
-        return LoginMasterPassword(
-          secureApplicationController: secureApplicationController,
-        );
-      },
+      blurr: 30,    // Giảm từ 60 xuống 30 để blur nhẹ hơn và nhanh hơn
+      opacity: 0.9, // Tăng từ 0.8 lên 0.9 để che phủ tốt hơn
+      lockedBuilder: (context, secureApplicationController) => _buildUnlockScreen(context, secureApplicationController),
       child: _buildScreen(settings.name ?? '', settings.arguments),
     );
 
@@ -163,5 +158,27 @@ class AppRoutes {
     }
 
     return MaterialPageRoute(builder: (context) => screen, settings: settings);
+  }
+
+  // Màn hình unlock tùy chỉnh
+  static Widget _buildUnlockScreen(BuildContext context, SecureApplicationController? controller) {
+    return LoginMasterPassword(
+      showBiometric: true,
+      isFromBackup: false,
+      isFromRestore: false,
+      secureApplicationController: controller,
+      callBackLoginSuccess: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) {
+        if (isLoginSuccess == true && controller != null) {
+          // Unlock ứng dụng khi đăng nhập thành công
+          controller.authSuccess(unlock: true);
+        }
+      },
+    );
+  }
+
+  // Xử lý yêu cầu mở khóa
+  static void _requestUnlock(SecureApplicationController? controller) {
+    // Logic này không còn cần thiết vì đã được xử lý trong LoginMasterPassword
+    controller?.authSuccess(unlock: true);
   }
 }

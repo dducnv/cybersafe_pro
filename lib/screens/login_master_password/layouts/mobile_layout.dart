@@ -33,31 +33,21 @@ class MobileLayout extends StatefulWidget {
 
 class _MobileLayoutState extends State<MobileLayout> {
   StreamSubscription? _lockStatusSubscription;
-  LocalAuthProvider? _authProvider;
-  late TextEditingController _pinCodeController;
-  late FocusNode _pinCodeFocusNode;
-  late GlobalKey<AppPinCodeFieldsState> _pinCodeKey;
-  late GlobalKey<FormState> _formKey;
+  final FocusNode _pinCodeFocusNode = FocusNode();
+  final GlobalKey<AppPinCodeFieldsState> _pinCodeKey = GlobalKey<AppPinCodeFieldsState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
     _setupLockStatusCheck();
-    _pinCodeController = TextEditingController();
-    _pinCodeFocusNode = FocusNode();
-    _pinCodeKey = GlobalKey<AppPinCodeFieldsState>();
-    _formKey = GlobalKey<FormState>();
-    _authProvider = context.read<LocalAuthProvider>();
-    _authProvider?.textEditingController = _pinCodeController;
-    _authProvider?.focusNode = _pinCodeFocusNode;
-    _authProvider?.appPinCodeKey = _pinCodeKey;
-    _authProvider?.formKey = _formKey;
   }
 
   void _setupLockStatusCheck() {
     _lockStatusSubscription = Stream.periodic(const Duration(seconds: 1), (count) => count).listen((_) {
       if (mounted) {
-        _authProvider?.updateLockStatus();
+        final provider = context.read<LocalAuthProvider>();
+        provider.updateLockStatus();
       }
     });
   }
@@ -65,16 +55,6 @@ class _MobileLayoutState extends State<MobileLayout> {
   @override
   void dispose() {
     _lockStatusSubscription?.cancel();
-
-    // Xóa tham chiếu đến các controller trong authProvider
-    if (_authProvider != null) {
-      // Tách biệt TextEditingController từ authProvider trước khi dispose
-      _authProvider!.textEditingController = TextEditingController();
-      _authProvider!.focusNode = FocusNode();
-      _authProvider!.appPinCodeKey = GlobalKey<AppPinCodeFieldsState>();
-      _authProvider!.formKey = GlobalKey<FormState>();
-    }
-
     super.dispose();
   }
 
@@ -127,7 +107,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                     ),
                   if (isCurrentlyLocked) _buildLockedStatus(provider),
 
-                  if (!isCurrentlyLocked) _buildPinCodeFields(),
+                  if (!isCurrentlyLocked) _buildPinCodeFields(provider),
 
                   if (!isCurrentlyLocked)
                     if (widget.showBiometric && LocalAuthConfig.instance.isAvailableBiometrics && LocalAuthConfig.instance.isOpenUseBiometric) ...[
@@ -136,7 +116,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                         children: [
                           IconButton(
                             onPressed: () {
-                              _authProvider?.onBiometric();
+                              provider.onBiometric();
                             },
                             icon:
                                 Platform.isIOS ? SvgPicture.asset('assets/icons/face_id.svg', width: 20.w, height: 20.h, color: Theme.of(context).colorScheme.primary) : const Icon(Icons.fingerprint),
@@ -149,16 +129,16 @@ class _MobileLayoutState extends State<MobileLayout> {
 
                   CustomButtonWidget(
                     borderRaidus: 100,
-                    width: 75.h,
-                    height: 75.h,
+                    width: 75,
+                    height: 75,
                     onPressed:
                         isCurrentlyLocked
                             ? null
                             : () async {
-                              await handleLogin();
+                              await handleLogin(provider);
                             },
                     text: "",
-                    child: Icon(Icons.arrow_forward, size: 24.sp, color: isCurrentlyLocked ? Colors.grey : Colors.white),
+                    child: Icon(Icons.arrow_forward, size: 24, color: isCurrentlyLocked ? Colors.grey : Colors.white),
                   ),
                 ],
               ),
@@ -193,22 +173,22 @@ class _MobileLayoutState extends State<MobileLayout> {
     );
   }
 
-  Widget _buildPinCodeFields() {
+  Widget _buildPinCodeFields(LocalAuthProvider provider) {
     if (!mounted) return const SizedBox.shrink();
 
     return AppPinCodeFields(
       autoFocus: _pinCodeFocusNode.hasFocus,
       key: _pinCodeKey,
       formKey: _formKey,
-      textEditingController: _pinCodeController,
-      focusNode: _pinCodeFocusNode,
+      textEditingController: provider.textEditingController,
+      focusNode: provider.focusNode,
       onSubmitted: (value) async {
         if (!mounted) return;
-        await handleLogin();
+        await handleLogin(provider);
       },
       onEnter: () async {
         if (!mounted) return;
-        await handleLogin();
+        await handleLogin(provider);
       },
       validator: (value) {
         if (value!.length < 6) {
@@ -221,25 +201,43 @@ class _MobileLayoutState extends State<MobileLayout> {
     );
   }
 
-  Future<void> handleLogin() async {
+  Future<void> handleLogin(LocalAuthProvider provider) async {
     if (!mounted) return;
-    SecureApplicationUtil.instance.secure();
+
+    // Nếu có secureApplicationController (khi ở chế độ unlock), xử lý riêng
     if (widget.secureApplicationController != null) {
-      widget.secureApplicationController?.unlock();
-      return;
-    }
-    if (widget.isFromBackup || widget.isFromRestore) {
-      if (widget.callBackLoginSuccess != null) {
-        widget.callBackLoginSuccess!(isLoginSuccess: true, pin: _authProvider?.textEditingController.text ?? '', appPinCodeKey: _authProvider?.appPinCodeKey);
+      // Kiểm tra mật khẩu trước khi unlock
+      bool isLoginSuccess = await provider.handleLogin();
+
+      if (isLoginSuccess) {
+        // Gọi callback để thông báo login thành công
+        if (widget.callBackLoginSuccess != null) {
+          widget.callBackLoginSuccess!(isLoginSuccess: true, pin: provider.textEditingController.text ?? '', appPinCodeKey: provider.appPinCodeKey);
+        }
+        // Unlock ứng dụng
+        widget.secureApplicationController?.authSuccess(unlock: true);
+      } else {
+        // Nếu login thất bại, không unlock
+        widget.secureApplicationController?.authFailed(unlock: false);
       }
       return;
     }
 
-    bool isLoginSuccess = await _authProvider?.handleLogin() ?? false;
+    // Logic cũ cho trường hợp bình thường
+    SecureApplicationUtil.instance.secure();
+
+    if (widget.isFromBackup || widget.isFromRestore) {
+      if (widget.callBackLoginSuccess != null) {
+        widget.callBackLoginSuccess!(isLoginSuccess: true, pin: provider.textEditingController.text ?? '', appPinCodeKey: provider.appPinCodeKey);
+      }
+      return;
+    }
+
+    bool isLoginSuccess = await provider.handleLogin();
 
     if (isLoginSuccess && mounted) {
       if (widget.callBackLoginSuccess != null) {
-        widget.callBackLoginSuccess!(isLoginSuccess: true, pin: _authProvider?.textEditingController.text ?? '', appPinCodeKey: _authProvider?.appPinCodeKey);
+        widget.callBackLoginSuccess!(isLoginSuccess: true, pin: provider.textEditingController.text ?? '', appPinCodeKey: provider.appPinCodeKey);
         return;
       }
 

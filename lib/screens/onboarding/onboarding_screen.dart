@@ -146,77 +146,79 @@ class OnboardingScreenState extends State<OnboardingScreen> {
     return showModalBottomSheet(
       context: context,
       builder: (context) {
-        return SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SettingItemWidget(
-                  icon: Icons.arrow_forward_ios_rounded,
-                  titleWidth: 400,
-                  title: context.appLocale.onboardingLocale.getText(OnboardingText.policy),
-                  onTap: () {
-                    AppConfig.showDialogRedirectLink(context, url: AppConfig.privacyPolicyUrl(context.localeRead.languageCode));
-                  },
-                ),
-                const SizedBox(height: 10),
-                SettingItemWidget(
-                  icon: Icons.arrow_forward_ios_rounded,
-                  titleWidth: 400,
-                  title: context.appLocale.onboardingLocale.getText(OnboardingText.terms),
-                  onTap: () {
-                    AppConfig.showDialogRedirectLink(context, url: AppConfig.termsOfServiceUrl(context.localeRead.languageCode));
-                  },
-                ),
-                const SizedBox(height: 5),
-                ValueListenableBuilder(
-                  valueListenable: isDegreed,
-                  builder: ((context, value, child) {
-                    return Column(
-                      children: [
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: value,
-                              onChanged: (value) {
-                                isDegreed.value = value!;
-                              },
-                            ),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () {
-                                  isDegreed.value = !isDegreed.value;
+        return SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SettingItemWidget(
+                    icon: Icons.arrow_forward_ios_rounded,
+                    titleWidth: 400,
+                    title: context.appLocale.onboardingLocale.getText(OnboardingText.policy),
+                    onTap: () {
+                      AppConfig.showDialogRedirectLink(context, url: AppConfig.privacyPolicyUrl(context.localeRead.languageCode));
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  SettingItemWidget(
+                    icon: Icons.arrow_forward_ios_rounded,
+                    titleWidth: 400,
+                    title: context.appLocale.onboardingLocale.getText(OnboardingText.terms),
+                    onTap: () {
+                      AppConfig.showDialogRedirectLink(context, url: AppConfig.termsOfServiceUrl(context.localeRead.languageCode));
+                    },
+                  ),
+                  const SizedBox(height: 5),
+                  ValueListenableBuilder(
+                    valueListenable: isDegreed,
+                    builder: ((context, value, child) {
+                      return Column(
+                        children: [
+                          Row(
+                            children: [
+                              Checkbox(
+                                value: value,
+                                onChanged: (value) {
+                                  isDegreed.value = value!;
                                 },
-                                child: Text(
-                                  context.appLocale.onboardingLocale.getText(OnboardingText.termsAndConditions),
-                                  maxLines: 2,
-                                  style: TextStyle(fontSize: 14.sp),
-                                  overflow: TextOverflow.ellipsis,
+                              ),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    isDegreed.value = !isDegreed.value;
+                                  },
+                                  child: Text(
+                                    context.appLocale.onboardingLocale.getText(OnboardingText.termsAndConditions),
+                                    maxLines: 2,
+                                    style: TextStyle(fontSize: 14.sp),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        CustomButtonWidget(
-                          isDisabled: !value,
-                          kMargin: 0,
-                          onPressed: () async {
-                            await context.read<CategoryProvider>().initDataCategory(context);
-                            await SecureStorage.instance.save(key: SecureStorageKey.firstOpenApp, value: "false");
-                            if (context.mounted) {
-                              Navigator.pushNamed(context, AppRoutes.registerMasterPin);
-                            }
-                          },
-                          text: context.appLocale.onboardingLocale.getText(OnboardingText.continueText),
-                        ),
-                      ],
-                    );
-                  }),
-                ),
-              ],
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          CustomButtonWidget(
+                            isDisabled: !value,
+                            kMargin: 0,
+                            onPressed: () async {
+                              await context.read<CategoryProvider>().initDataCategory(context);
+                              await SecureStorage.instance.save(key: SecureStorageKey.firstOpenApp, value: "false");
+                              if (context.mounted) {
+                                Navigator.pushNamed(context, AppRoutes.registerMasterPin);
+                              }
+                            },
+                            text: context.appLocale.onboardingLocale.getText(OnboardingText.continueText),
+                          ),
+                        ],
+                      );
+                    }),
+                  ),
+                ],
+              ),
             ),
           ),
         );

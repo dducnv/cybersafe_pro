@@ -40,6 +40,7 @@ class AppPinCodeFieldsState extends State<AppPinCodeFields> {
   void initState() {
     errorController = StreamController<ErrorAnimationType>();
     super.initState();
+    widget.textEditingController?.clear();
     HardwareKeyboard.instance.addHandler(
       (event) => _keyboardCallback(event),
     );
@@ -130,6 +131,7 @@ class AppPinCodeFieldsState extends State<AppPinCodeFields> {
           widget.onCompleted(v, this);
         },
         onChanged: widget.onChanged,
+        autoDisposeControllers: false,
       ),
       
     );

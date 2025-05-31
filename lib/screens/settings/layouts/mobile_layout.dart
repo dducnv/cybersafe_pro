@@ -26,7 +26,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class SettingMobileLayout extends StatelessWidget {
@@ -36,166 +35,168 @@ class SettingMobileLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(context.appLocale.settingsLocale.getText(SettingsLocale.settings)), backgroundColor: Theme.of(context).colorScheme.surface, scrolledUnderElevation: 0, elevation: 0),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(30),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(padding: const EdgeInsets.only(left: 16), child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.general), style: settingTitleCardStyle)),
-              const SizedBox(height: 5),
-              const SetThemeModeWidget(),
-              const SizedBox(height: 5),
-              ChangeLangWidget(),
-              const SizedBox(height: 5),
-              const SetThemeColor(),
-              const SizedBox(height: 16),
-              Padding(padding: const EdgeInsets.only(left: 16), child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.security), style: settingTitleCardStyle)),
-              const SizedBox(height: 5),
-              const UseBiometricLogin(),
-              const SizedBox(height: 5),
-              SettingItemWidget(
-                title: context.appLocale.settingsLocale.getText(SettingsLocale.changePin),
-                icon: Icons.pin,
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return const RegisterMasterPin(isChangePin: true);
-                      },
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 5),
-              SettingItemWidget(
-                title: context.appLocale.settingsLocale.getText(SettingsLocale.autoLock),
-                suffix: Row(
-                  children: [
-                    Consumer<AppProvider>(
-                      builder: (context, provider, child) {
-                        return Text(provider.isOpenAutoLock ? "${provider.timeAutoLock}'" : "none", style: settingTitleItemStyle);
-                      },
-                    ),
-                    const SizedBox(width: 5),
-                    Icon(Icons.lock_clock, size: 24.sp),
-                  ],
-                ),
-                onTap: () {
-                  pickTimeAutoLock(context);
-                },
-              ),
-              const SizedBox(height: 5),
-              // Consumer<AppProvider>(
-              //   builder: (context, provider, child) {
-              //     return SettingItemWidget(
-              //       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              //       title: context.appLocale.settingsLocale.getText(SettingsLocale.lockOnBackground),
-              //       suffix: AppCustomSwitch(
-              //         value: provider.lockOnBackground,
-              //         onChanged: (value) {
-              //           provider.setLockOnBackground(value);
-              //         },
-              //       ),
-              //       onTap: () {
-              //         provider.setLockOnBackground(!provider.lockOnBackground);
-              //       },
-              //     );
-              //   },
-              // ),
-              const SizedBox(height: 16),
-              Padding(padding: const EdgeInsets.only(left: 16), child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.backup), style: settingTitleCardStyle)),
-              const SizedBox(height: 5),
-              if (!AppConfig.isProApp && !Platform.isMacOS && !Platform.isWindows)
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(30),
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(padding: const EdgeInsets.only(left: 16), child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.general), style: settingTitleCardStyle)),
+                const SizedBox(height: 5),
+                const SetThemeModeWidget(),
+                const SizedBox(height: 5),
+                ChangeLangWidget(),
+                const SizedBox(height: 5),
+                const SetThemeColor(),
+                const SizedBox(height: 16),
+                Padding(padding: const EdgeInsets.only(left: 16), child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.security), style: settingTitleCardStyle)),
+                const SizedBox(height: 5),
+                const UseBiometricLogin(),
+                const SizedBox(height: 5),
                 SettingItemWidget(
-                  isGradientBg: true,
-                  titleStyle: settingTitleItemStyle.copyWith(color: Colors.white),
-                  title: context.appLocale.settingsLocale.getText(SettingsLocale.transferData),
-                  icon: Icons.import_export_rounded,
-                  onTap: () async {
-                    showAppCustomDialog(
-                      context,
-                      AppCustomDialog(
-                        title: context.trSafe(SettingsLocale.transferData),
-                        message: context.trSafe(SettingsLocale.transferDataMessage),
-                        confirmText: context.trSafe(SettingsLocale.confirm),
-                        canConfirmInitially: true,
-                        cancelText: context.trSafe(SettingsLocale.cancel),
-                        onConfirm: () async {
-                          try {
-                            bool checkUri = await canLaunchUrlString("cybersafepro://transfer");
-                            if (checkUri) {
-                              DataManagerService.transferData(context);
-                            } else {
-                              openUrl(AppConfig.proPlayStoreUrl, context: context);
-                            }
-                          } catch (e) {
-                            logError(e.toString());
-                          }
+                  title: context.appLocale.settingsLocale.getText(SettingsLocale.changePin),
+                  icon: Icons.pin,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return const RegisterMasterPin(isChangePin: true);
                         },
                       ),
                     );
                   },
                 ),
-              const SizedBox(height: 5),
-              SettingItemWidget(
-                title: context.appLocale.settingsLocale.getText(SettingsLocale.importDataFromBrowser),
-                icon: Icons.browser_updated_rounded,
-                onTap: () {
-                  DataManagerService.importDataFromBrowser(context);
-                },
-              ),
-              const SizedBox(height: 5),
-              SettingItemWidget(
-                title: context.appLocale.settingsLocale.getText(SettingsLocale.backupData),
-                icon: Icons.upload_file,
-                onTap: () {
-                  if (!DataManagerService.checkData(context)) {
-                    showToast(context.trSafe(SettingsLocale.dataIsEmpty), context: context);
-                    return;
-                  }
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return LoginMasterPassword(
-                          isFromBackup: true,
-                          showBiometric: false,
-                          callBackLoginSuccess: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
-                            if (isLoginSuccess == true && pin != null) {
-                              Navigator.of(context).pop();
-                              bool status = await DataManagerService.backupData(GlobalKeys.appRootNavigatorKey.currentContext!, pin);
-                              if (status && context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Backup data successful'), backgroundColor: Colors.green, duration: const Duration(seconds: 3)));
+                const SizedBox(height: 5),
+                SettingItemWidget(
+                  title: context.appLocale.settingsLocale.getText(SettingsLocale.autoLock),
+                  suffix: Row(
+                    children: [
+                      Consumer<AppProvider>(
+                        builder: (context, provider, child) {
+                          return Text(provider.isOpenAutoLock ? "${provider.timeAutoLock}'" : "none", style: settingTitleItemStyle);
+                        },
+                      ),
+                      const SizedBox(width: 5),
+                      Icon(Icons.lock_clock, size: 24.sp),
+                    ],
+                  ),
+                  onTap: () {
+                    pickTimeAutoLock(context);
+                  },
+                ),
+                const SizedBox(height: 5),
+                // Consumer<AppProvider>(
+                //   builder: (context, provider, child) {
+                //     return SettingItemWidget(
+                //       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                //       title: context.appLocale.settingsLocale.getText(SettingsLocale.lockOnBackground),
+                //       suffix: AppCustomSwitch(
+                //         value: provider.lockOnBackground,
+                //         onChanged: (value) {
+                //           provider.setLockOnBackground(value);
+                //         },
+                //       ),
+                //       onTap: () {
+                //         provider.setLockOnBackground(!provider.lockOnBackground);
+                //       },
+                //     );
+                //   },
+                // ),
+                const SizedBox(height: 16),
+                Padding(padding: const EdgeInsets.only(left: 16), child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.backup), style: settingTitleCardStyle)),
+                const SizedBox(height: 5),
+                if (!AppConfig.isProApp && !Platform.isMacOS && !Platform.isWindows)
+                  SettingItemWidget(
+                    isGradientBg: true,
+                    titleStyle: settingTitleItemStyle.copyWith(color: Colors.white),
+                    title: context.appLocale.settingsLocale.getText(SettingsLocale.transferData),
+                    icon: Icons.import_export_rounded,
+                    onTap: () async {
+                      showAppCustomDialog(
+                        context,
+                        AppCustomDialog(
+                          title: context.trSafe(SettingsLocale.transferData),
+                          message: context.trSafe(SettingsLocale.transferDataMessage),
+                          confirmText: context.trSafe(SettingsLocale.confirm),
+                          canConfirmInitially: true,
+                          cancelText: context.trSafe(SettingsLocale.cancel),
+                          onConfirm: () async {
+                            try {
+                              bool checkUri = await canLaunchUrlString("cybersafepro://transfer");
+                              if (checkUri) {
+                                DataManagerService.transferData(context);
+                              } else {
+                                openUrl(AppConfig.proPlayStoreUrl, context: context);
                               }
+                            } catch (e) {
+                              logError(e.toString());
                             }
                           },
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 5),
-              SettingItemWidget(
-                title: context.appLocale.settingsLocale.getText(SettingsLocale.restore),
-                icon: Icons.restore,
-                onTap: () {
-                  DataManagerService.restoreData(context);
-                },
-              ),
-
-              const SizedBox(height: 5),
-              SettingItemWidget(
-                title: context.appLocale.settingsLocale.getText(SettingsLocale.deleteData),
-                suffix: Icon(Icons.delete, color: Theme.of(context).colorScheme.error, size: 24.sp),
-                titleStyle: settingTitleItemStyle.copyWith(color: Theme.of(context).colorScheme.error),
-                onTap: () async {
-                  await DataManagerService.deleteAllDataPopup(context: context);
-                },
-              ),
-            ],
+                        ),
+                      );
+                    },
+                  ),
+                const SizedBox(height: 5),
+                SettingItemWidget(
+                  title: context.appLocale.settingsLocale.getText(SettingsLocale.importDataFromBrowser),
+                  icon: Icons.browser_updated_rounded,
+                  onTap: () {
+                    DataManagerService.importDataFromBrowser(context);
+                  },
+                ),
+                const SizedBox(height: 5),
+                SettingItemWidget(
+                  title: context.appLocale.settingsLocale.getText(SettingsLocale.backupData),
+                  icon: Icons.upload_file,
+                  onTap: () {
+                    if (!DataManagerService.checkData(context)) {
+                      showToast(context.trSafe(SettingsLocale.dataIsEmpty), context: context);
+                      return;
+                    }
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return LoginMasterPassword(
+                            isFromBackup: true,
+                            showBiometric: false,
+                            callBackLoginSuccess: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
+                              if (isLoginSuccess == true && pin != null) {
+                                Navigator.of(context).pop();
+                                bool status = await DataManagerService.backupData(GlobalKeys.appRootNavigatorKey.currentContext!, pin);
+                                if (status && context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Backup data successful'), backgroundColor: Colors.green, duration: const Duration(seconds: 3)));
+                                }
+                              }
+                            },
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 5),
+                SettingItemWidget(
+                  title: context.appLocale.settingsLocale.getText(SettingsLocale.restore),
+                  icon: Icons.restore,
+                  onTap: () {
+                    DataManagerService.restoreData(context);
+                  },
+                ),
+        
+                const SizedBox(height: 5),
+                SettingItemWidget(
+                  title: context.appLocale.settingsLocale.getText(SettingsLocale.deleteData),
+                  suffix: Icon(Icons.delete, color: Theme.of(context).colorScheme.error, size: 24.sp),
+                  titleStyle: settingTitleItemStyle.copyWith(color: Theme.of(context).colorScheme.error),
+                  onTap: () async {
+                    await DataManagerService.deleteAllDataPopup(context: context);
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

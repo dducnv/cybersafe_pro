@@ -1,9 +1,12 @@
+import 'package:cybersafe_pro/components/bottom_sheets/search_bottom_sheet.dart';
+import 'package:cybersafe_pro/providers/desktop_home_provider.dart';
 import 'package:cybersafe_pro/screens/create_account/layouts/mobile_layout.dart';
 import 'package:cybersafe_pro/screens/settings/layouts/mobile_layout.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
 import 'package:cybersafe_pro/widgets/modal_side_sheet/modal_side_sheet.dart';
 import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class DesktopAppbar extends StatefulWidget implements PreferredSizeWidget {
   @override
@@ -44,6 +47,14 @@ class _DesktopAppbarState extends State<DesktopAppbar> {
               textInputAction: TextInputAction.search,
               hintText: "Search",
               textAlign: TextAlign.center,
+              onTap: () {
+                showSearchBottomSheet(context,
+                  onTapAccount: (account) {
+                    context.read<DesktopHomeProvider>().selectAccount(account);
+                    Navigator.pop(context);
+                  },
+                );
+              },
               readOnly: true,
             ),
           ),

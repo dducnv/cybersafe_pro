@@ -1,7 +1,7 @@
 name: cybersafe_pro
 description: "A new Flutter project."
 publish_to: "none"
-version: 1.7.1+83
+version: 1.8.0+84
 
 environment:
   sdk: ^3.7.0
@@ -28,6 +28,7 @@ dependencies:
   cryptography: ^2.7.0
   pointycastle: ^3.7.4
   url_launcher: ^6.3.1
+  secure_application: ^4.1.0
   flutter_secure_storage: ^9.2.4
   local_auth_darwin: ^1.4.3
   #util
@@ -54,7 +55,6 @@ dependencies:
   device_info_plus: ^11.3.3
   flutter_speed_dial: ^7.0.0
   package_info_plus: ^8.3.0
-  secure_application: ^4.1.0
   permission_handler: ^11.4.0
   shared_preferences: ^2.5.2
   flutter_styled_toast: ^2.2.1

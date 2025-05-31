@@ -1,4 +1,3 @@
-
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
@@ -37,6 +36,15 @@ class LocalAuthProvider extends ChangeNotifier {
   static const int _maxLoginAttempts = 3;
   static const int _baseLockDurationMinutes = 1;
   static const int _maxLockDurationMinutes = 30;
+
+  Timer? _lockTimer;
+
+  LocalAuthProvider() {
+    focusNode = FocusNode();
+    textEditingController = TextEditingController();
+    appPinCodeKey = GlobalKey<AppPinCodeFieldsState>();
+    formKey = GlobalKey<FormState>();
+  }
 
   Future<void> init(bool canUseBiometric, Function() biometricLoginCallBack) async {
     await _checkLockStatus();
@@ -272,6 +280,7 @@ class LocalAuthProvider extends ChangeNotifier {
 
   // Đặt lại trạng thái khóa khi đăng nhập thành công
   Future<void> _resetLockStatus() async {
+    _lockTimer?.cancel();
     _loginFailCount = 0;
     _isLocked = false;
     _lockUntil = null;
@@ -301,6 +310,7 @@ class LocalAuthProvider extends ChangeNotifier {
     await SecureStorage.instance.save(key: SecureStorageKey.loginFailCount, value: _loginFailCount.toString());
     await SecureStorage.instance.save(key: SecureStorageKey.lockDurationMultiplier, value: _lockDurationMultiplier.toString());
 
+    _startLockTimer();
     notifyListeners();
   }
 
@@ -339,8 +349,22 @@ class LocalAuthProvider extends ChangeNotifier {
     }
   }
 
+  void _startLockTimer() {
+    _lockTimer?.cancel();
+    if (_lockUntil == null) return;
+    _lockTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!isLocked) {
+        timer.cancel();
+        notifyListeners();
+        return;
+      }
+      notifyListeners();
+    });
+  }
+
   @override
   void dispose() {
+    _lockTimer?.cancel();
     // Chỉ dispose các controller khi provider thực sự bị dispose
     // và các controller này không được quản lý bởi một widget khác
     if (!_isDisposed) {

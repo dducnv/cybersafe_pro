@@ -11,7 +11,6 @@ import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/services/local_auth_service.dart';
 import 'package:cybersafe_pro/utils/device_type.dart';
-import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -113,7 +112,6 @@ Future<void> initApp() async {
   }
 
   await initializeDateFormatting(initialLocale.toString(), null);
-  SecureApplicationUtil.instance.init();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   runApp(MultiProvider(providers: ListProvider.providers, child: ScreenSizeObserver(child: MyApp(initialRoute: initialRoute, initialLocale: initialLocale))));
 }

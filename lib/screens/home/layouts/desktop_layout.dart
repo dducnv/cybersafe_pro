@@ -10,18 +10,11 @@ import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/providers/desktop_home_provider.dart';
 import 'package:cybersafe_pro/resources/size_text_icon.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
-import 'package:cybersafe_pro/screens/category_manager/category_manager_screen.dart';
 import 'package:cybersafe_pro/screens/category_manager/layouts/mobile_layout.dart';
-import 'package:cybersafe_pro/screens/create_account/create_account_screen.dart';
 import 'package:cybersafe_pro/screens/create_account/layouts/mobile_layout.dart';
-import 'package:cybersafe_pro/screens/details_account/details_account_screen.dart';
 import 'package:cybersafe_pro/screens/home/components/desktop_appbar.dart';
-import 'package:cybersafe_pro/screens/otp/otp_list_screen.dart';
-import 'package:cybersafe_pro/screens/password_generator/layouts/mobile_layout.dart';
 import 'package:cybersafe_pro/screens/password_generator/password_generate_screen.dart';
 import 'package:cybersafe_pro/screens/settings/layouts/mobile_layout.dart';
-import 'package:cybersafe_pro/screens/settings/setting_screen.dart';
-import 'package:cybersafe_pro/screens/statistic/layouts/mobile_layout.dart';
 import 'package:cybersafe_pro/screens/statistic/statistic_screen.dart';
 import 'package:cybersafe_pro/screens/otp/layouts/mobile_layout.dart';
 import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
@@ -196,21 +189,28 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                                           accountProvider.loadMoreAccountsForCategory(categoryId);
                                         },
                                         itemBuilder: (account, itemIndex) {
-                                          return AccountItemWidget(
-                                            accountModel: account,
-                                            isLastItem: itemIndex == accounts.length - 1,
-                                            onLongPress: () {},
-                                            onCallBackPop: () {},
-                                            onTapSubButton: () {
-                                              bottomSheetOptionAccountItem(context: context, viewModel: accountProvider, accountModel: account);
-                                            },
-                                            onSelect: () {
-                                              context.read<AccountProvider>().handleSelectOrRemoveAccount(account);
-                                            },
-                                            onTap: () {
-                                              // Chọn tài khoản để hiển thị chi tiết
-                                              context.read<DesktopHomeProvider>().selectAccount(account);
-                                            },
+                                          return MouseRegion(
+                                            cursor: SystemMouseCursors.click,
+                                            child: AnimatedContainer(
+                                              duration: const Duration(milliseconds: 200),
+                                              curve: Curves.easeInOut,
+                                              child: AccountItemWidget(
+                                                accountModel: account,
+                                                isLastItem: itemIndex == accounts.length - 1,
+                                                onLongPress: () {},
+                                                onCallBackPop: () {},
+                                                onTapSubButton: () {
+                                                  bottomSheetOptionAccountItem(context: context, viewModel: accountProvider, accountModel: account);
+                                                },
+                                                onSelect: () {
+                                                  context.read<AccountProvider>().handleSelectOrRemoveAccount(account);
+                                                },
+                                                onTap: () {
+                                                  // Chọn tài khoản để hiển thị chi tiết
+                                                  context.read<DesktopHomeProvider>().selectAccount(account);
+                                                },
+                                              ),
+                                            ),
                                           );
                                         },
                                       );
@@ -230,14 +230,54 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                     flex: 3,
                     child: Consumer<DesktopHomeProvider>(
                       builder: (context, desktopProvider, child) {
-                        if (!desktopProvider.hasSelectedAccount) {
-                          return Container(
-                            color: Theme.of(context).colorScheme.surface,
-                            child: Center(child: Text("Chọn một tài khoản để xem chi tiết", style: TextStyle(fontSize: 16, color: Colors.grey))),
-                          );
-                        }
-                        final account = desktopProvider.selectedAccount!;
-                        return _buildAccountDetails(context, account);
+                        return AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          transitionBuilder: (Widget child, Animation<double> animation) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: SlideTransition(
+                                position: Tween<Offset>(
+                                  begin: const Offset(0.1, 0),
+                                  end: Offset.zero,
+                                ).animate(CurvedAnimation(
+                                  parent: animation,
+                                  curve: Curves.easeInOut,
+                                )),
+                                child: child,
+                              ),
+                            );
+                          },
+                          child: !desktopProvider.hasSelectedAccount
+                              ? Container(
+                                  key: const ValueKey('empty'),
+                                  color: Theme.of(context).colorScheme.surface,
+                                  child: Center(
+                                    child: AnimatedOpacity(
+                                      duration: const Duration(milliseconds: 500),
+                                      opacity: 1.0,
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.account_circle_outlined,
+                                            size: 64,
+                                            color: Colors.grey[400],
+                                          ),
+                                          const SizedBox(height: 16),
+                                          Text(
+                                            "Chọn một tài khoản để xem chi tiết",
+                                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : Container(
+                                  key: ValueKey('account_${desktopProvider.selectedAccount!.id}'),
+                                  child: _buildAccountDetails(context, desktopProvider.selectedAccount!),
+                                ),
+                        );
                       },
                     ),
                   ),
@@ -263,23 +303,127 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildAccountIcon(context, account),
-                  SizedBox(height: 16),
-                  if (account.totp.target != null) _buildTOTPWidget(account),
-                  SizedBox(height: 16),
-                  _buildBaseInfo(context, account),
-                  SizedBox(height: 16),
-                  _buildCategory(context, account),
-                  SizedBox(height: 16),
-                  if (account.notes != null && account.notes!.isNotEmpty) _buildNoteWidget(context, account),
-                  SizedBox(height: 16),
-                  if (account.customFields.isNotEmpty) _buildCustomFieldsWidget(account),
-                  if (account.passwordHistories.isNotEmpty) _buildPasswordHistoryWidget(account),
-                  _buildUpdatedAtWidget(account),
-                ],
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TweenAnimationBuilder<double>(
+                      duration: const Duration(milliseconds: 400),
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      builder: (context, value, child) {
+                        return Transform.translate(
+                          offset: Offset(0, 20 * (1 - value)),
+                          child: Opacity(
+                            opacity: value,
+                            child: _buildAccountIcon(context, account),
+                          ),
+                        );
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    if (account.totp.target != null) 
+                      TweenAnimationBuilder<double>(
+                        duration: const Duration(milliseconds: 500),
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        builder: (context, value, child) {
+                          return Transform.translate(
+                            offset: Offset(0, 20 * (1 - value)),
+                            child: Opacity(
+                              opacity: value,
+                              child: _buildTOTPWidget(account),
+                            ),
+                          );
+                        },
+                      ),
+                    SizedBox(height: 16),
+                    TweenAnimationBuilder<double>(
+                      duration: const Duration(milliseconds: 600),
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      builder: (context, value, child) {
+                        return Transform.translate(
+                          offset: Offset(0, 20 * (1 - value)),
+                          child: Opacity(
+                            opacity: value,
+                            child: _buildBaseInfo(context, account),
+                          ),
+                        );
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    TweenAnimationBuilder<double>(
+                      duration: const Duration(milliseconds: 700),
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      builder: (context, value, child) {
+                        return Transform.translate(
+                          offset: Offset(0, 20 * (1 - value)),
+                          child: Opacity(
+                            opacity: value,
+                            child: _buildCategory(context, account),
+                          ),
+                        );
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    if (account.notes != null && account.notes!.isNotEmpty) 
+                      TweenAnimationBuilder<double>(
+                        duration: const Duration(milliseconds: 800),
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        builder: (context, value, child) {
+                          return Transform.translate(
+                            offset: Offset(0, 20 * (1 - value)),
+                            child: Opacity(
+                              opacity: value,
+                              child: _buildNoteWidget(context, account),
+                            ),
+                          );
+                        },
+                      ),
+                    SizedBox(height: 16),
+                    if (account.customFields.isNotEmpty) 
+                      TweenAnimationBuilder<double>(
+                        duration: const Duration(milliseconds: 900),
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        builder: (context, value, child) {
+                          return Transform.translate(
+                            offset: Offset(0, 20 * (1 - value)),
+                            child: Opacity(
+                              opacity: value,
+                              child: _buildCustomFieldsWidget(account),
+                            ),
+                          );
+                        },
+                      ),
+                    if (account.passwordHistories.isNotEmpty) 
+                      TweenAnimationBuilder<double>(
+                        duration: const Duration(milliseconds: 1000),
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        builder: (context, value, child) {
+                          return Transform.translate(
+                            offset: Offset(0, 20 * (1 - value)),
+                            child: Opacity(
+                              opacity: value,
+                              child: _buildPasswordHistoryWidget(account),
+                            ),
+                          );
+                        },
+                      ),
+                    TweenAnimationBuilder<double>(
+                      duration: const Duration(milliseconds: 1100),
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      builder: (context, value, child) {
+                        return Transform.translate(
+                          offset: Offset(0, 20 * (1 - value)),
+                          child: Opacity(
+                            opacity: value,
+                            child: _buildUpdatedAtWidget(account),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -292,24 +436,44 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
     return Center(
       child: Column(
         children: [
-          Container(
-            width: 70.h,
-            height: 70.h,
-            clipBehavior: Clip.hardEdge,
-            padding: EdgeInsets.all(10),
-            decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainer, borderRadius: BorderRadius.circular(15)),
-            child: Center(
-              child: IconShowComponent(
-                account: account,
-                width: 50.h,
-                height: 50.h,
-                isDecrypted: false,
-                textStyle: TextStyle(fontSize: 30.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
-              ),
-            ),
+          TweenAnimationBuilder<double>(
+            duration: const Duration(milliseconds: 600),
+            tween: Tween(begin: 0.5, end: 1.0),
+            curve: Curves.elasticOut,
+            builder: (context, value, child) {
+              return Transform.scale(
+                scale: value,
+                child: Container(
+                  width: 70.h,
+                  height: 70.h,
+                  clipBehavior: Clip.hardEdge,
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainer, borderRadius: BorderRadius.circular(15)),
+                  child: Center(
+                    child: IconShowComponent(
+                      account: account,
+                      width: 50.h,
+                      height: 50.h,
+                      isDecrypted: false,
+                      textStyle: TextStyle(fontSize: 30.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
           SizedBox(height: 5.h),
-          DecryptText(showLoading: true, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.sp), value: account.title, decryptTextType: DecryptTextType.info),
+          TweenAnimationBuilder<double>(
+            duration: const Duration(milliseconds: 800),
+            tween: Tween(begin: 0.0, end: 1.0),
+            curve: Curves.easeOut,
+            builder: (context, value, child) {
+              return Opacity(
+                opacity: value,
+                child: DecryptText(showLoading: true, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.sp), value: account.title, decryptTextType: DecryptTextType.info),
+              );
+            },
+          ),
         ],
       ),
     );
