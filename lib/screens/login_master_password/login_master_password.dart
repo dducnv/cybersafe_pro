@@ -37,7 +37,7 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
     if (!_mounted) return;
 
     // Đảm bảo SecureApplicationUtil được khởi tạo
-    
+
     FlutterNativeSplash.remove();
 
     try {
@@ -46,8 +46,9 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
       // if (SecureApplicationUtil.instance.secureApplicationController != null) SecureApplicationUtil.instance.secureApplicationController?.open();
       await authProvider.init(widget.showBiometric && !widget.isFromBackup && !widget.isFromRestore, () {
         if (widget.secureApplicationController != null) widget.secureApplicationController?.unlock();
+        widget.callBackLoginSuccess?.call(isLoginSuccess: true);
         SecureApplicationUtil.instance.init();
-      });
+      }, isNavigateToHome: widget.secureApplicationController == null,);
       // Dừng timer
       if (_mounted) {
         context.read<AppProvider>().stopTimer();
@@ -65,7 +66,6 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
 
   @override
   Widget build(BuildContext context) {
-
     // Sử dụng ChangeNotifierProvider.value để đảm bảo rằng provider không bị
     // tạo mới và không bị dispose khi widget này dispose
     return Consumer<LocalAuthProvider>(

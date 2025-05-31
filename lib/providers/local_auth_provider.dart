@@ -46,11 +46,11 @@ class LocalAuthProvider extends ChangeNotifier {
     formKey = GlobalKey<FormState>();
   }
 
-  Future<void> init(bool canUseBiometric, Function() biometricLoginCallBack) async {
+  Future<void> init(bool canUseBiometric, Function() biometricLoginCallBack, {bool isNavigateToHome = true}) async {
     await _checkLockStatus();
     await checkAndUpdateLockStatus();
     if (_shouldUseBiometric(canUseBiometric)) {
-      await _handleBiometricAuth(biometricLoginCallBack);
+      await _handleBiometricAuth(biometricLoginCallBack, isNavigateToHome: isNavigateToHome);
     } else {
       await _focusPinInput();
     }
@@ -60,12 +60,12 @@ class LocalAuthProvider extends ChangeNotifier {
     return LocalAuthConfig.instance.isAvailableBiometrics && LocalAuthConfig.instance.isOpenUseBiometric && canUseBiometric;
   }
 
-  Future<void> _handleBiometricAuth(Function() biometricLoginCallBack) async {
+  Future<void> _handleBiometricAuth(Function() biometricLoginCallBack, {bool isNavigateToHome = true}) async {
     await Future.delayed(const Duration(milliseconds: 300));
     bool isAuth = await checkLocalAuth();
 
     if (isAuth) {
-      navigatorToHome();
+      if (isNavigateToHome) navigatorToHome();
       biometricLoginCallBack.call();
     } else {
       await _focusPinInput();

@@ -28,53 +28,55 @@ class CategoryManagerMobileLayout extends StatelessWidget {
         scrolledUnderElevation: 0,
         backgroundColor: Theme.of(context).colorScheme.surface,
       ),
-      body: Selector<CategoryProvider, List<CategoryOjbModel>>(
-        selector: (context, provider) => provider.categoryList,
-        builder: (context, categories, child) {
-          return categories.isEmpty
-              ? Center(child: Image.asset("assets/images/exclamation-mark.png", width: 60.w, height: 60.h))
-              : ClipRRect(
-                borderRadius: BorderRadius.circular(25),
-                child: ReorderableListView.builder(
-                  shrinkWrap: true,
-                  onReorderEnd: (index) {},
-                  padding: EdgeInsets.all(16),
-                  itemBuilder: (BuildContext context, int index) {
-                    var category = categories[index];
-                    return Padding(
-                      key: ValueKey(category.indexPos),
-                      padding: const EdgeInsets.only(bottom: 6),
-                      child: CardCustomWidget(
-                        padding: const EdgeInsets.all(12),
-                        child: Row(
-                          children: [
-                            Expanded(child: Text("${category.categoryName} (${category.accounts.length})", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500))),
-                            IconButton(
-                              onPressed: () {
-                                showCreateCategoryBottomSheet(context, isUpdate: true, categoryOjbModel: category);
-                              },
-                              icon: Icon(Icons.edit_note_rounded, size: 21.sp),
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                _showDeleteCategoryPopup(context: context, category: category);
-                              },
-                              icon: Icon(Icons.delete, color: Colors.red[600], size: 21.sp),
-                            ),
-                            SizedBox(width: 20.w),
-                            Icon(Icons.drag_indicator_outlined, size: 21.sp),
-                          ],
+      body: SafeArea(
+        child: Selector<CategoryProvider, List<CategoryOjbModel>>(
+          selector: (context, provider) => provider.categoryList,
+          builder: (context, categories, child) {
+            return categories.isEmpty
+                ? Center(child: Image.asset("assets/images/exclamation-mark.png", width: 60.w, height: 60.h))
+                : ClipRRect(
+                  borderRadius: BorderRadius.circular(25),
+                  child: ReorderableListView.builder(
+                    shrinkWrap: true,
+                    onReorderEnd: (index) {},
+                    padding: EdgeInsets.all(16),
+                    itemBuilder: (BuildContext context, int index) {
+                      var category = categories[index];
+                      return Padding(
+                        key: ValueKey(category.indexPos),
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: CardCustomWidget(
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
+                            children: [
+                              Expanded(child: Text("${category.categoryName} (${category.accounts.length})", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500))),
+                              IconButton(
+                                onPressed: () {
+                                  showCreateCategoryBottomSheet(context, isUpdate: true, categoryOjbModel: category);
+                                },
+                                icon: Icon(Icons.edit_note_rounded, size: 21.sp),
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  _showDeleteCategoryPopup(context: context, category: category);
+                                },
+                                icon: Icon(Icons.delete, color: Colors.red[600], size: 21.sp),
+                              ),
+                              SizedBox(width: 20.w),
+                              Icon(Icons.drag_indicator_outlined, size: 21.sp),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                  itemCount: categories.length,
-                  onReorder: (int oldIndex, int newIndex) {
-                    context.read<CategoryProvider>().reorderCategory(oldIndex, newIndex);
-                  },
-                ),
-              );
-        },
+                      );
+                    },
+                    itemCount: categories.length,
+                    onReorder: (int oldIndex, int newIndex) {
+                      context.read<CategoryProvider>().reorderCategory(oldIndex, newIndex);
+                    },
+                  ),
+                );
+          },
+        ),
       ),
     );
   }
