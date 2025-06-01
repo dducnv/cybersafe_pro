@@ -108,4 +108,17 @@ class PasswordGeneratorLocale extends BaseLocale {
     PasswordGeneratorText.generatePassword: 'Hasilkan kata sandi',
     PasswordGeneratorText.copyPassword: 'Salin kata sandi',
   };
+
+  @override
+  Map<String, String> get tr => {
+    PasswordGeneratorText.title: 'Parola Oluşturucu',
+    PasswordGeneratorText.passwordCopied: 'Parola panoya kopyalandı',
+    PasswordGeneratorText.specialChars: 'Özel karakterler (!@#,...)',
+    PasswordGeneratorText.numbers: 'Sayılar (0-9)',
+    PasswordGeneratorText.uppercase: 'Büyük harfler (A-Z)',
+    PasswordGeneratorText.lowercase: 'Küçük harfler (a-z)',
+    PasswordGeneratorText.passwordLength: 'Parola uzunluğu',
+    PasswordGeneratorText.generatePassword: 'Parola oluştur',
+    PasswordGeneratorText.copyPassword: 'Parola kopyala',
+  };
 }

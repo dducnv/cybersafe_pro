@@ -108,4 +108,17 @@ class OtpLocale extends BaseLocale {
     OtpText.enterManually: 'Masukkan Secara Manual',
     OtpText.secretKeyValidation: 'Tidak dapat kosong',
   };
+
+  @override
+  Map<String, String> get tr => {
+    OtpText.title: 'OTP Hesaplar',
+    OtpText.scanQrCode: 'QR Kodu Tarayın',
+    OtpText.manualEntry: 'Manuel Giriş',
+    OtpText.addAccount: 'Hesap Ekle',
+    OtpText.accountName: 'Hesap Adı',
+    OtpText.secretKey: 'Gizli Anahtar',
+    OtpText.invalidSecretKey: 'Geçersiz Gizli Anahtar',
+    OtpText.enterManually: 'Manuel Giriş',
+    OtpText.secretKeyValidation: 'Boş olamaz',
+  };
 }

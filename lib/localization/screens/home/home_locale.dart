@@ -387,6 +387,39 @@ class HomeLocale extends BaseLocale {
     copyPassword: 'Copiar senha',
     deleteAccount: 'Deletar conta',
   };
+
+  @override
+  Map<String, String> get tr => {
+    home: 'Ana Sayfa',
+    accounts: 'Hesaplar',
+    categories: 'Kategoriler',
+    settings: 'Ayarlar',
+    search: 'Ara',
+    addAccount: 'Hesap Ekle',
+    noAccounts: 'Henüz hesap yok',
+    click: 'Tıkla',
+    toAddAccount: 'hesap eklemek için',
+    seeMore: 'Daha fazla {count} göster',
+    seeMore10: 'Daha fazla 10 göster',
+    items: 'öğe',
+    searchNoResult: 'Sonuç bulunamadı',
+    searchTitle: 'Hesapları ara',
+    searchHint: 'Kullanıcı adı, e-posta, uygulama adı girin.',
+    passwordGenerator: 'Parola Oluşturucu',
+    deleteAllAccount: 'Seçilen tüm hesapları sil',
+    cancel: 'İptal',
+    delete: 'Sil',
+    changeCategory: 'Kategori Değiştir',
+    copySuccess: 'Kopyalandı',
+    selectAccount: 'Hesap Seç',
+    unSelectAccount: 'Hesap Seçimi',
+    accountDetails: 'Hesap Detayı',
+    updateAccount: 'Hesap Güncelle',
+    copyUsername: 'Kullanıcı Adını Kopyala',
+    copyPassword: 'Parolayı Kopyala',
+    deleteAccount: 'Hesap Sil',
+  };
+
 }
 
 //key

@@ -195,4 +195,30 @@ class CategoryLocale extends BaseLocale {
     CategoryText.other: '🔍 Lainnya',
     CategoryText.updateCategory: 'Perbarui Kategori',
   };
+
+  @override
+  Map<String, String> get tr => {
+    CategoryText.title: 'Kategori Yöneticisi',
+    CategoryText.deleteCategory: 'Kategori Sil',
+    CategoryText.confirmDelete: 'Silmeyi Onayla',
+    CategoryText.cancelDelete: 'İptal',
+    CategoryText.deleteConfirmation: 'Bu kategoriyi silmek istediğinize emin misiniz?',
+    CategoryText.deleteWarningWithAccounts: 'Bu kategoriye hesaplarınız var. Silindiğinde, bu kategoriye ait tüm hesaplar silinecektir.',
+    CategoryText.deleteWarningEmpty: 'Bu kategoriyi silmek istediğinize emin misiniz?',
+    CategoryText.categoryCount: '{0} öğe',
+    CategoryText.createCategory: 'Kategori Oluştur',
+    CategoryText.editCategory: 'Kategori Düzenle',
+    CategoryText.categoryName: 'Kategori Adı',
+
+    CategoryText.updateCategory: 'Kategori Güncelle',
+    CategoryText.cancel: 'İptal',
+    CategoryText.bank: '💰 Finans',
+    CategoryText.job: '💼 İş',
+    CategoryText.study: '🎓 Eğitim',
+    CategoryText.shopping: '🛍️ Alışveriş',
+    CategoryText.entertainment: '🎮 Eğlence',
+    CategoryText.other: '🔍 Diğer',
+    CategoryText.categoryIcon: 'Kategori Simgesi',
+  };
+
 }

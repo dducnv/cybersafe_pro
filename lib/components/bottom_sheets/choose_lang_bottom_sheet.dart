@@ -19,7 +19,7 @@ void showLanguageBottomSheet(BuildContext context) {
         child: Consumer<AppLocale>(
           builder: (context, appLocale, child) {
             return Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,

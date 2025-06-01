@@ -185,4 +185,28 @@ class AboutLocale extends BaseLocale {
     GeneralText.updateNowText: 'Обновить сейчас',
     GeneralText.notNowText: 'Позже',
   };
+
+  @override
+  Map<String, String> get tr => {
+    GeneralText.aboutAppTitle: 'Uygulama Hakkında',
+    GeneralText.appVersion: 'Uygulama Sürümü',
+    GeneralText.securityOfflineTitle: 'Tamamen Çevrimdışı Güvenlik',
+    GeneralText.securityOfflineDesc: 'Parolaları tamamen cihazınızda saklayın, ağ bağlantısı olmadan, AES-256 şifreleme',
+    GeneralText.categoryOrganizeTitle: 'Kategorilere Göre Organizasyon',
+    GeneralText.categoryOrganizeDesc: 'Hesapları kategorilere ayırın, hızlıca arayın ve kolayca yönetin',
+    GeneralText.backupRestoreTitle: 'Yedekleme ve Geri Yükleme',
+    GeneralText.backupRestoreDesc: 'Verilerinizi şifrelemek ve gerektiğinde geri yüklemek için yedekleme oluşturun',
+    GeneralText.privacyMaxTitle: 'Maksimum Gizlilik',
+    GeneralText.privacyMaxDesc: 'Kullanıcı verilerini toplamaz, hesap kayıt gerektirmez, tamamen çevrimdışı',
+
+    GeneralText.proIntroTitle: 'Tüm özellikleri açmak için Pro sürümüne yükselleyin',
+    GeneralText.twoFactorAuthDesc: 'İki faktörlü kimlik doğrulama özelliği',
+    GeneralText.statisticsDuplicatePasswordDesc: 'Yinelenen parola istatistikleri özelliği',
+    GeneralText.customThemeColorDesc: 'Özel tema rengi özelliği',
+    GeneralText.customIconDesc: 'Özel simge özelliği',
+    GeneralText.passwordHistoryDetailDesc: 'Parola geçmişi ayrıntıları özelliği',
+
+    GeneralText.updateNowText: 'Şimdi Güncelle',
+    GeneralText.notNowText: 'Daha Sonra',
+  };
 }

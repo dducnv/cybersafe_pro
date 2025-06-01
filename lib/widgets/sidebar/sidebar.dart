@@ -42,6 +42,8 @@ class Sidebar extends StatelessWidget {
             Navigator.of(context).pop();
             if (await inAppReview.isAvailable()) {
               inAppReview.requestReview();
+            } else {
+              inAppReview.openStoreListing();
             }
           },
         ),
@@ -62,6 +64,28 @@ class Sidebar extends StatelessWidget {
           title: Text(context.trSidebar(SidebarText.featureRequest), style: drawerTitleStyle),
           onTap: () {
             openUrl("mailto:contact.ducnv@gmail.com?subject=[CyberSafe] Feature Request", context: context);
+          },
+        ),
+        //contact
+        ListTile(
+          leading: Icon(Icons.support_agent_rounded, size: 24),
+          title: Text(context.trSidebar(SidebarText.support), style: drawerTitleStyle),
+          onTap: () {
+            openUrl("mailto:contact.ducnv@gmail.com?subject=[CyberSafe] Support", context: context);
+          },
+        ),
+        ListTile(
+          leading: Icon(Icons.translate_rounded, size: 24),
+          title: Text(context.trSidebar(SidebarText.requestLanguage), style: drawerTitleStyle),
+          onTap: () {
+            openUrl("mailto:contact.ducnv@gmail.com?subject=[CyberSafe] Request Language", context: context);
+          },
+        ),
+        ListTile(
+          leading: Icon(Icons.contact_mail_rounded, size: 24),
+          title: Text(context.trSidebar(SidebarText.contact), style: drawerTitleStyle),
+          onTap: () {
+            AppConfig.showDialogRedirectLink(context, url: AppConfig.contactUrl());
           },
         ),
         ListTile(

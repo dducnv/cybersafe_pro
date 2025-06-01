@@ -136,4 +136,22 @@ class OnboardingLocale extends BaseLocale {
     OnboardingText.doNotAgreeRedirectLink: 'Apakah Anda setuju untuk pergi ke link?',
     OnboardingText.showLink: 'Tampilkan tautan',
   };
+
+  @override
+  Map<String, String> get tr => {
+    OnboardingText.welcome: 'Hoşgeldiniz',
+    OnboardingText.selectLanguage: 'Dil Seç',
+    OnboardingText.getStarted: 'Başla',
+    OnboardingText.termsAndConditions: 'Koşullar ve Şartları Kabul Et',
+    OnboardingText.agree: 'Kabul Et',
+
+    OnboardingText.createMasterPassword: 'Ana Parola Oluştur',
+    OnboardingText.welcomeDescription: 'CyberSafe Pro\'ye hoşgeldiniz, güvenli parola yönetimi uygulaması.',
+    OnboardingText.terms: 'Koşullar ve Şartlar',
+    OnboardingText.policy: 'Gizlilik Politikası',
+    OnboardingText.continueText: 'Devam Et',
+    OnboardingText.agreeRedirectLink: 'Kabul Et ve Link\'e Git',
+    OnboardingText.doNotAgreeRedirectLink: 'Link\'e gitmek istiyor musunuz?',
+    OnboardingText.showLink: 'Link\'i Göster',
+  };
 } 

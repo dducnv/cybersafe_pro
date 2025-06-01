@@ -143,4 +143,22 @@ class StatisticLocale extends BaseLocale {
     StatisticText.totalAccountPasswordWeak: 'Total Kata Sandi Lemah',
     StatisticText.totalAccountSamePassword: 'Total Kata Sandi Duplikat',
   };
+
+  @override
+  Map<String, String> get tr => {
+    StatisticText.title: 'İstatistik',
+    StatisticText.securityScore: 'Güvenlik Puanı',
+    StatisticText.weakPasswords: 'Zayıf',
+    StatisticText.duplicatePasswords: 'Yinelenen',
+    StatisticText.strongPasswords: 'Güçlü',
+    StatisticText.securityCheck: 'Güvenlik Kontrolü',
+    StatisticText.passwordAge: 'Parola Yaşı',
+    StatisticText.passwordStrength: 'Parola Gücü',
+    StatisticText.twoFactorEnabled: 'İki Faktörlü Kimlik Doğrulama',
+    StatisticText.accountsProtected: 'Korunan Hesaplar',
+    StatisticText.totalAccount: 'Toplam Hesap',
+    StatisticText.totalAccountPasswordStrong: 'Toplam Güçlü Parola',
+    StatisticText.totalAccountPasswordWeak: 'Toplam Zayıf Parola',
+    StatisticText.totalAccountSamePassword: 'Toplam Yinelenen Parola',
+  };
 } 

@@ -270,4 +270,43 @@ class CreateAccountLocale extends BaseLocale {
     CreateAccountText.confirmPasswordValidation: 'Konfirmasi kata sandi tidak boleh kosong',
     CreateAccountText.noteValidation: 'Catatan tidak boleh kosong',
   };  
+
+  @override
+  Map<String, String> get tr => {
+    CreateAccountText.title: 'Hesap Oluştur',
+    CreateAccountText.updateAccount: 'Hesap Güncelle',
+    CreateAccountText.chooseIcon: 'Simge Seç',
+    CreateAccountText.noSelect: 'Seçim yok',
+    CreateAccountText.twoFactorAuth: 'İki Faktörlü Kimlik Doğrulama',
+
+    CreateAccountText.password: 'Parola',
+    CreateAccountText.overwritePassword: 'Parolayı Değiştir',
+    CreateAccountText.overwritePasswordMessage: 'Eski parola silinecek ve yeni bir parola oluşturulacak!',
+    CreateAccountText.cancel: 'İptal',
+    CreateAccountText.confirm: 'Onayla',
+    CreateAccountText.addField: 'Alan Ekle',
+    CreateAccountText.customFields: 'Özel Alanlar',
+    CreateAccountText.chooseFieldType: 'Alan Tipi Seç',
+
+    CreateAccountText.appName: 'Uygulama Adı',
+    CreateAccountText.username: 'Kullanıcı Adı',
+    CreateAccountText.confirmPassword: 'Parolayı Doğrula',
+    CreateAccountText.note: 'Not',
+    CreateAccountText.category: 'Kategori',
+    CreateAccountText.chooseCategory: 'Kategori Seç',
+    CreateAccountText.enterKey: 'TOTP Anahtarını Gir',
+    CreateAccountText.otpError: 'Geçersiz TOTP Anahtarı',
+
+    CreateAccountText.titleField: 'Alan Başlığı',
+    CreateAccountText.fieldType: 'Alan Tipi',
+    CreateAccountText.iconApp: 'Varsayılan Simge',
+    CreateAccountText.iconCustom: 'Özel Simge',
+
+    CreateAccountText.appNameValidation: 'Uygulama adı boş olamaz',
+    CreateAccountText.usernameValidation: 'Kullanıcı adı boş olamaz',
+    CreateAccountText.passwordValidation: 'Parola boş olamaz',
+    CreateAccountText.confirmPasswordValidation: 'Parola doğrulama boş olamaz',
+    CreateAccountText.noteValidation: 'Not boş olamaz',
+    CreateAccountText.categoryValidation: 'Kategori boş olamaz',
+  };
 } 

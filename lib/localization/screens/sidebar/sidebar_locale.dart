@@ -28,6 +28,9 @@ class SidebarLocale extends BaseLocale {
     SidebarText.privacyPolicy: 'Chính sách bảo mật',
     SidebarText.termsOfService: 'Điều khoản dịch vụ',
     SidebarText.rateApp: 'Đánh giá ứng dụng',
+    SidebarText.support: 'Hỗ trợ',
+    SidebarText.requestLanguage: 'Yêu cầu ngôn ngữ',
+    SidebarText.contact: 'Liên hệ',
   };
 
   @override
@@ -40,6 +43,9 @@ class SidebarLocale extends BaseLocale {
     SidebarText.privacyPolicy: 'Privacy Policy',
     SidebarText.termsOfService: 'Terms of Service',
     SidebarText.rateApp: 'Rate App',
+    SidebarText.support: 'Support',
+    SidebarText.requestLanguage: 'Request Language',
+    SidebarText.contact: 'Contact',
   };
 
   @override
@@ -52,6 +58,9 @@ class SidebarLocale extends BaseLocale {
     SidebarText.privacyPolicy: 'Política de Privacidade',
     SidebarText.termsOfService: 'Termos de Serviço',
     SidebarText.rateApp: 'Avaliar Aplicativo',
+    SidebarText.support: 'Suporte',
+    SidebarText.requestLanguage: 'Solicitar Idioma',
+    SidebarText.contact: 'Contato',
   };
 
   @override
@@ -64,6 +73,9 @@ class SidebarLocale extends BaseLocale {
     SidebarText.privacyPolicy: 'गोपनीयता नीति',
     SidebarText.termsOfService: 'सेवा की शर्तें',
     SidebarText.rateApp: 'ऐप का मूल्यांकन करें',
+    SidebarText.support: 'समर्थन',
+    SidebarText.requestLanguage: 'भाषा अनुरोध',
+    SidebarText.contact: 'संपर्क',
   };
 
   @override
@@ -76,6 +88,9 @@ class SidebarLocale extends BaseLocale {
     SidebarText.privacyPolicy: 'プライバシーポリシー',
     SidebarText.termsOfService: '利用規約',
     SidebarText.rateApp: 'アプリを評価する',
+    SidebarText.support: 'サポート',
+    SidebarText.requestLanguage: '言語リクエスト',
+    SidebarText.contact: '連絡先',
   };
 
   @override
@@ -88,6 +103,9 @@ class SidebarLocale extends BaseLocale {
     SidebarText.privacyPolicy: 'Политика конфиденциальности',
     SidebarText.termsOfService: 'Условия использования',
     SidebarText.rateApp: 'Оценить приложение',
+    SidebarText.support: 'Поддержка',
+    SidebarText.requestLanguage: 'Запрос языка',
+    SidebarText.contact: 'Контакт',
   };
 
   @override
@@ -100,5 +118,24 @@ class SidebarLocale extends BaseLocale {
     SidebarText.privacyPolicy: 'Kebijakan Privasi',
     SidebarText.termsOfService: 'Ketentuan Layanan',
     SidebarText.rateApp: 'Evaluasi Aplikasi',
+    SidebarText.support: 'Dukungan',
+    SidebarText.requestLanguage: 'Permintaan Bahasa',
+    SidebarText.contact: 'Kontak',
+  };
+
+  @override
+  Map<String, String> get tr => {
+    SidebarText.appName: 'CyberSafe',
+    SidebarText.categoryManager: 'Kategori Yöneticisi',
+    SidebarText.about: 'Hakkında',
+    SidebarText.faqs: 'SSS',
+    SidebarText.featureRequest: 'Özellik İstekleri',
+
+    SidebarText.privacyPolicy: 'Gizlilik Politikası',
+    SidebarText.termsOfService: 'Kullanım Koşulları',
+    SidebarText.rateApp: 'Uygulamayı Değerlendir',
+    SidebarText.support: 'Destek',
+    SidebarText.requestLanguage: 'Dil Talebi',
+    SidebarText.contact: 'İletişim',
   };
 } 

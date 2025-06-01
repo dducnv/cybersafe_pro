@@ -477,4 +477,68 @@ class ErrorLocale extends BaseLocale {
     ErrorText.missingSecret: 'Rahasia hilang',
     ErrorText.invalidAlgorithm: 'Algoritma tidak valid',
   };
+
+  @override
+  Map<String, String> get tr => {
+    // Common errors
+    ErrorText.generalError: 'Hata oluştu',
+    ErrorText.networkError: 'Ağ hatası',
+    ErrorText.unknownError: 'Bilinmeyen hata',
+    ErrorText.operationFailed: 'İşlem başarısız',
+    ErrorText.invalidData: 'Geçersiz veri',
+
+    // Authentication errors
+    ErrorText.pinTooShort: 'PIN en az 6 karakter olmalıdır',
+    ErrorText.pinIncorrect: 'Yanlış PIN',
+    ErrorText.authenticationFailed: 'Kimlik doğrulama başarısız',
+    ErrorText.deviceKeyMissing: 'Cihaz anahtarı oluşturulmamış',
+
+    // Account errors
+    ErrorText.accountEmpty: 'Hesap boş olamaz',
+    ErrorText.accountNotFound: 'Hesap bulunamadı',
+    ErrorText.accountNameRequired: 'Hesap adı gereklidir',
+    ErrorText.cannotDeleteAccount: 'Hesap silinemez',
+    ErrorText.cannotDeleteSomeAccounts: 'Bazı hesaplar silinemez',
+
+    // Category errors
+    ErrorText.categoryNameEmpty: 'Kategori adı boş olamaz',
+    ErrorText.categoryExists: 'Bu kategori zaten mevcut',
+    ErrorText.cannotDeleteCategory: 'Kategori silinemez',
+    ErrorText.categoryNotFound: 'Kategori bulunamadı',
+
+    // File operation errors
+    ErrorText.fileNotSelected: 'Dosya seçilmedi',
+    ErrorText.fileNotFound: 'Dosya bulunamadı',
+    ErrorText.cannotReadFile: 'Dosya okunamadı',
+    ErrorText.invalidFileFormat: 'Geçersiz dosya formatı',
+    ErrorText.emptyCsvFile: 'CSV dosyası boş',
+    ErrorText.invalidCsvFormat: 'Geçersiz CSV formatı. Gerekli sütunlar: name, url, username, password, note',
+    ErrorText.invalidBackupFile: 'Geçersiz yedekleme dosyası',
+    ErrorText.corruptedBackupFile: 'Yedekleme dosyası bozuk veya geçersiz',
+    ErrorText.missingBackupField: 'Yedekleme dosyasında eksik alan',
+    ErrorText.backupTooLarge: 'Yedekleme boyutu çok büyük',
+    ErrorText.restoreFailed: 'Geri yükleme başarısız',
+
+    // Encryption errors
+    ErrorText.encryptionFailed: 'Şifreleme başarısız',
+    ErrorText.decryptionFailed: 'Şifre çözme başarısız',
+    ErrorText.dataEncryptionMismatch: 'Yeniden şifreleme sonrası veri eşleşmiyor',
+    ErrorText.encryptionVerificationFailed: 'Şifreleme doğrulama başarısız',
+    ErrorText.migrationFailed: 'Veri geçişi başarısız',
+
+    // TOTP errors
+    ErrorText.emptySecretKey: 'Gizli anahtar boş',
+    ErrorText.invalidSecretKey: 'Geçersiz gizli anahtar',
+    ErrorText.invalidOtpUri: 'Geçersiz OTP URI',
+    ErrorText.missingOtpIssuer: 'OTP yayıncısı eksik',
+    ErrorText.missingOtpSecret: 'OTP gizli anahtarı eksik',
+
+    // Operation limits
+    ErrorText.tooManyRetries: 'Çok fazla deneme',
+    ErrorText.tryAgainLater: 'Lütfen daha sonra tekrar deneyin',
+
+    ErrorText.invalidUriScheme: 'Geçersiz URI şeması',
+    ErrorText.missingIssuer: 'Yayıncı eksik',
+    ErrorText.missingSecret: 'Gizli anahtar eksik',
+  };
 }

@@ -134,72 +134,74 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
     await showModalBottomSheet(
       context: context,
       builder: (context) {
-        return SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        AppRoutes.navigateTo(context, AppRoutes.detailsAccount, arguments: {"accountId": totp.id});
-                      },
-                      icon: const Icon(Icons.arrow_outward),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Align(
-                  alignment: Alignment.center,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
-                    child: SizedBox(
-                      width: 50.h,
-                      height: 50.h,
-                      child: ColoredBox(
-                        color: Colors.grey.withOpacity(0.2),
-                        child: Center(child: Padding(padding: const EdgeInsets.all(8.0), child: IconShowComponent(account: totp, width: 45.w, height: 45.h, isDecrypted: false))),
+        return SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          AppRoutes.navigateTo(context, AppRoutes.detailsAccount, arguments: {"accountId": totp.id});
+                        },
+                        icon: const Icon(Icons.arrow_outward),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.center,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      child: SizedBox(
+                        width: 50.h,
+                        height: 50.h,
+                        child: ColoredBox(
+                          color: Colors.grey.withOpacity(0.2),
+                          child: Center(child: Padding(padding: const EdgeInsets.all(8.0), child: IconShowComponent(account: totp, width: 45.w, height: 45.h, isDecrypted: false))),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                DecryptText(style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold), value: totp.title, decryptTextType: DecryptTextType.info),
-                DecryptText(style: TextStyle(fontSize: 16.sp), value: totp.email ?? "", decryptTextType: DecryptTextType.info),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: DecryptText(
-                        style: TextStyle(fontSize: 16.sp),
-                        decryptTextType: DecryptTextType.opt,
-                        value: totp.totp.target?.secretKey ?? "",
-                        builder: (context, value) {
-                          return CardCustomWidget(padding: EdgeInsets.all(10), child: OtpTextWithCountdown(keySecret: value));
-                        },
+                  const SizedBox(height: 10),
+                  DecryptText(style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold), value: totp.title, decryptTextType: DecryptTextType.info),
+                  DecryptText(style: TextStyle(fontSize: 16.sp), value: totp.email ?? "", decryptTextType: DecryptTextType.info),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DecryptText(
+                          style: TextStyle(fontSize: 16.sp),
+                          decryptTextType: DecryptTextType.opt,
+                          value: totp.totp.target?.secretKey ?? "",
+                          builder: (context, value) {
+                            return CardCustomWidget(padding: EdgeInsets.all(10), child: OtpTextWithCountdown(keySecret: value));
+                          },
+                        ),
                       ),
-                    ),
-
-                    const SizedBox(width: 10),
-                    IconButton(
-                      onPressed: () async {
-                        Navigator.pop(context);
-                        if (totp.totp.target?.secretKey == null) return;
-                        String secretKey = await EncryptAppDataService.instance.decryptTOTPKey(totp.totp.target?.secretKey ?? "");
-
-                        if (!context.mounted) return;
-                        clipboardCustom(context: context, text: generateTOTPCode(keySecret: secretKey));
-                      },
-                      icon: Icon(Icons.copy, size: 20.sp),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-              ],
+          
+                      const SizedBox(width: 10),
+                      IconButton(
+                        onPressed: () async {
+                          Navigator.pop(context);
+                          if (totp.totp.target?.secretKey == null) return;
+                          String secretKey = await EncryptAppDataService.instance.decryptTOTPKey(totp.totp.target?.secretKey ?? "");
+          
+                          if (!context.mounted) return;
+                          clipboardCustom(context: context, text: generateTOTPCode(keySecret: secretKey));
+                        },
+                        icon: Icon(Icons.copy, size: 20.sp),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
             ),
           ),
         );

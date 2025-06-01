@@ -128,4 +128,12 @@ class AuthLocale extends BaseLocale {
     LoginText.pinCodeNotMatch: 'PINs não correspondem',
     LoginText.pinCodeRequired: 'PIN é obrigatório',
   };
+
+  @override
+  Map<String, String> get tr => {
+    LoginText.createPinCode: 'PIN Oluştur',
+    LoginText.confirmPinCode: 'PIN Doğrula',
+    LoginText.pinCodeNotMatch: 'PINler eşleşmiyor',
+    LoginText.pinCodeRequired: 'PIN gereklidir',
+  };
 }

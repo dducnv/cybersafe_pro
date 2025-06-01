@@ -199,4 +199,32 @@ class DetailsAccountLocale extends BaseLocale {
     DetailsAccountText.email: "Email",
     DetailsAccountText.passwordHistoryDetail: "Detail",
   };
+
+  @override
+  Map<String, String> get tr => {
+    DetailsAccountText.editAccount: "Hesap Düzenle",
+    DetailsAccountText.deleteAccount: "Hesap Sil",
+    DetailsAccountText.copy: "Kopyala",
+    DetailsAccountText.show: "Göster",
+
+    DetailsAccountText.copied: "Kopyalandı",
+    DetailsAccountText.deleteConfirmation: "Hesap Sil",
+    DetailsAccountText.deleteAccountQuestion: "Bu hesabı silmek istediğinize emin misiniz?",
+    DetailsAccountText.otpCode: "OTP Kodu",
+    DetailsAccountText.baseInfo: "Temel Bilgiler",
+    DetailsAccountText.category: "Kategori",
+    DetailsAccountText.note: "Not",
+
+    DetailsAccountText.customFields: "Özel Alanlar",
+    DetailsAccountText.passwordHistory: "Parola Geçmişi",
+    DetailsAccountText.updatedAt: "Son Güncelleme",
+    DetailsAccountText.cancel: "İptal",
+    DetailsAccountText.confirm: "Onayla",
+    DetailsAccountText.passwordHistoryTitle: "Parola Geçmişi",
+    DetailsAccountText.username: "Kullanıcı Adı",
+
+    DetailsAccountText.password: "Parola",
+    DetailsAccountText.email: "Email",
+    DetailsAccountText.passwordHistoryDetail: "Detay",
+  };
 }

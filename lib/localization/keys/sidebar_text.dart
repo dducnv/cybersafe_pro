@@ -7,4 +7,7 @@ class SidebarText {
   static const String privacyPolicy = 'privacy_policy';
   static const String termsOfService = 'terms_of_service';
   static const String rateApp = 'rate_app';
+  static const String support = 'support';
+  static const String requestLanguage = 'request_language';
+  static const String contact = 'contact';
 } 

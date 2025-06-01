@@ -47,6 +47,8 @@ class AppLocaleModel extends BaseLocale {
   Map<String, String> get ru => {};
   @override
   Map<String, String> get id => {};
+  @override
+  Map<String, String> get tr => {};
 }
 
 final List<AppLocaleModel> appLocales = [
@@ -59,6 +61,7 @@ final List<AppLocaleModel> appLocales = [
   AppLocaleModel(languageCode: 'hi', countryCode: 'IN', languageName: 'Hindi', languageNativeName: 'हिन्दी', flagEmoji: '🇮🇳'),
   AppLocaleModel(languageCode: 'ja', countryCode: 'JP', languageName: 'Japanese', languageNativeName: '日本語', flagEmoji: '🇯🇵'),
   AppLocaleModel(languageCode: 'id', countryCode: 'ID', languageName: 'Indonesian', languageNativeName: 'Bahasa Indonesia', flagEmoji: '🇮🇩'),
+  AppLocaleModel(languageCode: 'tr', countryCode: 'TR', languageName: 'Turkish', languageNativeName: 'Türkçe', flagEmoji: '🇹🇷'),
 ];
 
 class AppLocale extends ChangeNotifier {
@@ -112,6 +115,7 @@ class AppLocale extends ChangeNotifier {
       'en' when locale.countryCode == 'US' => currentLocaleModel.en_US,
       'pt' => currentLocaleModel.pt,
       'en' => currentLocaleModel.en,
+      'tr' => currentLocaleModel.tr,
       _ => currentLocaleModel.en, // fallback to English
     };
     return translations[key] ?? key;

@@ -143,4 +143,27 @@ class LoginLocale extends BaseLocale {
     LoginText.pleaseTryAgainLater: 'Silakan coba lagi nanti dalam {0} menit',
     LoginText.restoreNote: 'Masukkan PIN sao lưu untuk khôi phục dữ liệu.',
   };
+
+  @override
+  Map<String, String> get tr => {
+    LoginText.enterPin: 'PIN Gir',
+    LoginText.forgotPin: 'PIN Unut',
+    LoginText.useBiometric: 'Biometrik Kullan',
+    LoginText.incorrectPin: 'Yanlış PIN',
+    LoginText.pinCodeRequired: 'Lütfen geçerli bir PIN girin',
+    LoginText.resetApp: 'Uygulamayı Sıfırla',
+    LoginText.confirmReset: 'Sıfırlama Onayla',
+    LoginText.resetWarning: 'Uyarı: Uygulamayı sıfırlamak tüm verilerinizi siler. Devam etmek istediğinize emin misiniz?',
+    LoginText.enterAnyPin: 'Herhangi bir PIN girin',
+    LoginText.backupNote: 'Bu PIN dosyaları şifrelemek için kullanılacak, verileri geri yüklemek için lütfen hatırlayın.',
+    LoginText.changePinCode: 'PIN Değiştir',
+    LoginText.loginLockDescription: 'Birden fazla yanlış giriş denemesi nedeniyle hesap kilitlendi',
+    LoginText.pleaseTryAgainLater: 'Lütfen {0} dakika sonra tekrar deneyin',
+    LoginText.restoreNote: 'Verileri geri yüklemek için geri yedekleme PIN girin.',
+
+    LoginText.createPinCode: 'PIN Oluştur',
+    LoginText.confirmPinCode: 'PIN Doğrula',
+    LoginText.pinCodeNotMatch: 'PINler eşleşmiyor',
+    
+  };
 } 

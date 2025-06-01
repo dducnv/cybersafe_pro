@@ -420,4 +420,38 @@ class SettingsLocale extends BaseLocale {
     receiveData: 'Receber dados',
     receiveDataMessage: 'Para continuar recebendo dados da versão Lite, por favor selecione um arquivo para adicionar dados à versão Pro!',
   };
+
+  @override
+  Map<String, String> get tr => {
+    settings: 'Ayarlar',
+    general: 'Genel',
+    security: 'Güvenlik',
+    language: 'Dil',
+    theme: 'Tema',
+    darkMode: 'Koyu Mod',
+    biometric: 'Biometrik',
+    autoLock: 'Otomatik Kilit',
+    changePin: 'PIN Değiştir',
+    backup: 'Yedekleme',
+    restore: 'Geri Yükle',
+    about: 'Hakkında',
+    chooseLanguage: 'Dil Seç',
+    importDataFromBrowser: 'Tarayıcıdan Veri İçe Aktar',
+    backupData: 'Veri Yedekleme',
+    deleteData: 'Veri Sil',
+    deleteDataConfirmation: 'Veri Silme Onayı',
+    confirm: 'Onayla',
+    lockOnBackground: 'Arka Plan Modunda Kilit',
+    dataIsEmpty: 'Veri Yok',
+    deleteDataQuestion: 'Tüm verileri silmek istediğinize emin misiniz?',
+    cancel: 'İptal',
+    appIsNotInstalled: 'Uygulama Yüklenmemiş',
+    appIsNotInstalledMessage: 'Veri aktarımı yapmadan önce uygulamayı yükleyin.',
+    installNow: 'Şimdi Yükle',
+    transferData: 'Veri Pro Sürümüne Aktar',
+    transferDataMessage: 'Veri Lite\'den Pro\'ya aktarılsın mı?',
+
+    receiveData: 'Veri Al',
+    receiveDataMessage: 'Lite sürümünden veri almak için lütfen Pro sürümüne veri eklemek için bir dosya seçin!',
+  };
 }
