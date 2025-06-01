@@ -24,7 +24,10 @@ void showLanguageBottomSheet(BuildContext context) {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(context.appLocale.settingsLocale.getText(SettingsLocale.chooseLanguage), style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.chooseLanguage), style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+                  ),
                   const SizedBox(height: 16),
                   Expanded(child: ListView(children: items)),
                 ],

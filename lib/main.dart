@@ -13,6 +13,7 @@ import 'package:cybersafe_pro/services/local_auth_service.dart';
 import 'package:cybersafe_pro/utils/device_type.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -82,6 +83,8 @@ class _ScreenSizeObserverState extends State<ScreenSizeObserver> with WidgetsBin
 Future<void> initApp() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   timezone.initializeTimeZones();
+  //only show status bar
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.top]);
 
   // Khởi tạo ObjectBox
   await SharedPreferencesHelper.init();

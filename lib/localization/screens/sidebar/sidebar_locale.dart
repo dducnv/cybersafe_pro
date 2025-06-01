@@ -36,13 +36,13 @@ class SidebarLocale extends BaseLocale {
   @override
   Map<String, String> get en => {
     SidebarText.appName: 'CyberSafe',
-    SidebarText.categoryManager: 'Category Manager',
+    SidebarText.categoryManager: 'Category Management',
     SidebarText.about: 'About',
     SidebarText.faqs: 'FAQs',
     SidebarText.featureRequest: 'Feature Request',
     SidebarText.privacyPolicy: 'Privacy Policy',
     SidebarText.termsOfService: 'Terms of Service',
-    SidebarText.rateApp: 'Rate App',
+    SidebarText.rateApp: 'Rate the App',
     SidebarText.support: 'Support',
     SidebarText.requestLanguage: 'Request Language',
     SidebarText.contact: 'Contact',
@@ -51,13 +51,13 @@ class SidebarLocale extends BaseLocale {
   @override
   Map<String, String> get pt => {
     SidebarText.appName: 'CyberSafe',
-    SidebarText.categoryManager: 'Gerenciador de Categorias',
+    SidebarText.categoryManager: 'Gerenciamento de Categorias',
     SidebarText.about: 'Sobre',
-    SidebarText.faqs: 'FAQs',
-    SidebarText.featureRequest: 'Solicitar Recurso',
+    SidebarText.faqs: 'Perguntas Frequentes',
+    SidebarText.featureRequest: 'Solicitar Funcionalidade',
     SidebarText.privacyPolicy: 'Política de Privacidade',
     SidebarText.termsOfService: 'Termos de Serviço',
-    SidebarText.rateApp: 'Avaliar Aplicativo',
+    SidebarText.rateApp: 'Avaliar o Aplicativo',
     SidebarText.support: 'Suporte',
     SidebarText.requestLanguage: 'Solicitar Idioma',
     SidebarText.contact: 'Contato',
@@ -66,14 +66,14 @@ class SidebarLocale extends BaseLocale {
   @override
   Map<String, String> get hi => {
     SidebarText.appName: 'साइबरसेफ',
-    SidebarText.categoryManager: 'श्रेणी प्रबंधक',
+    SidebarText.categoryManager: 'श्रेणी प्रबंधन',
     SidebarText.about: 'परिचय',
-    SidebarText.faqs: 'सामान्य प्रश्न',
-    SidebarText.featureRequest: 'सुविधा अनुरोध',
+    SidebarText.faqs: 'अक्सर पूछे जाने वाले प्रश्न',
+    SidebarText.featureRequest: 'फीचर अनुरोध',
     SidebarText.privacyPolicy: 'गोपनीयता नीति',
     SidebarText.termsOfService: 'सेवा की शर्तें',
-    SidebarText.rateApp: 'ऐप का मूल्यांकन करें',
-    SidebarText.support: 'समर्थन',
+    SidebarText.rateApp: 'ऐप को रेट करें',
+    SidebarText.support: 'सहायता',
     SidebarText.requestLanguage: 'भाषा अनुरोध',
     SidebarText.contact: 'संपर्क',
   };
@@ -81,8 +81,8 @@ class SidebarLocale extends BaseLocale {
   @override
   Map<String, String> get ja => {
     SidebarText.appName: 'サイバーセーフ',
-    SidebarText.categoryManager: 'カテゴリマネージャー',
-    SidebarText.about: '私たちについて',
+    SidebarText.categoryManager: 'カテゴリ管理',
+    SidebarText.about: 'アプリについて',
     SidebarText.faqs: 'よくある質問',
     SidebarText.featureRequest: '機能リクエスト',
     SidebarText.privacyPolicy: 'プライバシーポリシー',
@@ -90,34 +90,34 @@ class SidebarLocale extends BaseLocale {
     SidebarText.rateApp: 'アプリを評価する',
     SidebarText.support: 'サポート',
     SidebarText.requestLanguage: '言語リクエスト',
-    SidebarText.contact: '連絡先',
+    SidebarText.contact: 'お問い合わせ',
   };
 
   @override
   Map<String, String> get ru => {
-    SidebarText.appName: 'КиберБезопасность',
+    SidebarText.appName: 'CyberSafe',
     SidebarText.categoryManager: 'Управление категориями',
-    SidebarText.about: 'О нас',
-    SidebarText.faqs: 'ЧЗВ',
+    SidebarText.about: 'О приложении',
+    SidebarText.faqs: 'Часто задаваемые вопросы',
     SidebarText.featureRequest: 'Запрос функции',
     SidebarText.privacyPolicy: 'Политика конфиденциальности',
     SidebarText.termsOfService: 'Условия использования',
     SidebarText.rateApp: 'Оценить приложение',
     SidebarText.support: 'Поддержка',
     SidebarText.requestLanguage: 'Запрос языка',
-    SidebarText.contact: 'Контакт',
+    SidebarText.contact: 'Контакты',
   };
 
   @override
   Map<String, String> get id => {
     SidebarText.appName: 'CyberSafe',
-    SidebarText.categoryManager: 'Pengelola Kategori',
-    SidebarText.about: 'Tentang',
-    SidebarText.faqs: 'FAQs',
+    SidebarText.categoryManager: 'Manajemen Kategori',
+    SidebarText.about: 'Tentang aplikasi',
+    SidebarText.faqs: 'Pertanyaan Umum',
     SidebarText.featureRequest: 'Permintaan Fitur',
     SidebarText.privacyPolicy: 'Kebijakan Privasi',
     SidebarText.termsOfService: 'Ketentuan Layanan',
-    SidebarText.rateApp: 'Evaluasi Aplikasi',
+    SidebarText.rateApp: 'Beri Nilai Aplikasi',
     SidebarText.support: 'Dukungan',
     SidebarText.requestLanguage: 'Permintaan Bahasa',
     SidebarText.contact: 'Kontak',
@@ -126,11 +126,10 @@ class SidebarLocale extends BaseLocale {
   @override
   Map<String, String> get tr => {
     SidebarText.appName: 'CyberSafe',
-    SidebarText.categoryManager: 'Kategori Yöneticisi',
+    SidebarText.categoryManager: 'Kategori Yönetimi',
     SidebarText.about: 'Hakkında',
-    SidebarText.faqs: 'SSS',
-    SidebarText.featureRequest: 'Özellik İstekleri',
-
+    SidebarText.faqs: 'Sıkça Sorulan Sorular',
+    SidebarText.featureRequest: 'Özellik Talebi',
     SidebarText.privacyPolicy: 'Gizlilik Politikası',
     SidebarText.termsOfService: 'Kullanım Koşulları',
     SidebarText.rateApp: 'Uygulamayı Değerlendir',

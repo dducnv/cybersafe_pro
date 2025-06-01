@@ -48,25 +48,12 @@ class Sidebar extends StatelessWidget {
           },
         ),
         ListTile(
-          leading: Icon(Icons.info_rounded, size: 24),
-          title: Text(context.trSidebar(SidebarText.about), style: drawerTitleStyle),
+          leading: Icon(Icons.contact_mail_rounded, size: 24),
+          title: Text(context.trSidebar(SidebarText.contact), style: drawerTitleStyle),
           onTap: () {
-            AppRoutes.navigateTo(context, AppRoutes.aboutApp);
+            AppConfig.showDialogRedirectLink(context, url: AppConfig.contactUrl());
           },
         ),
-        // ListTile(
-        //   leading: Icon(Icons.question_mark_rounded, size: 24.sp),
-        //   title: Text(context.trSidebar(SidebarText.faqs), style: drawerTitleStyle),
-        //   onTap: () {}
-        // ),
-        ListTile(
-          leading: Icon(Icons.mail_rounded, size: 24),
-          title: Text(context.trSidebar(SidebarText.featureRequest), style: drawerTitleStyle),
-          onTap: () {
-            openUrl("mailto:contact.ducnv@gmail.com?subject=[CyberSafe] Feature Request", context: context);
-          },
-        ),
-        //contact
         ListTile(
           leading: Icon(Icons.support_agent_rounded, size: 24),
           title: Text(context.trSidebar(SidebarText.support), style: drawerTitleStyle),
@@ -75,17 +62,19 @@ class Sidebar extends StatelessWidget {
           },
         ),
         ListTile(
+          leading: Icon(Icons.mail_rounded, size: 24),
+          title: Text(context.trSidebar(SidebarText.featureRequest), style: drawerTitleStyle),
+          onTap: () {
+            openUrl("mailto:contact.ducnv@gmail.com?subject=[CyberSafe] Feature Request", context: context);
+          },
+        ),
+
+        //contact
+        ListTile(
           leading: Icon(Icons.translate_rounded, size: 24),
           title: Text(context.trSidebar(SidebarText.requestLanguage), style: drawerTitleStyle),
           onTap: () {
             openUrl("mailto:contact.ducnv@gmail.com?subject=[CyberSafe] Request Language", context: context);
-          },
-        ),
-        ListTile(
-          leading: Icon(Icons.contact_mail_rounded, size: 24),
-          title: Text(context.trSidebar(SidebarText.contact), style: drawerTitleStyle),
-          onTap: () {
-            AppConfig.showDialogRedirectLink(context, url: AppConfig.contactUrl());
           },
         ),
         ListTile(
@@ -100,6 +89,13 @@ class Sidebar extends StatelessWidget {
           title: Text(context.trSidebar(SidebarText.termsOfService), style: drawerTitleStyle),
           onTap: () {
             AppConfig.showDialogRedirectLink(context, url: AppConfig.termsOfServiceUrl(context.localeRead.languageCode));
+          },
+        ),
+        ListTile(
+          leading: Icon(Icons.info_rounded, size: 24),
+          title: Text(context.trSidebar(SidebarText.about), style: drawerTitleStyle),
+          onTap: () {
+            AppRoutes.navigateTo(context, AppRoutes.aboutApp);
           },
         ),
       ],

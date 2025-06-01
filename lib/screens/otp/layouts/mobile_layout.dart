@@ -48,7 +48,7 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('OTP Accounts'), elevation: 0, scrolledUnderElevation: 0, backgroundColor: Theme.of(context).colorScheme.surface),
+      appBar: AppBar(title: Text(context.trOtp(OtpText.title)), elevation: 0, scrolledUnderElevation: 0, backgroundColor: Theme.of(context).colorScheme.surface),
       body:
           _otpAccounts.isEmpty
               ? Center(child: Image.asset("assets/images/exclamation-mark.png", width: 60.w, height: 60.h))
