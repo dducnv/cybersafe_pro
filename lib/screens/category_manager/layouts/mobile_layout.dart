@@ -3,6 +3,7 @@ import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/category_text.dart';
+import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
@@ -96,6 +97,8 @@ class CategoryManagerMobileLayout extends StatelessWidget {
         onConfirm: () async {
           bool result = await context.read<CategoryProvider>().deleteCategory(category);
           if (result && context.mounted) {
+            context.read<CategoryProvider>().refresh();
+            context.read<AccountProvider>().refreshAccounts();
             Navigator.pop(context);
           }
         },

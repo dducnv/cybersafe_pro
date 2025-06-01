@@ -106,7 +106,6 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                           ListTile(
                             title: Text(context.trDetails(DetailsAccountText.deleteAccount), style: TextStyle(color: Theme.of(context).colorScheme.error)),
                             onTap: () {
-                              Navigator.of(context).pop();
                               showAppCustomDialog(
                                 context,
                                 AppCustomDialog(
@@ -115,9 +114,10 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                                   confirmText: context.trSafe(DetailsAccountText.deleteAccount),
                                   cancelText: context.trSafe(DetailsAccountText.cancel),
                                   isCountDownTimer: true,
-                                  onConfirm: () {
+                                  onConfirm: () async {
+                                    await context.read<AccountProvider>().deleteAccount(widget.accountOjbModel);
+                                    if (!context.mounted) return;
                                     context.read<CategoryProvider>().refresh();
-                                    context.read<AccountProvider>().deleteAccount(widget.accountOjbModel);
                                     Navigator.of(context).pop();
                                     Navigator.of(context).pop();
                                   },

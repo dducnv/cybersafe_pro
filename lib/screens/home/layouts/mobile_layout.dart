@@ -349,7 +349,6 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                   leading: Icon(Icons.delete, color: Colors.red, size: 24.sp),
                   title: Text(context.trHome(HomeLocale.deleteAccount), style: TextStyle(color: Colors.red, fontSize: 16.sp)),
                   onTap: () {
-                    Navigator.pop(context);
                     showAppCustomDialog(
                       context,
                       AppCustomDialog(
@@ -358,9 +357,10 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                         confirmText: context.trSafe(DetailsAccountText.deleteAccount),
                         cancelText: context.trSafe(DetailsAccountText.cancel),
                         isCountDownTimer: true,
-                        onConfirm: () {
+                        onConfirm: () async {
+                          await context.read<AccountProvider>().deleteAccount(accountModel);
+                          if (!context.mounted) return;
                           context.read<CategoryProvider>().refresh();
-                          context.read<AccountProvider>().deleteAccount(accountModel);
                           Navigator.of(context).pop();
                           Navigator.of(context).pop();
                         },

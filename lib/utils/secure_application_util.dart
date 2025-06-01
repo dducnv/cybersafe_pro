@@ -40,17 +40,12 @@ class SecureApplicationUtil {
       if (secureApplicationController == null || _isDisposed) {
         _isDisposed = false;
         secureApplicationController = SecureApplicationController(
-          SecureApplicationState(
-            locked: false,
-            secured: true,
-          ),
+          SecureApplicationState(),
         );
         _setupListeners();
+        secureApplicationController?.secure();
         _isInitialized = true;
         _shouldLockOnBackground = autoLock;
-        
-        // Mở ứng dụng ngay sau khi khởi tạo
-        secureApplicationController?.open();
         
         if (!_initCompleter.isCompleted) {
           _initCompleter.complete();

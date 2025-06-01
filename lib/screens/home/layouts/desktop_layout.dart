@@ -129,7 +129,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
       extendBody: true,
       appBar: DesktopAppbar(),
       body: Padding(
-        padding: const EdgeInsets.only(top:16),
+        padding: const EdgeInsets.only(top: 16),
         child: Column(
           children: [
             Expanded(
@@ -149,7 +149,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                       ],
                     ),
                   ),
-        
+
                   // Danh sách tài khoản
                   Expanded(
                     flex: 2,
@@ -165,11 +165,11 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                               child: Consumer<AccountProvider>(
                                 builder: (context, accountProvider, child) {
                                   final groupedAccounts = accountProvider.groupedAccounts;
-        
+
                                   if (groupedAccounts.isEmpty) {
                                     return _buildEmptyData();
                                   }
-        
+
                                   return ListView.builder(
                                     controller: _scrollController,
                                     itemCount: groupedAccounts.length,
@@ -179,7 +179,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                                       final categoryId = categoryKeys[index];
                                       final category = context.read<CategoryProvider>().categories[categoryId];
                                       final accounts = groupedAccounts[categoryId] ?? [];
-        
+
                                       return CardItem<AccountOjbModel>(
                                         items: accounts,
                                         title: category?.categoryName ?? "",
@@ -224,7 +224,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                       ),
                     ),
                   ),
-        
+
                   // Chi tiết tài khoản
                   Expanded(
                     flex: 3,
@@ -236,47 +236,32 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                             return FadeTransition(
                               opacity: animation,
                               child: SlideTransition(
-                                position: Tween<Offset>(
-                                  begin: const Offset(0.1, 0),
-                                  end: Offset.zero,
-                                ).animate(CurvedAnimation(
-                                  parent: animation,
-                                  curve: Curves.easeInOut,
-                                )),
+                                position: Tween<Offset>(begin: const Offset(0.1, 0), end: Offset.zero).animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut)),
                                 child: child,
                               ),
                             );
                           },
-                          child: !desktopProvider.hasSelectedAccount
-                              ? Container(
-                                  key: const ValueKey('empty'),
-                                  color: Theme.of(context).colorScheme.surface,
-                                  child: Center(
-                                    child: AnimatedOpacity(
-                                      duration: const Duration(milliseconds: 500),
-                                      opacity: 1.0,
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.account_circle_outlined,
-                                            size: 64,
-                                            color: Colors.grey[400],
-                                          ),
-                                          const SizedBox(height: 16),
-                                          Text(
-                                            "Chọn một tài khoản để xem chi tiết",
-                                            style: TextStyle(fontSize: 16, color: Colors.grey),
-                                          ),
-                                        ],
+                          child:
+                              !desktopProvider.hasSelectedAccount
+                                  ? Container(
+                                    key: const ValueKey('empty'),
+                                    color: Theme.of(context).colorScheme.surface,
+                                    child: Center(
+                                      child: AnimatedOpacity(
+                                        duration: const Duration(milliseconds: 500),
+                                        opacity: 1.0,
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(Icons.account_circle_outlined, size: 64, color: Colors.grey[400]),
+                                            const SizedBox(height: 16),
+                                            Text("Chọn một tài khoản để xem chi tiết", style: TextStyle(fontSize: 16, color: Colors.grey)),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                )
-                              : Container(
-                                  key: ValueKey('account_${desktopProvider.selectedAccount!.id}'),
-                                  child: _buildAccountDetails(context, desktopProvider.selectedAccount!),
-                                ),
+                                  )
+                                  : Container(key: ValueKey('account_${desktopProvider.selectedAccount!.id}'), child: _buildAccountDetails(context, desktopProvider.selectedAccount!)),
                         );
                       },
                     ),
@@ -284,7 +269,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                 ],
               ),
             ),
-        
+
             // Phần danh mục ở dưới
             Padding(padding: EdgeInsets.only(top: 16, bottom: 24.h), child: _buildCategoryDetail(context)),
           ],
@@ -313,28 +298,16 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                       duration: const Duration(milliseconds: 400),
                       tween: Tween(begin: 0.0, end: 1.0),
                       builder: (context, value, child) {
-                        return Transform.translate(
-                          offset: Offset(0, 20 * (1 - value)),
-                          child: Opacity(
-                            opacity: value,
-                            child: _buildAccountIcon(context, account),
-                          ),
-                        );
+                        return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildAccountIcon(context, account)));
                       },
                     ),
                     SizedBox(height: 16),
-                    if (account.totp.target != null) 
+                    if (account.totp.target != null)
                       TweenAnimationBuilder<double>(
                         duration: const Duration(milliseconds: 500),
                         tween: Tween(begin: 0.0, end: 1.0),
                         builder: (context, value, child) {
-                          return Transform.translate(
-                            offset: Offset(0, 20 * (1 - value)),
-                            child: Opacity(
-                              opacity: value,
-                              child: _buildTOTPWidget(account),
-                            ),
-                          );
+                          return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildTOTPWidget(account)));
                         },
                       ),
                     SizedBox(height: 16),
@@ -342,13 +315,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                       duration: const Duration(milliseconds: 600),
                       tween: Tween(begin: 0.0, end: 1.0),
                       builder: (context, value, child) {
-                        return Transform.translate(
-                          offset: Offset(0, 20 * (1 - value)),
-                          child: Opacity(
-                            opacity: value,
-                            child: _buildBaseInfo(context, account),
-                          ),
-                        );
+                        return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildBaseInfo(context, account)));
                       },
                     ),
                     SizedBox(height: 16),
@@ -356,70 +323,40 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                       duration: const Duration(milliseconds: 700),
                       tween: Tween(begin: 0.0, end: 1.0),
                       builder: (context, value, child) {
-                        return Transform.translate(
-                          offset: Offset(0, 20 * (1 - value)),
-                          child: Opacity(
-                            opacity: value,
-                            child: _buildCategory(context, account),
-                          ),
-                        );
+                        return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildCategory(context, account)));
                       },
                     ),
                     SizedBox(height: 16),
-                    if (account.notes != null && account.notes!.isNotEmpty) 
+                    if (account.notes != null && account.notes!.isNotEmpty)
                       TweenAnimationBuilder<double>(
                         duration: const Duration(milliseconds: 800),
                         tween: Tween(begin: 0.0, end: 1.0),
                         builder: (context, value, child) {
-                          return Transform.translate(
-                            offset: Offset(0, 20 * (1 - value)),
-                            child: Opacity(
-                              opacity: value,
-                              child: _buildNoteWidget(context, account),
-                            ),
-                          );
+                          return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildNoteWidget(context, account)));
                         },
                       ),
                     SizedBox(height: 16),
-                    if (account.customFields.isNotEmpty) 
+                    if (account.customFields.isNotEmpty)
                       TweenAnimationBuilder<double>(
                         duration: const Duration(milliseconds: 900),
                         tween: Tween(begin: 0.0, end: 1.0),
                         builder: (context, value, child) {
-                          return Transform.translate(
-                            offset: Offset(0, 20 * (1 - value)),
-                            child: Opacity(
-                              opacity: value,
-                              child: _buildCustomFieldsWidget(account),
-                            ),
-                          );
+                          return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildCustomFieldsWidget(account)));
                         },
                       ),
-                    if (account.passwordHistories.isNotEmpty) 
+                    if (account.passwordHistories.isNotEmpty)
                       TweenAnimationBuilder<double>(
                         duration: const Duration(milliseconds: 1000),
                         tween: Tween(begin: 0.0, end: 1.0),
                         builder: (context, value, child) {
-                          return Transform.translate(
-                            offset: Offset(0, 20 * (1 - value)),
-                            child: Opacity(
-                              opacity: value,
-                              child: _buildPasswordHistoryWidget(account),
-                            ),
-                          );
+                          return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildPasswordHistoryWidget(account)));
                         },
                       ),
                     TweenAnimationBuilder<double>(
                       duration: const Duration(milliseconds: 1100),
                       tween: Tween(begin: 0.0, end: 1.0),
                       builder: (context, value, child) {
-                        return Transform.translate(
-                          offset: Offset(0, 20 * (1 - value)),
-                          child: Opacity(
-                            opacity: value,
-                            child: _buildUpdatedAtWidget(account),
-                          ),
-                        );
+                        return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildUpdatedAtWidget(account)));
                       },
                     ),
                   ],
@@ -916,7 +853,6 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                   leading: Icon(Icons.delete, color: Colors.red, size: 24.sp),
                   title: Text(context.trHome(HomeLocale.deleteAccount), style: TextStyle(color: Colors.red, fontSize: 16.sp)),
                   onTap: () {
-                    Navigator.pop(context);
                     showAppCustomDialog(
                       context,
                       AppCustomDialog(
@@ -925,10 +861,10 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                         confirmText: context.trSafe(DetailsAccountText.deleteAccount),
                         cancelText: context.trSafe(DetailsAccountText.cancel),
                         isCountDownTimer: true,
-                        onConfirm: () {
+                        onConfirm: () async {
+                          await context.read<AccountProvider>().deleteAccount(accountModel);
+                          if (!context.mounted) return;
                           context.read<CategoryProvider>().refresh();
-                          context.read<AccountProvider>().deleteAccount(accountModel);
-                          Navigator.of(context).pop();
                           Navigator.of(context).pop();
                         },
                       ),

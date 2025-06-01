@@ -106,7 +106,12 @@ class _AppCustomDialogState extends State<AppCustomDialog> {
             child: Text(widget.cancelText ?? context.trCategory(CategoryText.cancel), style: TextStyle(color: widget.cancelButtonColor ?? CupertinoColors.destructiveRed)),
           ),
         CupertinoDialogAction(
-          onPressed: canConfirm ? (widget.onConfirm ?? () => Navigator.of(context).pop()) : null,
+          onPressed:
+              canConfirm
+                  ? () {
+                    widget.onConfirm?.call();
+                  }
+                  : null,
           child: Text(
             "${widget.confirmText ?? context.trSettings(SettingsLocale.confirm)} ${widget.isCountDownTimer && !canConfirm ? "($countdown)" : ""}",
             style: TextStyle(color: canConfirm ? (widget.confirmButtonColor ?? CupertinoColors.activeBlue) : CupertinoColors.inactiveGray, fontWeight: FontWeight.w600),
@@ -137,7 +142,13 @@ class _AppCustomDialogState extends State<AppCustomDialog> {
             child: Text(widget.cancelText ?? context.trCategory(CategoryText.cancel)),
           ),
         TextButton(
-          onPressed: canConfirm ? (widget.onConfirm ?? () => Navigator.of(context).pop()) : null,
+          onPressed:
+              canConfirm
+                  ? () {
+                    widget.onConfirm?.call();
+                    Navigator.of(context).pop();
+                  }
+                  : null,
           style: TextButton.styleFrom(
             foregroundColor: canConfirm ? (widget.confirmButtonColor ?? Theme.of(context).colorScheme.primary) : Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.38),
           ),
