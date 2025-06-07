@@ -11,7 +11,7 @@ class CardCustomWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: padding ?? EdgeInsets.symmetric(horizontal: 16, vertical: 10.h),
+      padding: padding ?? EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,

@@ -94,7 +94,7 @@ class OtpTextWithCountdownState extends State<OtpTextWithCountdown> {
 
   Widget _buildCountDownTimer() {
     return CircularCountDownTimer(
-      width: widget.width ?? 20.w,
+      width: widget.width ?? 20.h,
       height: widget.height ?? 20.h,
       duration: widget.duration ?? 30,
       initialDuration: widget.initialDuration ?? nowValueCountDown,

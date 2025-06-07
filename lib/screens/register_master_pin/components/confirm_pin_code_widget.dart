@@ -43,8 +43,12 @@ class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
             child: AppPinCodeFields(
               key: widget.appPinCodeConfirmKey,
               formKey: widget.formConfirmKey,
-              onSubmitted: (value) {},
-              onEnter: () {},
+              onSubmitted: (value) {
+                _handleSubmit();  
+              },
+              onEnter: () {
+                _handleSubmit();
+              },
               textEditingController: pinCodeController,
               autoFocus: true,
               validator: (value) {

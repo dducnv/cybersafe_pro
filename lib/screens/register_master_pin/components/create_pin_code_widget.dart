@@ -41,8 +41,12 @@ class _CreatePinCodeWidgetState extends State<CreatePinCodeWidget> {
               key: widget.appPinCodeCreateKey,
               formKey: widget.formCreateKey,
               textEditingController: pinCodeController,
-              onSubmitted: (value) {},
-              onEnter: () {},
+              onSubmitted: (value) {
+                _handleSubmit();
+              },
+              onEnter: () {
+                _handleSubmit();
+              },
               autoFocus: true,
               validator: (value) {
                 if (value!.length < 6) {

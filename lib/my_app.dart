@@ -198,9 +198,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       case AppRoutes.registerMasterPin:
         return const RegisterMasterPin();
       case AppRoutes.loginMasterPin:
-        return const LoginMasterPassword();
+        return const LoginMasterPassword(showBiometric: true);
       default:
-        return const LoginMasterPassword();
+        return const LoginMasterPassword(showBiometric: true);
     }
   }
 

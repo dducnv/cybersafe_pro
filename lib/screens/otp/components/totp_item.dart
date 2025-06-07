@@ -42,27 +42,28 @@ class _TotpItemState extends State<TotpItem> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
-                        child: SizedBox(width: 50.h, height: 50.h, child: ColoredBox(color: Colors.grey.withValues(alpha: 0.2), child: Center(child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: IconShowComponent(account: widget.account, width: 45.w, height: 45.h, isDecrypted: false),
-                        )))),
-                      ),
-                      const SizedBox(width: 10),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.5,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            DecryptText(value: widget.title, decryptTextType: DecryptTextType.info, style: TextStyle(overflow: TextOverflow.ellipsis, fontSize: 14.sp, fontWeight: FontWeight.bold)),
-                            if (widget.email.isNotEmpty) DecryptText(value: widget.email, decryptTextType: DecryptTextType.info, style: TextStyle(color: Colors.grey, fontSize: 12.sp)),
-                          ],
+                  Expanded(
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(15),
+                          child: SizedBox(width: 50.h, height: 50.h, child: ColoredBox(color: Colors.grey.withValues(alpha: 0.2), child: Center(child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: IconShowComponent(account: widget.account, width: 45.w, height: 45.h, isDecrypted: false),
+                          )))),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              DecryptText(value: widget.title, decryptTextType: DecryptTextType.info, style: TextStyle(overflow: TextOverflow.ellipsis, fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                              if (widget.email.isNotEmpty) DecryptText(value: widget.email, decryptTextType: DecryptTextType.info, style: TextStyle(color: Colors.grey, fontSize: 12.sp)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   IconButton(
                     onPressed: () async {
