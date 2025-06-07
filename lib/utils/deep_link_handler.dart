@@ -46,26 +46,22 @@ class DeepLinkHandler {
   }
 
   Future<void> _handleTransferRequest(Uri uri) async {
-        // Extract the file path from the query parameters
+    // Extract the file path from the query parameters
 
     BuildContext? context = GlobalKeys.appRootNavigatorKey.currentContext;
     if (context == null || !context.mounted) return;
-    showAppCustomDialog(
+    bool? isConfirmed = await showAppCustomDialog(
       context,
       AppCustomDialog(
         title: context.trSafe(SettingsLocale.receiveData),
         message: context.trSafe(SettingsLocale.receiveDataMessage),
         confirmText: context.trSafe(SettingsLocale.confirm),
         cancelText: context.trSafe(SettingsLocale.cancel),
-        canConfirmInitially:true,
-        onCancel: () {
-          AppRoutes.pop(context);
-        },
-        onConfirm: () {
-          DataManagerService.importTransferData();
-        },
+        canConfirmInitially: true,
       ),
     );
+    if (isConfirmed != true) return;
+    await DataManagerService.importTransferData();
   }
 
   void dispose() {

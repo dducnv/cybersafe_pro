@@ -11,6 +11,7 @@ import 'package:cybersafe_pro/services/local_auth_service.dart';
 import 'package:cybersafe_pro/utils/device_type.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/utils/secure_app_state.dart';
 import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
@@ -98,7 +99,6 @@ class _MobileLayoutState extends State<MobileLayout> {
           return KeyboardListener(
             focusNode: FocusNode(),
             onKeyEvent: (event) {
-              print('Key event: ${event.logicalKey}'); // Debug log for key events
               if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.enter) {
                 if (!isCurrentlyLocked) {
                   handleLogin(provider);
@@ -240,20 +240,17 @@ class _MobileLayoutState extends State<MobileLayout> {
       if (isLoginSuccess) {
         // Gọi callback để thông báo login thành công
         if (widget.callBackLoginCallback != null) {
-          widget.callBackLoginCallback!(isLoginSuccess: true, pin: provider.textEditingController.text ?? '', appPinCodeKey: _pinCodeKey);
+          widget.callBackLoginCallback!(isLoginSuccess: true, pin: provider.textEditingController.text, appPinCodeKey: _pinCodeKey);
         }
         // Unlock ứng dụng0
         widget.secureApplicationController?.authSuccess(unlock: true);
+        SecureApplicationUtil.instance.setSecureState(SecureAppState.secured);
       } else {
         // Nếu login thất bại, không unlock
         widget.secureApplicationController?.authFailed(unlock: false);
       }
       return;
     }
-
-    // Logic cũ cho trường hợp bình thường
-    SecureApplicationUtil.instance.secure();
-
     if (widget.isFromBackup || widget.isFromRestore) {
       if (widget.callBackLoginCallback != null) {
         widget.callBackLoginCallback!(isLoginSuccess: true, pin: provider.textEditingController.text ?? '', appPinCodeKey: _pinCodeKey);
@@ -264,14 +261,16 @@ class _MobileLayoutState extends State<MobileLayout> {
     bool isLoginSuccess = await provider.handleLogin();
 
     if (isLoginSuccess && mounted) {
+      SecureApplicationUtil.instance.setSecureState(SecureAppState.secured);
       if (widget.callBackLoginCallback != null) {
-        widget.callBackLoginCallback!(isLoginSuccess: true, pin: provider.textEditingController.text ?? '', appPinCodeKey: _pinCodeKey);
+        widget.callBackLoginCallback!(isLoginSuccess: true, pin: provider.textEditingController.text, appPinCodeKey: _pinCodeKey);
         return;
       }
 
       try {
         if (mounted) {
           final appProvider = Provider.of<AppProvider>(context, listen: false);
+
           appProvider.initializeTimer();
           AppRoutes.navigateAndRemoveUntil(context, AppRoutes.home);
         }

@@ -39,6 +39,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     initApp();
+    SecureApplicationUtil.instance.init();
     _initSecureApplication();
   }
 
@@ -55,14 +56,23 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     if (state == AppLifecycleState.paused) {
       logInfo("Ứng dụng đang chạy nền");
       context.read<AppProvider>().handleAppBackground();
-      // Lock ứng dụng ngay lập tức khi vào background
-      SecureApplicationUtil.instance.lockOnBackground();
+      // Lock ứng dụng ngay lập tức khi vào background, chỉ khi không ở login/register
+      final currentRoute = ModalRoute.of(context)?.settings.name;
+      if (currentRoute != AppRoutes.loginMasterPin && currentRoute != AppRoutes.registerMasterPin) {
+        SecureApplicationUtil.instance.lockOnBackground();
+      }
       // Xóa orchestration key khi ứng dụng chuyển sang background
       // Làm sạch cache để giảm bộ nhớ
       EncryptAppDataService.instance.clearCache();
     } else if (state == AppLifecycleState.resumed) {
       logInfo("Ứng dụng đang chạy lại");
+      context.read<AppProvider>().initializeTimer();
       EncryptAppDataService.instance.initialize();
+
+      // Đảm bảo SecureApplicationUtil đã được khởi tạo
+      if (!SecureApplicationUtil.instance.isInitialized) {
+        SecureApplicationUtil.instance.init();
+      }
 
       // Kiểm tra xem có sự thay đổi về loại thiết bị không
       final deviceType = DeviceInfo.getDeviceType(context);
@@ -128,7 +138,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Future<void> _initSecureApplication() async {
     try {
       // Khởi tạo ngay lập tức mà không chờ delay
-      await SecureApplicationUtil.instance.init(autoLock: true);
+      await SecureApplicationUtil.instance.init();
       logInfo('SecureApplication initialized successfully');
     } catch (e) {
       logError('Failed to initialize SecureApplication: $e');
@@ -205,27 +215,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   Widget _buildSecureApplication(Widget? child) {
-    try {
-      // Kiểm tra xem SecureApplicationUtil đã được khởi tạo chưa
-      if (!SecureApplicationUtil.instance.isInitialized || SecureApplicationUtil.instance.secureApplicationController == null) {
-        // Nếu chưa khởi tạo, trả về child trực tiếp
-        return _buildListenerWidget(child);
-      }
-      // Sử dụng ValueListenableBuilder để lắng nghe thay đổi trạng thái mà không cần truy cập trực tiếp vào widget
-      return ValueListenableBuilder<bool>(
-        valueListenable: SecureApplicationUtil.instance.lockStateChanged,
-        builder: (context, _, __) {
-          return SecureApplication(
-            nativeRemoveDelay: 200, // Giảm từ 800ms xuống 200ms cho hiệu ứng nhanh hơn
-            secureApplicationController: SecureApplicationUtil.instance.secureApplicationController,
-            child: _buildListenerWidget(child),
-          );
-        },
-      );
-    } catch (e) {
-      logError('Error in _buildSecureApplication: $e');
+    // Luôn bọc app bằng SecureApplication để chặn screenshot
+    if (!SecureApplicationUtil.instance.isInitialized || SecureApplicationUtil.instance.secureApplicationController == null) {
       return _buildListenerWidget(child);
     }
+    return SecureApplication(nativeRemoveDelay: 200, secureApplicationController: SecureApplicationUtil.instance.secureApplicationController, child: _buildListenerWidget(child));
   }
 
   Widget _buildListenerWidget(Widget? child) {

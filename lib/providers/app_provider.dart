@@ -19,7 +19,7 @@ class AppProvider extends ChangeNotifier {
   bool isShowRequestRotateKey = false;
 
   //time login
-  Timer _rootTimer = Timer(Duration.zero, () {});
+  Timer? _rootTimer;
   bool _isOpenAutoLock = false;
   bool get isOpenAutoLock => _isOpenAutoLock;
   int _timeAutoLock = 5;
@@ -44,11 +44,10 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> initializeTimer() async {
-    _rootTimer.cancel();
+    stopTimer();
     final autoLock = await SecureStorage.instance.readBool(SecureStorageKey.isAutoLock);
     final timeAutoLock = await SecureStorage.instance.readInt(SecureStorageKey.timeAutoLock) ?? 5;
     final lockOnBackground = await SecureStorage.instance.readBool(SecureStorageKey.lockOnBackground) ?? false;
-    
     _timeAutoLock = timeAutoLock;
     _lockOnBackground = lockOnBackground;
     if (autoLock == null || !autoLock) {
@@ -56,34 +55,38 @@ class AppProvider extends ChangeNotifier {
       return;
     }
     _isOpenAutoLock = true;
-    // Chuyển từ phút sang giây nếu thời gian dưới 1 phút
-    Duration time = _timeAutoLock < 1 
-        ? Duration(seconds: 30) 
-        : Duration(minutes: _timeAutoLock);
-    _rootTimer = Timer(time, () {
+    _startAutoLockTimer();
+  }
 
+  void _startAutoLockTimer() {
+    stopTimer();
+    Duration time = _timeAutoLock < 1 ? Duration(seconds: 30) : Duration(minutes: _timeAutoLock);
+    _rootTimer = Timer(time, () {
       logInfo('Auto lock timer expired');
       logOutUser();
     });
-    
   }
 
   void stopTimer() {
-    _rootTimer.cancel();
+    _rootTimer?.cancel();
+    _rootTimer = null;
   }
 
   void logOutUser() {
-    print("logout");
-    _rootTimer.cancel();
+    stopTimer();
     AppRoutes.navigateAndRemoveUntil(GlobalKeys.appRootNavigatorKey.currentContext!, AppRoutes.loginMasterPin);
   }
 
   void handleUserInteraction([_]) {
-    if (!_rootTimer.isActive) {
-      return;
+    if (!_isOpenAutoLock) return;
+    if (_rootTimer == null || !_rootTimer!.isActive) return;
+    _startAutoLockTimer();
+  }
+
+  void resetAutoLockTimer() {
+    if (_isOpenAutoLock) {
+      _startAutoLockTimer();
     }
-    _rootTimer.cancel();
-    initializeTimer();
   }
 
   void setAutoLock(bool isOpen, int time) {
@@ -105,12 +108,13 @@ class AppProvider extends ChangeNotifier {
   
   // Xử lý khi ứng dụng chuyển sang chế độ nền
   void handleAppBackground() {
+    stopTimer(); // clear timer khi vào background
     if (_lockOnBackground && DataManagerService.canLockApp) {
       logAction('Khóa ứng dụng do chạy nền');
       
       try {
         // Dừng bộ đếm thời gian
-        _rootTimer.cancel();
+        _rootTimer?.cancel();
         // Tạo trễ ngắn để đảm bảo giao diện cập nhật trước khi đăng xuất
         // Future.delayed(const Duration(milliseconds: 100), () {
         //   logOutUser();

@@ -54,8 +54,6 @@ class SecureApplicationUtil {
       try {
         // Tạm thời mở khóa để thực hiện các tác vụ
         secureApplicationController?.open();
-        print("hehe hehehe");
-
         // Đặt timer để khôi phục bảo mật sau một khoảng thời gian
         _resumeTimer?.cancel();
         _resumeTimer = Timer(const Duration(minutes: 3), () {

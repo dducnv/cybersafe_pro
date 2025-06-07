@@ -149,22 +149,21 @@ class AppRoutes {
 
   // Route generator for handling dynamic routes and arguments
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
-    // Kiểm tra và cập nhật trạng thái bảo mật dựa trên route
-    if (!noneSecureRoutes.contains(settings.name)) {
-      SecureApplicationUtil.instance.setSecureState(SecureAppState.partial);
-    }
-
     Widget screen = _buildScreen(settings.name ?? '', settings.arguments);
 
     // Chỉ áp dụng SecureGate cho các route cần bảo mật
     if (!noneSecureRoutes.contains(settings.name)) {
-      screen = SecureGate(blurr: 30, opacity: 0.9, lockedBuilder: (context, secureApplicationController) => _buildUnlockScreen(context, secureApplicationController), child: screen);
+      screen = SecureGate(
+        blurr: 30,
+        opacity: 0.9,
+        lockedBuilder: (context, secureApplicationController) => _buildUnlockScreen(context, secureApplicationController),
+        child: screen,
+      );
     }
 
     if (Platform.isIOS) {
       return CupertinoPageRoute(builder: (context) => screen, settings: settings);
     }
-
     return MaterialPageRoute(builder: (context) => screen, settings: settings);
   }
 

@@ -521,9 +521,7 @@ class DataManagerService {
   static Future<bool> importTransferData() async {
     try {
       showLoadingDialog();
-      Directory? externalDirectory = await getDownloadDirectory();
-      // Lấy đường dẫn file
-      FilePickerResult? result = await FilePicker.platform.pickFiles(initialDirectory: "${externalDirectory.path}/cyber_safe/$TRANSFER_FOLDER");
+      FilePickerResult? result = await FilePickerUtils.pickFile(type: FileType.any);
       if (result == null || result.files.isEmpty) {
         throw Exception('File not selected');
       }
@@ -598,7 +596,6 @@ class DataManagerService {
         Navigator.of(GlobalKeys.appRootNavigatorKey.currentContext!).pop();
         await GlobalKeys.appRootNavigatorKey.currentContext!.read<CategoryProvider>().refresh();
         GlobalKeys.appRootNavigatorKey.currentContext!.read<AccountProvider>().refreshAccounts();
-
         hideLoadingDialog();
         return true;
       } else {

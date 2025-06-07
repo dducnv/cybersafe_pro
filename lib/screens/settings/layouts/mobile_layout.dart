@@ -184,7 +184,6 @@ class SettingMobileLayout extends StatelessWidget {
                   title: context.appLocale.settingsLocale.getText(SettingsLocale.restore),
                   icon: Icons.restore,
                   onTap: () async {
-                    SecureApplicationUtil.instance.secureApplicationController?.pause();
                     await DataManagerService.restoreData(context);
                   },
                 ),

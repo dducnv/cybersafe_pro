@@ -1,6 +1,7 @@
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/local_auth_provider.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
+import 'package:cybersafe_pro/utils/secure_app_state.dart';
 import 'package:cybersafe_pro/utils/secure_application_util.dart';
 // import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
@@ -56,9 +57,9 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
       final authProvider = Provider.of<LocalAuthProvider>(context, listen: false);
       // if (SecureApplicationUtil.instance.secureApplicationController != null) SecureApplicationUtil.instance.secureApplicationController?.open();
       await authProvider.init(widget.showBiometric && !widget.isFromBackup && !widget.isFromRestore, () {
-        if (widget.secureApplicationController != null) widget.secureApplicationController?.unlock();
+        if (widget.secureApplicationController != null) widget.secureApplicationController?.authSuccess(unlock: true);
         widget.callBackLoginCallback?.call(isLoginSuccess: true);
-        SecureApplicationUtil.instance.init();
+        SecureApplicationUtil.instance.setSecureState(SecureAppState.secured);
       }, isNavigateToHome: widget.secureApplicationController == null);
       // Dừng timer
       if (_mounted) {
