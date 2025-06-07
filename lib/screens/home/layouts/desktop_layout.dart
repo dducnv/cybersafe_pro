@@ -1,6 +1,7 @@
 import 'package:cybersafe_pro/components/bottom_sheets/create_category_bottom_sheet.dart';
 import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/components/icon_show_component.dart';
+import 'package:cybersafe_pro/database/boxes/account_box.dart';
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/details_account_text.dart';
@@ -11,6 +12,7 @@ import 'package:cybersafe_pro/providers/desktop_home_provider.dart';
 import 'package:cybersafe_pro/resources/size_text_icon.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/screens/category_manager/layouts/mobile_layout.dart';
+import 'package:cybersafe_pro/screens/create_account/create_account_screen.dart' show CreateAccountScreen;
 import 'package:cybersafe_pro/screens/create_account/layouts/mobile_layout.dart';
 import 'package:cybersafe_pro/screens/home/components/desktop_appbar.dart';
 import 'package:cybersafe_pro/screens/password_generator/password_generate_screen.dart';
@@ -154,7 +156,11 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                   Expanded(
                     flex: 2,
                     child: Container(
-                      color: Theme.of(context).colorScheme.surface,
+                      padding: const EdgeInsets.only(right: 16),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        border: Border(right: BorderSide(color: context.darkMode ? Colors.grey.shade800 : Colors.grey.shade300, width: 1)),
+                      ),
                       child: Column(
                         children: [
                           Expanded(
@@ -194,21 +200,27 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                                             child: AnimatedContainer(
                                               duration: const Duration(milliseconds: 200),
                                               curve: Curves.easeInOut,
-                                              child: AccountItemWidget(
-                                                accountModel: account,
-                                                isLastItem: itemIndex == accounts.length - 1,
-                                                onLongPress: () {},
-                                                onCallBackPop: () {},
-                                                onTapSubButton: () {
-                                                  bottomSheetOptionAccountItem(context: context, viewModel: accountProvider, accountModel: account);
-                                                },
-                                                onSelect: () {
-                                                  context.read<AccountProvider>().handleSelectOrRemoveAccount(account);
-                                                },
-                                                onTap: () {
-                                                  // Chọn tài khoản để hiển thị chi tiết
-                                                  context.read<DesktopHomeProvider>().selectAccount(account);
-                                                },
+                                              child: Selector<DesktopHomeProvider, AccountOjbModel?>(
+                                                selector: (context, provider) => provider.selectedAccount,
+                                                builder: (context, selectedAccount, child) {
+                                                  return AccountItemWidget(
+                                                    accountModel: account,
+                                                    isSelected: selectedAccount?.id == account.id,
+                                                    isLastItem: itemIndex == accounts.length - 1,
+                                                    onLongPress: () {},
+                                                    onCallBackPop: () {},
+                                                    onTapSubButton: () {
+                                                      bottomSheetOptionAccountItem(viewModel: accountProvider, accountModel: account);
+                                                    },
+                                                    onSelect: () {
+                                                      context.read<AccountProvider>().handleSelectOrRemoveAccount(account);
+                                                    },
+                                                    onTap: () {
+                                                      // Chọn tài khoản để hiển thị chi tiết
+                                                      context.read<DesktopHomeProvider>().selectAccount(account);
+                                                    },
+                                                  );
+                                                }
                                               ),
                                             ),
                                           );
@@ -255,7 +267,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                                           children: [
                                             Icon(Icons.account_circle_outlined, size: 64, color: Colors.grey[400]),
                                             const SizedBox(height: 16),
-                                            Text("Chọn một tài khoản để xem chi tiết", style: TextStyle(fontSize: 16, color: Colors.grey)),
+                                            Text("Select an account to view details.", style: TextStyle(fontSize: 16, color: Colors.grey)),
                                           ],
                                         ),
                                       ),
@@ -311,13 +323,14 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                         },
                       ),
                     SizedBox(height: 16),
-                    TweenAnimationBuilder<double>(
-                      duration: const Duration(milliseconds: 600),
-                      tween: Tween(begin: 0.0, end: 1.0),
-                      builder: (context, value, child) {
-                        return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildBaseInfo(context, account)));
-                      },
-                    ),
+                    if ((account.email != null && account.email!.isNotEmpty) || (account.password != null && account.password!.isNotEmpty))
+                      TweenAnimationBuilder<double>(
+                        duration: const Duration(milliseconds: 600),
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        builder: (context, value, child) {
+                          return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildBaseInfo(context, account)));
+                        },
+                      ),
                     SizedBox(height: 16),
                     TweenAnimationBuilder<double>(
                       duration: const Duration(milliseconds: 700),
@@ -789,10 +802,10 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
     );
   }
 
-  Future<void> bottomSheetOptionAccountItem({required BuildContext context, required AccountProvider viewModel, required AccountOjbModel accountModel}) async {
+  Future<void> bottomSheetOptionAccountItem({required AccountProvider viewModel, required AccountOjbModel accountModel}) async {
     return showModalBottomSheet(
       context: context,
-      builder: (context) {
+      builder: (_) {
         return Container(
           padding: const EdgeInsets.symmetric(vertical: 16),
           child: SingleChildScrollView(
@@ -819,14 +832,30 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                   title: Text(context.trHome(HomeLocale.accountDetails), style: titleHomeOptiomItemStyle),
                   onTap: () {
                     Navigator.pop(context);
-                    AppRoutes.navigateTo(context, AppRoutes.detailsAccount, arguments: {"accountId": accountModel.id});
+                    context.read<DesktopHomeProvider>().selectAccount(accountModel);
                   },
                 ),
                 ListTile(
                   leading: Icon(Icons.edit, size: 24.sp),
                   title: Text(context.trHome(HomeLocale.updateAccount), style: titleHomeOptiomItemStyle),
                   onTap: () async {
-                    AppRoutes.navigateTo(context, AppRoutes.updateAccount, arguments: {"accountId": accountModel.id});
+                    Navigator.pop(context);
+                    await showModalSideSheet(
+                      context: context,
+                      ignoreAppBar: true,
+                      barrierDismissible: true,
+                      withCloseControll: false,
+                      body: CreateAccountScreen(isUpdate: true, accountId: accountModel.id),
+                    );
+                    if (!mounted) return;
+                    Future.delayed(const Duration(milliseconds: 500), () {
+                      if (!mounted) return;
+                      AccountBox.getById(accountModel.id).then((value) {
+                        if (value != null && mounted) {
+                          context.read<DesktopHomeProvider>().selectAccount(value);
+                        }
+                      });
+                    });
                   },
                 ),
                 if (accountModel.email != null && accountModel.email != "")

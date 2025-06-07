@@ -25,7 +25,7 @@ Future<bool?> showConfirmExitDialog(BuildContext context) async {
               ),
               const SizedBox(width: 8),
               Text(
-                context.trLogin(LoginText.confirmExit),
+                context.trSafe(LoginText.confirmExit),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.error,
@@ -34,7 +34,7 @@ Future<bool?> showConfirmExitDialog(BuildContext context) async {
             ],
           ),
           content: Text(
-            context.trLogin(LoginText.confirmExitMessage),
+            context.trSafe(LoginText.confirmExitMessage),
             style: TextStyle(
               fontSize: 16,
               color: Theme.of(context).colorScheme.onSurface,
@@ -46,7 +46,7 @@ Future<bool?> showConfirmExitDialog(BuildContext context) async {
                 Navigator.of(context).pop(false);
               },
               child: Text(
-                context.trLogin(LoginText.cancel),
+                context.trSafe(LoginText.cancel),
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w500,
@@ -58,7 +58,7 @@ Future<bool?> showConfirmExitDialog(BuildContext context) async {
                 Navigator.of(context).pop(true);
               },
               child: Text(
-                context.trLogin(LoginText.exit),
+                context.trSafe(LoginText.exit),
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.error,
                   fontWeight: FontWeight.w500,

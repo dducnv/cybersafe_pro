@@ -1,3 +1,4 @@
+import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:flutter/material.dart';
 
@@ -24,6 +25,7 @@ class _RegisterMasterPinState extends State<RegisterMasterPin> {
   @override
   void initState() {
     super.initState();
+    SecureApplicationUtil.instance.unlock();
     FlutterNativeSplash.remove();
   }
 

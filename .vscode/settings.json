@@ -1,10 +1,10 @@
 {
-    "cSpell.words": [
-        "cybersafe",
-        "totp"
-    ],
-    "dart.flutterSdkPath": "~/development/flutter",
-    "[dart]": {
-        "editor.defaultFormatter": "Dart-Code.dart-code",
-    }
+  "cSpell.words": [
+    "cybersafe",
+    "totp"
+  ],
+  "dart.flutterSdkPath": ".fvm/versions/3.29.3",
+  "[dart]": {
+    "editor.defaultFormatter": "Dart-Code.dart-code"
+  }
 }

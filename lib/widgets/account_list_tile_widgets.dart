@@ -9,12 +9,14 @@ import 'package:provider/provider.dart';
 class AccountItemWidget extends StatelessWidget {
   final AccountOjbModel accountModel;
   final bool isLastItem;
+  final bool isSelected;
   final Function()? onTapSubButton;
   final Function()? onCallBackPop;
   final Function()? onLongPress;
   final Function()? onSelect;
   final Function()? onDragSelect;
   final Function()? onTap;
+
   final Widget? subIcon;
   const AccountItemWidget({
     super.key,
@@ -26,13 +28,14 @@ class AccountItemWidget extends StatelessWidget {
     this.onSelect,
     this.subIcon,
     this.onDragSelect,
+    this.isSelected = false,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color.fromRGBO(0, 0, 0, 0),
+      color: isSelected ? Theme.of(context).colorScheme.primary.withValues(alpha: .1) : Colors.transparent,
       child: InkWell(
         onLongPress: onLongPress,
         onTap:
@@ -52,7 +55,7 @@ class AccountItemWidget extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),
                   child: ColoredBox(
-                    color: Colors.grey.withOpacity(0.2),
+                    color: Colors.grey.withValues(alpha: .2),
                     child: Center(
                       child: SizedBox(
                         width: 50.h,

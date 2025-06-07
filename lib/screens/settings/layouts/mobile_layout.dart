@@ -17,6 +17,7 @@ import 'package:cybersafe_pro/services/data_manager_service.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/app_custom_switch/app_custom_switch.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
@@ -26,6 +27,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
+import 'package:secure_application/secure_application_native.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class SettingMobileLayout extends StatelessWidget {
@@ -162,7 +164,7 @@ class SettingMobileLayout extends StatelessWidget {
                           return LoginMasterPassword(
                             isFromBackup: true,
                             showBiometric: false,
-                            callBackLoginSuccess: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
+                            callBackLoginCallback: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
                               if (isLoginSuccess == true && pin != null) {
                                 Navigator.of(context).pop();
                                 bool status = await DataManagerService.backupData(GlobalKeys.appRootNavigatorKey.currentContext!, pin);
@@ -181,11 +183,12 @@ class SettingMobileLayout extends StatelessWidget {
                 SettingItemWidget(
                   title: context.appLocale.settingsLocale.getText(SettingsLocale.restore),
                   icon: Icons.restore,
-                  onTap: () {
-                    DataManagerService.restoreData(context);
+                  onTap: () async {
+                    SecureApplicationUtil.instance.secureApplicationController?.pause();
+                    await DataManagerService.restoreData(context);
                   },
                 ),
-        
+
                 const SizedBox(height: 5),
                 SettingItemWidget(
                   title: context.appLocale.settingsLocale.getText(SettingsLocale.deleteData),
@@ -215,6 +218,7 @@ class SettingMobileLayout extends StatelessWidget {
               padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -275,6 +279,7 @@ class SettingMobileLayout extends StatelessWidget {
                     },
                     text: context.appLocale.settingsLocale.getText(SettingsLocale.confirm),
                   ),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),

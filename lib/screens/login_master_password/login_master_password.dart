@@ -15,10 +15,21 @@ class LoginMasterPassword extends StatefulWidget {
   final bool showBiometric;
   final bool isFromBackup;
   final bool isFromRestore;
+  final bool isFromDeleteData;
+  final bool fromSecureGate;
   final SecureApplicationController? secureApplicationController;
-  final Function({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey})? callBackLoginSuccess;
+  final Function({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey})? callBackLoginCallback;
 
-  const LoginMasterPassword({super.key, this.showBiometric = true, this.isFromBackup = false, this.isFromRestore = false, this.callBackLoginSuccess, this.secureApplicationController});
+  const LoginMasterPassword({
+    super.key,
+    this.showBiometric = true,
+    this.isFromBackup = false,
+    this.isFromRestore = false,
+    this.isFromDeleteData = false,
+    this.fromSecureGate = false,
+    this.callBackLoginCallback,
+    this.secureApplicationController,
+  });
 
   @override
   State<LoginMasterPassword> createState() => _LoginMasterPasswordState();
@@ -34,21 +45,21 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
   }
 
   Future<void> _initialize() async {
+    if (!widget.fromSecureGate) {
+      SecureApplicationUtil.instance.unlock();
+    }
+
     if (!_mounted) return;
-
-    // Đảm bảo SecureApplicationUtil được khởi tạo
-
     FlutterNativeSplash.remove();
-
     try {
       // Sử dụng provider có sẵn thay vì tạo mới
       final authProvider = Provider.of<LocalAuthProvider>(context, listen: false);
       // if (SecureApplicationUtil.instance.secureApplicationController != null) SecureApplicationUtil.instance.secureApplicationController?.open();
       await authProvider.init(widget.showBiometric && !widget.isFromBackup && !widget.isFromRestore, () {
         if (widget.secureApplicationController != null) widget.secureApplicationController?.unlock();
-        widget.callBackLoginSuccess?.call(isLoginSuccess: true);
+        widget.callBackLoginCallback?.call(isLoginSuccess: true);
         SecureApplicationUtil.instance.init();
-      }, isNavigateToHome: widget.secureApplicationController == null,);
+      }, isNavigateToHome: widget.secureApplicationController == null);
       // Dừng timer
       if (_mounted) {
         context.read<AppProvider>().stopTimer();
@@ -66,17 +77,13 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
 
   @override
   Widget build(BuildContext context) {
-    // Sử dụng ChangeNotifierProvider.value để đảm bảo rằng provider không bị
-    // tạo mới và không bị dispose khi widget này dispose
-    return Consumer<LocalAuthProvider>(
-      builder: (context, authProvider, _) {
-        return MobileLayout(
-          showBiometric: widget.showBiometric,
-          isFromBackup: widget.isFromBackup,
-          callBackLoginSuccess: widget.callBackLoginSuccess,
-          secureApplicationController: widget.secureApplicationController,
-        );
-      },
+    return MobileLayout(
+      showBiometric: widget.showBiometric,
+      isFromBackup: widget.isFromBackup,
+      isFromRestore: widget.isFromRestore,
+      isFromDeleteData: widget.isFromDeleteData,
+      callBackLoginCallback: widget.callBackLoginCallback,
+      secureApplicationController: widget.secureApplicationController,
     );
   }
 }

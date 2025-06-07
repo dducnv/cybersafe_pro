@@ -305,7 +305,7 @@ class EncryptAppDataService {
   }
 
   // Khôi phục backup
-  Future<bool> restoreBackup(String dataBackup, String pin) async {
+  Future<bool> restoreBackup(String dataBackup, String pin, {Function()? onIncorrectPin, Function()? onRestoreSuccess, Function()? onRestoreFailed, Function()? onRestoreStart}) async {
     try {
       final backupData = jsonDecode(dataBackup);
       _validateBackupData(backupData);
@@ -317,7 +317,8 @@ class EncryptAppDataService {
 
         // Kiểm tra xem có phải là dữ liệu backup hợp lệ không
         if (!data.containsKey('type') || data['type'] != 'CYBERSAFE_BACKUP') {
-          throw Exception('PIN_INCORRECT');
+          onIncorrectPin?.call();
+          throwAppError(ErrorText.invalidBackupFile);
         }
 
         await _restoreData(data['data']);
@@ -325,16 +326,19 @@ class EncryptAppDataService {
       } catch (e) {
         hideLoadingDialog();
         if (e.toString().contains('PIN_INCORRECT')) {
+          onIncorrectPin?.call();
           _logError('PIN không chính xác', e);
-          rethrow;
+          throw Exception('PIN_INCORRECT');
         }
-        // Nếu giải mã thất bại hoặc dữ liệu không hợp lệ, có thể là do PIN sai
-        throw Exception('PIN_INCORRECT');
+        
+        throwAppError(ErrorText.invalidBackupFile);
+        return false;
       }
     } catch (e) {
       hideLoadingDialog();
       _logError('Lỗi khôi phục backup', e);
       if (e.toString().contains('PIN_INCORRECT')) {
+        onIncorrectPin?.call();
         throw Exception('PIN_INCORRECT');
       }
       return false;

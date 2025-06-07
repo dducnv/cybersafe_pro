@@ -142,7 +142,8 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
           children: [
             _buildAnimatedWidget(index: 0, child: _buildAccountIcon()),
             if (accountOjbModel.totp.target != null && accountOjbModel.totp.target?.secretKey != null) _buildAnimatedWidget(index: 1, child: _buildTOTPWidget(accountOjbModel)),
-            if (accountOjbModel.email != null && accountOjbModel.email!.isNotEmpty) _buildAnimatedWidget(index: 2, child: _buildBaseInfo()),
+            if ((accountOjbModel.email != null && accountOjbModel.email!.isNotEmpty) || (accountOjbModel.password != null && accountOjbModel.password!.isNotEmpty))
+              _buildAnimatedWidget(index: 2, child: _buildBaseInfo()),
             _buildAnimatedWidget(index: 3, child: _buildCategory()),
             if (accountOjbModel.notes != null && accountOjbModel.notes!.isNotEmpty) _buildAnimatedWidget(index: 4, child: _buildNoteWidget()),
             if (accountOjbModel.customFields.isNotEmpty) _buildAnimatedWidget(index: 5, child: _buildCustomFieldsWidget(accountOjbModel)),
@@ -215,7 +216,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
             children: [
               if (accountOjbModel.email != null && accountOjbModel.email!.isNotEmpty)
                 ItemCopyValue(title: context.trDetails(DetailsAccountText.username), value: accountOjbModel.email!, isLastItem: accountOjbModel.password?.isEmpty ?? true),
-              if (accountOjbModel.password != null && accountOjbModel.password!.isNotEmpty)
+              if (accountOjbModel.password != null && accountOjbModel.password!.isNotEmpty && accountOjbModel.email != null && accountOjbModel.email!.isNotEmpty)
                 Padding(padding: EdgeInsets.symmetric(vertical: 5.h), child: Divider(color: Theme.of(context).colorScheme.surfaceContainerHighest)),
               if (accountOjbModel.password != null && accountOjbModel.password!.isNotEmpty)
                 ItemCopyValue(title: context.trDetails(DetailsAccountText.password), value: accountOjbModel.password!, isLastItem: true, isPrivateValue: true),
@@ -400,7 +401,10 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
-                  child: Text(context.trDetails(DetailsAccountText.passwordHistoryDetail), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary)),
+                  child: Text(
+                    context.trDetails(DetailsAccountText.passwordHistoryDetail),
+                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
+                  ),
                 ),
               ),
             ),
@@ -466,6 +470,4 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
       },
     );
   }
-
-
 }

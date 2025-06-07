@@ -4,9 +4,10 @@ import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:io' show Platform;
+import 'dart:async';
 
-Future<void> showAppCustomDialog(BuildContext context, AppCustomDialog dialog) {
-  return showDialog<void>(context: context, builder: (BuildContext context) => dialog);
+Future<bool?> showAppCustomDialog(BuildContext context, AppCustomDialog dialog) {
+  return showDialog<bool>(context: context, builder: (BuildContext context) => dialog);
 }
 
 class AppCustomDialog extends StatefulWidget {
@@ -21,9 +22,10 @@ class AppCustomDialog extends StatefulWidget {
   final Color? confirmButtonColor;
   final Color? cancelButtonColor;
   final bool isCountDownTimer;
-  final int? countDownTimer;
+  final int? countdownSeconds;
   final bool canConfirmInitially;
   final Widget? content;
+  final bool showMessageWithContent;
 
   const AppCustomDialog({
     super.key,
@@ -38,9 +40,10 @@ class AppCustomDialog extends StatefulWidget {
     this.confirmButtonColor,
     this.cancelButtonColor,
     this.isCountDownTimer = false,
-    this.countDownTimer = 5,
+    this.countdownSeconds = 5,
     this.canConfirmInitially = false,
     this.content,
+    this.showMessageWithContent = false,
   });
 
   @override
@@ -50,28 +53,28 @@ class AppCustomDialog extends StatefulWidget {
 class _AppCustomDialogState extends State<AppCustomDialog> {
   late bool canConfirm;
   late int countdown;
+  Timer? _countdownTimer;
 
   @override
   void initState() {
     super.initState();
     canConfirm = widget.canConfirmInitially;
-    countdown = widget.countDownTimer ?? 5;
+    countdown = widget.countdownSeconds ?? 5;
     if (widget.isCountDownTimer && !widget.canConfirmInitially) {
       _startCountdown();
     }
   }
 
   void _startCountdown() {
-    Future.delayed(const Duration(seconds: 1), () {
+    _countdownTimer = Timer(const Duration(seconds: 1), () {
       if (countdown > 0 && mounted) {
         setState(() {
           countdown--;
-        });
-        if (countdown == 0) {
-          setState(() {
+          if (countdown == 0) {
             canConfirm = true;
-          });
-        } else {
+          }
+        });
+        if (countdown > 0) {
           _startCountdown();
         }
       }
@@ -79,39 +82,52 @@ class _AppCustomDialogState extends State<AppCustomDialog> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    if (Platform.isIOS || Platform.isMacOS) {
-      return _buildCupertinoDialog(context);
-    }
-    return _buildMaterialDialog(context);
+  void dispose() {
+    _countdownTimer?.cancel();
+    super.dispose();
   }
 
-  Widget _buildCupertinoDialog(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
+    if (Platform.isIOS || Platform.isMacOS) {
+      return _buildCupertinoDialog();
+    }
+    return _buildMaterialDialog();
+  }
+
+  Widget _buildCupertinoDialog() {
     return CupertinoAlertDialog(
       title:
           widget.icon != null
               ? Column(children: [widget.icon!, const SizedBox(height: 8), Text(widget.title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600))])
               : Text(widget.title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
-      content:
-          widget.content ??
-          Column(
+      content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [Text(widget.message, style: const TextStyle(fontSize: 13, color: CupertinoColors.secondaryLabel))],
+            children: [
+              if (widget.content != null) 
+                widget.content!,
+              if (widget.message.isNotEmpty && (widget.content == null || widget.showMessageWithContent))
+                Text(
+                  widget.message,
+                  style: const TextStyle(fontSize: 13, color: CupertinoColors.secondaryLabel)
+                ),
+            ],
           ),
       actions: [
         if (widget.showCancelButton)
           CupertinoDialogAction(
-            onPressed: widget.onCancel ?? () => Navigator.of(context).pop(),
+            onPressed: widget.onCancel ?? () => Navigator.of(context).pop(false),
             child: Text(widget.cancelText ?? context.trCategory(CategoryText.cancel), style: TextStyle(color: widget.cancelButtonColor ?? CupertinoColors.destructiveRed)),
           ),
         CupertinoDialogAction(
-          onPressed:
-              canConfirm
-                  ? () {
-                    widget.onConfirm?.call();
-                  }
-                  : null,
+          onPressed: !canConfirm ? null : () {
+            if (widget.onConfirm != null) {
+              widget.onConfirm!.call();
+            }
+            Navigator.of(context).pop(true);
+          },
+          isDefaultAction: canConfirm,
           child: Text(
             "${widget.confirmText ?? context.trSettings(SettingsLocale.confirm)} ${widget.isCountDownTimer && !canConfirm ? "($countdown)" : ""}",
             style: TextStyle(color: canConfirm ? (widget.confirmButtonColor ?? CupertinoColors.activeBlue) : CupertinoColors.inactiveGray, fontWeight: FontWeight.w600),
@@ -121,34 +137,39 @@ class _AppCustomDialogState extends State<AppCustomDialog> {
     );
   }
 
-  Widget _buildMaterialDialog(BuildContext context) {
+  Widget _buildMaterialDialog() {
     return AlertDialog(
       title:
           widget.icon != null
               ? Column(children: [widget.icon!, const SizedBox(height: 8), Text(widget.title, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600))])
               : Text(widget.title, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
-      content:
-          widget.content ??
-          Column(
+      content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [Text(widget.message, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant))],
+            children: [
+              if (widget.content != null) 
+                widget.content!,
+              if (widget.message.isNotEmpty && (widget.content == null || widget.showMessageWithContent))
+                Text(
+                  widget.message,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)
+                ),
+            ],
           ),
       actions: [
         if (widget.showCancelButton)
           TextButton(
-            onPressed: widget.onCancel ?? () => Navigator.of(context).pop(),
+            onPressed: widget.onCancel ?? () => Navigator.of(context).pop(false),
             style: TextButton.styleFrom(foregroundColor: widget.cancelButtonColor ?? Theme.of(context).colorScheme.error),
             child: Text(widget.cancelText ?? context.trCategory(CategoryText.cancel)),
           ),
         TextButton(
-          onPressed:
-              canConfirm
-                  ? () {
-                    widget.onConfirm?.call();
-                    Navigator.of(context).pop();
-                  }
-                  : null,
+          onPressed: !canConfirm ? null : () {
+            if (widget.onConfirm != null) {
+              widget.onConfirm!.call();
+            }
+            Navigator.of(context).pop(true);
+          },
           style: TextButton.styleFrom(
             foregroundColor: canConfirm ? (widget.confirmButtonColor ?? Theme.of(context).colorScheme.primary) : Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.38),
           ),

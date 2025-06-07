@@ -8,12 +8,14 @@ import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/local_auth_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/services/local_auth_service.dart';
+import 'package:cybersafe_pro/utils/device_type.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:secure_application/secure_application_controller.dart';
@@ -22,10 +24,19 @@ class MobileLayout extends StatefulWidget {
   final bool showBiometric;
   final bool isFromBackup;
   final bool isFromRestore;
+  final bool isFromDeleteData;
   final SecureApplicationController? secureApplicationController;
-  final Function({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey})? callBackLoginSuccess;
+  final Function({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey})? callBackLoginCallback;
 
-  const MobileLayout({super.key, this.showBiometric = true, this.isFromBackup = false, this.isFromRestore = false, this.callBackLoginSuccess, this.secureApplicationController});
+  const MobileLayout({
+    super.key,
+    this.showBiometric = true,
+    this.isFromBackup = false,
+    this.isFromRestore = false,
+    this.isFromDeleteData = false,
+    this.callBackLoginCallback,
+    this.secureApplicationController,
+  });
 
   @override
   State<MobileLayout> createState() => _MobileLayoutState();
@@ -41,6 +52,8 @@ class _MobileLayoutState extends State<MobileLayout> {
   void initState() {
     super.initState();
     _setupLockStatusCheck();
+
+    //Listen ENTER KEYBOARD
   }
 
   void _setupLockStatusCheck() {
@@ -62,7 +75,7 @@ class _MobileLayoutState extends State<MobileLayout> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar:
-          widget.isFromBackup || widget.isFromRestore
+          widget.isFromBackup || widget.isFromRestore || widget.isFromDeleteData
               ? AppBar(
                 elevation: 0,
                 backgroundColor: Theme.of(context).colorScheme.surface,
@@ -82,65 +95,78 @@ class _MobileLayoutState extends State<MobileLayout> {
         builder: (context, provider, child) {
           final isCurrentlyLocked = provider.isLocked;
 
-          return Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 300),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    widget.isFromBackup ? context.trLogin(LoginText.enterAnyPin) : context.trLogin(LoginText.enterPin),
-                    style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                  if (widget.isFromBackup)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
-                      child: Text(context.trLogin(LoginText.backupNote), textAlign: TextAlign.center, style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
+          return KeyboardListener(
+            focusNode: FocusNode(),
+            onKeyEvent: (event) {
+              print('Key event: ${event.logicalKey}'); // Debug log for key events
+              if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.enter) {
+                if (!isCurrentlyLocked) {
+                  handleLogin(provider);
+                }
+              }
+            },
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 300),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      widget.isFromBackup ? context.trLogin(LoginText.enterAnyPin) : context.trLogin(LoginText.enterPin),
+                      style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
                     ),
-                  if (widget.isFromRestore)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
-                      child: Text(context.trLogin(LoginText.restoreNote), textAlign: TextAlign.center, style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
-                    ),
-                  if (isCurrentlyLocked) _buildLockedStatus(provider),
-
-                  if (!isCurrentlyLocked) _buildPinCodeFields(provider),
-
-                  if (!isCurrentlyLocked)
-                    if (widget.showBiometric && LocalAuthConfig.instance.isAvailableBiometrics && LocalAuthConfig.instance.isOpenUseBiometric) ...[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              provider.onBiometric();
-                            },
-                            icon:
-                                Platform.isIOS ? SvgPicture.asset('assets/icons/face_id.svg', width: 20.w, height: 20.h, color: Theme.of(context).colorScheme.primary) : const Icon(Icons.fingerprint),
-                          ),
-                        ],
+                    const SizedBox(height: 20),
+                    if (widget.isFromBackup)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
+                        child: Text(context.trLogin(LoginText.backupNote), textAlign: TextAlign.center, style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
                       ),
-                    ] else ...[
-                      SizedBox(height: 20),
-                    ],
+                    if (widget.isFromRestore)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
+                        child: Text(context.trLogin(LoginText.restoreNote), textAlign: TextAlign.center, style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
+                      ),
+                    if (isCurrentlyLocked) _buildLockedStatus(provider),
 
-                  CustomButtonWidget(
-                    borderRaidus: 100,
-                    width: 75,
-                    height: 75,
-                    onPressed:
-                        isCurrentlyLocked
-                            ? null
-                            : () async {
-                              await handleLogin(provider);
-                            },
-                    text: "",
-                    child: Icon(Icons.arrow_forward, size: 24, color: isCurrentlyLocked ? Colors.grey : Colors.white),
-                  ),
-                ],
+                    if (!isCurrentlyLocked) _buildPinCodeFields(provider),
+
+                    if (!isCurrentlyLocked)
+                      if (widget.showBiometric && LocalAuthConfig.instance.isAvailableBiometrics && LocalAuthConfig.instance.isOpenUseBiometric) ...[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                              onPressed: () {
+                                provider.onBiometric();
+                              },
+                              icon:
+                                  Platform.isIOS
+                                      ? SvgPicture.asset('assets/icons/face_id.svg', width: 20.w, height: 20.h, color: Theme.of(context).colorScheme.primary)
+                                      : const Icon(Icons.fingerprint),
+                            ),
+                          ],
+                        ),
+                      ] else ...[
+                        SizedBox(height: 20),
+                      ],
+
+                    CustomButtonWidget(
+                      borderRaidus: 100,
+                      width: 75,
+                      height: 75,
+                      onPressed:
+                          isCurrentlyLocked
+                              ? null
+                              : () async {
+                                await handleLogin(provider);
+                              },
+                      text: "",
+                      child: Icon(Icons.arrow_forward, size: 24, color: isCurrentlyLocked ? Colors.grey : Colors.white),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -180,8 +206,10 @@ class _MobileLayoutState extends State<MobileLayout> {
       autoFocus: _pinCodeFocusNode.hasFocus,
       key: _pinCodeKey,
       formKey: _formKey,
+      autoDismissKeyboard: DeviceInfo.getDeviceType(context) == DeviceType.mobile,
       textEditingController: provider.textEditingController,
       focusNode: provider.focusNode,
+
       onSubmitted: (value) async {
         if (!mounted) return;
         await handleLogin(provider);
@@ -211,10 +239,10 @@ class _MobileLayoutState extends State<MobileLayout> {
 
       if (isLoginSuccess) {
         // Gọi callback để thông báo login thành công
-        if (widget.callBackLoginSuccess != null) {
-          widget.callBackLoginSuccess!(isLoginSuccess: true, pin: provider.textEditingController.text ?? '', appPinCodeKey: provider.appPinCodeKey);
+        if (widget.callBackLoginCallback != null) {
+          widget.callBackLoginCallback!(isLoginSuccess: true, pin: provider.textEditingController.text ?? '', appPinCodeKey: _pinCodeKey);
         }
-        // Unlock ứng dụng
+        // Unlock ứng dụng0
         widget.secureApplicationController?.authSuccess(unlock: true);
       } else {
         // Nếu login thất bại, không unlock
@@ -227,8 +255,8 @@ class _MobileLayoutState extends State<MobileLayout> {
     SecureApplicationUtil.instance.secure();
 
     if (widget.isFromBackup || widget.isFromRestore) {
-      if (widget.callBackLoginSuccess != null) {
-        widget.callBackLoginSuccess!(isLoginSuccess: true, pin: provider.textEditingController.text ?? '', appPinCodeKey: provider.appPinCodeKey);
+      if (widget.callBackLoginCallback != null) {
+        widget.callBackLoginCallback!(isLoginSuccess: true, pin: provider.textEditingController.text ?? '', appPinCodeKey: _pinCodeKey);
       }
       return;
     }
@@ -236,8 +264,8 @@ class _MobileLayoutState extends State<MobileLayout> {
     bool isLoginSuccess = await provider.handleLogin();
 
     if (isLoginSuccess && mounted) {
-      if (widget.callBackLoginSuccess != null) {
-        widget.callBackLoginSuccess!(isLoginSuccess: true, pin: provider.textEditingController.text ?? '', appPinCodeKey: provider.appPinCodeKey);
+      if (widget.callBackLoginCallback != null) {
+        widget.callBackLoginCallback!(isLoginSuccess: true, pin: provider.textEditingController.text ?? '', appPinCodeKey: _pinCodeKey);
         return;
       }
 

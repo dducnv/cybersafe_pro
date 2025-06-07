@@ -244,12 +244,12 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
 
     // Resize the image to higher quality - 512x512 for better quality
     final img.Image resizedImage = img.copyResize(
-      originalImage, 
-      width: 256, 
+      originalImage,
+      width: 256,
       height: 256,
       interpolation: img.Interpolation.cubic, // Sử dụng cubic interpolation cho chất lượng tốt hơn
     );
-    
+
     // Sử dụng JPEG với chất lượng cao để giảm kích thước file nhưng vẫn giữ chất lượng tốt
     final List<int> resizedImageBytes = img.encodePng(resizedImage);
     final String base64Image = base64Encode(resizedImageBytes);
@@ -263,8 +263,8 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
     );
   }
 
-  Future<void> _showDialogCreateCustomIcon({required BuildContext context, required String base64Image, required AccountFormProvider formProvider, required TabController tabController}) async {
-    return showAppCustomDialog(
+  Future<bool?> _showDialogCreateCustomIcon({required BuildContext context, required String base64Image, required AccountFormProvider formProvider, required TabController tabController}) async {
+    return await showAppCustomDialog(
       context,
       AppCustomDialog(
         title: context.trSafe(CreateAccountText.iconCustom),

@@ -153,7 +153,6 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
                   Align(
                     alignment: Alignment.center,
                     child: ClipRRect(

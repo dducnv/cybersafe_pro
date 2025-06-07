@@ -1,4 +1,5 @@
 import 'package:cybersafe_pro/components/bottom_sheets/search_bottom_sheet.dart';
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/providers/desktop_home_provider.dart';
 import 'package:cybersafe_pro/screens/create_account/layouts/mobile_layout.dart';
 import 'package:cybersafe_pro/screens/settings/layouts/mobile_layout.dart';
@@ -48,7 +49,8 @@ class _DesktopAppbarState extends State<DesktopAppbar> {
               hintText: "Search",
               textAlign: TextAlign.center,
               onTap: () {
-                showSearchBottomSheet(context,
+                showSearchBottomSheet(
+                  context,
                   onTapAccount: (account) {
                     context.read<DesktopHomeProvider>().selectAccount(account);
                     Navigator.pop(context);
@@ -59,7 +61,7 @@ class _DesktopAppbarState extends State<DesktopAppbar> {
             ),
           ),
           CustomButtonWidget(
-            backgroundColor: Colors.grey[300],
+            backgroundColor: context.darkMode ? Colors.grey[800] : Colors.grey[200],
             borderRaidus: 100,
             margin: EdgeInsets.all(0),
             width: 50,
@@ -68,7 +70,7 @@ class _DesktopAppbarState extends State<DesktopAppbar> {
               showModalSideSheet(context: context, ignoreAppBar: true, barrierDismissible: true, withCloseControll: false, body: SettingMobileLayout());
             },
             text: "",
-            child: Icon(Icons.settings, size: 22),
+            child: Icon(Icons.settings, size: 22, color: context.darkMode ? Colors.white : Colors.grey[700]),
           ),
         ],
       ),

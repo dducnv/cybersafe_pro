@@ -12,7 +12,6 @@ Future<void> showCreateCategoryBottomSheet(BuildContext context, {bool isUpdate 
   await showModalBottomSheet(
     isScrollControlled: true,
     context: context,
-
     builder:
         (context) => SafeArea(
           child: Padding(
@@ -74,6 +73,26 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(context.trCategory(widget.isUpdate ? CategoryText.updateCategory : CategoryText.createCategory), style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600)),
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: provider.txtCategoryName,
+                  builder: (context, value, child) {
+                    return IconButton(
+                      onPressed:
+                          value.text.trim().isEmpty
+                              ? null
+                              : () {
+                                _handleCreateCategory(context, value.text);
+                              },
+                      icon: Icon(Icons.check),
+                    );
+                  },
+                ),
+              ],
+            ),
             CustomTextField(
               autoFocus: true,
               requiredTextField: true,
@@ -85,27 +104,7 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
               onFieldSubmitted: (value) => _handleCreateCategory(context, value),
             ),
             SizedBox(height: 16.h),
-            ValueListenableBuilder<TextEditingValue>(
-              valueListenable: provider.txtCategoryName,
-              builder: (context, value, child) {
-                return CustomButtonWidget(
-                  margin: EdgeInsets.zero,
-                  isDisabled: value.text.trim().isEmpty,
-                  onPressed: () => _handleCreateCategory(context, value.text),
-                  text: context.trCategory(CategoryText.createCategory),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (!widget.isUpdate) ...[Icon(Icons.add, color: Colors.white, size: 20.sp), SizedBox(width: 8.w)],
-                      Text(
-                        context.trCategory(widget.isUpdate ? CategoryText.updateCategory : CategoryText.createCategory),
-                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
+
             SizedBox(height: 16.h),
           ],
         );

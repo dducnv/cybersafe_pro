@@ -6,6 +6,7 @@ import 'package:cybersafe_pro/resources/brand_logo.dart';
 import 'package:cybersafe_pro/screens/password_generator/password_generate_screen.dart';
 import 'package:cybersafe_pro/services/otp.dart';
 import 'package:cybersafe_pro/utils/device_type.dart';
+import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
@@ -26,6 +27,7 @@ class AccountFormFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    formProvider.passNotifier.value = PasswordStrength.calculate(text: formProvider.passwordController.text);
     return Column(
       children: [
         CustomTextField(
@@ -127,9 +129,9 @@ class AccountFormFields extends StatelessWidget {
             const SizedBox(width: 12),
             IconButton(
               icon: const Icon(Icons.loop_rounded),
-              onPressed: () {
+              onPressed: () async {
                 if (formProvider.passwordController.text.isNotEmpty) {
-                  showAppCustomDialog(
+                  bool? confirm = await showAppCustomDialog(
                     context,
                     AppCustomDialog(
                       canConfirmInitially: true,
@@ -137,15 +139,11 @@ class AccountFormFields extends StatelessWidget {
                       message: context.trSafe(CreateAccountText.overwritePasswordMessage),
                       confirmText: context.trSafe(CreateAccountText.confirm),
                       cancelText: context.trSafe(CreateAccountText.cancel),
-                      onConfirm: () {
-                        Navigator.of(context).pop();
-                        _toGenPass(context);
-                      },
-                      onCancel: () {
-                        Navigator.of(context).pop();
-                      },
                     ),
                   );
+                  if (confirm == true && context.mounted) {
+                    _toGenPass(context);
+                  }
                 } else {
                   _toGenPass(context);
                 }
@@ -288,7 +286,7 @@ class AccountFormFields extends StatelessWidget {
         ),
       );
     }
-    return Navigator.of(context).push(
+    return Navigator.of(GlobalKeys.appRootNavigatorKey.currentContext!).push(
       MaterialPageRoute(
         builder: (context) {
           return PasswordGenerateScreen(

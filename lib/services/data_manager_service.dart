@@ -23,20 +23,19 @@ import 'package:cybersafe_pro/screens/login_master_password/login_master_passwor
 import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/services/encrypt_service.dart';
 import 'package:cybersafe_pro/services/permission_service.dart';
+import 'package:cybersafe_pro/utils/file_picker_utils.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
+import 'package:cybersafe_pro/utils/secure_application_util.dart';
+import 'package:cybersafe_pro/utils/toast_noti.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:downloadsfolder/downloadsfolder.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sharing_intent/flutter_sharing_intent.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class DataManagerService {
   //instance
@@ -238,7 +237,7 @@ class DataManagerService {
     try {
       canLockApp = false;
       // Bước 1: Chọn file
-      FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.any);
+      FilePickerResult? result = await FilePickerUtils.pickFile(type: FileType.any);
       if (result == null || result.files.isEmpty) {
         throw Exception(context.trSafe(ErrorText.fileNotSelected));
       }
@@ -290,36 +289,42 @@ class DataManagerService {
       if (!context.mounted) return;
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) {
+          builder: (_) {
             return LoginMasterPassword(
               showBiometric: false,
               isFromRestore: true,
-              callBackLoginSuccess: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
+              callBackLoginCallback: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
                 if (isLoginSuccess == true && pin != null && GlobalKeys.appRootNavigatorKey.currentContext != null) {
                   try {
                     showLoadingDialog();
                     // Bước 6: Kiểm tra PIN và khôi phục dữ liệu
-                    final result = await EncryptAppDataService.instance.restoreBackup(jsonString, pin);
+                    final result = await EncryptAppDataService.instance.restoreBackup(
+                      jsonString,
+                      pin,
+                      onIncorrectPin: () {
+                        print("PIN incorrect, triggering error animation");
+                        if (appPinCodeKey != null && context.mounted) {
+                          appPinCodeKey.currentState?.triggerErrorAnimation();
+                        }
+                      },
+                    );
                     if (!context.mounted) return;
                     if (result) {
                       // Bước 7: Khôi phục thành công
                       await GlobalKeys.appRootNavigatorKey.currentContext!.read<CategoryProvider>().refresh();
                       GlobalKeys.appRootNavigatorKey.currentContext!.read<AccountProvider>().refreshAccounts();
-                      Navigator.of(GlobalKeys.appRootNavigatorKey.currentContext!).pop();
+
                       ScaffoldMessenger.of(
-                        GlobalKeys.appRootNavigatorKey.currentContext!,
-                      ).showSnackBar(const SnackBar(content: Text('Data restore successfully'), backgroundColor: Colors.green, duration: Duration(seconds: 2)));
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(context.trSafe('Data restore successfully')), backgroundColor: Colors.green, duration: const Duration(seconds: 3)));
+                      SecureApplicationUtil.instance.unlock();
+                      Navigator.of(context).pop();
                     } else {
                       throw Exception('Data restore failed');
                     }
                   } catch (e) {
                     if (!context.mounted) return;
-                    if (e.toString().contains('PIN_INCORRECT')) {
-                      appPinCodeKey?.currentState?.triggerErrorAnimation();
-                    } else {
-                      // Các lỗi khác trong quá trình khôi phục
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.trSafe(ErrorText.restoreFailed)), backgroundColor: Colors.red, duration: const Duration(seconds: 3)));
-                    }
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.trSafe(ErrorText.restoreFailed)), backgroundColor: Colors.red, duration: const Duration(seconds: 3)));
                   }
                 } else {
                   // Trường hợp không nhập PIN hoặc hủy
@@ -409,58 +414,61 @@ class DataManagerService {
   //wait 5s
 
   static Future<void> deleteAllDataPopup({required BuildContext context}) async {
-    showAppCustomDialog(
+    final result = await showAppCustomDialog(
       context,
       AppCustomDialog(
         title: context.trSafe(SettingsLocale.deleteData),
         message: context.trSafe(SettingsLocale.deleteDataQuestion),
         confirmText: context.trSafe(SettingsLocale.deleteData),
         cancelText: context.trSafe(SettingsLocale.cancel),
-        isCountDownTimer: true,
-        onConfirm: () {
-          Navigator.of(context).pop();
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder:
-                  (context) => LoginMasterPassword(
-                    showBiometric: false,
-                    callBackLoginSuccess: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
-                      if (isLoginSuccess == true && pin != null) {
-                        final success = await deleteData();
-
-                        if (success && GlobalKeys.appRootNavigatorKey.currentContext != null) {
-                          // Làm mới dữ liệu
-                          try {
-                            await GlobalKeys.appRootNavigatorKey.currentContext!.read<CategoryProvider>().refresh();
-                            GlobalKeys.appRootNavigatorKey.currentContext!.read<AccountProvider>().refreshAccounts();
-                          } catch (e) {
-                            logError('Lỗi làm mới dữ liệu sau khi xóa: $e');
-                          }
-
-                          // Hiển thị thông báo thành công
-                          ScaffoldMessenger.of(
-                            GlobalKeys.appRootNavigatorKey.currentContext!,
-                          ).showSnackBar(const SnackBar(content: Text('Delete data successfully'), backgroundColor: Colors.green, duration: Duration(seconds: 2)));
-
-                          // Quay về màn hình chính
-                          Navigator.of(GlobalKeys.appRootNavigatorKey.currentContext!).pop();
-                        } else {
-                          if (GlobalKeys.appRootNavigatorKey.currentContext != null) {
-                            ScaffoldMessenger.of(
-                              GlobalKeys.appRootNavigatorKey.currentContext!,
-                            ).showSnackBar(const SnackBar(content: Text('Delete data failed'), backgroundColor: Colors.red, duration: Duration(seconds: 2)));
-                            Navigator.of(GlobalKeys.appRootNavigatorKey.currentContext!).pop();
-                          }
-                        }
-                      }
-                    },
-                  ),
-            ),
-          );
-        },
+        isCountDownTimer: false,
+        canConfirmInitially: true,
       ),
     );
+    if (result == true) {
+      Navigator.of(GlobalKeys.appRootNavigatorKey.currentContext!).push(
+        MaterialPageRoute(
+          builder:
+              (context) => LoginMasterPassword(
+                showBiometric: false,
+                isFromDeleteData: true,
+                callBackLoginCallback: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
+                  if (isLoginSuccess == true && pin != null) {
+                    try {
+                      final success = await deleteData();
+
+                      if (success && context.mounted) {
+                        // Làm mới dữ liệu
+                        await context.read<CategoryProvider>().refresh();
+                        context.read<AccountProvider>().refreshAccounts();
+                        // Quay về home và xóa tất cả màn hình trước đó
+                        // Hiển thị thông báo thành công
+                        Navigator.of(context).pop();
+                        showToastSuccess("Delete data successfully");
+                      } else {
+                        if (context.mounted) {
+                          Navigator.of(context).pop(); // Đóng màn hình login
+                          showToastError("Delete data failed");
+                        }
+                      }
+                    } catch (e) {
+                      logError('Lỗi trong quá trình xóa dữ liệu: $e');
+                      if (context.mounted) {
+                        Navigator.of(context).pop(); // Đóng màn hình login
+                        showToastError("Delete data failed");
+                      }
+                    }
+                  } else {
+                    // Trường hợp hủy hoặc login thất bại
+                    if (context.mounted) {
+                      Navigator.of(context).pop(); // Đóng màn hình login
+                    }
+                  }
+                },
+              ),
+        ),
+      );
+    }
   }
 
   static Future<bool> transferData(BuildContext context) async {
@@ -497,7 +505,7 @@ class DataManagerService {
       final codeEncrypted = EncryptService.instance.encryptFernetBytes(data: utf8.encode(backupJson), key: Env.backupFileEncryptKey);
 
       // Save file using FilePicker
-       await FilePicker.platform.saveFile(dialogTitle: 'Save Backup File', fileName: transferFileName, initialDirectory: backupDir.path, bytes: Uint8List.fromList(codeEncrypted));
+      await FilePicker.platform.saveFile(dialogTitle: 'Save Backup File', fileName: transferFileName, initialDirectory: backupDir.path, bytes: Uint8List.fromList(codeEncrypted));
 
       launchProApp(context);
       logInfo('Transfer successfully to ${transferFile.path}');

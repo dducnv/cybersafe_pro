@@ -9,7 +9,7 @@ class AppConfig {
   static final instance = AppConfig._internal();
   AppConfig._internal();
 
-  static bool isProApp = false;
+  static bool isProApp = true;
   static String proPackageId = "com.duc_app_lab_ind.cyber_safe";
   static String proPlayStoreUrl = "https://play.google.com/store/apps/details?id=com.duc_app_lab_ind.cyber_safe";
   static String proUriSchemeTransfer = "cybersafepro://";
@@ -34,7 +34,7 @@ class AppConfig {
     return "https://dducnv.github.io/onelink";
   }
 
-  static Future<void> showDialogRedirectLink(BuildContext context, {required String url}) async {
+  static Future<bool?> showDialogRedirectLink(BuildContext context, {required String url}) async {
     return showAppCustomDialog(
       context,
       AppCustomDialog(

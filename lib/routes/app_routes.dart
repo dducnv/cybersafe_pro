@@ -15,8 +15,9 @@ import 'package:cybersafe_pro/screens/statistic/statistic_screen.dart';
 import 'package:cybersafe_pro/screens/statistic/sub_sceens/account_password_weak.dart';
 import 'package:cybersafe_pro/screens/statistic/sub_sceens/same_passwords_view.dart';
 import 'package:cybersafe_pro/utils/device_type.dart';
-import 'package:cybersafe_pro/utils/global_keys.dart';
-import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart' show AppPinCodeFields, AppPinCodeFieldsState;
+import 'package:cybersafe_pro/utils/secure_application_util.dart';
+import 'package:cybersafe_pro/utils/secure_app_state.dart';
+import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart' show AppPinCodeFieldsState;
 import 'package:cybersafe_pro/widgets/modal_side_sheet/modal_side_sheet.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -144,14 +145,21 @@ class AppRoutes {
     }
   }
 
+  static List<String> noneSecureRoutes = [registerMasterPin, loginMasterPin];
+
   // Route generator for handling dynamic routes and arguments
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
-    Widget screen = SecureGate(
-      blurr: 30,    // Giảm từ 60 xuống 30 để blur nhẹ hơn và nhanh hơn
-      opacity: 0.9, // Tăng từ 0.8 lên 0.9 để che phủ tốt hơn
-      lockedBuilder: (context, secureApplicationController) => _buildUnlockScreen(context, secureApplicationController),
-      child: _buildScreen(settings.name ?? '', settings.arguments),
-    );
+    // Kiểm tra và cập nhật trạng thái bảo mật dựa trên route
+    if (!noneSecureRoutes.contains(settings.name)) {
+      SecureApplicationUtil.instance.setSecureState(SecureAppState.partial);
+    }
+
+    Widget screen = _buildScreen(settings.name ?? '', settings.arguments);
+
+    // Chỉ áp dụng SecureGate cho các route cần bảo mật
+    if (!noneSecureRoutes.contains(settings.name)) {
+      screen = SecureGate(blurr: 30, opacity: 0.9, lockedBuilder: (context, secureApplicationController) => _buildUnlockScreen(context, secureApplicationController), child: screen);
+    }
 
     if (Platform.isIOS) {
       return CupertinoPageRoute(builder: (context) => screen, settings: settings);
@@ -164,10 +172,9 @@ class AppRoutes {
   static Widget _buildUnlockScreen(BuildContext context, SecureApplicationController? controller) {
     return LoginMasterPassword(
       showBiometric: true,
-      isFromBackup: false,
-      isFromRestore: false,
+      fromSecureGate: true,
       secureApplicationController: controller,
-      callBackLoginSuccess: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) {
+      callBackLoginCallback: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) {
         if (isLoginSuccess == true && controller != null) {
           // Unlock ứng dụng khi đăng nhập thành công
           controller.authSuccess(unlock: true);

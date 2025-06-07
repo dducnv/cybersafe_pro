@@ -26,7 +26,7 @@ class AccountFormProvider extends ChangeNotifier {
   final TextEditingController otpController = TextEditingController();
   final TextEditingController noteController = TextEditingController();
 
-   final passNotifier = ValueNotifier<PasswordStrength?>(null);
+  final passNotifier = ValueNotifier<PasswordStrength?>(null);
 
   final TextEditingController txtFieldTitle = TextEditingController();
   final TextEditingController iconCustomName = TextEditingController();
