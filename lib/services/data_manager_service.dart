@@ -43,7 +43,6 @@ class DataManagerService {
   factory DataManagerService() => _instance;
   DataManagerService._internal();
 
-  static const String transferFileName = "cyber_safe_transfer.enc";
   static const String TRANSFER_FOLDER = "CyberSafeTransfer";
   static bool canLockApp = true;
 
@@ -488,7 +487,7 @@ class DataManagerService {
 
       final backupJson = jsonEncode(backup);
       final codeEncrypted = EncryptService.instance.encryptDataBytes(data: utf8.encode(backupJson), key: Env.backupFileEncryptKey);
-
+      final transferFileName = "transferFile_${DateTime.now().millisecondsSinceEpoch}.enc";
       // Save file using FilePicker
       await FilePicker.platform.saveFile(dialogTitle: 'Save Backup File', fileName: transferFileName, bytes: Uint8List.fromList(codeEncrypted));
       launchProApp(context);
@@ -589,8 +588,6 @@ class DataManagerService {
         }
         Navigator.of(GlobalKeys.appRootNavigatorKey.currentContext!).pop();
         loadingProgress.dispose();
-        await GlobalKeys.appRootNavigatorKey.currentContext!.read<CategoryProvider>().refresh();
-        GlobalKeys.appRootNavigatorKey.currentContext!.read<AccountProvider>().refreshAccounts();
         hideLoadingDialog();
         return true;
       } else {

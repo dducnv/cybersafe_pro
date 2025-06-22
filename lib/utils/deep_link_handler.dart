@@ -4,11 +4,13 @@ import 'package:app_links/app_links.dart';
 import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
-import 'package:cybersafe_pro/routes/app_routes.dart';
+import 'package:cybersafe_pro/providers/account_provider.dart';
+import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/services/data_manager_service.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 
 class DeepLinkHandler {
   static final DeepLinkHandler _instance = DeepLinkHandler._internal();
@@ -30,7 +32,7 @@ class DeepLinkHandler {
         logError('Error handling deep link: $error');
       },
     );
-    // Handle links when app is already running
+    // // Handle links when app is already running
 
     _isInitialized = true;
   }
@@ -41,11 +43,11 @@ class DeepLinkHandler {
     // Check if this is a transfer request
     if (uri.scheme == 'cybersafepro' && uri.host == 'transfer') {
       // Handle data transfer
-      _handleTransferRequest(uri);
+      _handleTransferRequest();
     }
   }
 
-  Future<void> _handleTransferRequest(Uri uri) async {
+  Future<void> _handleTransferRequest() async {
     // Extract the file path from the query parameters
 
     BuildContext? context = GlobalKeys.appRootNavigatorKey.currentContext;
@@ -62,6 +64,8 @@ class DeepLinkHandler {
     );
     if (isConfirmed != true) return;
     await DataManagerService.importTransferData();
+    await GlobalKeys.appRootNavigatorKey.currentContext!.read<CategoryProvider>().refresh();
+    GlobalKeys.appRootNavigatorKey.currentContext!.read<AccountProvider>().refreshAccounts(resetExpansion: true);
   }
 
   void dispose() {

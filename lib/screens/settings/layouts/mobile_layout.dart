@@ -19,8 +19,6 @@ import 'package:cybersafe_pro/services/data_manager_service.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
-import 'package:cybersafe_pro/utils/secure_application_util.dart';
-import 'package:cybersafe_pro/utils/toast_noti.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/app_custom_switch/app_custom_switch.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
