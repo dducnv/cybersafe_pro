@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:csv/csv.dart';
 import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
@@ -33,6 +32,7 @@ import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.da
 import 'package:downloadsfolder/downloadsfolder.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -123,32 +123,29 @@ class DataManagerService {
       if (!context.mounted) return;
       final accountProvider = Provider.of<AccountProvider>(context, listen: false);
 
-      int successCount = 0;
-      // Import từng dòng dữ liệu
-      for (var row in csvTable.skip(1)) {
+      // --- Sử dụng compute để mapping batch các dòng CSV ---
+      final mappedRows = await compute(_mapCsvRowsInIsolate, {
+        'rows': csvTable.skip(1).toList(),
+        'header': header,
+        'nameIndex': nameIndex,
+        'urlIndex': urlIndex,
+        'usernameIndex': usernameIndex,
+        'passwordIndex': passwordIndex,
+        'noteIndex': noteIndex,
+        'categoryName': fileName,
+        'categoryId': categoryId,
+      });
+      final futures = mappedRows.map((row) async {
         try {
-          if (row.length < header.length) continue;
-
-          final title = row[nameIndex].toString().trim();
-          final url = row[urlIndex].toString().trim();
-          final username = row[usernameIndex].toString().trim();
-          final password = row[passwordIndex].toString().trim();
-          final note = row[noteIndex].toString().trim();
-
-          if (title.isEmpty || username.isEmpty || password.isEmpty) continue;
-
-          final importNote = note.isEmpty ? url : note;
-
-          // Tạo account mới
-          final account = AccountOjbModel(title: title, email: username, password: password, notes: importNote, categoryOjbModel: newCategory);
-
-          // Lưu vào database
+          final account = AccountOjbModel(title: row['title'], email: row['email'], password: row['password'], notes: row['notes'], categoryOjbModel: newCategory);
           await accountProvider.createOrUpdateAccount(account);
-          successCount++;
+          return true;
         } catch (e) {
-          continue;
+          return false;
         }
-      }
+      });
+      final results = await Future.wait(futures);
+      int successCount = results.where((r) => r).length;
 
       // Refresh danh sách account
       await accountProvider.refreshAccounts();
@@ -177,6 +174,7 @@ class DataManagerService {
   //backup data
   static Future<bool> backupData(BuildContext context, String pin) async {
     try {
+      await EncryptAppDataService.instance.initialize();
       final safeContext = GlobalKeys.appRootNavigatorKey.currentContext ?? context;
       // Check permissions first
       if (!await PermissionService.instance.requestStoragePermission()) {
@@ -193,10 +191,9 @@ class DataManagerService {
       // Create backup data
       final backupService = EncryptAppDataService.instance;
       final backup = await backupService.createBackup(pin, backupName);
-
-      // Encrypt backup data
-      final backupJson = jsonEncode(backup);
-      final encryptedData = EncryptService.instance.encryptFernetBytes(data: utf8.encode(backupJson), key: Env.backupFileEncryptKey);
+      // --- Sử dụng compute để mã hóa dữ liệu backup (utf8.encode) ---
+      final backupJsonBytes = await compute(_encodeBackupInIsolate, backup);
+      final encryptedData = EncryptService.instance.encryptDataBytes(data: backupJsonBytes, key: Env.backupFileEncryptKey);
 
       // Get backup directory
       final downloadDir = await getDownloadDirectory();
@@ -219,13 +216,14 @@ class DataManagerService {
       hideLoadingDialog();
       await Future.delayed(const Duration(milliseconds: 100));
       if (safeContext.mounted) {
-        Navigator.of(safeContext).pop();
+        SecureApplicationUtil.instance.unlock();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Backup data successful'), backgroundColor: Colors.green, duration: const Duration(seconds: 3)));
       }
       return true;
     } catch (e) {
       hideLoadingDialog();
+      SecureApplicationUtil.instance.unlock();
       logError('Backup failed: $e');
-
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Backup failed: ${e.toString()}'), backgroundColor: Colors.red, duration: const Duration(seconds: 3)));
       }
@@ -233,7 +231,7 @@ class DataManagerService {
     }
   }
 
-  static Future<void> restoreData(BuildContext context) async {
+  static Future<bool> restoreData(BuildContext context) async {
     try {
       canLockApp = false;
       // Bước 1: Chọn file
@@ -267,27 +265,26 @@ class DataManagerService {
       // Bước 3: Giải mã dữ liệu file
       List<int> dataBackup;
       try {
-        dataBackup = EncryptService.instance.decryptFernetBytes(encryptedData: encryptedBytes, key: Env.backupFileEncryptKey);
+        dataBackup = EncryptService.instance.decryptDataBytes(encryptedData: encryptedBytes, key: Env.backupFileEncryptKey);
       } catch (e) {
         throw Exception('Backup data is not valid or corrupted');
       }
-
-      // Bước 4: Chuyển đổi dữ liệu sang JSON
+      // --- Sử dụng compute để chuyển đổi dữ liệu sang JSON (utf8.decode) ---
       String jsonString;
       try {
-        jsonString = utf8.decode(dataBackup);
+        jsonString = await compute(_decodeBackupInIsolate, dataBackup);
         // Kiểm tra xem có phải JSON hợp lệ không
         final jsonData = jsonDecode(jsonString);
         if (!jsonData.containsKey('type') || jsonData['type'] != 'CYBERSAFE_BACKUP') {
           throw Exception('Backup data is not valid');
         }
       } catch (e) {
-        throw Exception('Backup data is not valid: ${e.toString()}');
+        throw Exception('Backup data is not valid: \\${e.toString()}');
       }
 
       // Bước 5: Hiển thị màn hình nhập PIN
-      if (!context.mounted) return;
-      Navigator.of(context).push(
+      if (!context.mounted) return false;
+      await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) {
             return LoginMasterPassword(
@@ -296,33 +293,38 @@ class DataManagerService {
               callBackLoginCallback: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
                 if (isLoginSuccess == true && pin != null && GlobalKeys.appRootNavigatorKey.currentContext != null) {
                   try {
-                    showLoadingDialog();
+                    ValueNotifier<double>? loadingProgress = ValueNotifier<double>(0.0);
+                    showLoadingDialog(context: GlobalKeys.appRootNavigatorKey.currentContext!, loadingProgress: loadingProgress);
+                    await Future.delayed(const Duration(milliseconds: 50)); // Cho UI kịp render loading
                     // Bước 6: Kiểm tra PIN và khôi phục dữ liệu
                     final result = await EncryptAppDataService.instance.restoreBackup(
                       jsonString,
                       pin,
                       onIncorrectPin: () {
-                        print("PIN incorrect, triggering error animation");
                         if (appPinCodeKey != null && context.mounted) {
                           appPinCodeKey.currentState?.triggerErrorAnimation();
+                        }
+                      },
+                      onRestoreProgress: (progress) {
+                        final contextRoot = GlobalKeys.appRootNavigatorKey.currentContext ?? context;
+                        if (contextRoot.mounted) {
+                          loadingProgress.value = progress;
                         }
                       },
                     );
                     if (!context.mounted) return;
                     if (result) {
-                      // Bước 7: Khôi phục thành công
-                      await GlobalKeys.appRootNavigatorKey.currentContext!.read<CategoryProvider>().refresh();
-                      GlobalKeys.appRootNavigatorKey.currentContext!.read<AccountProvider>().refreshAccounts();
-
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(context.trSafe('Data restore successfully')), backgroundColor: Colors.green, duration: const Duration(seconds: 3)));
+                      loadingProgress.dispose();
+                      hideLoadingDialog();
                       SecureApplicationUtil.instance.unlock();
-                      Navigator.of(context).pop();
+                      Navigator.of(context).pop(true);
                     } else {
+                      loadingProgress.dispose();
+                      logError('Data restore failed');
                       throw Exception('Data restore failed');
                     }
                   } catch (e) {
+                    logError('Restore data failed in catch: $e');
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.trSafe(ErrorText.restoreFailed)), backgroundColor: Colors.red, duration: const Duration(seconds: 3)));
                   }
@@ -338,6 +340,7 @@ class DataManagerService {
         ),
       );
       canLockApp = true;
+      return true;
     } catch (e) {
       // Xử lý các lỗi chung
       canLockApp = true;
@@ -345,6 +348,8 @@ class DataManagerService {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}'), backgroundColor: Colors.red, duration: const Duration(seconds: 3)));
       }
+      logError('Restore data failed: $e');
+      return false;
     }
   }
 
@@ -444,18 +449,18 @@ class DataManagerService {
                         // Quay về home và xóa tất cả màn hình trước đó
                         // Hiển thị thông báo thành công
                         Navigator.of(context).pop();
-                        showToastSuccess("Delete data successfully");
+                        showToastSuccess("Delete data successfully", context: context);
                       } else {
                         if (context.mounted) {
                           Navigator.of(context).pop(); // Đóng màn hình login
-                          showToastError("Delete data failed");
+                          showToastError("Delete data failed", context: context);
                         }
                       }
                     } catch (e) {
                       logError('Lỗi trong quá trình xóa dữ liệu: $e');
                       if (context.mounted) {
                         Navigator.of(context).pop(); // Đóng màn hình login
-                        showToastError("Delete data failed");
+                        showToastError("Delete data failed", context: context);
                       }
                     }
                   } else {
@@ -480,35 +485,13 @@ class DataManagerService {
       showLoadingDialog();
       final backupService = EncryptAppDataService.instance;
       final backup = await backupService.createBackup(Env.transferFileEncryptKey, "cyber_safe_transfer", isTransfer: true);
-      // Tạo thư mục cyber_safe
-      Directory downloadDirectory = await getDownloadDirectory();
-      final backupDir = Directory(path.join(downloadDirectory.path, 'cyber_safe/$TRANSFER_FOLDER'));
-      if (!backupDir.existsSync()) {
-        logInfo('Tạo thư mục cyber_safe');
-        await backupDir.create();
-      }
-      //foder files
-      for (var file in backupDir.listSync(recursive: true)) {
-        if (file.path.endsWith('.enc')) {
-          try {
-            await file.delete(recursive: true);
-          } catch (e) {
-            logError('Error delete file: ${e.toString()}');
-          }
-        }
-      }
 
-      File transferFile = File('${backupDir.path}/cyber_safe_transfer_data.enc');
-      // 6. Log đường dẫn file để debug
-      logInfo('Creating transfer file at: ${transferFile.path}');
       final backupJson = jsonEncode(backup);
-      final codeEncrypted = EncryptService.instance.encryptFernetBytes(data: utf8.encode(backupJson), key: Env.backupFileEncryptKey);
+      final codeEncrypted = EncryptService.instance.encryptDataBytes(data: utf8.encode(backupJson), key: Env.backupFileEncryptKey);
 
       // Save file using FilePicker
-      await FilePicker.platform.saveFile(dialogTitle: 'Save Backup File', fileName: transferFileName, initialDirectory: backupDir.path, bytes: Uint8List.fromList(codeEncrypted));
-
+      await FilePicker.platform.saveFile(dialogTitle: 'Save Backup File', fileName: transferFileName, bytes: Uint8List.fromList(codeEncrypted));
       launchProApp(context);
-      logInfo('Transfer successfully to ${transferFile.path}');
       return true;
     } catch (e) {
       hideLoadingDialog();
@@ -520,7 +503,6 @@ class DataManagerService {
   //import transfer data
   static Future<bool> importTransferData() async {
     try {
-      showLoadingDialog();
       FilePickerResult? result = await FilePickerUtils.pickFile(type: FileType.any);
       if (result == null || result.files.isEmpty) {
         throw Exception('File not selected');
@@ -564,8 +546,12 @@ class DataManagerService {
         throw Exception("Cannot read file: $e");
       }
 
+      ValueNotifier<double>? loadingProgress = ValueNotifier<double>(0.0);
+
+      showLoadingDialog(loadingProgress: loadingProgress);
+
       // 4. Giải mã và xử lý dữ liệu
-      List<int> dataBackup = EncryptService.instance.decryptFernetBytes(encryptedData: fileBytes, key: Env.backupFileEncryptKey);
+      List<int> dataBackup = EncryptService.instance.decryptDataBytes(encryptedData: fileBytes, key: Env.backupFileEncryptKey);
 
       if (dataBackup.isEmpty) {
         throw Exception("Decrypted data is empty");
@@ -574,7 +560,15 @@ class DataManagerService {
       String jsonString = utf8.decode(dataBackup);
 
       // 5. Khôi phục dữ liệu
-      final resultRestore = await EncryptAppDataService.instance.restoreBackup(jsonString, Env.transferFileEncryptKey);
+      final resultRestore = await EncryptAppDataService.instance.restoreBackup(
+        jsonString,
+        Env.transferFileEncryptKey,
+        onRestoreProgress: (progress) {
+          if (GlobalKeys.appRootNavigatorKey.currentContext != null) {
+            loadingProgress.value = progress;
+          }
+        },
+      );
 
       // 6. Xử lý kết quả
       if (resultRestore) {
@@ -594,6 +588,7 @@ class DataManagerService {
           logError('Warning: Could not delete transfer file: $e');
         }
         Navigator.of(GlobalKeys.appRootNavigatorKey.currentContext!).pop();
+        loadingProgress.dispose();
         await GlobalKeys.appRootNavigatorKey.currentContext!.read<CategoryProvider>().refresh();
         GlobalKeys.appRootNavigatorKey.currentContext!.read<AccountProvider>().refreshAccounts();
         hideLoadingDialog();
@@ -671,3 +666,40 @@ class DataManagerService {
     }
   }
 }
+
+// --- Top-level functions for compute (Isolate) ---
+String _decodeBackupInIsolate(List<int> dataBackup) {
+  return utf8.decode(dataBackup);
+}
+
+List<int> _encodeBackupInIsolate(Map<String, dynamic> backup) {
+  final backupJson = jsonEncode(backup);
+  return utf8.encode(backupJson);
+}
+
+List<Map<String, dynamic>> _mapCsvRowsInIsolate(Map<String, dynamic> args) {
+  final List<List<dynamic>> rows = args['rows'] as List<List<dynamic>>;
+  final List<String> header = List<String>.from(args['header']);
+  final int nameIndex = args['nameIndex'];
+  final int urlIndex = args['urlIndex'];
+  final int usernameIndex = args['usernameIndex'];
+  final int passwordIndex = args['passwordIndex'];
+  final int noteIndex = args['noteIndex'];
+  final String categoryName = args['categoryName'];
+  final int categoryId = args['categoryId'];
+  final List<Map<String, dynamic>> result = [];
+  for (var row in rows) {
+    if (row.length < header.length) continue;
+    final title = row[nameIndex].toString().trim();
+    final url = row[urlIndex].toString().trim();
+    final username = row[usernameIndex].toString().trim();
+    final password = row[passwordIndex].toString().trim();
+    final note = row[noteIndex].toString().trim();
+    if (title.isEmpty || username.isEmpty || password.isEmpty) continue;
+    final importNote = note.isEmpty ? url : note;
+    result.add({'title': title, 'email': username, 'password': password, 'notes': importNote, 'categoryName': categoryName, 'categoryId': categoryId});
+  }
+  return result;
+}
+
+// --- End top-level functions ---

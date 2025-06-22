@@ -1,6 +1,5 @@
 import 'package:cybersafe_pro/objectbox.g.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
-import 'package:flutter/foundation.dart';
 
 import '../models/category_ojb_model.dart';
 import '../objectbox.dart';

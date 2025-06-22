@@ -19,6 +19,8 @@ import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 class DetailsAccountMobileLayout extends StatefulWidget {
   final AccountOjbModel accountOjbModel;
@@ -32,32 +34,14 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
   final decryptService = EncryptAppDataService.instance;
   late AccountOjbModel _accountOjbModel;
 
-  // Thêm các biến điều khiển animation
-  final List<bool> _isVisible = List.generate(7, (_) => false);
-  final Duration _animationDuration = const Duration(milliseconds: 250);
-  final Duration _staggeredDelay = const Duration(milliseconds: 100);
-
   @override
   void initState() {
     super.initState();
     _accountOjbModel = widget.accountOjbModel;
-    _startAnimation();
   }
 
   // Getter để truy cập accountOjbModel
   AccountOjbModel get accountOjbModel => _accountOjbModel;
-
-  // Thêm phương thức điều khiển animation
-  void _startAnimation() async {
-    for (int i = 0; i < _isVisible.length; i++) {
-      await Future.delayed(_staggeredDelay);
-      if (mounted) {
-        setState(() {
-          _isVisible[i] = true;
-        });
-      }
-    }
-  }
 
   Future<void> reloadAccount() async {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
@@ -72,6 +56,24 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> detailBlocks = [
+      _buildAccountIcon(),
+      if (accountOjbModel.totp.target != null && accountOjbModel.totp.target?.secretKey != null) _buildTOTPWidget(accountOjbModel),
+      if ((accountOjbModel.email != null && accountOjbModel.email!.isNotEmpty) || (accountOjbModel.password != null && accountOjbModel.password!.isNotEmpty)) _buildBaseInfo(),
+      _buildCategory(),
+      if (accountOjbModel.notes != null && accountOjbModel.notes!.isNotEmpty) _buildNoteWidget(),
+      if (accountOjbModel.customFields.isNotEmpty) _buildCustomFieldsWidget(accountOjbModel),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (accountOjbModel.passwordHistories.isNotEmpty) _buildPasswordHistoryWidget(accountOjbModel),
+          const SizedBox(height: 10),
+          _buildUpdatedAtWidget(accountOjbModel),
+        ],
+      ),
+      const SizedBox(height: 16),
+    ];
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -84,7 +86,6 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
               showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-
                 builder: (BuildContext context) {
                   return SafeArea(
                     child: Padding(
@@ -136,42 +137,27 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildAnimatedWidget(index: 0, child: _buildAccountIcon()),
-            if (accountOjbModel.totp.target != null && accountOjbModel.totp.target?.secretKey != null) _buildAnimatedWidget(index: 1, child: _buildTOTPWidget(accountOjbModel)),
-            if ((accountOjbModel.email != null && accountOjbModel.email!.isNotEmpty) || (accountOjbModel.password != null && accountOjbModel.password!.isNotEmpty))
-              _buildAnimatedWidget(index: 2, child: _buildBaseInfo()),
-            _buildAnimatedWidget(index: 3, child: _buildCategory()),
-            if (accountOjbModel.notes != null && accountOjbModel.notes!.isNotEmpty) _buildAnimatedWidget(index: 4, child: _buildNoteWidget()),
-            if (accountOjbModel.customFields.isNotEmpty) _buildAnimatedWidget(index: 5, child: _buildCustomFieldsWidget(accountOjbModel)),
-            _buildAnimatedWidget(
-              index: 6,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [if (accountOjbModel.passwordHistories.isNotEmpty) _buildPasswordHistoryWidget(accountOjbModel), const SizedBox(height: 10), _buildUpdatedAtWidget(accountOjbModel)],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(16),
+          child: AnimationLimiter(
+            child: Column(
+              children: List.generate(
+                detailBlocks.length,
+                (index) => AnimationConfiguration.staggeredList(
+                  position: index,
+                  duration: const Duration(milliseconds: 400),
+                  child: SlideAnimation(
+                    verticalOffset: 30.0,
+                    child: FadeInAnimation(
+                      child: detailBlocks[index],
+                    ),
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: 16),
-          ],
+          ),
         ),
-      ),
-    );
-  }
-
-  // Thêm widget wrapper cho animation
-  Widget _buildAnimatedWidget({required int index, required Widget child}) {
-    return AnimatedOpacity(
-      duration: _animationDuration,
-      opacity: _isVisible[index] ? 1.0 : 0.0,
-      curve: Curves.easeInSine,
-      child: AnimatedSlide(
-        duration: Duration(milliseconds: 200),
-        offset: _isVisible[index] ? Offset.zero : const Offset(0.1, 0),
-        curve: Curves.easeInSine,
-        child: AnimatedScale(duration: Duration(milliseconds: 300), scale: _isVisible[index] ? 1.0 : 0.95, curve: Curves.easeInSine, child: child),
       ),
     );
   }
@@ -279,7 +265,11 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                     controller: TextEditingController(text: snapshot.data),
                   );
                 }
-                return SizedBox.shrink();
+                return Shimmer.fromColors(
+                  baseColor: Theme.of(context).colorScheme.primary.withValues(alpha: .4),
+                  highlightColor: Theme.of(context).colorScheme.primary,
+                  child: Text('Decrypting...', textAlign: TextAlign.start, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+                );
               },
             ),
           ],

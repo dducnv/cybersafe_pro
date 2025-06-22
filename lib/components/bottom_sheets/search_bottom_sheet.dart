@@ -10,6 +10,7 @@ import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/decrypt_text/decrypt_text.dart';
 import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:provider/provider.dart';
 
 Future<void> showSearchBottomSheet(BuildContext context,{
@@ -137,54 +138,65 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
             )
           else
             Expanded(
-              child: ListView.builder(
-                itemCount: _searchResults.length,
-                itemBuilder: (context, index) {
-                  final account = _searchResults[index];
-                  return ListTile(
-                    leading: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainer,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: IconShowComponent(
-                            account: account,
-                            width: 30,
-                            height: 30,
-                            textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey[800]),
-                            isDecrypted: false,
+              child: AnimationLimiter(
+                child: ListView.builder(
+                  itemCount: _searchResults.length,
+                  itemBuilder: (context, index) {
+                    final account = _searchResults[index];
+                    return AnimationConfiguration.staggeredList(
+                      position: index,
+                      duration: const Duration(milliseconds: 350),
+                      child: SlideAnimation(
+                        verticalOffset: 24.0,
+                        child: FadeInAnimation(
+                          child: ListTile(
+                            leading: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.surfaceContainer,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: IconShowComponent(
+                                    account: account,
+                                    width: 30,
+                                    height: 30,
+                                    textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey[800]),
+                                    isDecrypted: false,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            title: DecryptText(
+                              value: account.title,
+                              decryptTextType: DecryptTextType.info,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600
+                              ),
+                            ),
+                            subtitle: account.email != null ? DecryptText(
+                              value: account.email!,
+                              decryptTextType: DecryptTextType.info,
+                              style: TextStyle(
+                                color: Colors.grey[600]
+                              ),
+                            ) : null,
+                            onTap: () {
+                              if (widget.onTapAccount != null) {
+                                widget.onTapAccount!(account);
+                              } else {
+                                AppRoutes.navigateTo(context, AppRoutes.detailsAccount, arguments: {"accountId": account.id});
+                              }
+                            },
                           ),
                         ),
                       ),
-                    ),
-                    title: DecryptText(
-                      value: account.title,
-                      decryptTextType: DecryptTextType.info,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600
-                      ),
-                    ),
-                    subtitle: account.email != null ? DecryptText(
-                      value: account.email!,
-                      decryptTextType: DecryptTextType.info,
-                      style: TextStyle(
-                        color: Colors.grey[600]
-                      ),
-                    ) : null,
-                    onTap: () {
-                      if (widget.onTapAccount != null) {
-                        widget.onTapAccount!(account);
-                      } else {
-                        AppRoutes.navigateTo(context, AppRoutes.detailsAccount, arguments: {"accountId": account.id});
-                      }
-                    },
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
         ],

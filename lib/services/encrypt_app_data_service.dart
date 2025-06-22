@@ -2,15 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:async';
-import 'dart:collection';
 import 'package:crypto/crypto.dart';
 import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/database/boxes/account_box.dart';
-import 'package:cybersafe_pro/database/boxes/account_custom_field_box.dart';
 import 'package:cybersafe_pro/database/boxes/category_box.dart';
 import 'package:cybersafe_pro/database/boxes/icon_custom_box.dart';
-import 'package:cybersafe_pro/database/boxes/password_history_box.dart';
 import 'package:cybersafe_pro/database/models/account_custom_field.dart';
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
@@ -19,7 +16,6 @@ import 'package:cybersafe_pro/database/models/password_history_model.dart';
 import 'package:cybersafe_pro/database/models/totp_ojb_model.dart';
 import 'package:cybersafe_pro/localization/keys/error_text.dart';
 import 'package:cybersafe_pro/services/encrypt_service.dart';
-import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_data.dart';
 import 'package:cybersafe_pro/utils/app_error.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
@@ -56,7 +52,6 @@ enum KeyType { info, password, totp, pinCode }
 // Service chính để mã hóa/giải mã
 class EncryptAppDataService {
   static final instance = EncryptAppDataService._();
-  final _encryptData = EncryptService.instance;
   final _secureStorage = SecureStorage.instance;
 
   // Orchestration key cho việc bảo vệ khóa trong bộ nhớ
@@ -72,36 +67,30 @@ class EncryptAppDataService {
 
   EncryptAppDataService._();
 
-  // Khởi tạo
+  Future<void>? _initializing;
   Future<void> initialize() async {
+    if (_initializing != null) return _initializing!;
+    final completer = Completer<void>();
+    _initializing = completer.future;
     try {
       // Khởi tạo orchestration key trước
       await _initializeOrchestrationKey();
-
-      final isLegacy = await _isLegacyUser();
       final hasDeviceKey = await _hasDeviceKey();
 
-      if (!isLegacy) {
-        if (!hasDeviceKey) {
-          await _generateDeviceKey();
-          await _saveCurrentVersion();
-        } else {
-          await _checkAndUpdateVersion();
-        }
-        await _preloadKeys();
-        return;
-      }
-
       if (!hasDeviceKey) {
-        await _withRetry(() async {
-          await _generateDeviceKey();
-          await _migrateData();
-          await _saveCurrentVersion();
-        });
+        await _generateDeviceKey();
+        await _saveCurrentVersion();
+      } else {
+        await _checkAndUpdateVersion();
       }
+      await _preloadKeys();
+      completer.complete();
     } catch (e) {
       _logError('Lỗi khởi tạo', e);
+      completer.completeError(e);
       rethrow;
+    } finally {
+      _initializing = null;
     }
   }
 
@@ -148,7 +137,6 @@ class EncryptAppDataService {
       _logError('Orchestration key chưa được khởi tạo', 'Không thể bảo vệ khóa');
       return key; // Fallback nếu chưa khởi tạo
     }
-
     final keyBytes = utf8.encode(key);
     final orchestrationBytes = utf8.encode(_orchestrationKey);
     final result = List<int>.filled(keyBytes.length, 0);
@@ -185,15 +173,22 @@ class EncryptAppDataService {
 
   //Pin code
   Future<String> encryptPinCode(String pinCode) async {
-    final deviceKey = await _getDeviceKey();
-    final encryptionKey = await _generateEncryptionKey(deviceKey, KeyType.pinCode);
-    return _encryptData.encryptFernet(value: pinCode, key: encryptionKey);
+    try {
+      if (pinCode.isEmpty) return pinCode;
+
+      final deviceKey = await _getDeviceKey();
+      final encryptionKey = await _generateEncryptionKey(deviceKey, KeyType.pinCode);
+      return EncryptService.encryptData(value: pinCode, key: encryptionKey);
+    } catch (e) {
+      _logError('Lỗi mã hóa pin code', e);
+      rethrow;
+    }
   }
 
   Future<String> decryptPinCode(String encrypted) async {
     final deviceKey = await _getDeviceKey();
     final encryptionKey = await _generateEncryptionKey(deviceKey, KeyType.pinCode);
-    return _encryptData.decryptFernet(value: encrypted, key: encryptionKey);
+    return EncryptService.decryptData(value: encrypted, key: encryptionKey);
   }
 
   // Mã hóa thông tin
@@ -203,7 +198,7 @@ class EncryptAppDataService {
     try {
       final deviceKey = await _getDeviceKey();
       final encryptionKey = await _generateEncryptionKey(deviceKey, KeyType.info);
-      return await compute(_encryptInIsolate, {'value': value, 'key': encryptionKey});
+      return _encryptInIsolate({'value': value, 'key': encryptionKey});
     } catch (e) {
       _logError('Lỗi mã hóa thông tin', e);
       return value;
@@ -231,7 +226,7 @@ class EncryptAppDataService {
     try {
       final deviceKey = await _getDeviceKey();
       final encryptionKey = await _generateEncryptionKey(deviceKey, KeyType.password);
-      return _encryptData.encryptFernet(value: password, key: encryptionKey);
+      return EncryptService.encryptData(value: password, key: encryptionKey);
     } catch (e) {
       _logError('Lỗi mã hóa mật khẩu', e);
       rethrow;
@@ -245,7 +240,7 @@ class EncryptAppDataService {
     try {
       final deviceKey = await _getDeviceKey();
       final encryptionKey = await _generateEncryptionKey(deviceKey, KeyType.password);
-      return _encryptData.decryptFernet(value: encrypted, key: encryptionKey);
+      return EncryptService.decryptData(value: encrypted, key: encryptionKey);
     } catch (e) {
       _logError('Lỗi giải mã mật khẩu', e);
       rethrow;
@@ -259,7 +254,7 @@ class EncryptAppDataService {
     try {
       final deviceKey = await _getDeviceKey();
       final encryptionKey = await _generateEncryptionKey(deviceKey, KeyType.totp);
-      return _encryptData.decryptFernet(value: encrypted, key: encryptionKey);
+      return EncryptService.decryptData(value: encrypted, key: encryptionKey);
     } catch (e) {
       _logError('Lỗi giải mã TOTP', e);
       rethrow;
@@ -273,7 +268,7 @@ class EncryptAppDataService {
     try {
       final deviceKey = await _getDeviceKey();
       final encryptionKey = await _generateEncryptionKey(deviceKey, KeyType.totp);
-      return _encryptData.encryptFernet(value: key, key: encryptionKey);
+      return EncryptService.encryptData(value: key, key: encryptionKey);
     } catch (e) {
       _logError('Lỗi mã hóa TOTP', e);
       rethrow;
@@ -286,17 +281,19 @@ class EncryptAppDataService {
     try {
       final deviceKey = await _getDeviceKey();
       final accounts = await AccountBox.getAll();
+      // --- Sử dụng compute cho batch toDecryptedJson ---
+      final accountsJson = await _accountsToDecryptedJsonBatch(accounts);
       final backupData = {
         'type': 'CYBERSAFE_BACKUP',
         'version': AppVersion.latest.version,
         'timestamp': DateTime.now().toIso8601String(),
         'backupName': backupName,
         'deviceKey': deviceKey,
-        'data': {'accounts': await Future.wait(accounts.map((acc) => acc.toDecryptedJson()))},
+        'data': {'accounts': accountsJson},
       };
       final backupJson = jsonEncode(backupData);
       _validateBackupSize(backupJson);
-      final encryptedData = await _encryptData.encryptFernet(value: backupJson, key: _generateBackupKey(pin));
+      final encryptedData = await EncryptService.encryptData(value: backupJson, key: _generateBackupKey(pin));
       return {'type': 'CYBERSAFE_BACKUP', 'version': AppVersion.latest.version, 'data': encryptedData, 'checksum': _calculateChecksum(encryptedData), 'timestamp': DateTime.now().toIso8601String()};
     } catch (e) {
       _logError('Lỗi tạo backup', e);
@@ -305,13 +302,21 @@ class EncryptAppDataService {
   }
 
   // Khôi phục backup
-  Future<bool> restoreBackup(String dataBackup, String pin, {Function()? onIncorrectPin, Function()? onRestoreSuccess, Function()? onRestoreFailed, Function()? onRestoreStart}) async {
+  Future<bool> restoreBackup(
+    String dataBackup,
+    String pin, {
+    Function()? onIncorrectPin,
+    Function()? onRestoreSuccess,
+    Function()? onRestoreFailed,
+    Function()? onRestoreStart,
+    Function(double progress)? onRestoreProgress,
+  }) async {
     try {
       final backupData = jsonDecode(dataBackup);
       _validateBackupData(backupData);
 
       try {
-        final decryptedData = _encryptData.decryptFernet(value: backupData['data'], key: _generateBackupKey(pin));
+        final decryptedData = EncryptService.decryptData(value: backupData['data'], key: _generateBackupKey(pin));
         // Kiểm tra xem dữ liệu giải mã có đúng định dạng JSON không
         final data = jsonDecode(decryptedData);
 
@@ -321,7 +326,7 @@ class EncryptAppDataService {
           throwAppError(ErrorText.invalidBackupFile);
         }
 
-        await _restoreData(data['data']);
+        await _restoreData(data['data'], onRestoreProgress: onRestoreProgress);
         return true;
       } catch (e) {
         hideLoadingDialog();
@@ -330,7 +335,7 @@ class EncryptAppDataService {
           _logError('PIN không chính xác', e);
           throw Exception('PIN_INCORRECT');
         }
-        
+
         throwAppError(ErrorText.invalidBackupFile);
         return false;
       }
@@ -350,58 +355,60 @@ class EncryptAppDataService {
     logError('[EncryptAppDataService] ERROR: $message: $error');
   }
 
-  Future<bool> _isLegacyUser() async {
-    return await _secureStorage.read(key: SecureStorageKeys.themMode.name) != null || await _secureStorage.read(key: SecureStorageKeys.fistOpenApp.name) != null;
-  }
-
   Future<bool> _hasDeviceKey() async {
     return await _secureStorage.read(key: SecureStorageKey.deviceKeyStorageKey) != null;
   }
 
   Future<void> _generateDeviceKey() async {
-    final key = base64.encode(List.generate(32, (_) => Random.secure().nextInt(256)));
-    await _secureStorage.save(key: SecureStorageKey.deviceKeyStorageKey, value: key);
+    return await _withRetry(() async {
+      final key = base64.encode(List.generate(32, (_) => Random.secure().nextInt(256)));
+      await _secureStorage.save(key: SecureStorageKey.deviceKeyStorageKey, value: key);
+    });
   }
 
   Future<String> _getDeviceKey() async {
-    if (_cachedDeviceKey != null && _deviceKeyExpiry != null && DateTime.now().isBefore(_deviceKeyExpiry!)) {
-      // Khôi phục khóa từ cache (đã được bảo vệ)
-      return _unprotectKey(_cachedDeviceKey!);
-    }
+    return await _withRetry(() async {
+      if (_cachedDeviceKey != null && _deviceKeyExpiry != null && DateTime.now().isBefore(_deviceKeyExpiry!)) {
+        // Khôi phục khóa từ cache (đã được bảo vệ)
+        return _unprotectKey(_cachedDeviceKey!);
+      }
 
-    final key = await _secureStorage.read(key: SecureStorageKey.deviceKeyStorageKey);
-    if (key == null) throw Exception('Device key not created');
+      final key = await _secureStorage.read(key: SecureStorageKey.deviceKeyStorageKey);
+      if (key == null) throw Exception('Device key not created');
 
-    // Lưu khóa vào cache sau khi bảo vệ
-    _cachedDeviceKey = _protectKey(key);
-    _deviceKeyExpiry = DateTime.now().add(EncryptionConfig.KEY_CACHE_DURATION);
-    return key;
+      // Lưu khóa vào cache sau khi bảo vệ
+      _cachedDeviceKey = _protectKey(key);
+      _deviceKeyExpiry = DateTime.now().add(EncryptionConfig.KEY_CACHE_DURATION);
+      return key;
+    });
   }
 
   Future<String> _generateEncryptionKey(String deviceKey, KeyType type) async {
-    final cacheKey = '${type.name}_$deviceKey';
+    return await _withRetry(() async {
+      final cacheKey = '${type.name}_$deviceKey';
 
-    // Nếu có trong cache, giải mã và trả về
-    if (_keyCache.containsKey(cacheKey) && !_keyCache[cacheKey]!.isExpired) {
-      return _unprotectKey(_keyCache[cacheKey]!.key);
-    }
+      // Nếu có trong cache, giải mã và trả về
+      if (_keyCache.containsKey(cacheKey) && !_keyCache[cacheKey]!.isExpired) {
+        return _unprotectKey(_keyCache[cacheKey]!.key);
+      }
 
-    final storageKey = _getStorageKeyForType(type);
-    final savedKey = await _secureStorage.read(key: storageKey);
-    if (savedKey != null) {
+      final storageKey = _getStorageKeyForType(type);
+      final savedKey = await _secureStorage.read(key: storageKey);
+      if (savedKey != null) {
+        // Lưu vào cache sau khi bảo vệ
+        _keyCache[cacheKey] = _CachedKey(_protectKey(savedKey));
+        return savedKey;
+      }
+
+      final salt = 'cybersafe_${type.name}_salt_$deviceKey';
+      final key = await compute(_generateKeyInIsolate, {'salt': salt, 'deviceKey': deviceKey, 'iterations': EncryptionConfig.PBKDF2_ITERATIONS, 'keySize': EncryptionConfig.KEY_SIZE_BYTES});
+
       // Lưu vào cache sau khi bảo vệ
-      _keyCache[cacheKey] = _CachedKey(_protectKey(savedKey));
-      return savedKey;
-    }
+      _keyCache[cacheKey] = _CachedKey(_protectKey(key));
+      await _secureStorage.save(key: storageKey, value: key);
 
-    final salt = 'cybersafe_${type.name}_salt_$deviceKey';
-    final key = await compute(_generateKeyInIsolate, {'salt': salt, 'deviceKey': deviceKey, 'iterations': EncryptionConfig.PBKDF2_ITERATIONS, 'keySize': EncryptionConfig.KEY_SIZE_BYTES});
-
-    // Lưu vào cache sau khi bảo vệ
-    _keyCache[cacheKey] = _CachedKey(_protectKey(key));
-    await _secureStorage.save(key: storageKey, value: key);
-
-    return key;
+      return key;
+    });
   }
 
   static String _generateKeyInIsolate(Map<String, dynamic> params) {
@@ -411,12 +418,11 @@ class EncryptAppDataService {
   }
 
   static Future<String> _encryptInIsolate(Map<String, String> params) async {
-    final encryptData = EncryptService.instance;
-    return await encryptData.encryptFernet(value: params['value']!, key: params['key']!);
+    return await EncryptService.encryptData(value: params['value']!, key: params['key']!);
   }
 
   static String _decryptInIsolate(Map<String, String> params) {
-    return EncryptService.instance.decryptFernet(value: params['value']!, key: params['key']!);
+    return EncryptService.decryptData(value: params['value']!, key: params['key']!);
   }
 
   String _getStorageKeyForType(KeyType type) {
@@ -602,14 +608,11 @@ class EncryptAppDataService {
 
       // Lưu toàn bộ keys mới vào storage
       await _saveNewKeys(newDeviceKey, newKeys);
-
-      // Lưu các accounts đã mã hóa lại
-      for (var account in reencryptedAccounts.values) {
-        await AccountBox.put(account);
-      }
+      await AccountBox.putMany(reencryptedAccounts.values.toList());
 
       // Xóa cache cũ
       clearCache();
+      _initializeOrchestrationKey();
       onSuccess.call();
       timer.stop();
       logInfo('[EncryptAppDataService] Hoàn thành rotate keys trong ${timer.elapsed.inSeconds}s');
@@ -675,278 +678,85 @@ class EncryptAppDataService {
     }
   }
 
-  Future<void> _migrateData() async {
-    try {
-      final accounts = await AccountBox.getAll();
-      if (accounts.isEmpty) {
-        return;
-      }
-      var migratedCount = 0;
-      var errorCount = 0;
-      final migratedAccounts = <AccountOjbModel>[];
-      // Mã hóa pin code của người dùng cũ
-      String? pinCodeEncrypted = await SecureStorage.instance.read(key: SecureStorageKeys.pinCode.name);
-      final oldPinCode = OldEncryptData.decriptPinCode(pinCodeEncrypted!);
-      final encryptedPinCode = await encryptPinCode(oldPinCode);
-
-      for (var account in accounts) {
-        try {
-          await _withRetry(() async {
-            final decryptedAccount = await _decryptWithLegacyKey(account);
-            final reencryptedAccount = await _encryptAccountWithKeys(decryptedAccount, decryptValue: false);
-            migratedAccounts.add(reencryptedAccount); // Thêm vào danh sách chờ
-            migratedCount++;
-          });
-        } catch (e) {
-          _logError('Không thể tải trước keys', e);
-          errorCount++;
-          break; // Dừng ngay khi có lỗi để tránh lãng phí tài nguyên
-        }
-      }
-
-      // Chỉ lưu vào database nếu tất cả đều thành công
-      if (errorCount == 0 && migratedCount == accounts.length) {
-        // Lưu pin code mới
-        await SecureStorage.instance.save(key: SecureStorageKeys.pinCode.name, value: encryptedPinCode);
-
-        // Lưu tất cả tài khoản đã migrate vào database
-        await AccountBox.putMany(migratedAccounts);
-      } else {
-        throw Exception('Migration failed: $errorCount errors, only migrated $migratedCount/${accounts.length} accounts');
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<AccountOjbModel> _encryptAccountWithKeys(AccountOjbModel account, {bool decryptValue = true}) async {
-    try {
-      // Mã hóa lại các trường cơ bản với keys mới
-      final reencryptedAccount = AccountOjbModel(
-        id: account.id,
-        title: await encryptInfo(account.title),
-        email: account.email != null ? await encryptInfo(account.email!) : null,
-        password: account.password != null ? await encryptPassword(account.password!) : null,
-        notes: account.notes != null ? await encryptInfo(account.notes!) : null,
-        icon: account.icon,
-        categoryOjbModel: account.getCategory,
-        iconCustomModel: account.getIconCustom,
-        createdAt: account.createdAt,
-        updatedAt: DateTime.now(),
-      );
-
-      // Mã hóa lại custom fields nếu có
-      if (account.getCustomFields.isNotEmpty) {
-        final reencryptedFields = await Future.wait(
-          account.getCustomFields.map((field) async {
-            try {
-              String decryptedValue = field.value;
-              if (decryptValue) {
-                decryptedValue = field.typeField == 'password' ? await decryptPassword(field.value) : await decryptInfo(field.value);
-                if (decryptedValue.isEmpty) {
-                  return null; // Không thêm vào nếu giá trị rỗng
-                }
-              }
-              final reencryptedValue = field.typeField == 'password' ? await encryptPassword(decryptedValue) : await encryptInfo(decryptedValue);
-              return AccountCustomFieldOjbModel(id: field.id, name: field.name, hintText: field.hintText, value: reencryptedValue, typeField: field.typeField);
-            } catch (e) {
-              return null; // Không thêm vào nếu có lỗi
-            }
-          }),
-        );
-        reencryptedAccount.customFields.clear();
-        reencryptedAccount.customFields.addAll(reencryptedFields.where((field) => field != null).cast<AccountCustomFieldOjbModel>());
-      }
-
-      // Mã hóa lại password histories nếu có
-      if (account.getPasswordHistories.isNotEmpty) {
-        final reencryptedHistories = await Future.wait(
-          account.getPasswordHistories.map((history) async {
-            try {
-              final decryptedPassword = await decryptPassword(history.password);
-              if (decryptedPassword.isEmpty) {
-                return null; // Không thêm vào nếu giá trị rỗng
-              }
-              final reencryptedPassword = await encryptPassword(decryptedPassword);
-              return PasswordHistory(id: history.id, password: reencryptedPassword, createdAt: history.createdAt);
-            } catch (e) {
-              return null; // Không thêm vào nếu có lỗi
-            }
-          }),
-        );
-        reencryptedAccount.passwordHistories.clear();
-        reencryptedAccount.passwordHistories.addAll(reencryptedHistories.where((history) => history != null).cast<PasswordHistory>());
-      }
-
-      // Mã hóa lại TOTP nếu có
-      if (account.getTotp != null) {
-        try {
-          final decryptedSecret = await decryptTOTPKey(account.getTotp!.secretKey);
-          if (decryptedSecret.isEmpty) {
-            return reencryptedAccount; // Không thêm TOTP nếu giá trị rỗng
+  Future<void> _restoreData(Map<String, dynamic> data, {Function(double progress)? onRestoreProgress}) async {
+    // 1. Chuẩn bị danh sách account mới (reset id, xử lý category/icon/custom fields/histories)
+    final List<AccountOjbModel> newAccounts =
+        (data['accounts'] as List).map((json) => AccountOjbModel.fromJson(json)).map((account) {
+          // Reset ID về 0 để ObjectBox tự tạo ID mới
+          final accountNew = AccountOjbModel(id: 0, title: account.title, email: account.email ?? "", password: account.password ?? "", notes: account.notes ?? "", icon: account.icon ?? "");
+          // TOTP
+          if (account.getTotp != null) {
+            accountNew.totp.target = TOTPOjbModel(id: 0, secretKey: account.getTotp!.secretKey);
           }
-          final reencryptedSecret = await encryptTOTPKey(decryptedSecret);
-          reencryptedAccount.setTotp = TOTPOjbModel(secretKey: reencryptedSecret);
-        } catch (e) {
-          logError('Lỗi mã hóa TOTP: ${e.toString()}');
-        }
-      }
+          // Custom fields
+          if (account.getCustomFields.isNotEmpty) {
+            for (var customField in account.getCustomFields) {
+              accountNew.customFields.add(AccountCustomFieldOjbModel(id: 0, name: customField.name, value: customField.value, hintText: customField.hintText, typeField: customField.typeField));
+            }
+          }
+          // Password histories
+          if (account.getPasswordHistories.isNotEmpty) {
+            for (var passwordHistory in account.getPasswordHistories) {
+              accountNew.passwordHistories.add(PasswordHistory(id: 0, password: passwordHistory.password, createdAt: passwordHistory.createdAt));
+            }
+          }
+          // Category
+          account.category.target ??= CategoryOjbModel(categoryName: "Backup");
+          final categoryResult = CategoryBox.findCategoryByName(account.category.target?.categoryName ?? "Backup");
+          if (categoryResult == null) {
+            final newCategory = CategoryOjbModel(id: 0, categoryName: account.category.target?.categoryName ?? "Backup");
+            final id = CategoryBox.put(newCategory);
+            newCategory.id = id;
+            accountNew.category.target = newCategory;
+          } else {
+            accountNew.category.target = categoryResult;
+          }
+          // Icon custom
+          if (account.getIconCustom != null && account.getIconCustom!.imageBase64.isNotEmpty) {
+            final existingIcon = IconCustomBox.findIconByBase64Image(account.getIconCustom!.imageBase64);
+            if (existingIcon != null) {
+              accountNew.iconCustom.target = existingIcon;
+            } else {
+              final newIcon = IconCustomModel(
+                id: 0,
+                name: account.getIconCustom!.name,
+                imageBase64DarkModel: account.getIconCustom?.imageBase64DarkModel ?? "",
+                imageBase64: account.getIconCustom!.imageBase64,
+              );
+              final iconId = IconCustomBox.put(newIcon);
+              newIcon.id = iconId;
+              accountNew.iconCustom.target = newIcon;
+            }
+          }
+          return accountNew;
+        }).toList();
 
-      return reencryptedAccount;
-    } catch (e) {
-      logError('[EncryptAppDataService] Lỗi mã hóa lại account ${account.id}: $e');
-      rethrow;
+    // 2. Lấy deviceKey và các encryptionKey trên main isolate
+    final deviceKey = await _getDeviceKey();
+    final infoKey = await _generateEncryptionKey(deviceKey, KeyType.info);
+    final passwordKey = await _generateEncryptionKey(deviceKey, KeyType.password);
+    final totpKey = await _generateEncryptionKey(deviceKey, KeyType.totp);
+
+    // 3. Truyền vào Isolate để batch encrypt và cập nhật progress
+    const int batchSize = 10;
+    final total = newAccounts.length;
+    int done = 0;
+    List<AccountOjbModel> allEncrypted = [];
+    for (var i = 0; i < newAccounts.length; i += batchSize) {
+      final batch = newAccounts.skip(i).take(batchSize).toList();
+      final accountsEncrypted = await compute(_encryptAccountsWithKeysBatch, {
+        'accounts': batch,
+        'encryptionKeys': {'deviceKey': deviceKey, 'infoKey': infoKey, 'passwordKey': passwordKey, 'totpKey': totpKey},
+      });
+      allEncrypted.addAll(accountsEncrypted);
+      done += batch.length;
+      if (onRestoreProgress != null) {
+        double progress = done / total;
+        onRestoreProgress(progress > 1.0 ? 1.0 : progress);
+      }
     }
-  }
-
-  //   /// Giải mã với key cũ (chỉ dùng trong migration)
-  Future<AccountOjbModel> _decryptWithLegacyKey(AccountOjbModel account) async {
-    try {
-      return AccountOjbModel(
-        id: account.id,
-        title: OldEncryptData.decryptInfo(account.title),
-        email: account.email != null ? OldEncryptData.decryptInfo(account.email!) : null,
-        password: account.password != null ? OldEncryptData.decryptPassword(account.password!) : null,
-        notes: account.notes != null ? OldEncryptData.decryptInfo(account.notes!) : null,
-        icon: account.icon,
-        categoryOjbModel: account.getCategory,
-        customFieldOjbModel:
-            account.getCustomFields
-                .map((field) {
-                  try {
-                    String decryptedValue = field.typeField == 'password' ? OldEncryptData.decryptPassword(field.value) : OldEncryptData.decryptInfo(field.value);
-                    if (decryptedValue.isEmpty || decryptedValue == "") {
-                      AccountCustomFieldBox.removeById(field.id);
-                      return null; // Không thêm vào nếu giá trị rỗng
-                    }
-
-                    field.value = decryptedValue;
-                    return field;
-                  } catch (e) {
-                    AccountCustomFieldBox.removeById(field.id);
-                    return null; // Không thêm vào nếu có lỗi
-                  }
-                })
-                .where((field) => field != null)
-                .cast<AccountCustomFieldOjbModel>()
-                .toList(),
-        passwordHistoriesList:
-            account.getPasswordHistories
-                .map((history) {
-                  try {
-                    String decryptedPassword = OldEncryptData.decryptPassword(history.password);
-                    if (decryptedPassword.isEmpty || decryptedPassword == "") {
-                      PasswordHistoryBox.removeById(history.id);
-                      return null; // Không thêm vào nếu giá trị rỗng
-                    }
-                    history.password = decryptedPassword;
-                    return history;
-                  } catch (e) {
-                    PasswordHistoryBox.removeById(history.id);
-                    return null; // Không thêm vào nếu có lỗi
-                  }
-                })
-                .where((history) => history != null)
-                .cast<PasswordHistory>()
-                .toList(),
-        totpOjbModel: account.getTotp != null ? TOTPOjbModel(id: 0, secretKey: OldEncryptData.decryptTOTPKey(account.getTotp!.secretKey)) : null,
-        iconCustomModel: account.getIconCustom,
-        createdAt: account.createdAt,
-        updatedAt: account.updatedAt,
-      );
-    } catch (e) {
-      logError('[EncryptAppDataService] Lỗi giải mã với key cũ cho account ${account.id}: $e');
-      rethrow;
-    }
-  }
-
-  Future<void> _restoreData(Map<String, dynamic> data) async {
-    List<AccountOjbModel> accountsEncrypted = [];
-    List<AccountOjbModel> newAccounts = (data['accounts'] as List).map((json) => AccountOjbModel.fromJson(json)).toList();
-
-    for (var account in newAccounts) {
-      // Reset ID về 0 để ObjectBox tự tạo ID mới
-      final accountNew = AccountOjbModel(
-        id: 0, // Set ID = 0 để ObjectBox tự tạo ID mới
-        title: account.title,
-        email: account.email ?? "",
-        password: account.password ?? "",
-        notes: account.notes ?? "",
-        icon: account.icon ?? "",
-      );
-
-      // Xử lý TOTP
-      if (account.getTotp != null) {
-        accountNew.totp.target = TOTPOjbModel(
-          id: 0, // Reset ID
-          secretKey: account.getTotp!.secretKey,
-        );
-      }
-
-      // Xử lý custom fields
-      if (account.getCustomFields.isNotEmpty) {
-        for (var customField in account.getCustomFields) {
-          final newCustomField = AccountCustomFieldOjbModel(
-            id: 0, // Reset ID
-            name: customField.name,
-            value: customField.value,
-            hintText: customField.hintText,
-            typeField: customField.typeField,
-          );
-          accountNew.customFields.add(newCustomField);
-        }
-      }
-
-      // Xử lý password histories
-      if (account.getPasswordHistories.isNotEmpty) {
-        for (var passwordHistory in account.getPasswordHistories) {
-          final newPasswordHistory = PasswordHistory(
-            id: 0, // Reset ID
-            password: passwordHistory.password,
-            createdAt: passwordHistory.createdAt,
-          );
-          accountNew.passwordHistories.add(newPasswordHistory);
-        }
-      }
-
-      // Xử lý category
-      account.category.target ??= CategoryOjbModel(categoryName: "Backup");
-      final categoryResult = CategoryBox.findCategoryByName(account.category.target?.categoryName ?? "Backup");
-      if (categoryResult == null) {
-        final newCategory = CategoryOjbModel(
-          id: 0, // Reset ID
-          categoryName: account.category.target?.categoryName ?? "Backup",
-        );
-        final id = CategoryBox.put(newCategory);
-        newCategory.id = id;
-        accountNew.category.target = newCategory;
-      } else {
-        accountNew.category.target = categoryResult;
-      }
-
-      // Xử lý icon custom
-      if (account.getIconCustom != null && account.getIconCustom!.imageBase64.isNotEmpty) {
-        final existingIcon = IconCustomBox.findIconByBase64Image(account.getIconCustom!.imageBase64);
-        if (existingIcon != null) {
-          accountNew.iconCustom.target = existingIcon;
-        } else {
-          final newIcon = IconCustomModel(
-            id: 0, // Reset ID
-            name: account.getIconCustom!.name,
-            imageBase64DarkModel: account.getIconCustom?.imageBase64DarkModel ?? "",
-            imageBase64: account.getIconCustom!.imageBase64,
-          );
-          final iconId = IconCustomBox.put(newIcon);
-          newIcon.id = iconId;
-          accountNew.iconCustom.target = newIcon;
-        }
-      }
-
-      final accountEncrypted = await _encryptAccountWithKeys(accountNew);
-      accountsEncrypted.add(accountEncrypted);
-    }
-    logInfo("accountsEncrypted: ${accountsEncrypted.length}");
-    await AccountBox.putMany(accountsEncrypted);
+    logInfo("accountsEncrypted: \u001b[32m\u001b[1m${allEncrypted.length}\u001b[0m");
+    await AccountBox.putMany(allEncrypted);
   }
 
   Future<void> _saveCurrentVersion() async {
@@ -992,7 +802,102 @@ class EncryptAppDataService {
   }
 }
 
-// Helper classes
+// Top-level function for compute: batch toDecryptedJson
+Future<List<Map<String, dynamic>>> _accountsToDecryptedJsonBatch(List<AccountOjbModel> accounts) async {
+  return await Future.wait(accounts.map((acc) => acc.toDecryptedJson()));
+}
+
+// Helper: concurrentMap with throttled concurrency
+Future<List<T>> _concurrentMap<T, E>(Iterable<E> items, Future<T> Function(E item) mapper, {int maxConcurrent = 4}) async {
+  final results = <T>[];
+  final iterator = items.iterator;
+  int running = 0;
+  final completer = Completer<void>();
+  bool done = false;
+
+  void runNext() {
+    if (!iterator.moveNext()) {
+      if (running == 0 && !done) {
+        done = true;
+        completer.complete();
+      }
+      return;
+    }
+    running++;
+    mapper(iterator.current).then((result) {
+      results.add(result);
+      running--;
+      runNext();
+    });
+    if (running < maxConcurrent) {
+      runNext();
+    }
+  }
+
+  for (int i = 0; i < maxConcurrent; i++) {
+    runNext();
+  }
+  await completer.future;
+  return results;
+}
+
+// Top-level function for compute: batch encryptAccountWithKeys
+Future<List<AccountOjbModel>> _encryptAccountsWithKeysBatch(Map<String, dynamic> args) async {
+  final List<AccountOjbModel> accounts = (args['accounts'] as List).cast<AccountOjbModel>();
+  final keys = args['encryptionKeys'] as Map<String, String>;
+  final tempService = _TempEncryptionService(deviceKey: keys['deviceKey']!, encryptionKeys: {KeyType.info: keys['infoKey']!, KeyType.password: keys['passwordKey']!, KeyType.totp: keys['totpKey']!});
+
+  const int batchSize = 50; // hoặc 20, 100 tùy RAM
+  const int maxConcurrent = 4; // Giới hạn số encryptFernet chạy song song
+  List<AccountOjbModel> result = [];
+  for (var i = 0; i < accounts.length; i += batchSize) {
+    final batch = accounts.skip(i).take(batchSize);
+    final encryptedBatch = await _concurrentMap(batch, (acc) async {
+      List<AccountCustomFieldOjbModel> customFields = [];
+      if (acc.getCustomFields.isNotEmpty) {
+        customFields = await Future.wait(
+          acc.getCustomFields.map((field) async {
+            return AccountCustomFieldOjbModel(
+              id: field.id,
+              name: field.name,
+              value: field.typeField == 'password' ? await tempService.encryptPassword(field.value) : await tempService.encryptInfo(field.value),
+              hintText: field.hintText,
+              typeField: field.typeField,
+            );
+          }),
+        );
+      }
+
+      List<PasswordHistory> passwordHistoriesList = [];
+      if (acc.getPasswordHistories.isNotEmpty) {
+        passwordHistoriesList = await Future.wait(
+          acc.getPasswordHistories.map((history) async {
+            return PasswordHistory(id: history.id, password: await tempService.encryptPassword(history.password), createdAt: history.createdAt);
+          }),
+        );
+      }
+
+      return AccountOjbModel(
+        id: acc.id,
+        title: await tempService.encryptInfo(acc.title),
+        email: acc.email != null ? await tempService.encryptInfo(acc.email!) : null,
+        password: acc.password != null ? await tempService.encryptPassword(acc.password!) : null,
+        notes: acc.notes != null ? await tempService.encryptInfo(acc.notes!) : null,
+        icon: acc.icon,
+        totpOjbModel: acc.getTotp != null ? TOTPOjbModel(secretKey: await tempService.encryptTOTPKey(acc.getTotp!.secretKey)) : null,
+        categoryOjbModel: acc.getCategory,
+        iconCustomModel: acc.getIconCustom,
+        customFieldOjbModel: customFields,
+        passwordHistoriesList: passwordHistoriesList,
+        createdAt: acc.createdAt,
+        updatedAt: DateTime.now(),
+      );
+    }, maxConcurrent: maxConcurrent);
+    result.addAll(encryptedBatch);
+  }
+  return result;
+}
+
 class _CachedKey {
   final String key;
   final DateTime expiresAt;
@@ -1054,38 +959,37 @@ extension EncryptAppDataServiceExtension on EncryptAppDataService {
 class _TempEncryptionService {
   final String deviceKey;
   final Map<KeyType, String> encryptionKeys;
-  final _encryptData = EncryptService.instance;
 
   _TempEncryptionService({required this.deviceKey, required this.encryptionKeys});
 
   Future<String> encryptInfo(String value) async {
     if (value.isEmpty) return value;
-    return await _encryptData.encryptFernet(value: value, key: encryptionKeys[KeyType.info]!);
+    return await EncryptService.encryptData(value: value, key: encryptionKeys[KeyType.info]!);
   }
 
   Future<String> encryptPassword(String value) async {
     if (value.isEmpty) return value;
-    return await _encryptData.encryptFernet(value: value, key: encryptionKeys[KeyType.password]!);
+    return await EncryptService.encryptData(value: value, key: encryptionKeys[KeyType.password]!);
   }
 
   Future<String> encryptTOTPKey(String value) async {
     if (value.isEmpty) return value;
-    return await _encryptData.encryptFernet(value: value, key: encryptionKeys[KeyType.totp]!);
+    return await EncryptService.encryptData(value: value, key: encryptionKeys[KeyType.totp]!);
   }
 
   Future<String> decryptInfo(String value) async {
     if (value.isEmpty) return value;
-    return _encryptData.decryptFernet(value: value, key: encryptionKeys[KeyType.info]!);
+    return EncryptService.decryptData(value: value, key: encryptionKeys[KeyType.info]!);
   }
 
   Future<String> decryptPassword(String value) async {
     if (value.isEmpty) return value;
-    return _encryptData.decryptFernet(value: value, key: encryptionKeys[KeyType.password]!);
+    return EncryptService.decryptData(value: value, key: encryptionKeys[KeyType.password]!);
   }
 
   Future<String> decryptTOTPKey(String value) async {
     if (value.isEmpty) return value;
-    return _encryptData.decryptFernet(value: value, key: encryptionKeys[KeyType.totp]!);
+    return EncryptService.decryptData(value: value, key: encryptionKeys[KeyType.totp]!);
   }
 
   Future<Map<String, String>> decryptAccountForVerification(AccountOjbModel account) async {

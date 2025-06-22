@@ -2,7 +2,7 @@ import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 
-void showToastSuccess(String message, {BuildContext? context}) {
+void showToastSuccess(String message, {BuildContext? context, StyledToastPosition? position}) {
   final safeContext = context ?? GlobalKeys.appRootNavigatorKey.currentContext;
   if (safeContext == null || !safeContext.mounted) return;
   showToast(
@@ -11,11 +11,11 @@ void showToastSuccess(String message, {BuildContext? context}) {
     animation: StyledToastAnimation.fade,
     backgroundColor: Theme.of(safeContext).colorScheme.primary,
     textStyle: const TextStyle(color: Colors.white),
-    position: StyledToastPosition.center,
+    position: position ?? StyledToastPosition.center,
   );
 }
 
-void showToastError(String message, {BuildContext? context}) {
+void showToastError(String message, {BuildContext? context, StyledToastPosition? position}) {
   final safeContext = context ?? GlobalKeys.appRootNavigatorKey.currentContext;
   if (safeContext == null || !safeContext.mounted) return;
   showToast(
@@ -24,11 +24,11 @@ void showToastError(String message, {BuildContext? context}) {
     animation: StyledToastAnimation.fade,
     backgroundColor: Theme.of(safeContext).colorScheme.error,
     textStyle: const TextStyle(color: Colors.white),
-    position: StyledToastPosition.center,
+    position:position?? StyledToastPosition.center,
   );
 }
 
-void showToastWarning(String message, {BuildContext? context}) {
+void showToastWarning(String message, {BuildContext? context, StyledToastPosition? position}) {
   final safeContext = context ?? GlobalKeys.appRootNavigatorKey.currentContext;
   if (safeContext == null || !safeContext.mounted) return;
   showToast(
@@ -37,6 +37,6 @@ void showToastWarning(String message, {BuildContext? context}) {
     animation: StyledToastAnimation.fade,
     backgroundColor: Colors.orange,
     textStyle: const TextStyle(color: Colors.white),
-    position: StyledToastPosition.center,
+    position: position ?? StyledToastPosition.center,
   );
 }

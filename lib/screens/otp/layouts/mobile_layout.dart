@@ -1,3 +1,4 @@
+import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/components/icon_show_component.dart';
 import 'package:cybersafe_pro/database/boxes/account_box.dart';
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
@@ -20,6 +21,7 @@ import 'package:cybersafe_pro/widgets/otp_text_with_countdown/otp_text_with_coun
 import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:provider/provider.dart';
 
 class OtpMobileLayout extends StatefulWidget {
@@ -31,18 +33,29 @@ class OtpMobileLayout extends StatefulWidget {
 
 class _OtpMobileLayoutState extends State<OtpMobileLayout> {
   List<AccountOjbModel> _otpAccounts = [];
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadOTPAccounts();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadOTPAccounts();
+    });
   }
 
-  void _loadOTPAccounts() {
-    final accounts = AccountBox.getAllWithOTP();
+  Future<void> _loadOTPAccounts() async {
     setState(() {
-      _otpAccounts = accounts;
+      _isLoading = true;
     });
+    // Đợi 1 frame để tránh block UI
+    await Future.delayed(Duration(milliseconds: 10));
+    final accounts = await Future(() => AccountBox.getAllWithOTP());
+    if (mounted) {
+      setState(() {
+        _otpAccounts = accounts;
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -50,26 +63,55 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
     return Scaffold(
       appBar: AppBar(title: Text(context.trOtp(OtpText.title)), elevation: 0, scrolledUnderElevation: 0, backgroundColor: Theme.of(context).colorScheme.surface),
       body:
-          _otpAccounts.isEmpty
+          _isLoading
+              ? Center(child: CircularProgressIndicator())
+              : _otpAccounts.isEmpty
               ? Center(child: Image.asset("assets/images/exclamation-mark.png", width: 60.w, height: 60.h))
-              : ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemCount: _otpAccounts.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 8),
-                itemBuilder: (context, index) {
-                  final account = _otpAccounts[index];
-                  return TotpItem(
-                    account: account,
-                    secretKey: account.totp.target?.secretKey ?? '',
-                    iconCustom: account.getIconCustom ?? IconCustomModel(name: '', imageBase64: ''),
-                    title: account.title,
-                    email: account.email ?? '',
-                    icon: account.icon ?? '',
-                    onTap: () {
-                      seeDetailTOTPBottomSheet(context, account);
-                    },
-                  );
-                },
+              : AnimationLimiter(
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _otpAccounts.length,
+                  separatorBuilder: (context, index) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final account = _otpAccounts[index];
+                    return AnimationConfiguration.staggeredList(
+                      position: index,
+                      duration: const Duration(milliseconds: 400),
+                      child: SlideAnimation(
+                        verticalOffset: 30.0,
+                        child: FadeInAnimation(
+                          child: TotpItem(
+                            account: account,
+                            secretKey: account.totp.target?.secretKey ?? '',
+                            iconCustom: account.getIconCustom ?? IconCustomModel(name: '', imageBase64: ''),
+                            title: account.title,
+                            email: account.email ?? '',
+                            icon: account.icon ?? '',
+                            onTap: () async {
+                              // Giải mã trước khi mở bottom sheet
+                              final secretKeyEncrypted = account.totp.target?.secretKey ?? '';
+                              if (secretKeyEncrypted.isEmpty) {
+                                seeDetailTOTPBottomSheet(context, account, '');
+                                return;
+                              }
+                              showLoadingDialog(context: context); // Sửa lại truyền context đúng dạng
+                              String decryptedSecretKey = '';
+                              try {
+                                decryptedSecretKey = await EncryptAppDataService.instance.decryptTOTPKey(secretKeyEncrypted);
+                              } catch (e) {
+                                decryptedSecretKey = '';
+                              }
+                              hideLoadingDialog();
+                              if (context.mounted) {
+                                seeDetailTOTPBottomSheet(context, account, decryptedSecretKey); // Truyền trực tiếp
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
 
       floatingActionButton: SpeedDial(
@@ -130,7 +172,7 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
     }
   }
 
-  Future<void> seeDetailTOTPBottomSheet(BuildContext context, AccountOjbModel totp) async {
+  Future<void> seeDetailTOTPBottomSheet(BuildContext context, AccountOjbModel totp, String decryptedSecretKey) async {
     await showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -175,25 +217,17 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
                   Row(
                     children: [
                       Expanded(
-                        child: DecryptText(
-                          style: TextStyle(fontSize: 16.sp),
-                          decryptTextType: DecryptTextType.opt,
-                          value: totp.totp.target?.secretKey ?? "",
-                          builder: (context, value) {
-                            return CardCustomWidget(padding: EdgeInsets.all(10), child: OtpTextWithCountdown(keySecret: value));
-                          },
+                        child: CardCustomWidget(
+                          padding: EdgeInsets.all(10),
+                          child: (decryptedSecretKey.isEmpty) ? Text('Error', style: TextStyle(color: Colors.red)) : OtpTextWithCountdown(keySecret: decryptedSecretKey),
                         ),
                       ),
-          
                       const SizedBox(width: 10),
                       IconButton(
                         onPressed: () async {
                           Navigator.pop(context);
-                          if (totp.totp.target?.secretKey == null) return;
-                          String secretKey = await EncryptAppDataService.instance.decryptTOTPKey(totp.totp.target?.secretKey ?? "");
-          
-                          if (!context.mounted) return;
-                          clipboardCustom(context: context, text: generateTOTPCode(keySecret: secretKey));
+                          if (decryptedSecretKey.isEmpty) return;
+                          clipboardCustom(context: context, text: generateTOTPCode(keySecret: decryptedSecretKey));
                         },
                         icon: Icon(Icons.copy, size: 20.sp),
                       ),

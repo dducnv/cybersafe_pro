@@ -32,7 +32,7 @@ class AboutLocale extends BaseLocale {
     GeneralText.privacyMaxDesc: 'Không thu thập dữ liệu, không cần đăng ký tài khoản, sử dụng hoàn toàn ngoại tuyến.',
 
     GeneralText.proIntroTitle: 'Nâng cấp Pro để trải nghiệm trọn vẹn mọi tính năng',
-    GeneralText.twoFactorAuthDesc: 'Bảo vệ tài khoản với xác thực hai lớp (2FA)',
+    GeneralText.twoFactorAuthDesc: 'Mở khoá màn hình truy cập nhanh mã OTP (2FA)',
     GeneralText.statisticsDuplicatePasswordDesc: 'Phân tích và cảnh báo mật khẩu trùng lặp',
     GeneralText.customThemeColorDesc: 'Tùy chỉnh màu sắc giao diện theo ý thích',
     GeneralText.customIconDesc: 'Tạo và sử dụng icon cá nhân không giới hạn',
@@ -56,7 +56,7 @@ class AboutLocale extends BaseLocale {
     GeneralText.privacyMaxDesc: 'No data collection, no account registration required, fully offline usage.',
 
     GeneralText.proIntroTitle: 'Upgrade to Pro for the full experience',
-    GeneralText.twoFactorAuthDesc: 'Protect your account with two-factor authentication (2FA)',
+    GeneralText.twoFactorAuthDesc: 'Unlock the screen to quickly access OTP codes (2FA)',
     GeneralText.statisticsDuplicatePasswordDesc: 'Analyze and alert duplicate passwords',
     GeneralText.customThemeColorDesc: 'Customize interface colors as you like',
     GeneralText.customIconDesc: 'Create and use unlimited personal icons',
@@ -80,7 +80,7 @@ class AboutLocale extends BaseLocale {
     GeneralText.privacyMaxDesc: 'उपयोगकर्ता डेटा संग्रहण नहीं करता है, खाता पंजीकरण आवश्यक नहीं है, पूरी तरह से ऑफलाइन',
 
     GeneralText.proIntroTitle: 'प्रो संस्करण में बढ़ाएं और सभी सुविधाओं को खोलें',
-    GeneralText.twoFactorAuthDesc: 'दो-कारक प्रमाणीकरण सुविधा',
+    GeneralText.twoFactorAuthDesc: 'स्क्रीन अनलॉक करें और OTP (2FA) कोड तक तुरंत पहुँचें',
     GeneralText.statisticsDuplicatePasswordDesc: 'डुप्लिकेट पासवर्ड सुविधा',
     GeneralText.customThemeColorDesc: 'संपादित विषय रंग सुविधा',
     GeneralText.customIconDesc: 'संपादित आइकन सुविधा',
@@ -128,7 +128,7 @@ class AboutLocale extends BaseLocale {
     GeneralText.privacyMaxDesc: 'データ収集なし、アカウント登録不要、完全オフライン利用。',
 
     GeneralText.proIntroTitle: 'Proにアップグレードしてすべての機能を体験',
-    GeneralText.twoFactorAuthDesc: '2段階認証（2FA）でアカウントを保護',
+    GeneralText.twoFactorAuthDesc: '画面ロックを解除してOTP（2FA）コードにすぐアクセス',
     GeneralText.statisticsDuplicatePasswordDesc: '重複パスワードを分析・警告',
     GeneralText.customThemeColorDesc: 'インターフェースの色を自由にカスタマイズ',
     GeneralText.customIconDesc: '無制限に個人アイコンを作成・使用',
@@ -152,7 +152,7 @@ class AboutLocale extends BaseLocale {
     GeneralText.privacyMaxDesc: 'Sem coleta de dados, sem necessidade de cadastro, uso totalmente offline.',
 
     GeneralText.proIntroTitle: 'Atualize para o Pro para aproveitar todos os recursos',
-    GeneralText.twoFactorAuthDesc: 'Proteja sua conta com autenticação em duas etapas (2FA)',
+    GeneralText.twoFactorAuthDesc: 'Desbloqueie a tela para acessar rapidamente os códigos OTP (2FA)',
     GeneralText.statisticsDuplicatePasswordDesc: 'Analise e alerte sobre senhas duplicadas',
     GeneralText.customThemeColorDesc: 'Personalize as cores da interface como preferir',
     GeneralText.customIconDesc: 'Crie e use ícones pessoais ilimitados',
@@ -200,7 +200,7 @@ class AboutLocale extends BaseLocale {
     GeneralText.privacyMaxDesc: 'Veri toplanmaz, hesap kaydı gerekmez, tamamen çevrimdışı kullanım.',
 
     GeneralText.proIntroTitle: 'Tüm özellikleri deneyimlemek için Pro\'ya yükseltin',
-    GeneralText.twoFactorAuthDesc: 'Hesabınızı iki faktörlü kimlik doğrulama (2FA) ile koruyun',
+    GeneralText.twoFactorAuthDesc: 'Ekranı açarak OTP (2FA) koduna hızlıca erişin',
     GeneralText.statisticsDuplicatePasswordDesc: 'Yinelenen şifreleri analiz edin ve uyarı alın',
     GeneralText.customThemeColorDesc: 'Arayüz renklerini istediğiniz gibi özelleştirin',
     GeneralText.customIconDesc: 'Sınırsız kişisel simge oluşturun ve kullanın',

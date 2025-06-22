@@ -282,22 +282,6 @@ class AccountProvider extends ChangeNotifier {
     });
   }
 
-  // // Lấy account đã giải mã với cache
-  // Future<AccountOjbModel> getDecryptedAccount(int id) async {
-  //   // Kiểm tra cache trước
-  //   if (_decryptedCache.containsKey(id)) {
-  //     return _decryptedCache[id]!;
-  //   }
-
-  //   final account = _accounts[id];
-  //   if (account == null) throw Exception('Account không tồn tại');
-
-  //   final decrypted = await _decryptAccount(account);
-  //   // Lưu vào cache
-  //   _decryptedCache[id] = decrypted;
-  //   return decrypted;
-  // }
-
   // Thêm account mới với mã hóa
   Future<bool> createOrUpdateAccount(AccountOjbModel account, {bool isUpdate = false}) async {
     final stopwatch = Stopwatch()..start();
@@ -380,7 +364,7 @@ class AccountProvider extends ChangeNotifier {
     return result ?? false;
   }
 
-  Future<bool> handleDeleteAllAccount() async {
+  Future<bool> handleDeleteAllSelectedAccounts() async {
     final result = await _handleAsync(funcName: "deleteAllAccount", () async {
       showLoadingDialog();
       try {
@@ -405,9 +389,6 @@ class AccountProvider extends ChangeNotifier {
 
         // Xóa danh sách tài khoản đã chọn
         handleClearAccountsSelected();
-
-        // Cập nhật lại UI
-        await refreshAccounts();
         return true;
       } finally {
         hideLoadingDialog();

@@ -35,7 +35,7 @@ import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:shimmer/shimmer.dart';
 
 class HomeDesktopLayout extends StatefulWidget {
   const HomeDesktopLayout({super.key});
@@ -45,7 +45,6 @@ class HomeDesktopLayout extends StatefulWidget {
 }
 
 class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
-  final ItemScrollController itemScrollController = ItemScrollController();
   final ScrollController _scrollController = ScrollController();
   final decryptService = EncryptAppDataService.instance;
 
@@ -220,7 +219,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                                                       context.read<DesktopHomeProvider>().selectAccount(account);
                                                     },
                                                   );
-                                                }
+                                                },
                                               ),
                                             ),
                                           );
@@ -505,7 +504,11 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                     controller: TextEditingController(text: snapshot.data),
                   );
                 }
-                return SizedBox.shrink();
+                return Shimmer.fromColors(
+                  baseColor: Theme.of(context).colorScheme.primary.withValues(alpha: .4),
+                  highlightColor: Theme.of(context).colorScheme.primary,
+                  child: Text('Decrypting...', textAlign: TextAlign.start, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+                );
               },
             ),
           ],
@@ -726,10 +729,9 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                     child: Consumer2<CategoryProvider, AccountProvider>(
                       builder: (context, categoryProvider, accountProvider, child) {
                         final categories = categoryProvider.categoryList;
-                        return ScrollablePositionedList.separated(
+                        return ListView.separated(
                           separatorBuilder: (context, index) => SizedBox(width: 10.w),
                           scrollDirection: Axis.horizontal,
-                          itemScrollController: itemScrollController,
                           itemCount: categories.length,
                           padding: EdgeInsets.only(right: 16),
                           itemBuilder: (context, index) {

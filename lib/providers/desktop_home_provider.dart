@@ -17,4 +17,16 @@ class DesktopHomeProvider extends ChangeNotifier {
   }
   
   bool get hasSelectedAccount => _selectedAccount != null;
+
+  void toggleAccountSelection(AccountOjbModel account) {
+    if (_selectedAccount == account) {
+      clearSelectedAccount();
+    } else {
+      selectAccount(account);
+    }
+  }
+  void handleClearAccountsSelected() {
+    _selectedAccount = null;
+    notifyListeners();
+  }
 }

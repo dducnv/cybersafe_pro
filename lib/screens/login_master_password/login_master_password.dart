@@ -62,7 +62,7 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
         SecureApplicationUtil.instance.setSecureState(SecureAppState.secured);
       }, isNavigateToHome: widget.secureApplicationController == null);
       // Dừng timer
-      if (_mounted) {
+      if (_mounted && mounted) {
         context.read<AppProvider>().stopTimer();
       }
     } catch (e) {

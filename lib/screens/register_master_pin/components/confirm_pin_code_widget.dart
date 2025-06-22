@@ -4,10 +4,12 @@ import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/local_auth_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/utils/toast_noti.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:provider/provider.dart';
 
 class ConfirmPinCodeWidget extends StatefulWidget {
@@ -24,10 +26,17 @@ class ConfirmPinCodeWidget extends StatefulWidget {
 class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
   TextEditingController pinCodeController = TextEditingController();
   int timeCorrect = 0;
+  FocusNode focusNode = FocusNode();
+  @override
+  void initState() {
+    super.initState();
+    focusNode = FocusNode();
+  }
+
   @override
   Widget build(BuildContext context) {
     return KeyboardListener(
-      focusNode: FocusNode(),
+      focusNode: focusNode,
       onKeyEvent: (event) {
         if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.enter) {
           _handleSubmit();
@@ -44,7 +53,7 @@ class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
               key: widget.appPinCodeConfirmKey,
               formKey: widget.formConfirmKey,
               onSubmitted: (value) {
-                _handleSubmit();  
+                _handleSubmit();
               },
               onEnter: () {
                 _handleSubmit();
@@ -54,10 +63,6 @@ class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
               validator: (value) {
                 if (value!.isEmpty) {
                   return context.trSafe(LoginText.pinCodeRequired);
-                }
-                bool isVerified = Provider.of<LocalAuthProvider>(context, listen: false).verifyRegisterPinCode(value);
-                if (!isVerified) {
-                  return context.trSafe(LoginText.pinCodeNotMatch);
                 }
                 return null;
               },
@@ -92,7 +97,10 @@ class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
     } else {
       timeCorrect++;
       widget.appPinCodeConfirmKey.currentState!.triggerErrorAnimation();
-      if (timeCorrect >= 3) {
+      showToastWarning(context.trSafe(LoginText.pinCodeNotMatch), context: context, position: StyledToastPosition.top);
+
+      if (timeCorrect >= 1) {
+        focusNode.dispose();
         widget.pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
       }
     }

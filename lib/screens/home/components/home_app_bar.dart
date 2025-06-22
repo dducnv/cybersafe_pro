@@ -5,6 +5,7 @@ import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
+import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/resources/app_config.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
@@ -63,7 +64,7 @@ class _HomeAppBarCustomState extends State<HomeAppBarCustom> {
                           padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2),
-                            gradient: LinearGradient(colors: [Theme.of(context).colorScheme.primary.withValues(alpha: 0.6), Theme.of(context).colorScheme.primary]),
+                            gradient: LinearGradient(colors: [Theme.of(context).colorScheme.primary.withValues(alpha: .6), Theme.of(context).colorScheme.primary]),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text("PRO", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
@@ -100,9 +101,11 @@ class _HomeAppBarCustomState extends State<HomeAppBarCustom> {
                             confirmButtonColor: Colors.red,
                             cancelButtonColor: Theme.of(context).colorScheme.primary,
                             isCountDownTimer: true,
-                            onConfirm: () {
+                            onConfirm: () async {
                               Navigator.pop(context);
-                              context.read<AccountProvider>().handleDeleteAllAccount();
+                              await context.read<AccountProvider>().handleDeleteAllSelectedAccounts();
+                              if (context.mounted) return;
+                              Future.wait([context.read<CategoryProvider>().refresh(), context.read<AccountProvider>().refreshAccounts(resetExpansion: true)]);
                             },
                           ),
                         );

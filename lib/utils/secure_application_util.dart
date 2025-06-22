@@ -2,7 +2,6 @@ import 'package:cybersafe_pro/utils/secure_app_state.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:secure_application/secure_application.dart';
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 class SecureApplicationUtil {

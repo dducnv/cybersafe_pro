@@ -4,7 +4,9 @@ import 'package:cybersafe_pro/components/bottom_sheets/pro_intro_bottom_sheet.da
 import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
+import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
+import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/resources/app_config.dart';
 import 'package:cybersafe_pro/resources/size_text_icon.dart';
 import 'package:cybersafe_pro/screens/login_master_password/login_master_password.dart';
@@ -18,6 +20,7 @@ import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/secure_application_util.dart';
+import 'package:cybersafe_pro/utils/toast_noti.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/app_custom_switch/app_custom_switch.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
@@ -27,7 +30,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
-import 'package:secure_application/secure_application_native.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class SettingMobileLayout extends StatelessWidget {
@@ -153,12 +155,12 @@ class SettingMobileLayout extends StatelessWidget {
                 SettingItemWidget(
                   title: context.appLocale.settingsLocale.getText(SettingsLocale.backupData),
                   icon: Icons.upload_file,
-                  onTap: () {
+                  onTap: () async {
                     if (!DataManagerService.checkData(context)) {
                       showToast(context.trSafe(SettingsLocale.dataIsEmpty), context: context);
                       return;
                     }
-                    Navigator.of(context).push(
+                    await Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) {
                           return LoginMasterPassword(
@@ -167,10 +169,7 @@ class SettingMobileLayout extends StatelessWidget {
                             callBackLoginCallback: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
                               if (isLoginSuccess == true && pin != null) {
                                 Navigator.of(context).pop();
-                                bool status = await DataManagerService.backupData(GlobalKeys.appRootNavigatorKey.currentContext!, pin);
-                                if (status && context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Backup data successful'), backgroundColor: Colors.green, duration: const Duration(seconds: 3)));
-                                }
+                                await DataManagerService.backupData(GlobalKeys.appRootNavigatorKey.currentContext!, pin);
                               }
                             },
                           );
@@ -184,7 +183,18 @@ class SettingMobileLayout extends StatelessWidget {
                   title: context.appLocale.settingsLocale.getText(SettingsLocale.restore),
                   icon: Icons.restore,
                   onTap: () async {
-                    await DataManagerService.restoreData(context);
+                    await DataManagerService.restoreData(context).then((value) {
+                      if (!value) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.trSafe('Data restore failed')), backgroundColor: Colors.red, duration: const Duration(seconds: 3)));
+                        return;
+                      }
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(context.trSafe('Data restore successfully')), backgroundColor: Colors.green, duration: const Duration(seconds: 3)));
+                    });
+                    await GlobalKeys.appRootNavigatorKey.currentContext!.read<CategoryProvider>().refresh();
+                    GlobalKeys.appRootNavigatorKey.currentContext!.read<AccountProvider>().refreshAccounts(resetExpansion: true);
                   },
                 ),
 

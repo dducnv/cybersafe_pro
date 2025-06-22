@@ -121,10 +121,7 @@ class OtpTextWithCountdownState extends State<OtpTextWithCountdown> {
       children: [
         if (!widget.isSubTimeCountDown) _buildCountDownTimer(),
         if (!widget.isSubTimeCountDown) const SizedBox(width: 10),
-        if (AppConfig.isProApp)
-          Text(totp, style: widget.otpTextStyle ?? TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.primary))
-        else
-          Text("*** ***", style: widget.otpTextStyle ?? TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.primary)),
+        Text(totp, style: widget.otpTextStyle ?? TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.primary)),
         if (widget.isSubTimeCountDown) _buildCountDownTimer(),
       ],
     );

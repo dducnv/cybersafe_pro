@@ -98,7 +98,7 @@ class LocalAuthConfig {
     if (!_isAuthenticating) {
       return true;
     }
-    
+
     try {
       _isAuthenticating = false;
       return await auth.stopAuthentication();
@@ -124,17 +124,8 @@ class LocalAuthConfig {
     bool authenticated = false;
     try {
       _isAuthenticating = true;
-      final String reason = Platform.isIOS 
-          ? 'Vui lòng sử dụng Face ID để xác thực' 
-          : 'Vui lòng quét vân tay để xác thực';
-
-      authenticated = await auth.authenticate(
-        localizedReason: reason, 
-        options: const AuthenticationOptions(
-          stickyAuth: true, 
-          biometricOnly: true,
-        ),
-      );
+      final String reason = Platform.isIOS ? 'Kindly use Face ID for authentication' : 'Kindly scan your fingerprint for authentication';
+      authenticated = await auth.authenticate(localizedReason: reason, options: const AuthenticationOptions(stickyAuth: true, biometricOnly: true));
     } on PlatformException catch (e) {
       logError("error authenticate: $e");
       // Xử lý riêng lỗi auth_in_progress
@@ -148,7 +139,7 @@ class LocalAuthConfig {
     } finally {
       _isAuthenticating = false;
     }
-    
+
     return authenticated;
   }
 

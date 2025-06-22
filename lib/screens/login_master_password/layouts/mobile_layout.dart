@@ -13,10 +13,12 @@ import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/secure_app_state.dart';
 import 'package:cybersafe_pro/utils/secure_application_util.dart';
+import 'package:cybersafe_pro/utils/toast_noti.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:secure_application/secure_application_controller.dart';
@@ -95,7 +97,6 @@ class _MobileLayoutState extends State<MobileLayout> {
       body: Consumer<LocalAuthProvider>(
         builder: (context, provider, child) {
           final isCurrentlyLocked = provider.isLocked;
-
           return KeyboardListener(
             focusNode: FocusNode(),
             onKeyEvent: (event) {
@@ -277,6 +278,9 @@ class _MobileLayoutState extends State<MobileLayout> {
       } catch (e) {
         logError('Error navigating after login: $e');
       }
+    } else {
+      if (!mounted) return;
+      showToastError(context.trSafe(LoginText.incorrectPin), context: context, position: StyledToastPosition.top);
     }
   }
 }
