@@ -1,4 +1,3 @@
-import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:flutter/material.dart';
 
 class CardCustomWidget extends StatelessWidget {
