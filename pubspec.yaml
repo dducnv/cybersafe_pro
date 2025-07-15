@@ -20,11 +20,11 @@ dependencies:
   objectbox: ^4.1.0
   objectbox_flutter_libs: any
 
-  # drift: ^2.27.0
-  # drift_flutter: ^0.2.4
-  # sqlcipher_flutter_libs: ^0.6.7
-  # sqlite3_flutter_libs: ^0.5.34
-  # json_annotation: ^4.9.0
+  drift: ^2.27.0
+  drift_flutter: ^0.2.4
+  sqlcipher_flutter_libs: ^0.6.7
+  sqlite3_flutter_libs: ^0.5.34
+  json_annotation: ^4.9.0
   #security
   crypto: ^3.0.6
   envied: ^1.1.1

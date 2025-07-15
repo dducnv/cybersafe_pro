@@ -16,8 +16,8 @@ class SecureStorageKey {
   static const String numberLogin = 'numberLogin';
   static const String lockOnBackground = 'lockOnBackground';
 
-
   static const String encryptionKeyCreationTime = "encryption_key_creation_time";
+  
   //old_key
   static const String deviceKeyStorageKey = 'device_encryption_key';
   static const String infoKeyStorageKey = 'info_encryption_key';
@@ -38,4 +38,17 @@ class SecureStorageKey {
   static const String securePasswordKey = '@password_encryption_key';
   static const String secureTotpKey = '@totp_encryption_key';
   static const String securePinCodeKey = '@pinCode_encryption_key';
+  
+  // Key rotation support - thời gian tạo key
+  static const String secureDeviceKeyCreationTime = '@device_encryption_key_creation_time';
+  static const String secureInfoKeyCreationTime = '@info_encryption_key_creation_time';
+  static const String securePasswordKeyCreationTime = '@password_encryption_key_creation_time';
+  static const String secureTotpKeyCreationTime = '@totp_encryption_key_creation_time';
+  static const String securePinCodeKeyCreationTime = '@pinCode_encryption_key_creation_time';
+  
+  // Performance và security tracking
+  static const String devicePerformanceCache = '@device_performance_cache';
+  static const String devicePerformanceTestTime = '@device_performance_test_time';
+  static const String securityViolationCount = '@security_violation_count';
+  static const String lastSecurityViolationTime = '@last_security_violation_time';
 }
