@@ -3,6 +3,7 @@ import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -96,10 +97,10 @@ class AccountItemWidget extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(accountModel.title, style: TextStyle(overflow: TextOverflow.ellipsis, fontSize: 14.sp, fontWeight: FontWeight.bold), maxLines: 1),
+                              Text(accountModel.title, overflow: TextOverflow.ellipsis, style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.bold), maxLines: 1),
                               if (accountModel.email != null && accountModel.email!.isNotEmpty) ...[
                                 SizedBox(height: 4),
-                                Text(accountModel.email!, maxLines: 1, style: TextStyle(overflow: TextOverflow.ellipsis, color: Colors.grey, fontSize: 12.sp)),
+                                Text(accountModel.email!, maxLines: 1, overflow: TextOverflow.ellipsis, style: CustomTextStyle.regular(color: Colors.grey, fontSize: 12.sp)),
                               ],
                             ],
                           ),

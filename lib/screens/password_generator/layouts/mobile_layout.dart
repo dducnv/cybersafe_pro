@@ -3,6 +3,7 @@ import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/providers/password_generate_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:numberpicker/numberpicker.dart';
@@ -105,7 +106,7 @@ class _PasswordGenerateMobileLayoutState extends State<PasswordGenerateMobileLay
                     child: Center(
                       child: Consumer<PasswordGenerateProvider>(
                         builder: (context, viewModel, child) {
-                          return RichText(textAlign: TextAlign.center, text: TextSpan(children: viewModel.passwordInline, style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)));
+                          return RichText(textAlign: TextAlign.center, text: TextSpan(children: viewModel.passwordInline, style: CustomTextStyle.regular(fontSize: 25, fontWeight: FontWeight.bold)));
                         },
                       ),
                     ),
@@ -131,7 +132,7 @@ class _PasswordGenerateMobileLayoutState extends State<PasswordGenerateMobileLay
                           );
                         },
                       ),
-                      Text("(!@#,...)", style: TextStyle(fontSize: 14)),
+                      Text("(!@#,...)", style: CustomTextStyle.regular(fontSize: 14)),
                     ],
                   ),
                   Row(
@@ -149,7 +150,7 @@ class _PasswordGenerateMobileLayoutState extends State<PasswordGenerateMobileLay
                           );
                         },
                       ),
-                      Text("(0-9)", style: TextStyle(fontSize: 14)),
+                      Text("(0-9)", style: CustomTextStyle.regular(fontSize: 14)),
                     ],
                   ),
                 ],
@@ -166,7 +167,7 @@ class _PasswordGenerateMobileLayoutState extends State<PasswordGenerateMobileLay
                           haptics: true,
                           zeroPad: false,
                           value: viewModel.passLength,
-                          selectedTextStyle: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 25.sp, fontWeight: FontWeight.bold),
+                          textStyle: CustomTextStyle.regular(color: Theme.of(context).colorScheme.primary, fontSize: 25.sp, fontWeight: FontWeight.bold),
                           itemCount: 5,
                           minValue: 8,
                           maxValue: 100,

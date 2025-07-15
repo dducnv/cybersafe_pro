@@ -14,6 +14,7 @@ import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
 import 'package:cybersafe_pro/widgets/modal_side_sheet/modal_side_sheet.dart';
 import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -95,7 +96,7 @@ class _DesktopAppbarState extends State<DesktopAppbar> {
                                 children: [
                                   Icon(Icons.delete_rounded, color: Colors.redAccent, size: 24.sp),
                                   const SizedBox(width: 5),
-                                  Text(accountSelected.length.toString(), style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 18.sp)),
+                                  Text(accountSelected.length.toString(), style: CustomTextStyle.regular(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 18.sp)),
                                 ],
                               ),
                             ),

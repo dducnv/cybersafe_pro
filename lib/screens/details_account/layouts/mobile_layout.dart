@@ -16,6 +16,7 @@ import 'package:cybersafe_pro/widgets/item_custom/item_copy_value.dart';
 import 'package:cybersafe_pro/widgets/otp_text_with_countdown/otp_text_with_countdown.dart';
 import 'package:cybersafe_pro/widgets/request_pro/request_pro.dart';
 import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -105,7 +106,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                             },
                           ),
                           ListTile(
-                            title: Text(context.trDetails(DetailsAccountText.deleteAccount), style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                            title: Text(context.trDetails(DetailsAccountText.deleteAccount), style: CustomTextStyle.regular(color: Theme.of(context).colorScheme.error)),
                             onTap: () {
                               showAppCustomDialog(
                                 context,
@@ -178,12 +179,12 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                 width: 50.h,
                 height: 50.h,
                 isDecrypted: false,
-                textStyle: TextStyle(fontSize: 30.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+                textStyle: CustomTextStyle.regular(fontSize: 30.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
               ),
             ),
           ),
           SizedBox(height: 5.h),
-          DecryptText(showLoading: true, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.sp), value: accountOjbModel.title, decryptTextType: DecryptTextType.info),
+          DecryptText(showLoading: true, style: CustomTextStyle.regular(fontWeight: FontWeight.bold, fontSize: 20.sp), value: accountOjbModel.title, decryptTextType: DecryptTextType.info),
         ],
       ),
     );
@@ -195,7 +196,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 10),
-        Text(context.trDetails(DetailsAccountText.baseInfo), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+        Text(context.trDetails(DetailsAccountText.baseInfo), style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
         SizedBox(height: 5.h),
         CardCustomWidget(
           child: Column(
@@ -218,14 +219,14 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        Text(context.trDetails(DetailsAccountText.category), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+        Text(context.trDetails(DetailsAccountText.category), style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
         const SizedBox(height: 5),
         CardCustomWidget(
           child: Row(
             children: [
               Icon(Icons.folder, color: Theme.of(context).colorScheme.primary, size: 24.sp),
               const SizedBox(width: 10),
-              Text(accountOjbModel.category.target?.categoryName ?? "", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400)),
+              Text(accountOjbModel.category.target?.categoryName ?? "", style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w400)),
             ],
           ),
         ),
@@ -241,7 +242,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [Text(context.trDetails(DetailsAccountText.note), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]))],
+              children: [Text(context.trDetails(DetailsAccountText.note), style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]))],
             ),
             const SizedBox(height: 5),
             FutureBuilder(
@@ -259,7 +260,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                     textInputAction: TextInputAction.newline,
                     textAlign: TextAlign.start,
                     minLines: 1,
-                    textStyle: TextStyle(),
+                    textStyle: CustomTextStyle.regular(),
                     maxLines: null,
                     isObscure: false,
                     controller: TextEditingController(text: snapshot.data),
@@ -268,7 +269,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                 return Shimmer.fromColors(
                   baseColor: Theme.of(context).colorScheme.primary.withValues(alpha: .4),
                   highlightColor: Theme.of(context).colorScheme.primary,
-                  child: Text('Decrypting...', textAlign: TextAlign.start, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+                  child: Text('Decrypting...', textAlign: TextAlign.start, style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
                 );
               },
             ),
@@ -283,7 +284,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        Text(context.trDetails(DetailsAccountText.customFields), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+        Text(context.trDetails(DetailsAccountText.customFields), style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
         const SizedBox(height: 5),
         CardCustomWidget(
           child: Column(
@@ -313,7 +314,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(context.trDetails(DetailsAccountText.otpCode), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+        Text(context.trDetails(DetailsAccountText.otpCode), style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
         const SizedBox(height: 5),
         RequestPro(
           child: CardCustomWidget(
@@ -360,8 +361,8 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
     return RichText(
       text: TextSpan(
         children: [
-          TextSpan(text: "${context.trDetails(DetailsAccountText.updatedAt)}: ", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
-          TextSpan(text: account.updatedAtFormat, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.grey[600])),
+          TextSpan(text: "${context.trDetails(DetailsAccountText.updatedAt)}: ", style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+          TextSpan(text: account.updatedAtFormat, style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.grey[600])),
         ],
       ),
     );
@@ -378,8 +379,8 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
             RichText(
               text: TextSpan(
                 children: [
-                  TextSpan(text: "${context.trDetails(DetailsAccountText.passwordHistoryTitle)}: ", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
-                  TextSpan(text: "${account.passwordHistories.length}", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary)),
+                  TextSpan(text: "${context.trDetails(DetailsAccountText.passwordHistoryTitle)}: ", style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+                  TextSpan(text: "${account.passwordHistories.length}", style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary)),
                 ],
               ),
             ),
@@ -393,7 +394,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                   padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
                   child: Text(
                     context.trDetails(DetailsAccountText.passwordHistoryDetail),
-                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
+                    style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
                   ),
                 ),
               ),
@@ -421,7 +422,7 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(context.trDetails(DetailsAccountText.passwordHistoryTitle), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+                      Text(context.trDetails(DetailsAccountText.passwordHistoryTitle), style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
                       IconButton(
                         onPressed: () {
                           Navigator.pop(context);

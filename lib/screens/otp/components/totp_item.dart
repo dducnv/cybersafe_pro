@@ -8,6 +8,7 @@ import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
 import 'package:cybersafe_pro/widgets/decrypt_text/decrypt_text.dart';
 import 'package:cybersafe_pro/widgets/request_pro/request_pro.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 
 class TotpItem extends StatefulWidget {
@@ -57,8 +58,8 @@ class _TotpItemState extends State<TotpItem> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              DecryptText(value: widget.title, decryptTextType: DecryptTextType.info, style: TextStyle(overflow: TextOverflow.ellipsis, fontSize: 14.sp, fontWeight: FontWeight.bold)),
-                              if (widget.email.isNotEmpty) DecryptText(value: widget.email, decryptTextType: DecryptTextType.info, style: TextStyle(color: Colors.grey, fontSize: 12.sp)),
+                              DecryptText(value: widget.title, decryptTextType: DecryptTextType.info, style: CustomTextStyle.regular(overflow: TextOverflow.ellipsis, fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                              if (widget.email.isNotEmpty) DecryptText(value: widget.email, decryptTextType: DecryptTextType.info, style: CustomTextStyle.regular(color: Colors.grey, fontSize: 12.sp)),
                             ],
                           ),
                         ),

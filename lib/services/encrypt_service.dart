@@ -4,7 +4,6 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:pointycastle/export.dart' as pc;
 import 'package:flutter/foundation.dart';
 import 'package:crypto/crypto.dart';
-import 'package:argon2/argon2.dart';
 
 class EncryptService {
   static final instance = EncryptService._internal();
@@ -129,11 +128,6 @@ class EncryptService {
         return value;
       }
 
-      if (package.containsKey('kdf') && package['kdf'] == 'argon2id') {
-        // Giải mã theo cách cũ: Argon2
-        return decryptWithArgon2(value: value, key: key);
-      }
-
       if (package.containsKey('fast') && package['fast'] == true && package.containsKey('salt')) {
         // Giải mã dữ liệu fast với salt (bảo mật hơn)
         final salt = base64.decode(package['salt']);
@@ -220,47 +214,6 @@ class EncryptService {
     }
   }
 
-  // Giải mã dữ liệu dùng Argon2
-  static String decryptWithArgon2({required String value, required String key}) {
-    try {
-      if (key.isEmpty || value.isEmpty) return value;
-      final resultCacheKey = '$value:$key:argon2';
-      if (_decryptionResultCache.containsKey(resultCacheKey)) {
-        return _decryptionResultCache[resultCacheKey]!;
-      }
-      Map<String, dynamic> package;
-      try {
-        package = json.decode(value) as Map<String, dynamic>;
-      } catch (e) {
-        return value;
-      }
-      if (package['kdf'] != 'argon2id') return value;
-      final salt = base64.decode(package['salt']);
-      final iv = encrypt.IV(base64.decode(package['iv']));
-      final data = encrypt.Encrypted.fromBase64(package['data']);
-      final argon2Params = package['argon2'] as Map<String, dynamic>;
-      final argon2 = Argon2BytesGenerator();
-      final params = Argon2Parameters(
-        Argon2Parameters.ARGON2_id,
-        salt,
-        version: argon2Params['version'] ?? Argon2Parameters.ARGON2_VERSION_13,
-        iterations: argon2Params['iterations'] ?? 2,
-        memoryPowerOf2: argon2Params['memoryPowerOfTwo'] ?? 16,
-        lanes: argon2Params['lanes'] ?? 2,
-      );
-      argon2.init(params);
-      final keyBytes = Uint8List(_keyLength);
-      argon2.generateBytes(Uint8List.fromList(utf8.encode(key)), keyBytes, 0, _keyLength);
-      final derivedKey = encrypt.Key(keyBytes);
-      final encrypter = _getEncrypter(derivedKey);
-      final result = encrypter.decrypt(data, iv: iv);
-      _decryptionResultCache[resultCacheKey] = result;
-      return result;
-    } catch (e) {
-      logError("Decryption error (Argon2): $e");
-      return value;
-    }
-  }
 
   List<int> encryptDataBytes({required List<int> data, required String key}) {
     try {

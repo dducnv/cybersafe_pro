@@ -1,4 +1,5 @@
 import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 
 class CustomButtonWidget extends StatelessWidget {
@@ -98,7 +99,7 @@ class CustomButtonWidget extends StatelessWidget {
         child: child ??
             Text(
               text ?? '',
-              style: style ?? TextStyle(fontSize: 18.sp),
+              style: style ?? CustomTextStyle.regular(fontSize: 18.sp),
               textAlign: TextAlign.center,
             ),
       ),

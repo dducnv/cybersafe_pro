@@ -1,4 +1,5 @@
 import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -109,8 +110,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
             child: RichText(
               text: TextSpan(
                 text: widget.titleTextField ?? '',
-                style: widget.titleTextStyle ?? TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]),
-                children: widget.requiredTextField ? <TextSpan>[TextSpan(text: '*', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16.sp))] : [],
+                style: widget.titleTextStyle ?? CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]),
+                children: widget.requiredTextField ? <TextSpan>[TextSpan(text: '*', style: CustomTextStyle.regular(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16.sp))] : [],
               ),
             ),
 
@@ -152,19 +153,19 @@ class _CustomTextFieldState extends State<CustomTextField> {
             keyboardType: widget.textInputType ?? TextInputType.text,
             textInputAction: widget.textInputAction,
             obscureText: widget.isObscure ? passwordVisible : widget.isObscure,
-            style: TextStyle(color: widget.textColor, fontSize: 14.sp, fontWeight: FontWeight.w400),
+            style: CustomTextStyle.regular(color: widget.textColor, fontSize: 14.sp, fontWeight: FontWeight.w400),
             autofillHints: widget.autofillHints,
             decoration: InputDecoration(
               filled: true,
               alignLabelWithHint: false,
-              helperStyle: const TextStyle(color: Colors.green),
+              helperStyle: CustomTextStyle.regular(color: Colors.green),
               counterText: '',
-              hintStyle: widget.hintStyle ?? TextStyle(color: Colors.grey[600]),
+              hintStyle: widget.hintStyle ?? CustomTextStyle.regular(color: Colors.grey[600]),
               fillColor: Theme.of(context).colorScheme.surfaceContainer,
               border: OutlineInputBorder(borderRadius: widget.borderRadius ?? BorderRadius.circular(10), borderSide: BorderSide(color: Theme.of(context).colorScheme.surfaceContainerHighest)),
               isDense: true,
               hintText: widget.hintText,
-              hintMaxLines:1,
+              hintMaxLines: 1,
               prefixIcon: widget.prefixIcon,
               suffixIconConstraints: BoxConstraints(maxHeight: widget.suffixIconConstraintsMaxHeight ?? 25.h),
               helperText: widget.helperText,
@@ -198,7 +199,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                       ? OutlineInputBorder(borderSide: const BorderSide(color: Colors.red), borderRadius: widget.borderRadius ?? const BorderRadius.all(Radius.circular(10)))
                       : errorBorder,
               errorText: widget.textError == '' ? null : widget.textError,
-              errorStyle: TextStyle(color: Colors.red, fontSize: 12.sp, fontWeight: FontWeight.w400),
+              errorStyle: CustomTextStyle.regular(color: Colors.red, fontSize: 12.sp, fontWeight: FontWeight.w400),
             ),
           ),
         ),

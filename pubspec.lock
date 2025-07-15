@@ -70,14 +70,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.4"
-  argon2:
-    dependency: "direct main"
-    description:
-      name: argon2
-      sha256: ee456fa6f71392faadd9c43f4a2cc66c8d56132337fe71dc09d217d4e994102e
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   args:
     dependency: transitive
     description:
@@ -254,14 +246,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.6"
-  cryptography:
-    dependency: "direct main"
-    description:
-      name: cryptography
-      sha256: d146b76d33d94548cf035233fbc2f4338c1242fa119013bead807d033fc4ae05
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.7.0"
   csslib:
     dependency: transitive
     description:
@@ -618,14 +602,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-  hex:
-    dependency: transitive
-    description:
-      name: hex
-      sha256: "4e7cd54e4b59ba026432a6be2dd9d96e4c5205725194997193bf871703b82c4a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.0"
   html:
     dependency: transitive
     description:

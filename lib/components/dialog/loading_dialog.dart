@@ -1,5 +1,6 @@
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
@@ -37,7 +38,11 @@ Future<void> showLoadingDialog({BuildContext? context, ValueNotifier<double>? lo
                               crossAxisAlignment: CrossAxisAlignment.center,
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text('${(progress * 100).toStringAsFixed(0)}%', textAlign: TextAlign.center, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                                Text(
+                                  '${(progress * 100).toStringAsFixed(0)}%',
+                                  textAlign: TextAlign.center,
+                                  style: CustomTextStyle.regular(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                                ),
                                 SizedBox(height: 8),
                                 SizedBox(
                                   width: 200,

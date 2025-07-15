@@ -16,6 +16,7 @@ import 'package:cybersafe_pro/widgets/decrypt_text/decrypt_text.dart';
 import 'package:cybersafe_pro/widgets/otp_qrcode_scan/otp_qrcode_scan.dart';
 import 'package:cybersafe_pro/widgets/otp_text_with_countdown/otp_text_with_countdown.dart';
 import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:provider/provider.dart';
@@ -61,7 +62,7 @@ class _OtpTabletLayoutState extends State<OtpTabletLayout> {
                   SizedBox(height: 20.h),
                   Text(
                     "Không có tài khoản OTP nào",
-                    style: TextStyle(
+                    style: CustomTextStyle.regular(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w500,
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -221,13 +222,13 @@ class _OtpTabletLayoutState extends State<OtpTabletLayout> {
                       ),
                       const SizedBox(height: 20),
                       DecryptText(
-                        style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold), 
+                        style: CustomTextStyle.regular(fontSize: 24.sp, fontWeight: FontWeight.bold), 
                         value: totp.title, 
                         decryptTextType: DecryptTextType.info
                       ),
                       if (totp.email != null && totp.email!.isNotEmpty)
                         DecryptText(
-                          style: TextStyle(fontSize: 18.sp, color: Theme.of(context).colorScheme.onSurfaceVariant), 
+                          style: CustomTextStyle.regular(fontSize: 18.sp, color: Theme.of(context).colorScheme.onSurfaceVariant), 
                           value: totp.email ?? "", 
                           decryptTextType: DecryptTextType.info
                         ),
@@ -236,7 +237,7 @@ class _OtpTabletLayoutState extends State<OtpTabletLayout> {
                         children: [
                           Expanded(
                             child: DecryptText(
-                              style: TextStyle(fontSize: 18.sp),
+                              style: CustomTextStyle.regular(fontSize: 18.sp),
                               decryptTextType: DecryptTextType.opt,
                               value: totp.totp.target?.secretKey ?? "",
                               builder: (context, value) {
@@ -314,7 +315,7 @@ class _AddTOTPWithKeyboardBottomSheetState extends State<AddTOTPWithKeyboardBott
             children: [
               Text(
                 'Thêm tài khoản OTP',
-                style: TextStyle(
+                style: CustomTextStyle.regular(
                   fontSize: 22.sp,
                   fontWeight: FontWeight.bold,
                 ),

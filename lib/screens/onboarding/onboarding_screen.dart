@@ -10,6 +10,7 @@ import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
 import 'package:cybersafe_pro/widgets/setting_item_widget/setting_item_widget.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -93,7 +94,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget buildWelcomeText(ThemeData theme) {
-    return Column(children: [Text('CyberSafe', style: TextStyle(color: theme.colorScheme.primary, fontSize: 25.sp, fontWeight: FontWeight.bold))]);
+    return Column(children: [Text('CyberSafe', style: CustomTextStyle.regular(color: theme.colorScheme.primary, fontSize: 25.sp, fontWeight: FontWeight.bold))]);
   }
 
   Widget buildAnimation() {
@@ -193,7 +194,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
                                   child: Text(
                                     context.appLocale.onboardingLocale.getText(OnboardingText.termsAndConditions),
                                     maxLines: 2,
-                                    style: TextStyle(fontSize: 14.sp),
+                                    style: CustomTextStyle.regular(fontSize: 14.sp),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),

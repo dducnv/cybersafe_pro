@@ -6,6 +6,7 @@ import 'package:cybersafe_pro/resources/size_text_icon.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 
 class Sidebar extends StatelessWidget {
@@ -22,7 +23,7 @@ class Sidebar extends StatelessWidget {
           child: Column(
             children: [
               Image.asset('assets/images/app_icon_trans.png', width: 100.w, height: 100.h),
-              Text("CyberSafe", style: TextStyle(color: Colors.white, fontSize: 25.sp, fontWeight: FontWeight.bold)),
+              Text("CyberSafe", style: CustomTextStyle.regular(color: Colors.white, fontSize: 25.sp, fontWeight: FontWeight.bold)),
             ],
           ), //UserAccountDrawerHeader
         ),

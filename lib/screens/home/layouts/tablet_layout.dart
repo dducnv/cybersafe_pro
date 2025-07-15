@@ -1,5 +1,6 @@
 import 'package:cybersafe_pro/providers/theme_provider.dart';
 import 'package:cybersafe_pro/screens/settings/components/theme_color_picker.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../components/home_app_bar.dart';
@@ -27,24 +28,13 @@ class _HomeTabletLayoutState extends State<HomeTabletLayout> {
         child: Column(
           children: [
             DrawerHeader(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              child: const Column(
+              decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircleAvatar(
-                    radius: 40,
-                    child: Icon(Icons.person, size: 40),
-                  ),
+                  CircleAvatar(radius: 40, child: Icon(Icons.person, size: 40)),
                   SizedBox(height: 10),
-                  Text(
-                    'CyberSafe Pro',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                    ),
-                  ),
+                  Text('CyberSafe Pro', style: CustomTextStyle.regular(color: Colors.white, fontSize: 20)),
                 ],
               ),
             ),
@@ -91,20 +81,8 @@ class _HomeTabletLayoutState extends State<HomeTabletLayout> {
                     },
                   ),
                   // Theme color section
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Text(
-                      'Theme Colors',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: ThemeColorPicker(),
-                  ),
+                  Padding(padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: Text('Theme Colors', style: CustomTextStyle.regular(fontWeight: FontWeight.bold, fontSize: 16))),
+                  Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: ThemeColorPicker()),
                 ],
               ),
             ),
@@ -122,13 +100,7 @@ class _HomeTabletLayoutState extends State<HomeTabletLayout> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Dashboard',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  Text('Dashboard', style: CustomTextStyle.regular(fontSize: 24, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 16),
                   Expanded(
                     child: GridView.count(
@@ -143,17 +115,9 @@ class _HomeTabletLayoutState extends State<HomeTabletLayout> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'Card ${index + 1}',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                                Text('Card ${index + 1}', style: CustomTextStyle.regular(fontSize: 18, fontWeight: FontWeight.bold)),
                                 const SizedBox(height: 8),
-                                const Text(
-                                  'This is a sample card content that demonstrates the layout for tablet view.',
-                                ),
+                                const Text('This is a sample card content that demonstrates the layout for tablet view.'),
                               ],
                             ),
                           ),
@@ -169,4 +133,4 @@ class _HomeTabletLayoutState extends State<HomeTabletLayout> {
       ),
     );
   }
-} 
+}

@@ -16,6 +16,7 @@ import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:cybersafe_pro/utils/toast_noti.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
@@ -115,19 +116,19 @@ class _MobileLayoutState extends State<MobileLayout> {
                   children: [
                     Text(
                       widget.isFromBackup ? context.trLogin(LoginText.enterAnyPin) : context.trLogin(LoginText.enterPin),
-                      style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+                      style: CustomTextStyle.regular(fontSize: 20.sp, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
                     if (widget.isFromBackup)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
-                        child: Text(context.trLogin(LoginText.backupNote), textAlign: TextAlign.center, style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
+                        child: Text(context.trLogin(LoginText.backupNote), textAlign: TextAlign.center, style: CustomTextStyle.regular(fontSize: 14, fontStyle: FontStyle.italic)),
                       ),
                     if (widget.isFromRestore)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
-                        child: Text(context.trLogin(LoginText.restoreNote), textAlign: TextAlign.center, style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
+                        child: Text(context.trLogin(LoginText.restoreNote), textAlign: TextAlign.center, style: CustomTextStyle.regular(fontSize: 14, fontStyle: FontStyle.italic)),
                       ),
                     if (isCurrentlyLocked) _buildLockedStatus(provider),
 
@@ -181,9 +182,9 @@ class _MobileLayoutState extends State<MobileLayout> {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10).copyWith(bottom: 24),
       child: Column(
         children: [
-          Text(context.trLogin(LoginText.loginLockDescription), textAlign: TextAlign.center, style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          Text(context.trLogin(LoginText.loginLockDescription), textAlign: TextAlign.center, style: CustomTextStyle.regular(color: Colors.red, fontWeight: FontWeight.bold)),
           const SizedBox(height: 10),
-          Text(context.trLogin(LoginText.pleaseTryAgainLater).replaceAll("{0}", provider.formattedRemainingTime), textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w500)),
+          Text(context.trLogin(LoginText.pleaseTryAgainLater).replaceAll("{0}", provider.formattedRemainingTime), textAlign: TextAlign.center, style: CustomTextStyle.regular(fontWeight: FontWeight.w500)),
           const SizedBox(height: 5),
           _buildCountdownDisplay(provider),
         ],
@@ -196,7 +197,7 @@ class _MobileLayoutState extends State<MobileLayout> {
       margin: const EdgeInsets.only(top: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(20)),
-      child: Text(provider.formattedRemainingTime, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Theme.of(context).colorScheme.error)),
+      child: Text(provider.formattedRemainingTime, style: CustomTextStyle.regular(fontWeight: FontWeight.bold, fontSize: 18, color: Theme.of(context).colorScheme.error)),
     );
   }
 

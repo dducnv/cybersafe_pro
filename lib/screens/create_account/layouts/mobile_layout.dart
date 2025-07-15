@@ -10,6 +10,7 @@ import 'package:cybersafe_pro/resources/brand_logo.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/request_pro/request_pro.dart';
 import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
@@ -98,7 +99,7 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(context.appLocale.createAccountLocale.getText(CreateAccountText.chooseIcon), style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600)),
+                        Text(context.appLocale.createAccountLocale.getText(CreateAccountText.chooseIcon), style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w600)),
                         IconButton(
                           onPressed: () {
                             _pickImageFromGallery(context, formProvider, tabController);
@@ -116,7 +117,7 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
                       Navigator.pop(context);
                     },
                     leading: Icon(Icons.cancel_outlined, color: Colors.blueAccent, size: 30.sp),
-                    title: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.noSelect), style: TextStyle(fontSize: 16.sp)),
+                    title: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.noSelect), style: CustomTextStyle.regular(fontSize: 16.sp)),
                   ),
                   const SizedBox(height: 10),
 
@@ -163,7 +164,7 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
       itemBuilder: (context, index) {
         var column = Column(
           children: [
-            Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text(branchLogoCategories[index].categoryName, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600))),
+            Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text(branchLogoCategories[index].categoryName, style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w600))),
             const SizedBox(height: 10),
             Column(
               children:
@@ -176,7 +177,7 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
                             Navigator.pop(context);
                           },
                           leading: SizedBox(width: 40.h, height: 40.h, child: SvgPicture.asset(context.darkMode ? e.branchLogoPathDarkMode! : e.branchLogoPathLightMode!)),
-                          title: Text(e.branchName ?? "", style: TextStyle(fontSize: 16.sp)),
+                          title: Text(e.branchName ?? "", style: CustomTextStyle.regular(fontSize: 16.sp)),
                         ),
                       )
                       .toList(),
@@ -208,7 +209,7 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
                       borderRadius: BorderRadius.circular(8),
                       child: Image.memory(base64Decode(formProvider.listIconsCustom[index].imageBase64), width: 40.h, height: 40.h, fit: BoxFit.contain),
                     ),
-                    title: Text(formProvider.listIconsCustom[index].name, style: TextStyle(fontSize: 16.sp)),
+                    title: Text(formProvider.listIconsCustom[index].name, style: CustomTextStyle.regular(fontSize: 16.sp)),
                     trailing: IconButton(
                       onPressed: () {
                         formProvider.deleteIconCustom(formProvider.listIconsCustom[index]);

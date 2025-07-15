@@ -15,6 +15,7 @@ import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/account_list_tile_widgets.dart';
 import 'package:cybersafe_pro/widgets/card_item.dart';
 import 'package:cybersafe_pro/widgets/sidebar/sidebar.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../components/home_app_bar.dart';
@@ -259,7 +260,7 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                                       children: [
                                         Padding(
                                           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 2.w).copyWith(right: isSelected ? 0 : 20.w),
-                                          child: Center(child: Text(category.categoryName, style: TextStyle(fontSize: 14.sp, color: isSelected ? Theme.of(context).colorScheme.onPrimary : null))),
+                                          child: Center(child: Text(category.categoryName, style: CustomTextStyle.regular(fontSize: 14.sp, color: isSelected ? Theme.of(context).colorScheme.onPrimary : null))),
                                         ),
                                         if (isSelected) Padding(padding: EdgeInsets.all(8.h), child: Icon(Icons.close, size: 18.sp, color: Theme.of(context).colorScheme.onPrimary)),
                                       ],
@@ -345,7 +346,7 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                     ),
                   ListTile(
                     leading: Icon(Icons.delete, color: Colors.red, size: 24.sp),
-                    title: Text(context.trHome(HomeLocale.deleteAccount), style: TextStyle(color: Colors.red, fontSize: 16.sp)),
+                    title: Text(context.trHome(HomeLocale.deleteAccount), style: CustomTextStyle.regular(color: Colors.red, fontSize: 16.sp)),
                     onTap: () {
                       showAppCustomDialog(
                         context,
@@ -387,11 +388,11 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(context.appLocale.homeLocale.getText(HomeLocale.click), style: TextStyle(fontSize: 16.sp)),
+              Text(context.appLocale.homeLocale.getText(HomeLocale.click), style: CustomTextStyle.regular(fontSize: 16.sp)),
               const SizedBox(width: 5),
               CircleAvatar(child: Icon(Icons.add, size: 21.sp)),
               const SizedBox(width: 5),
-              Text(context.appLocale.homeLocale.getText(HomeLocale.toAddAccount), style: TextStyle(fontSize: 16.sp)),
+              Text(context.appLocale.homeLocale.getText(HomeLocale.toAddAccount), style: CustomTextStyle.regular(fontSize: 16.sp)),
             ],
           ),
         ],

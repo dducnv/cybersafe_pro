@@ -3,6 +3,7 @@ import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/type_text_field.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:cybersafe_pro/providers/account_form_provider.dart';
 import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
@@ -43,7 +44,7 @@ class AddFieldBottomSheet extends StatelessWidget {
                   child: Center(
                     child: Text(
                       context.trCreateAccount(CreateAccountText.addField),
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                      style: CustomTextStyle.regular(fontSize: 18, fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
@@ -87,8 +88,8 @@ class AddFieldBottomSheet extends StatelessWidget {
     return RichText(
       text: TextSpan(
         text: context.trCreateAccount(CreateAccountText.fieldType),
-        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]),
-        children: [TextSpan(text: '*', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 14.sp))],
+        style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]),
+        children: [TextSpan(text: '*', style: CustomTextStyle.regular(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 14.sp))],
       ),
     );
   }
@@ -119,7 +120,7 @@ class AddFieldBottomSheet extends StatelessWidget {
                 },
               ),
               const SizedBox(width: 10),
-              Text(typeTextFields[index].title, style: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 18)),
+              Text(typeTextFields[index].title, style: CustomTextStyle.regular(color: Theme.of(context).colorScheme.primary, fontSize: 18)),
             ],
           ),
         );

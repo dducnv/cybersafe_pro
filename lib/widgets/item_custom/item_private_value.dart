@@ -1,4 +1,5 @@
 import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 
 class ItemPrivateValue extends StatelessWidget {
@@ -18,8 +19,8 @@ class ItemPrivateValue extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: TextStyle(color: Colors.grey, overflow: TextOverflow.ellipsis, fontSize: 14.sp, fontWeight: FontWeight.w500)),
-              Text(value, style: TextStyle(fontSize: 14.sp)),
+              Text(title, style: CustomTextStyle.regular(color: Colors.grey, overflow: TextOverflow.ellipsis, fontSize: 14.sp, fontWeight: FontWeight.w500)),
+              Text(value, style: CustomTextStyle.regular(fontSize: 14.sp)),
             ],
           ),
           IconButton(onPressed: () {}, icon: Icon(Icons.more_vert, size: 20.sp)),

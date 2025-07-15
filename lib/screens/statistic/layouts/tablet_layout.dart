@@ -5,6 +5,7 @@ import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/screens/statistic/widgets/security_check_item.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/request_pro/request_pro.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:provider/provider.dart';
@@ -88,7 +89,7 @@ class _StatisticTabletLayoutState extends State<StatisticTabletLayout> {
                       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                       child: Text(
                         'Tổng quan',
-                        style: TextStyle(
+                        style: CustomTextStyle.regular(
                           fontSize: 22.sp,
                           fontWeight: FontWeight.bold,
                         ),
@@ -123,15 +124,15 @@ class _StatisticTabletLayoutState extends State<StatisticTabletLayout> {
                                   centerWidget: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Text("$score", style: TextStyle(fontSize: 35.sp, fontWeight: FontWeight.bold)),
-                                      Text("Điểm bảo mật", style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold)),
+                                      Text("$score", style: CustomTextStyle.regular(fontSize: 35.sp, fontWeight: FontWeight.bold)),
+                                      Text("Điểm bảo mật", style: CustomTextStyle.regular(fontSize: 11.sp, fontWeight: FontWeight.bold)),
                                     ],
                                   ),
                                   legendOptions: LegendOptions(
                                     showLegendsInRow: true,
                                     legendPosition: LegendPosition.bottom,
                                     showLegends: true,
-                                    legendTextStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 16.sp),
+                                    legendTextStyle: CustomTextStyle.regular(fontWeight: FontWeight.w500, fontSize: 16.sp),
                                   ),
                                   chartValuesOptions: const ChartValuesOptions(
                                     showChartValueBackground: false,
@@ -198,7 +199,7 @@ class _StatisticTabletLayoutState extends State<StatisticTabletLayout> {
                       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
                       child: Text(
                         'Phân bố theo danh mục',
-                        style: TextStyle(
+                        style: CustomTextStyle.regular(
                           fontSize: 20.sp,
                           fontWeight: FontWeight.bold,
                         ),
@@ -215,7 +216,7 @@ class _StatisticTabletLayoutState extends State<StatisticTabletLayout> {
                                   padding: const EdgeInsets.all(32),
                                   child: Text(
                                     'Chưa có danh mục nào',
-                                    style: TextStyle(
+                                    style: CustomTextStyle.regular(
                                       fontSize: 16.sp,
                                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                                     ),
@@ -266,7 +267,7 @@ class _StatisticTabletLayoutState extends State<StatisticTabletLayout> {
               children: [
                 Text(
                   category.categoryName,
-                  style: TextStyle(
+                  style: CustomTextStyle.regular(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
                   ),
@@ -275,7 +276,7 @@ class _StatisticTabletLayoutState extends State<StatisticTabletLayout> {
                 const SizedBox(height: 8),
                 Text(
                   '$accountCount tài khoản',
-                  style: TextStyle(
+                  style: CustomTextStyle.regular(
                     fontSize: 14.sp,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -308,7 +309,7 @@ class _StatisticTabletLayoutState extends State<StatisticTabletLayout> {
                   alignment: Alignment.centerRight,
                   child: Text(
                     '$percentage%',
-                    style: TextStyle(
+                    style: CustomTextStyle.regular(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.primary,

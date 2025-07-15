@@ -3,6 +3,7 @@ import 'package:cybersafe_pro/localization/keys/general.dart';
 import 'package:cybersafe_pro/main.dart';
 import 'package:cybersafe_pro/resources/app_config.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 
 class AboutAppScreen extends StatelessWidget {
@@ -27,14 +28,14 @@ class AboutAppScreen extends StatelessWidget {
               const SizedBox(height: 24),
               Text(
                 AppConfig.isProApp ? "CyberSafe PRO" : "CyberSafe",
-                style: TextStyle(
+                style: CustomTextStyle.regular(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
                 "v${packageInfo.version} (${packageInfo.buildNumber})",
-                style: TextStyle(
+                style: CustomTextStyle.regular(
                   fontSize: 14.sp,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -99,7 +100,7 @@ class AboutAppScreen extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
+                    style: CustomTextStyle.regular(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
                     ),
@@ -107,7 +108,7 @@ class AboutAppScreen extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     description,
-                    style: TextStyle(
+                    style: CustomTextStyle.regular(
                       fontSize: 14.sp,
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),

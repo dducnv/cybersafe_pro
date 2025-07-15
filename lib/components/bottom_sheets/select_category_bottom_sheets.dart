@@ -6,6 +6,7 @@ import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -39,7 +40,7 @@ class SelectCategoryBottomSheet extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Padding(padding: EdgeInsets.symmetric(horizontal: 16.w), child: Text("${isFromChangeCategory? context.trHome(HomeLocale.changeCategory): context.trCreateAccount(CreateAccountText.chooseCategory)} ($count)", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600))),
+                  Padding(padding: EdgeInsets.symmetric(horizontal: 16.w), child: Text("${isFromChangeCategory? context.trHome(HomeLocale.changeCategory): context.trCreateAccount(CreateAccountText.chooseCategory)} ($count)", style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w600))),
                   Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: IconButton(
@@ -82,7 +83,7 @@ class SelectCategoryBottomSheet extends StatelessWidget {
                           final accountCount = accountProvider.getTotalAccountsInCategory(category.id);
                           return Text(
                             "${category.categoryName} ($accountCount)", 
-                            style: TextStyle(fontSize: 16.sp)
+                            style: CustomTextStyle.regular(fontSize: 16.sp)
                           );
                         }
                       ),

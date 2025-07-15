@@ -6,6 +6,7 @@ import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/utils/app_error.dart';
 import 'package:cybersafe_pro/localization/keys/error_text.dart';
 import 'package:cybersafe_pro/widgets/circular_countdown_timer/circular_countdown_timer.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -103,7 +104,7 @@ class OtpTextWithCountdownState extends State<OtpTextWithCountdown> {
       backgroundColor: Colors.grey[300],
       controller: countDownController,
       strokeWidth: 5,
-      textStyle: widget.countDownTextStyle ?? const TextStyle(fontSize: 10, color: Colors.black, fontWeight: FontWeight.w500),
+      textStyle: widget.countDownTextStyle ?? CustomTextStyle.regular(fontSize: 10, color: Colors.black, fontWeight: FontWeight.w500),
       autoStart: true,
       isReverse: true,
       strokeCap: StrokeCap.round,
@@ -121,7 +122,7 @@ class OtpTextWithCountdownState extends State<OtpTextWithCountdown> {
       children: [
         if (!widget.isSubTimeCountDown) _buildCountDownTimer(),
         if (!widget.isSubTimeCountDown) const SizedBox(width: 10),
-        Text(totp, style: widget.otpTextStyle ?? TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.primary)),
+        Text(totp, style: widget.otpTextStyle ?? CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.primary)),
         if (widget.isSubTimeCountDown) _buildCountDownTimer(),
       ],
     );

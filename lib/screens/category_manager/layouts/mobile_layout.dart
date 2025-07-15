@@ -7,6 +7,7 @@ import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -50,7 +51,7 @@ class CategoryManagerMobileLayout extends StatelessWidget {
                           padding: const EdgeInsets.all(12),
                           child: Row(
                             children: [
-                              Expanded(child: Text("${category.categoryName} (${category.accounts.length})", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500))),
+                              Expanded(child: Text("${category.categoryName} (${category.accounts.length})", style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w500))),
                               IconButton(
                                 onPressed: () {
                                   showCreateCategoryBottomSheet(context, isUpdate: true, categoryOjbModel: category);

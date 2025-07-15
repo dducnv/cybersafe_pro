@@ -3,6 +3,7 @@ import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -132,7 +133,7 @@ class _CategoryManagerTabletLayoutState extends State<CategoryManagerTabletLayou
                             const SizedBox(height: 16),
                             Text(
                               'Không có danh mục nào',
-                              style: TextStyle(
+                              style: CustomTextStyle.regular(
                                 fontSize: 18.sp,
                                 color: Colors.grey,
                               ),
@@ -187,14 +188,14 @@ class _CategoryManagerTabletLayoutState extends State<CategoryManagerTabletLayou
                               ),
                               title: Text(
                                 category.categoryName,
-                                style: TextStyle(
+                                style: CustomTextStyle.regular(
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               subtitle: Text(
                                 '$accountCount tài khoản',
-                                style: TextStyle(
+                                style: CustomTextStyle.regular(
                                   fontSize: 14.sp,
                                 ),
                               ),

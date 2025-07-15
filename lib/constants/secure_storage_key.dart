@@ -16,7 +16,9 @@ class SecureStorageKey {
   static const String numberLogin = 'numberLogin';
   static const String lockOnBackground = 'lockOnBackground';
 
+
   static const String encryptionKeyCreationTime = "encryption_key_creation_time";
+  //old_key
   static const String deviceKeyStorageKey = 'device_encryption_key';
   static const String infoKeyStorageKey = 'info_encryption_key';
   static const String passwordKeyStorageKey = 'password_encryption_key';
@@ -24,9 +26,16 @@ class SecureStorageKey {
   static const String pinCodeKeyStorageKey = 'pinCode_encryption_key';
   // static const String keyCreationTimeStorageKey = 'encryption_key_creation_time';
   static const String appVersionStorageKey = 'app_version';
-  
+
   // Khóa cho tính năng khóa tài khoản
   static const String lockUntil = 'account_lock_until';
   static const String loginFailCount = 'login_fail_count';
   static const String lockDurationMultiplier = 'lock_duration_multiplier';
+
+  //new_encript_key
+  static const String secureDeviceKey = '@device_encryption_key';
+  static const String secureInfoKey = '@info_encryption_key';
+  static const String securePasswordKey = '@password_encryption_key';
+  static const String secureTotpKey = '@totp_encryption_key';
+  static const String securePinCodeKey = '@pinCode_encryption_key';
 }

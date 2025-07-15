@@ -5,6 +5,7 @@ import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/screens/statistic/widgets/security_check_item.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/request_pro/request_pro.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:provider/provider.dart';
@@ -102,7 +103,7 @@ class _StatisticMobileLayoutState extends State<StatisticMobileLayout> {
                             centerWidget: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text("$score", style: TextStyle(fontSize: 35.sp, fontWeight: FontWeight.bold)),
+                                Text("$score", style: CustomTextStyle.regular(fontSize: 35.sp, fontWeight: FontWeight.bold)),
                                 Text(context.trStatistic(StatisticText.securityScore), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold)),
                               ],
                             ),
@@ -110,7 +111,7 @@ class _StatisticMobileLayoutState extends State<StatisticMobileLayout> {
                               showLegendsInRow: true,
                               legendPosition: LegendPosition.bottom,
                               showLegends: true,
-                              legendTextStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 16.sp),
+                              legendTextStyle: CustomTextStyle.regular(fontWeight: FontWeight.w500, fontSize: 16.sp),
                             ),
                             chartValuesOptions: const ChartValuesOptions(
                               showChartValueBackground: false,

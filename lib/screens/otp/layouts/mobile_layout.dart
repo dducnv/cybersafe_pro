@@ -19,6 +19,7 @@ import 'package:cybersafe_pro/widgets/decrypt_text/decrypt_text.dart';
 import 'package:cybersafe_pro/widgets/otp_qrcode_scan/otp_qrcode_scan.dart';
 import 'package:cybersafe_pro/widgets/otp_text_with_countdown/otp_text_with_countdown.dart';
 import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
@@ -211,15 +212,15 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  DecryptText(style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold), value: totp.title, decryptTextType: DecryptTextType.info),
-                  DecryptText(style: TextStyle(fontSize: 16.sp), value: totp.email ?? "", decryptTextType: DecryptTextType.info),
+                  DecryptText(style: CustomTextStyle.regular(fontSize: 18.sp, fontWeight: FontWeight.bold), value: totp.title, decryptTextType: DecryptTextType.info),
+                  DecryptText(style: CustomTextStyle.regular(fontSize: 16.sp), value: totp.email ?? "", decryptTextType: DecryptTextType.info),
                   const SizedBox(height: 16),
                   Row(
                     children: [
                       Expanded(
                         child: CardCustomWidget(
                           padding: EdgeInsets.all(10),
-                          child: (decryptedSecretKey.isEmpty) ? Text('Error', style: TextStyle(color: Colors.red)) : OtpTextWithCountdown(keySecret: decryptedSecretKey),
+                          child: (decryptedSecretKey.isEmpty) ? Text('Error', style: CustomTextStyle.regular(color: Colors.red)) : OtpTextWithCountdown(keySecret: decryptedSecretKey),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -300,7 +301,7 @@ class _AddTOTPWithKeyboardBottomSheetState extends State<AddTOTPWithKeyboardBott
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
-                  Expanded(child: Center(child: Text(context.trOtp(OtpText.enterManually), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)))),
+                  Expanded(child: Center(child: Text(context.trOtp(OtpText.enterManually), style: CustomTextStyle.regular(fontSize: 18, fontWeight: FontWeight.w600)))),
                   IconButton(onPressed: () => _handleSubmit(context), icon: const Icon(Icons.check)),
                 ],
               ),

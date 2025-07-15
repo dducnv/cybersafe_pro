@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cybersafe_pro/utils/device_type.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
@@ -85,7 +86,7 @@ class AppPinCodeFieldsState extends State<AppPinCodeFields> {
       child: PinCodeTextField(
         appContext: context,
         focusNode: widget.focusNode,
-        pastedTextStyle: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold),
+        pastedTextStyle: CustomTextStyle.regular(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold),
         length: 6,
         autoFocus: widget.autoFocus ?? false,
         obscureText: true,

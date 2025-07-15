@@ -13,6 +13,7 @@ import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
 import 'package:cybersafe_pro/widgets/modal_side_sheet/modal_side_sheet.dart';
 import 'package:cybersafe_pro/widgets/otp_qrcode_scan/otp_qrcode_scan.dart';
 import 'package:cybersafe_pro/widgets/otp_text_with_countdown/otp_text_with_countdown.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:cybersafe_pro/providers/account_form_provider.dart';
 import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
@@ -60,7 +61,7 @@ class AccountFormFields extends StatelessWidget {
                             padding: const EdgeInsets.only(left: 5, bottom: 5),
                             child: Text(
                               context.appLocale.createAccountLocale.getText(CreateAccountText.twoFactorAuth),
-                              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]),
+                              style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]),
                             ),
                           ),
                           Row(
@@ -105,7 +106,7 @@ class AccountFormFields extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 5),
-          child: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.password), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+          child: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.password), style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
         ),
         const SizedBox(height: 5),
         Row(
@@ -185,7 +186,7 @@ class AccountFormFields extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 5, left: 5),
-          child: Text(context.trCreateAccount(CreateAccountText.twoFactorAuth), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+          child: Text(context.trCreateAccount(CreateAccountText.twoFactorAuth), style: CustomTextStyle.regular(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey[600])),
         ),
         Row(
           children: [

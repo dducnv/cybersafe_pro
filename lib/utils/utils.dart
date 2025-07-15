@@ -5,6 +5,7 @@ import 'package:cybersafe_pro/services/local_auth_service.dart';
 import 'package:cybersafe_pro/services/otp.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
@@ -21,7 +22,7 @@ Future<void> clipboardCustom({required BuildContext context, required String tex
       context: context,
       animation: StyledToastAnimation.fade,
       backgroundColor: Theme.of(context).colorScheme.primary,
-      textStyle: const TextStyle(color: Colors.white),
+      textStyle: CustomTextStyle.regular(color: Colors.white),
       position: StyledToastPosition.center,
     );
   });

@@ -5,6 +5,7 @@ import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/resources/brand_logo.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/decrypt_text/decrypt_text.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 // ignore: unnecessary_import
@@ -39,14 +40,14 @@ class IconShowComponent extends StatelessWidget {
       return Center(
         child:
             isDecrypted
-                ? Text(account.title.isNotEmpty ? _getSafeFirstCharacter(account.title) : "?", style: textStyle ?? TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold))
+                ? Text(account.title.isNotEmpty ? _getSafeFirstCharacter(account.title) : "?", style: textStyle ?? CustomTextStyle.regular(fontSize: 24.sp, fontWeight: FontWeight.bold))
                 : DecryptText(
                   showLoading: false,
-                  style: textStyle ?? TextStyle(fontSize: 30.sp, fontWeight: FontWeight.bold),
+                  style: textStyle ?? CustomTextStyle.regular(fontSize: 30.sp, fontWeight: FontWeight.bold),
                   value: account.title,
                   decryptTextType: DecryptTextType.info,
                   builder: (context, value) {
-                    return Text(value.isNotEmpty ? _getSafeFirstCharacter(value) : "?", style: textStyle ?? TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold));
+                    return Text(value.isNotEmpty ? _getSafeFirstCharacter(value) : "?", style: textStyle ?? CustomTextStyle.regular(fontSize: 24.sp, fontWeight: FontWeight.bold));
                   },
                 ),
       );
