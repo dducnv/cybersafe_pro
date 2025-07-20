@@ -19,7 +19,7 @@ import 'package:cybersafe_pro/screens/password_generator/password_generate_scree
 import 'package:cybersafe_pro/screens/settings/layouts/mobile_layout.dart';
 import 'package:cybersafe_pro/screens/statistic/statistic_screen.dart';
 import 'package:cybersafe_pro/screens/otp/layouts/mobile_layout.dart';
-import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
+import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/utils/device_type.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/utils.dart';

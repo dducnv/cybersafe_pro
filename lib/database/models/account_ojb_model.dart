@@ -5,7 +5,7 @@ import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
 import 'package:cybersafe_pro/database/models/icon_custom_model.dart';
 import 'package:cybersafe_pro/database/models/password_history_model.dart';
 import 'package:cybersafe_pro/database/models/totp_ojb_model.dart';
-import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
+import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:intl/intl.dart';
 import 'package:objectbox/objectbox.dart';
@@ -136,14 +136,14 @@ class AccountOjbModel {
       if (account.getIconCustom != null) {
         newAccount.iconCustom.target = account.getIconCustom;
       }
-      
+
       if (account.getCustomFields.isNotEmpty) {
         for (var field in account.getCustomFields) {
           field.account.target = newAccount;
           newAccount.customFields.add(field);
         }
       }
-      
+
       if (account.getPasswordHistories.isNotEmpty) {
         for (var history in account.getPasswordHistories) {
           history.account.target = newAccount;
@@ -176,34 +176,14 @@ class AccountOjbModel {
       password: json['password'] ?? '',
       notes: json['notes'] ?? '',
       icon: json['icon'],
-      passwordUpdatedAt: json['passwordUpdatedAt'] != null 
-        ? DateTime.parse(json['passwordUpdatedAt']) 
-        : null,
-      createdAt: json['createdAt'] != null 
-        ? DateTime.parse(json['createdAt']) 
-        : null,
-      updatedAt: json['updatedAt'] != null 
-        ? DateTime.parse(json['updatedAt']) 
-        : null,
-      categoryOjbModel: json['category'] != null 
-        ? CategoryOjbModel.fromJson(json['category']) 
-        : null,
-      customFieldOjbModel: json['customFields'] != null 
-        ? (json['customFields'] as List)
-            .map((e) => AccountCustomFieldOjbModel.fromJson(e))
-            .toList() 
-        : null,
-      passwordHistoriesList: json['passwordHistories'] != null 
-        ? (json['passwordHistories'] as List)
-            .map((e) => PasswordHistory.fromJson(e))
-            .toList() 
-        : null,
-      totpOjbModel: json['totp'] != null 
-        ? TOTPOjbModel.fromJson(json['totp']) 
-        : null,
-      iconCustomModel: json['iconCustom'] != null 
-        ? IconCustomModel.fromJson(json['iconCustom']) 
-        : null,
+      passwordUpdatedAt: json['passwordUpdatedAt'] != null ? DateTime.parse(json['passwordUpdatedAt']) : null,
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      categoryOjbModel: json['category'] != null ? CategoryOjbModel.fromJson(json['category']) : null,
+      customFieldOjbModel: json['customFields'] != null ? (json['customFields'] as List).map((e) => AccountCustomFieldOjbModel.fromJson(e)).toList() : null,
+      passwordHistoriesList: json['passwordHistories'] != null ? (json['passwordHistories'] as List).map((e) => PasswordHistory.fromJson(e)).toList() : null,
+      totpOjbModel: json['totp'] != null ? TOTPOjbModel.fromJson(json['totp']) : null,
+      iconCustomModel: json['iconCustom'] != null ? IconCustomModel.fromJson(json['iconCustom']) : null,
     );
   }
 
@@ -227,6 +207,7 @@ class AccountOjbModel {
       'updatedAt': updatedAt?.toIso8601String(),
     };
   }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -240,6 +221,25 @@ class AccountOjbModel {
       'category': getCategory?.toJson(),
       'passwordUpdatedAt': passwordUpdatedAt?.toIso8601String(),
       'passwordHistories': getPasswordHistories.map((e) => e.toJson()).toList(),
+      'iconCustom': getIconCustom?.toJson(),
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+    };
+  }
+
+  Future<Map<String, dynamic>> toDecryptedOldDataJson() async {
+    return {
+      'id': id,
+      'title': await _encryptAppDataService.decryptInfo(title),
+      'email': await _encryptAppDataService.decryptInfo(email ?? ''),
+      'password': await _encryptAppDataService.decryptPassword(password ?? ''),
+      'notes': await _encryptAppDataService.decryptInfo(notes ?? ''),
+      'icon': icon,
+      'customFields': await Future.wait(getCustomFields.map((e) => e.toDecryptedJson())),
+      'totp': getTotp != null ? await getTotp!.toDecryptedJson() : null,
+      'category': getCategory?.toJson(),
+      'passwordUpdatedAt': passwordUpdatedAt?.toIso8601String(),
+      'passwordHistories': await Future.wait(getPasswordHistories.map((e) => e.toDecryptedJson())),
       'iconCustom': getIconCustom?.toJson(),
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),

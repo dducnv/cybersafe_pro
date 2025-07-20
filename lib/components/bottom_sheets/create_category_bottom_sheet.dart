@@ -1,14 +1,13 @@
-import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/category_text.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
+import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
-import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
 import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-Future<void> showCreateCategoryBottomSheet(BuildContext context, {bool isUpdate = false, CategoryOjbModel? categoryOjbModel}) async {
+Future<void> showCreateCategoryBottomSheet(BuildContext context, {bool isUpdate = false, CategoryDriftModelData? categoryDriftModelData}) async {
   await showModalBottomSheet(
     isScrollControlled: true,
     context: context,
@@ -16,7 +15,7 @@ Future<void> showCreateCategoryBottomSheet(BuildContext context, {bool isUpdate 
         (context) => SafeArea(
           child: Padding(
             padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 16, right: 16, top: 16),
-            child: CreateCategoryBottomSheet(isUpdate: isUpdate, categoryOjbModel: categoryOjbModel),
+            child: CreateCategoryBottomSheet(isUpdate: isUpdate, categoryDriftModelData: categoryDriftModelData),
           ),
         ),
   );
@@ -24,8 +23,8 @@ Future<void> showCreateCategoryBottomSheet(BuildContext context, {bool isUpdate 
 
 class CreateCategoryBottomSheet extends StatefulWidget {
   final bool isUpdate;
-  final CategoryOjbModel? categoryOjbModel;
-  const CreateCategoryBottomSheet({super.key, this.categoryOjbModel, this.isUpdate = false});
+  final CategoryDriftModelData? categoryDriftModelData;
+  const CreateCategoryBottomSheet({super.key, this.categoryDriftModelData, this.isUpdate = false});
 
   @override
   State<CreateCategoryBottomSheet> createState() => _CreateCategoryBottomSheetState();
@@ -54,9 +53,9 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
     bool success = false;
 
     if (widget.isUpdate) {
-      success = await categoryProvider.updateCategory(CategoryOjbModel(categoryName: name.trim(), id: widget.categoryOjbModel!.id));
+      success = await categoryProvider.updateCategory(CategoryDriftModelData(categoryName: name.trim(), id: widget.categoryOjbModel!.id));
     } else {
-      success = await categoryProvider.createCategory(CategoryOjbModel(categoryName: name.trim()));
+      success = await categoryProvider.createCategory(CategoryDriftModelData(categoryName: name.trim()));
     }
     if (success) {
       navigator.pop();

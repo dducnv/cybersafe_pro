@@ -1,5 +1,5 @@
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
-import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
+import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
 import 'package:objectbox/objectbox.dart';
 
 @Entity(uid: 7720765967536005100)

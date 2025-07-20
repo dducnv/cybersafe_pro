@@ -65,7 +65,7 @@ void openUrl(String link, {LaunchMode? mode, required BuildContext context, Func
   try {
     await launchUrl(Uri.parse(link), mode: mode ?? LaunchMode.externalApplication);
   } catch (e) {
-    logError(e.toString());
+    logError(e.toString(), functionName: "openUrl");
     if (context.mounted) {
       showToast("Could not launch link", context: context, backgroundColor: Theme.of(context).colorScheme.primary, textStyle: const TextStyle(color: Colors.white));
     }
@@ -78,7 +78,7 @@ Future<bool> checkAppInstalled(String packageName) async {
     final bool installed = await platform.invokeMethod('isAppInstalled', {"packageName": packageName});
     return installed;
   } catch (e) {
-    logError(e.toString());
+    logError(e.toString(), functionName: "checkAppInstalled");
     return false;
   }
 }

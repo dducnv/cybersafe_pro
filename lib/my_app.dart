@@ -11,7 +11,7 @@ import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/screens/login_master_password/login_master_password.dart';
 import 'package:cybersafe_pro/screens/onboarding/onboarding_screen.dart';
 import 'package:cybersafe_pro/screens/register_master_pin/register_master_pin.dart';
-import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
+import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/utils/device_type.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
@@ -141,7 +141,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       await SecureApplicationUtil.instance.init();
       logInfo('SecureApplication initialized successfully');
     } catch (e) {
-      logError('Failed to initialize SecureApplication: $e');
+      logError('Failed to initialize SecureApplication: $e', functionName: "_initSecureApplication");
     }
   }
 

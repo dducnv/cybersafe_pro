@@ -38,6 +38,8 @@ class SecureStorageKey {
   static const String securePasswordKey = '@password_encryption_key';
   static const String secureTotpKey = '@totp_encryption_key';
   static const String securePinCodeKey = '@pinCode_encryption_key';
+  static const String secureDatabaseKey = '@database_encryption_key';
+  static const String secureNoteKey = '@note_encryption_key';
   
   // Key rotation support - thời gian tạo key
   static const String secureDeviceKeyCreationTime = '@device_encryption_key_creation_time';

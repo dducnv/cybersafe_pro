@@ -61,7 +61,7 @@ class SecureApplicationUtil {
           }
         });
       } catch (e) {
-        logError('Error in _applyPartialSecurity: $e');
+        logError('Error in _applyPartialSecurity: $e', functionName: "SecureApplicationUtil._applyPartialSecurity");
       }
     }
   }
@@ -77,7 +77,7 @@ class SecureApplicationUtil {
         secureApplicationController?.dispose();
         logInfo('SecureApplicationUtil disposed');
       } catch (e) {
-        logError('Error disposing SecureApplicationController: $e');
+        logError('Error disposing SecureApplicationController: $e', functionName: "SecureApplicationUtil.dispose");
       } finally {
         secureApplicationController = null;
       }
@@ -101,7 +101,7 @@ class SecureApplicationUtil {
         logInfo('SecureApplicationUtil initialized successfully');
       }
     } catch (e) {
-      logError('Error in init(): $e');
+      logError('Error in init(): $e', functionName: "SecureApplicationUtil.init");
       // Nếu có lỗi, vẫn đánh dấu là đã hoàn thành để không chặn UI
       if (!_initCompleter.isCompleted) {
         _initCompleter.complete();
@@ -127,7 +127,7 @@ class SecureApplicationUtil {
         secureApplicationController?.lock();
         logInfo('Application locked due to background state');
       } catch (e) {
-        logError('Error in lockOnBackground(): $e');
+        logError('Error in lockOnBackground(): $e', functionName: "SecureApplicationUtil.lockOnBackground");
       }
     }
   }
@@ -140,7 +140,7 @@ class SecureApplicationUtil {
         secureApplicationController?.unlock();
         logInfo('Application unlocked due to foreground state');
       } catch (e) {
-        logError('Error in unlockOnForeground(): $e');
+        logError('Error in unlockOnForeground(): $e', functionName: "SecureApplicationUtil.unlockOnForeground");
       }
     }
   }
@@ -151,7 +151,7 @@ class SecureApplicationUtil {
         secureApplicationController?.lock();
         logInfo('Application locked manually');
       } catch (e) {
-        logError('Error in lock(): $e');
+        logError('Error in lock(): $e', functionName: "SecureApplicationUtil.lock");
       }
     }
   }
@@ -162,7 +162,7 @@ class SecureApplicationUtil {
         secureApplicationController?.unlock();
         logInfo('Application unlocked manually');
       } catch (e) {
-        logError('Error in unlock(): $e');
+        logError('Error in unlock(): $e', functionName: "SecureApplicationUtil.unlock");
       }
     }
   }
@@ -173,7 +173,7 @@ class SecureApplicationUtil {
         secureApplicationController?.secure();
         logInfo('Application secured');
       } catch (e) {
-        logError('Error in secure(): $e');
+        logError('Error in secure(): $e', functionName: "SecureApplicationUtil.secure");
       }
     }
   }
@@ -184,7 +184,7 @@ class SecureApplicationUtil {
         secureApplicationController?.open();
         logInfo('Application opened');
       } catch (e) {
-        logError('Error in open(): $e');
+        logError('Error in open(): $e', functionName: "SecureApplicationUtil.open");
       }
     }
   }
@@ -195,7 +195,7 @@ class SecureApplicationUtil {
         secureApplicationController?.pause();
         logInfo('Application paused');
       } catch (e) {
-        logError('Error in pause(): $e');
+        logError('Error in pause(): $e', functionName: "SecureApplicationUtil.pause");
       }
     }
   }
@@ -206,7 +206,7 @@ class SecureApplicationUtil {
         secureApplicationController?.unpause();
         logInfo('Application unpaused');
       } catch (e) {
-        logError('Error in unpause(): $e');
+        logError('Error in unpause(): $e', functionName: "SecureApplicationUtil.unpause");
       }
     }
   }
@@ -215,7 +215,7 @@ class SecureApplicationUtil {
     try {
       return !_isDisposed && secureApplicationController != null && secureApplicationController!.value.locked;
     } catch (e) {
-      logError('Error in isLocked getter: $e');
+      logError('Error in isLocked getter: $e', functionName: "SecureApplicationUtil.isLocked");
       return false;
     }
   }
@@ -227,7 +227,7 @@ class SecureApplicationUtil {
       }
       return secureApplicationController!.secured;
     } catch (e) {
-      logError('Error in isSecured getter: $e');
+      logError('Error in isSecured getter: $e', functionName: "SecureApplicationUtil.isSecured");
       return false;
     }
   }
@@ -238,7 +238,7 @@ class SecureApplicationUtil {
         secureApplicationController?.authSuccess(unlock: unlock);
         logInfo('Authentication success - unlock: $unlock');
       } catch (e) {
-        logError('Error in authSuccess(): $e');
+        logError('Error in authSuccess(): $e', functionName: "SecureApplicationUtil.authSuccess");
       }
     }
   }
@@ -249,7 +249,7 @@ class SecureApplicationUtil {
         secureApplicationController?.authFailed(unlock: unlock);
         logInfo('Authentication failed - unlock: $unlock');
       } catch (e) {
-        logError('Error in authFailed(): $e');
+        logError('Error in authFailed(): $e', functionName: "SecureApplicationUtil.authFailed");
       }
     }
   }

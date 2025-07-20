@@ -20,11 +20,16 @@ dependencies:
   objectbox: ^4.1.0
   objectbox_flutter_libs: any
 
-  drift: ^2.27.0
-  drift_flutter: ^0.2.4
+  # Drift database với SQLCipher
+  drift: ^2.28.0
+  sqlite3: ^2.7.6
+
+  uuid: ^4.5.1
+  sqflite: ^2.4.2
   sqlcipher_flutter_libs: ^0.6.7
-  sqlite3_flutter_libs: ^0.5.34
   json_annotation: ^4.9.0
+
+  tuple: ^2.0.2
   #security
   crypto: ^3.0.6
   envied: ^1.1.1
@@ -73,7 +78,7 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   envied_generator: ^1.1.1
   build_runner: ^2.4.15
-  objectbox_generator: ^4.1.0
+  drift_dev: ^2.27.0
 
 flutter:
   uses-material-design: true

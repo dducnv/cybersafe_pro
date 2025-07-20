@@ -15,7 +15,7 @@ import 'package:cybersafe_pro/database/models/icon_custom_model.dart';
 import 'package:cybersafe_pro/database/models/password_history_model.dart';
 import 'package:cybersafe_pro/database/models/totp_ojb_model.dart';
 import 'package:cybersafe_pro/localization/keys/error_text.dart';
-import 'package:cybersafe_pro/services/encrypt_service.dart';
+import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_service.dart';
 import 'package:cybersafe_pro/utils/app_error.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';

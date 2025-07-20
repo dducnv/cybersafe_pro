@@ -1,21 +1,19 @@
 import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
-import 'package:cybersafe_pro/database/boxes/account_box.dart';
-import 'package:cybersafe_pro/providers/category_provider.dart';
-import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
-import 'package:flutter/material.dart';
-import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
-import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
+import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
+import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
+import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 // Nhóm các thống kê liên quan vào một class riêng
 class PasswordStatistics {
   final int totalWeak;
   final int totalStrong;
   final int totalSame;
-  final List<List<AccountOjbModel>> sameGroups;
-  final List<CategoryOjbModel> weakByCategories;
+  final List<List<AccountDriftModelData>> sameGroups;
+  final List<CategoryDriftModelData> weakByCategories;
 
   PasswordStatistics({required this.totalWeak, required this.totalStrong, required this.totalSame, required this.sameGroups, required this.weakByCategories});
 }
@@ -42,7 +40,7 @@ class StatisticProvider extends ChangeNotifier {
   }
 
   // Giải mã cả basic info và password cùng lúc
-  Future<(AccountOjbModel, String?)?> _getDecryptedAccount(AccountOjbModel account, AccountProvider accountProvider) async {
+  Future<(AccountDriftModelData, String?)?> _getDecryptedAccount(AccountDriftModelData account, AccountProvider accountProvider) async {
     if (account.password == null || account.password!.isEmpty) return null;
 
     final encryptData = EncryptAppDataService.instance;
@@ -52,7 +50,12 @@ class StatisticProvider extends ChangeNotifier {
     return (baseInfoAccount, decryptedPassword);
   }
 
-  Future<PasswordStatistics> processAccounts(List<AccountOjbModel> accounts, List<CategoryOjbModel> categories, AccountProvider accountProvider, {void Function(double progress)? onProgress}) async {
+  Future<PasswordStatistics> processAccounts(
+    List<AccountDriftModelData> accounts,
+    List<CategoryDriftModelData> categories,
+    AccountProvider accountProvider, {
+    void Function(double progress)? onProgress,
+  }) async {
     List<Map<String, dynamic>> decryptedList = [];
     const batchSize = 20;
     for (var i = 0; i < accounts.length; i += batchSize) {
@@ -80,35 +83,33 @@ class StatisticProvider extends ChangeNotifier {
       totalWeak: result['totalWeak'],
       totalStrong: result['totalStrong'],
       totalSame: result['totalSame'],
-      sameGroups: (result['sameGroups'] as List).map<List<AccountOjbModel>>((group) => (group as List).cast<AccountOjbModel>()).toList(),
-      weakByCategories: (result['weakByCategories'] as List).cast<CategoryOjbModel>(),
+      sameGroups: (result['sameGroups'] as List).map<List<AccountDriftModelData>>((group) => (group as List).cast<AccountDriftModelData>()).toList(),
+      weakByCategories: [],
     );
   }
 
   // Hàm isolate: chỉ xử lý gom nhóm/thống kê, không giải mã
   static Map<String, dynamic> _processAccountsInIsolate(Map<String, dynamic> args) {
     final List<Map<String, dynamic>> decryptedList = List<Map<String, dynamic>>.from(args['decryptedList']);
-    final List<CategoryOjbModel> categories = List<CategoryOjbModel>.from(args['categories']);
-    Map<String, List<AccountOjbModel>> passwordGroups = {};
-    Map<String, List<AccountOjbModel>> categoryWeakPasswords = {};
+    final List<CategoryDriftModelData> categories = List<CategoryDriftModelData>.from(args['categories']);
+    Map<String, List<AccountDriftModelData>> passwordGroups = {};
+    Map<String, List<AccountDriftModelData>> categoryWeakPasswords = {};
     int weakCount = 0;
     int strongCount = 0;
     final String pattern = r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$%&*()?£\-_=]).{12,}$';
     final regExp = RegExp(pattern);
 
     for (var item in decryptedList) {
-      final AccountOjbModel account = item['account'];
+      final AccountDriftModelData account = item['account'];
       final String password = item['password'];
       final bool isStrong = regExp.hasMatch(password);
       if (isStrong) {
         strongCount++;
       } else {
         weakCount++;
-        final categoryId = account.getCategory?.id;
-        if (categoryId != null) {
-          categoryWeakPasswords.putIfAbsent(categoryId.toString(), () => []);
-          categoryWeakPasswords[categoryId.toString()]!.add(account);
-        }
+        final categoryId = account.categoryId;
+        categoryWeakPasswords.putIfAbsent(categoryId.toString(), () => []);
+        categoryWeakPasswords[categoryId.toString()]!.add(account);
       }
       passwordGroups.putIfAbsent(password, () => []);
       passwordGroups[password]!.add(account);
@@ -120,10 +121,9 @@ class StatisticProvider extends ChangeNotifier {
             .map((category) {
               final weakAccounts = categoryWeakPasswords[category.id.toString()] ?? [];
               if (weakAccounts.isEmpty) return null;
-              return CategoryOjbModel(id: category.id, categoryName: category.categoryName, indexPos: category.indexPos, createdAt: category.createdAt, updatedAt: category.updatedAt)
-                ..accounts.addAll(weakAccounts);
+              return CategoryDriftModelData(id: category.id, categoryName: category.categoryName, indexPos: category.indexPos, createdAt: category.createdAt, updatedAt: category.updatedAt);
             })
-            .whereType<CategoryOjbModel>()
+            .whereType<CategoryDriftModelData>()
             .toList();
 
     return {'totalWeak': weakCount, 'totalStrong': strongCount, 'totalSame': samePasswordGroups.length, 'sameGroups': samePasswordGroups, 'weakByCategories': weakCategories};
@@ -136,11 +136,10 @@ class StatisticProvider extends ChangeNotifier {
       error = null;
       notifyListeners();
 
-      final categoryProvider = Provider.of<CategoryProvider>(context, listen: false);
       final accountProvider = Provider.of<AccountProvider>(context, listen: false);
 
-      final categories = categoryProvider.categoryList;
-      final accounts = await AccountBox.getAll();
+      final categories = await DriffDbManager.instance.categoryAdapter.getAll();
+      final accounts = await DriffDbManager.instance.accountAdapter.getAll();
       totalAccount = accounts.length;
 
       statistics = await processAccounts(accounts, categories, accountProvider);
@@ -170,9 +169,9 @@ class StatisticProvider extends ChangeNotifier {
   }
 
   // Getters để truy cập dễ dàng
-  List<CategoryOjbModel> get accountPasswordWeakByCategories => statistics?.weakByCategories ?? [];
+  List<CategoryDriftModelData> get accountPasswordWeakByCategories => statistics?.weakByCategories ?? [];
 
-  List<List<AccountOjbModel>> get accountSamePassword => statistics?.sameGroups ?? [];
+  List<List<AccountDriftModelData>> get accountSamePassword => statistics?.sameGroups ?? [];
 
   int get totalAccountPasswordWeak => statistics?.totalWeak ?? 0;
 

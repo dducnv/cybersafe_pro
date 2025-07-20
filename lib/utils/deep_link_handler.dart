@@ -29,7 +29,7 @@ class DeepLinkHandler {
         _handleLink(uri.toString());
       },
       onError: (error) {
-        logError('Error handling deep link: $error');
+        logError('Error handling deep link: $error', functionName: "DeepLinkHandler.initialize");
       },
     );
     // // Handle links when app is already running

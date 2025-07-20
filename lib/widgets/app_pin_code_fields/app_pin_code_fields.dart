@@ -71,7 +71,7 @@ class AppPinCodeFieldsState extends State<AppPinCodeFields> {
         errorController.add(ErrorAnimationType.shake);
       }
     } catch (e) {
-      logError('Error triggering animation: $e');
+      logError('Error triggering animation: $e', functionName: "AppPinCodeFieldsState.triggerErrorAnimation");
     }
   }
 
