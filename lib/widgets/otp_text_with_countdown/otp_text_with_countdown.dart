@@ -1,4 +1,3 @@
-import 'package:cybersafe_pro/resources/app_config.dart';
 import 'package:cybersafe_pro/services/otp.dart';
 import 'package:cybersafe_pro/utils/refetch_totp.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';

@@ -17,6 +17,7 @@ import 'package:cybersafe_pro/localization/keys/error_text.dart';
 import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
+import 'package:cybersafe_pro/providers/home_provider.dart';
 import 'package:cybersafe_pro/resources/app_config.dart';
 import 'package:cybersafe_pro/screens/login_master_password/login_master_password.dart';
 import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
@@ -137,7 +138,7 @@ class DataManagerService {
       final futures = mappedRows.map((row) async {
         try {
           final account = AccountOjbModel(title: row['title'], email: row['email'], password: row['password'], notes: row['notes'], categoryOjbModel: newCategory);
-          await accountProvider.createOrUpdateAccount(account);
+          // await accountProvider.createOrUpdateAccount(account);
           return true;
         } catch (e) {
           return false;
@@ -147,7 +148,7 @@ class DataManagerService {
       int successCount = results.where((r) => r).length;
 
       // Refresh danh sách account
-      await accountProvider.refreshAccounts();
+      if (context.mounted) context.read<HomeProvider>().refreshData();
       // Hiển thị thông báo thành công
       if (context.mounted) {
         context.read<CategoryProvider>().getCategories();
@@ -443,10 +444,7 @@ class DataManagerService {
 
                       if (success && context.mounted) {
                         // Làm mới dữ liệu
-                        await context.read<CategoryProvider>().refresh();
-                        context.read<AccountProvider>().refreshAccounts();
-                        // Quay về home và xóa tất cả màn hình trước đó
-                        // Hiển thị thông báo thành công
+                        if (context.mounted) context.read<HomeProvider>().refreshData();
                         Navigator.of(context).pop();
                         showToastSuccess("Delete data successfully", context: context);
                       } else {

@@ -1,6 +1,7 @@
 import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
+import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:provider/provider.dart';
@@ -43,9 +44,8 @@ class StatisticProvider extends ChangeNotifier {
   Future<(AccountDriftModelData, String?)?> _getDecryptedAccount(AccountDriftModelData account, AccountProvider accountProvider) async {
     if (account.password == null || account.password!.isEmpty) return null;
 
-    final encryptData = EncryptAppDataService.instance;
-    final baseInfoAccount = await accountProvider.decryptBasicInfo(account);
-    final decryptedPassword = await encryptData.decryptPassword(account.password!);
+    final baseInfoAccount = await accountProvider.getDecryptedBasicInfo(account);
+    final decryptedPassword = await DataSecureService.decryptPassword(account.password!);
 
     return (baseInfoAccount, decryptedPassword);
   }

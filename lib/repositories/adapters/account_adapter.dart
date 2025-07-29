@@ -11,7 +11,14 @@ class AccountAdapter {
   // ==================== CRUD Operations ====================
 
   Future<int> insertAccount(AccountDriftModelCompanion data) async {
-    final id = await _database.into(_database.accountDriftModel).insert(data);
+    final account = AccountDriftModelCompanion.insert(
+      title: data.title.value,
+      username: data.username.present ? Value(data.username.value) : const Value.absent(),
+      password: data.password.present ? Value(data.password.value) : const Value.absent(),
+      notes: data.notes.present ? Value(data.notes.value) : const Value.absent(),
+      categoryId: data.categoryId.value,
+    );
+    final id = await _database.accountDriftModel.insertOne(account);
     return id;
   }
 
@@ -140,7 +147,7 @@ class AccountAdapter {
       final variables = <Variable>[];
 
       buffer.write('''
-      SELECT id, title, username, category_id, created_at, updated_at
+      SELECT id, icon, title, username, icon_custom_id, category_id, created_at, updated_at, icon
       FROM account_drift_model
       WHERE category_id = ? AND deleted_at IS NULL
       ORDER BY updated_at DESC
@@ -166,9 +173,9 @@ class AccountAdapter {
           username: row.read<String?>('username'),
           password: null,
           notes: null,
-          icon: null,
+          icon: row.read<String?>('icon'),
           categoryId: row.read<int>('category_id'),
-          iconCustomId: null,
+          iconCustomId: row.read<int?>('icon_custom_id'),
           passwordUpdatedAt: null,
           createdAt: row.read<DateTime>('created_at'),
           updatedAt: row.read<DateTime>('updated_at'),
@@ -306,9 +313,13 @@ class AccountAdapter {
   /// Đếm số lượng tài khoản theo category
   Future<int> countByCategory(int categoryId) async {
     try {
-      final query = _database.selectOnly(_database.accountDriftModel)..where(_database.accountDriftModel.categoryId.equals(categoryId));
-      final rows = await query.get();
-      return rows.length;
+      final query =
+          _database.selectOnly(_database.accountDriftModel)
+            ..addColumns([_database.accountDriftModel.id.count()])
+            ..where(_database.accountDriftModel.categoryId.equals(categoryId));
+
+      final row = await query.getSingleOrNull();
+      return row?.read<int>(_database.accountDriftModel.id.count()) ?? 0;
     } catch (e) {
       logError('Error counting accounts by category: $e');
       return 0;
@@ -319,16 +330,18 @@ class AccountAdapter {
   Future<Map<int, int>> countByCategories(List<int> categoryIds) async {
     try {
       // Tạo danh sách các Future để đếm song song
-      final futures =
-          categoryIds.map((categoryId) async {
-            final count = await countByCategory(categoryId);
-            return MapEntry(categoryId, count);
-          }).toList();
+      final futures = categoryIds.map((categoryId) => countByCategory(categoryId)).toList();
 
       // Thực hiện tất cả queries song song
       final results = await Future.wait(futures);
 
-      return Map.fromEntries(results);
+      // Tạo map từ results
+      final Map<int, int> resultMap = {};
+      for (int i = 0; i < categoryIds.length; i++) {
+        resultMap[categoryIds[i]] = results[i];
+      }
+
+      return resultMap;
     } catch (e) {
       logError('Error counting accounts by categories: $e');
       return {};
@@ -369,38 +382,72 @@ class AccountAdapter {
     }
   }
 
-  /// Xóa tài khoản theo ID
+  /// Xóa tài khoản theo ID (bao gồm tất cả dữ liệu liên quan)
   Future<bool> delete(int id) async {
     try {
-      return await _database.delete(_database.accountDriftModel).delete(AccountDriftModelCompanion(id: Value(id))) > 0;
+      await _database.transaction(() async {
+        // Delete related TOTP first
+        await (_database.delete(_database.tOTPDriftModel)..where((tbl) => tbl.accountId.equals(id))).go();
+        
+        // Delete related Custom Fields
+        await (_database.delete(_database.accountCustomFieldDriftModel)..where((tbl) => tbl.accountId.equals(id))).go();
+        
+        // Delete Password History
+        await (_database.delete(_database.passwordHistoryDriftModel)..where((tbl) => tbl.accountId.equals(id))).go();
+        
+        // Finally delete the account itself
+        await (_database.delete(_database.accountDriftModel)..where((tbl) => tbl.id.equals(id))).go();
+      });
+      
+      return true;
     } catch (e) {
-      logError('Error deleting account: $e');
+      logError('Error deleting account with relations: $e');
       return false;
     }
   }
 
-  /// Xóa nhiều tài khoản
+  /// Xóa nhiều tài khoản (bao gồm tất cả dữ liệu liên quan)
   Future<int> deleteMany(List<int> ids) async {
     try {
-      int deletedCount = 0;
-      for (final id in ids) {
-        if (await delete(id)) {
-          deletedCount++;
-        }
-      }
-      return deletedCount;
+      await _database.transaction(() async {
+        // Delete related TOTPs for all accounts
+        await (_database.delete(_database.tOTPDriftModel)..where((tbl) => tbl.accountId.isIn(ids))).go();
+        
+        // Delete related Custom Fields for all accounts
+        await (_database.delete(_database.accountCustomFieldDriftModel)..where((tbl) => tbl.accountId.isIn(ids))).go();
+        
+        // Delete Password History for all accounts
+        await (_database.delete(_database.passwordHistoryDriftModel)..where((tbl) => tbl.accountId.isIn(ids))).go();
+        
+        // Finally delete all accounts
+        await (_database.delete(_database.accountDriftModel)..where((tbl) => tbl.id.isIn(ids))).go();
+      });
+      
+      return ids.length; // Return the number of accounts that were supposed to be deleted
     } catch (e) {
-      logError('Error deleting many accounts: $e');
+      logError('Error deleting many accounts with relations: $e');
       return 0;
     }
   }
 
-  /// Xóa tất cả tài khoản
+  /// Xóa tất cả tài khoản (bao gồm tất cả dữ liệu liên quan)
   Future<void> deleteAll() async {
     try {
-      await _database.delete(_database.accountDriftModel).go();
+      await _database.transaction(() async {
+        // Delete all TOTPs first
+        await _database.delete(_database.tOTPDriftModel).go();
+        
+        // Delete all Custom Fields
+        await _database.delete(_database.accountCustomFieldDriftModel).go();
+        
+        // Delete all Password History
+        await _database.delete(_database.passwordHistoryDriftModel).go();
+        
+        // Finally delete all accounts
+        await _database.delete(_database.accountDriftModel).go();
+      });
     } catch (e) {
-      logError('Error deleting all accounts: $e');
+      logError('Error deleting all accounts with relations: $e');
     }
   }
 
@@ -473,14 +520,11 @@ class AccountAdapter {
     }
   }
 
-  /// Xóa nhiều tài khoản (song song)
+  /// Xóa nhiều tài khoản (song song với transaction)
   Future<int> deleteManyParallel(List<int> ids) async {
     try {
-      // Thực hiện delete song song
-      final futures = ids.map((id) => delete(id)).toList();
-      final results = await Future.wait(futures);
-
-      return results.where((result) => result).length;
+      // Use the same transaction-based deleteMany method for consistency
+      return await deleteMany(ids);
     } catch (e) {
       logError('Error deleting many accounts in parallel: $e');
       return 0;

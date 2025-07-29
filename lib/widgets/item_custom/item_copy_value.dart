@@ -1,4 +1,4 @@
-import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
+import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/decrypt_text/decrypt_text.dart';
@@ -43,7 +43,6 @@ class _ItemCopyValueState extends State<ItemCopyValue> {
     if (widget.isPrivateValue && !_isShowValue) {
       return Text("***********", style: CustomTextStyle.regular(fontSize: 14.sp, overflow: TextOverflow.ellipsis));
     }
-
     return DecryptText(
       style: CustomTextStyle.regular(fontSize: 14.sp, overflow: TextOverflow.ellipsis),
       value: widget.value,
@@ -65,8 +64,7 @@ class _ItemCopyValueState extends State<ItemCopyValue> {
   Widget _buildCopyButton() {
     return IconButton(
       onPressed: () async {
-        final decryptService = EncryptAppDataService.instance;
-        final decryptedValue = widget.isPrivateValue ? await decryptService.decryptPassword(widget.value) : await decryptService.decryptInfo(widget.value);
+        final decryptedValue = widget.isPrivateValue ? await DataSecureService.decryptPassword(widget.value) : await DataSecureService.decryptInfo(widget.value);
         if (decryptedValue.isNotEmpty && mounted) {
           clipboardCustom(context: context, text: decryptedValue);
         }

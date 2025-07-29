@@ -1,4 +1,5 @@
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
+import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
 import 'package:intl/intl.dart';
 import 'package:objectbox/objectbox.dart';
@@ -43,9 +44,8 @@ class TOTPOjbModel {
     );
   }
 
-  final EncryptAppDataService _encryptAppDataService = EncryptAppDataService.instance;
   Future<Map<String, dynamic>> toDecryptedJson() async {
-    return {'secretKey': await _encryptAppDataService.decryptTOTPKey(secretKey), 'isShowToHome': isShowToHome, 'createdAt': createdAt.toIso8601String(), 'updatedAt': updatedAt.toIso8601String()};
+    return {'secretKey': await DataSecureService.decryptTOTPKey(secretKey), 'isShowToHome': isShowToHome, 'createdAt': createdAt.toIso8601String(), 'updatedAt': updatedAt.toIso8601String()};
   }
 
   //to json

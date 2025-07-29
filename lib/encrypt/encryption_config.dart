@@ -5,7 +5,7 @@ import 'package:crypto/crypto.dart';
 
 class EncryptionConfig {
   // PBKDF2 Configuration (OWASP 2023 recommendations)
-  static const int PBKDF2_ITERATIONS = 250000; //For 
+  static const int PBKDF2_ITERATIONS = 250000; //For high device
   static const int PBKDF2_ITERATIONS_MOBILE = 100000; // For mobile optimization
   static const int PBKDF2_ITERATIONS_LOW_END = 50000; // For low-end devices
   

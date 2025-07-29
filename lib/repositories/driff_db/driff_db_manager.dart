@@ -6,6 +6,7 @@ import 'package:cybersafe_pro/repositories/adapters/password_history_adapter.dar
 import 'package:cybersafe_pro/repositories/adapters/totp_adapter.dart';
 import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/services/data_secure_service.dart';
+import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:drift/drift.dart';
 
 class DriffDbManager {
@@ -58,7 +59,13 @@ class DriffDbManager {
       DataSecureService.encryptInfo(account.notes.value ?? ""),
     ]);
 
-    account = account.copyWith(title: Value(futures[0]), username: Value(futures[1]), password: Value(futures[2]), notes: Value(futures[3]));
+    account = account.copyWith(
+      id: null,
+      title: Value(futures[0]),
+      username: account.username.present ? Value(futures[1]) : const Value.absent(),
+      password: account.password.present ? Value(futures[2]) : const Value.absent(),
+      notes: account.notes.present ? Value(futures[3]) : const Value.absent(),
+    );
     final id = await accountAdapter.insertAccount(account);
 
     if (customFields != null) {
@@ -66,7 +73,8 @@ class DriffDbManager {
     }
 
     if (totp != null) {
-      await totpAdapter.insertOrUpdateTOTP(id, totp.secretKey.value, totp.isShowToHome.value);
+      final encryptedSecretKey = await DataSecureService.encryptTOTPKey(totp.secretKey.value);
+      await totpAdapter.insertOrUpdateTOTP(id, encryptedSecretKey, totp.isShowToHome.value);
     }
     return await accountAdapter.getById(id);
   }
@@ -83,27 +91,39 @@ class DriffDbManager {
       DataSecureService.encryptPassword(account.password.value ?? ""),
       DataSecureService.encryptInfo(account.notes.value ?? ""),
     ]);
-
-    account = account.copyWith(title: Value(futures[0]), username: Value(futures[1]), password: Value(futures[2]), notes: Value(futures[3]));
-
+    account = account.copyWith(
+      title: Value(futures[0]),
+      username: account.username.present ? Value(futures[1]) : const Value.absent(),
+      password: account.password.present ? Value(futures[2]) : const Value.absent(),
+      notes: account.notes.present ? Value(futures[3]) : const Value.absent(),
+    );
     if (newPassword.isNotEmpty) {
+      final currentAccount = await accountAdapter.getById(account.id.value);
+      if (currentAccount != null && currentAccount.password != null && currentAccount.password!.isNotEmpty) {
+        await passwordHistoryAdapter.insertPasswordHistory(account.id.value, await DataSecureService.encryptPassword(currentAccount.password!));
+        logInfo('Password history saved for account ${account.id.value}');
+      } else {
+        logInfo('No current password found for account ${account.id.value}');
+      }
+
+      // Update with new password
       final encryptedPassword = await DataSecureService.encryptPassword(newPassword);
       account = account.copyWith(password: Value(encryptedPassword));
-      if (account.password.value != null && account.password.value!.isNotEmpty) {
-        final encriptOldPassword = await DataSecureService.encryptPassword(account.password.value!);
-        await passwordHistoryAdapter.insertPasswordHistory(account.id.value, encriptOldPassword);
-      }
+      logInfo('Password updated for account ${account.id.value}');
     }
 
     await accountAdapter.updateAccount(account.id.value, account);
+
+    // Delete existing custom fields first
     await accountCustomFieldAdapter.deleteCustomFieldsByAccount(account.id.value);
+
+    // Create new custom fields if provided
     if (customFields != null && customFields.isNotEmpty) {
       await Future.wait(customFields.map((customField) => createAccountCustomFieldWithEncriptData(customField: customField, accountId: account.id.value)));
     }
 
     if (totp != null && totp.secretKey.value.isNotEmpty) {
-      bool isSecretKeyEncrypted = DataSecureService.isValueEncrypted(totp.secretKey.value);
-      final encryptedSecretKey = isSecretKeyEncrypted ? totp.secretKey.value : await DataSecureService.encryptInfo(totp.secretKey.value);
+      final encryptedSecretKey = await DataSecureService.encryptTOTPKey(totp.secretKey.value);
       await totpAdapter.insertOrUpdateTOTP(account.id.value, encryptedSecretKey, totp.isShowToHome.value);
     } else {
       await totpAdapter.deleteTOTP(account.id.value);
@@ -122,13 +142,17 @@ class DriffDbManager {
             : customField.typeField.value == 'password'
             ? await DataSecureService.encryptPassword(customField.value.value)
             : await DataSecureService.encryptInfo(customField.value.value);
-    customField = customField.copyWith(name: customField.name, value: Value(encryptedValue));
-    await accountCustomFieldAdapter.insertOrUpdateCustomField(customField.copyWith(accountId: Value(accountId)));
+
+    // Create new custom field without ID (let database auto-generate)
+    final newCustomField = AccountCustomFieldDriftModelCompanion.insert(
+      id: const Value.absent(), // Let database auto-generate ID
+      accountId: accountId,
+      name: customField.name.value,
+      value: encryptedValue,
+      hintText: customField.hintText.value,
+      typeField: customField.typeField.value,
+    );
+
+    await accountCustomFieldAdapter.insertOrUpdateCustomField(newCustomField);
   }
-
-  // ================= CATEGORY =================
-
-  // ================= ICON CUSTOM =================
-
-  // ================= PASSWORD HISTORY =================
 }

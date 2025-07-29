@@ -10,7 +10,7 @@ class PasswordHistoryAdapter {
   // ==================== CRUD Operations ====================
 
   Future<void> insertPasswordHistory(int accountId, String password) async {
-    await _database.into(_database.passwordHistoryDriftModel).insert(PasswordHistoryDriftModelCompanion(accountId: Value(accountId), password: Value(password)));
+    await _database.into(_database.passwordHistoryDriftModel).insert(PasswordHistoryDriftModelCompanion.insert(accountId: accountId, password: password));
   }
 
   Future<List<PasswordHistoryDriftModelData>> getPasswordHistory(int accountId) async {

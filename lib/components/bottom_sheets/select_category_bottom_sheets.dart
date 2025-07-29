@@ -1,16 +1,21 @@
 import 'package:cybersafe_pro/components/bottom_sheets/create_category_bottom_sheet.dart';
-import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
 import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
-import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
+import 'package:cybersafe_pro/providers/category_provider.dart';
+import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-Future<void> showSelectCategoryBottomSheet(BuildContext context, {CategoryOjbModel? selectedCategory, bool isFromChangeCategory = false, required Function(CategoryOjbModel) onSelected}) async {
+Future<void> showSelectCategoryBottomSheet(
+  BuildContext context, {
+  CategoryDriftModelData? selectedCategory,
+  bool isFromChangeCategory = false,
+  required Function(CategoryDriftModelData) onSelected,
+}) async {
   await showModalBottomSheet(
     context: context,
     builder: (context) => SafeArea(child: SelectCategoryBottomSheet(selectedCategory: selectedCategory, onSelected: onSelected, isFromChangeCategory: isFromChangeCategory)),
@@ -18,8 +23,8 @@ Future<void> showSelectCategoryBottomSheet(BuildContext context, {CategoryOjbMod
 }
 
 class SelectCategoryBottomSheet extends StatelessWidget {
-  final CategoryOjbModel? selectedCategory;
-  final Function(CategoryOjbModel) onSelected;
+  final CategoryDriftModelData? selectedCategory;
+  final Function(CategoryDriftModelData) onSelected;
   final bool isFromChangeCategory;
 
   const SelectCategoryBottomSheet({super.key, this.selectedCategory, required this.onSelected, required this.isFromChangeCategory});
@@ -40,7 +45,13 @@ class SelectCategoryBottomSheet extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Padding(padding: EdgeInsets.symmetric(horizontal: 16.w), child: Text("${isFromChangeCategory? context.trHome(HomeLocale.changeCategory): context.trCreateAccount(CreateAccountText.chooseCategory)} ($count)", style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w600))),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    child: Text(
+                      "${isFromChangeCategory ? context.trHome(HomeLocale.changeCategory) : context.trCreateAccount(CreateAccountText.chooseCategory)} ($count)",
+                      style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w600),
+                    ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.only(right: 10),
                     child: IconButton(
@@ -58,18 +69,18 @@ class SelectCategoryBottomSheet extends StatelessWidget {
 
           // Selector cho danh sách categories
           Expanded(
-            child: Selector<CategoryProvider, List<CategoryOjbModel>>(
-              selector: (_, provider) => provider.categoryList,
+            child: Selector<CategoryProvider, List<CategoryDriftModelData>>(
+              selector: (_, provider) => provider.categories,
               shouldRebuild: (previous, next) {
-                return previous.length != next.length || previous.any((prev) => next.any((next) => prev.categoryName != next.categoryName || prev.accounts.length != next.accounts.length));
+                return previous.length != next.length || previous.any((prev) => next.any((next) => prev.categoryName != next.categoryName));
               },
               builder: (context, categories, child) {
+                final accountProvider = context.read<AccountProvider>();
                 return ListView.builder(
                   shrinkWrap: true,
                   itemCount: categories.length,
                   itemBuilder: (context, index) {
                     final category = categories[index];
-
                     return ListTile(
                       contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
                       selected: selectedCategory == category,
@@ -78,15 +89,7 @@ class SelectCategoryBottomSheet extends StatelessWidget {
                         Navigator.pop(context);
                       },
                       leading: Icon(Icons.folder, color: Theme.of(context).colorScheme.primary, size: 24.sp),
-                      title: Consumer<AccountProvider>(
-                        builder: (context, accountProvider, _) {
-                          final accountCount = accountProvider.getTotalAccountsInCategory(category.id);
-                          return Text(
-                            "${category.categoryName} ($accountCount)", 
-                            style: CustomTextStyle.regular(fontSize: 16.sp)
-                          );
-                        }
-                      ),
+                      title: Text("${category.categoryName} (${accountProvider.mapCategoryIdTotalAccount[category.id] ?? 0})", style: CustomTextStyle.regular(fontSize: 16.sp)),
                     );
                   },
                 );

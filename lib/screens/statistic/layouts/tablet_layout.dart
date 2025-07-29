@@ -1,6 +1,6 @@
-import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/providers/statistic_provider.dart';
+import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/screens/statistic/widgets/security_check_item.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
@@ -208,7 +208,7 @@ class _StatisticTabletLayoutState extends State<StatisticTabletLayout> {
                     
                     Consumer<CategoryProvider>(
                       builder: (context, categoryProvider, child) {
-                        final categories = categoryProvider.categoryList;
+                        final categories = categoryProvider.categories;
                         
                         return categories.isEmpty
                             ? Center(
@@ -236,10 +236,11 @@ class _StatisticTabletLayoutState extends State<StatisticTabletLayout> {
     );
   }
 
-  Widget _buildCategoryDistribution(BuildContext context, List<CategoryOjbModel> categories) {
+  Widget _buildCategoryDistribution(BuildContext context, List<CategoryDriftModelData> categories) {
+    final categoryProvider = Provider.of<CategoryProvider>(context);
     int totalAccounts = 0;
     for (final category in categories) {
-      totalAccounts += category.accounts.length;
+      totalAccounts += categoryProvider.mapCategoryIdTotalAccount[category.id] ?? 0;
     }
     
     return GridView.builder(
@@ -254,11 +255,11 @@ class _StatisticTabletLayoutState extends State<StatisticTabletLayout> {
       physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
         final category = categories[index];
-        final accountCount = category.accounts.length;
-        final percentage = totalAccounts > 0 
-          ? (accountCount / totalAccounts * 100).toInt() 
-          : 0;
-        
+        final accountCount = categoryProvider.mapCategoryIdTotalAccount[category.id] ?? 0;
+        final percentage = totalAccounts > 0
+            ? (accountCount / totalAccounts * 100).toInt()
+            : 0;
+
         return Card(
           child: Padding(
             padding: const EdgeInsets.all(16),

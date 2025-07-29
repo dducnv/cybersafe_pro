@@ -4,6 +4,7 @@ import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/category_text.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
+import 'package:cybersafe_pro/providers/home_provider.dart';
 import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
@@ -33,8 +34,9 @@ class CategoryManagerMobileLayout extends StatelessWidget {
       ),
       body: SafeArea(
         child: Selector<CategoryProvider, Tuple2<List<CategoryDriftModelData>, Map<int, int>>>(
-          selector: (context, provider) => Tuple2(provider.categoryList, provider.mapCategoryIdTotalAccount),
+          selector: (context, provider) => Tuple2(provider.categories, provider.mapCategoryIdTotalAccount),
           builder: (context, categoryProvider, child) {
+            final accountProvider = context.read<AccountProvider>();
             return categoryProvider.item1.isEmpty
                 ? Center(child: Image.asset("assets/images/exclamation-mark.png", width: 60.w, height: 60.h))
                 : ClipRRect(
@@ -52,7 +54,7 @@ class CategoryManagerMobileLayout extends StatelessWidget {
                           padding: const EdgeInsets.all(12),
                           child: Row(
                             children: [
-                              Expanded(child: Text("${category.categoryName} (${categoryProvider.item2[category.id]})", style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w500))),
+                              Expanded(child: Text("${category.categoryName} (${accountProvider.mapCategoryIdTotalAccount[category.id] ?? 0})", style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w500))),
                               IconButton(
                                 onPressed: () {
                                   showCreateCategoryBottomSheet(context, isUpdate: true, categoryDriftModelData: category);
@@ -100,8 +102,7 @@ class CategoryManagerMobileLayout extends StatelessWidget {
         onConfirm: () async {
           bool result = await context.read<CategoryProvider>().deleteCategory(category);
           if (result && context.mounted) {
-            context.read<CategoryProvider>().refresh();
-            context.read<AccountProvider>().refreshAccounts();
+            context.read<HomeProvider>().refreshData();
             Navigator.pop(context);
           }
         },

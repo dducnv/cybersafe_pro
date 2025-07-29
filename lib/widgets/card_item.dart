@@ -50,7 +50,8 @@ class _CardItemState<T> extends State<CardItem<T>> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final remainingItems = (widget.totalItems ?? widget.items.length) - widget.items.length;
+    final totalItems = widget.totalItems ?? widget.items.length;
+    final remainingItems = totalItems - widget.items.length;
     final shouldShowSeeMore = widget.showSeeMore == true && remainingItems > 0;
 
     return Column(

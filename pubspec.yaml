@@ -13,6 +13,7 @@ dependencies:
     sdk: flutter
   #provider
   path: ^1.9.1
+  tuple: ^2.0.2
   provider: ^6.1.2
   path_provider: ^2.1.5
   #database
@@ -23,13 +24,8 @@ dependencies:
   # Drift database với SQLCipher
   drift: ^2.28.0
   sqlite3: ^2.7.6
-
-  uuid: ^4.5.1
-  sqflite: ^2.4.2
   sqlcipher_flutter_libs: ^0.6.7
-  json_annotation: ^4.9.0
 
-  tuple: ^2.0.2
   #security
   crypto: ^3.0.6
   envied: ^1.1.1
@@ -90,38 +86,38 @@ flutter:
     - assets/icons/brand_icons/
     - assets/icons/brand_icons/banks/
   fonts:
-    - family: IBMPlexMono
+    - family: IBMPlexSans
       fonts:
-        - asset: assets/fonts/IBMPlexMono-Regular.ttf
-        - asset: assets/fonts/IBMPlexMono-Bold.ttf
+        - asset: assets/fonts/IBMPlexSans-Regular.ttf
+        - asset: assets/fonts/IBMPlexSans-Bold.ttf
           weight: 700
-        - asset: assets/fonts/IBMPlexMono-BoldItalic.ttf
+        - asset: assets/fonts/IBMPlexSans-BoldItalic.ttf
           weight: 700
           style: italic
-        - asset: assets/fonts/IBMPlexMono-Italic.ttf
+        - asset: assets/fonts/IBMPlexSans-Italic.ttf
           style: italic
-        - asset: assets/fonts/IBMPlexMono-Light.ttf
+        - asset: assets/fonts/IBMPlexSans-Light.ttf
           weight: 300
-        - asset: assets/fonts/IBMPlexMono-LightItalic.ttf
+        - asset: assets/fonts/IBMPlexSans-LightItalic.ttf
           weight: 300
           style: italic
-        - asset: assets/fonts/IBMPlexMono-Medium.ttf
+        - asset: assets/fonts/IBMPlexSans-Medium.ttf
           weight: 500
-        - asset: assets/fonts/IBMPlexMono-MediumItalic.ttf
+        - asset: assets/fonts/IBMPlexSans-MediumItalic.ttf
           weight: 500
           style: italic
-        - asset: assets/fonts/IBMPlexMono-SemiBold.ttf
+        - asset: assets/fonts/IBMPlexSans-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/IBMPlexMono-SemiBoldItalic.ttf
+        - asset: assets/fonts/IBMPlexSans-SemiBoldItalic.ttf
           weight: 600
           style: italic
-        - asset: assets/fonts/IBMPlexMono-ExtraLight.ttf
+        - asset: assets/fonts/IBMPlexSans-ExtraLight.ttf
           weight: 200
-        - asset: assets/fonts/IBMPlexMono-ExtraLightItalic.ttf
+        - asset: assets/fonts/IBMPlexSans-ExtraLightItalic.ttf
           weight: 200
           style: italic
-        - asset: assets/fonts/IBMPlexMono-Thin.ttf
+        - asset: assets/fonts/IBMPlexSans-Thin.ttf
           weight: 100
-        - asset: assets/fonts/IBMPlexMono-ThinItalic.ttf
+        - asset: assets/fonts/IBMPlexSans-ThinItalic.ttf
           weight: 100
           style: italic

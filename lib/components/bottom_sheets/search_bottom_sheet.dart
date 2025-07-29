@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:cybersafe_pro/components/icon_show_component.dart';
-import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
+import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/decrypt_text/decrypt_text.dart';
@@ -15,7 +15,7 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:provider/provider.dart';
 
 Future<void> showSearchBottomSheet(BuildContext context,{
-  Function(AccountOjbModel)? onTapAccount,
+  Function(AccountDriftModelData)? onTapAccount,
 }) async {
   return showModalBottomSheet(
     isScrollControlled: true, 
@@ -27,7 +27,7 @@ Future<void> showSearchBottomSheet(BuildContext context,{
 }
 
 class SearchBottomSheet extends StatefulWidget {
-  final Function(AccountOjbModel)? onTapAccount;
+  final Function(AccountDriftModelData)? onTapAccount;
   const SearchBottomSheet({super.key, this.onTapAccount});
 
   @override
@@ -36,14 +36,26 @@ class SearchBottomSheet extends StatefulWidget {
 
 class _SearchBottomSheetState extends State<SearchBottomSheet> {
   final TextEditingController _searchController = TextEditingController();
-  List<AccountOjbModel> _searchResults = [];
+  List<AccountDriftModelData> _searchResults = [];
   bool _isLoading = false;
   Timer? _debounceTimer;
+  String _lastQuery = '';
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
+    _preloadAccountsForSearch();
+  }
+
+  /// Preload accounts for search to improve performance
+  Future<void> _preloadAccountsForSearch() async {
+    try {
+      final accountProvider = context.read<AccountProvider>();
+      await accountProvider.preloadAccountsForSearch();
+    } catch (e) {
+      // Ignore errors, search will still work
+    }
   }
 
   @override
@@ -57,29 +69,50 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
     // Hủy timer cũ nếu có
     _debounceTimer?.cancel();
     
-    // Tạo timer mới để debounce
-    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
-      final query = _searchController.text.trim();
-      if (query.isEmpty) {
-        setState(() {
-          _searchResults = [];
-          _isLoading = false;
-        });
-        return;
-      }
+    final query = _searchController.text.trim();
+    
+    // Clear results immediately if query is empty
+    if (query.isEmpty) {
+      setState(() {
+        _searchResults = [];
+        _isLoading = false;
+        _lastQuery = '';
+      });
+      return;
+    }
 
-      setState(() => _isLoading = true);
+    // Don't search if it's the same query
+    if (query == _lastQuery) {
+      return;
+    }
+
+    // Show loading state
+    setState(() => _isLoading = true);
+    
+    // Tạo timer mới để debounce
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
+      if (!mounted) return;
       
-      // Thực hiện tìm kiếm
-      final accountProvider = context.read<AccountProvider>();
-      accountProvider.searchAccounts(query).then((results) {
+      try {
+        // Thực hiện tìm kiếm
+        final accountProvider = context.read<AccountProvider>();
+        final results = await accountProvider.searchAccounts(query);
+        
         if (mounted) {
           setState(() {
             _searchResults = results;
             _isLoading = false;
+            _lastQuery = query;
           });
         }
-      });
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _searchResults = [];
+            _isLoading = false;
+          });
+        }
+      }
     });
   }
 
@@ -166,7 +199,6 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
                                     width: 30,
                                     height: 30,
                                     textStyle: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey[800]),
-                                    isDecrypted: false,
                                   ),
                                 ),
                               ),
@@ -178,8 +210,8 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
                                 fontWeight: FontWeight.w600
                               ),
                             ),
-                            subtitle: account.email != null ? DecryptText(
-                              value: account.email!,
+                            subtitle: account.username != null ? DecryptText(
+                              value: account.username!,
                               decryptTextType: DecryptTextType.info,
                               style: TextStyle(
                                 color: Colors.grey[600]

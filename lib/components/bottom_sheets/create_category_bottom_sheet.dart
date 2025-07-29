@@ -36,7 +36,7 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
     super.initState();
     final categoryProvider = context.read<CategoryProvider>();
     categoryProvider.txtCategoryName = TextEditingController();
-    categoryProvider.txtCategoryName.text = widget.categoryOjbModel?.categoryName ?? "";
+    categoryProvider.txtCategoryName.text = widget.categoryDriftModelData?.categoryName ?? "";
   }
 
   @override
@@ -53,9 +53,9 @@ class _CreateCategoryBottomSheetState extends State<CreateCategoryBottomSheet> {
     bool success = false;
 
     if (widget.isUpdate) {
-      success = await categoryProvider.updateCategory(CategoryDriftModelData(categoryName: name.trim(), id: widget.categoryOjbModel!.id));
+      success = await categoryProvider.updateCategory(id: widget.categoryDriftModelData!.id, categoryName: name.trim());
     } else {
-      success = await categoryProvider.createCategory(CategoryDriftModelData(categoryName: name.trim()));
+      success = await categoryProvider.createCategory(name.trim());
     }
     if (success) {
       navigator.pop();

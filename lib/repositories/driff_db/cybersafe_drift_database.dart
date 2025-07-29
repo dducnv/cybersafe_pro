@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
@@ -11,15 +12,7 @@ import 'models/models.dart';
 
 part 'cybersafe_drift_database.g.dart';
 
-@DriftDatabase(tables: [
-  AccountDriftModel,
-  CategoryDriftModel,
-  TOTPDriftModel,
-  PasswordHistoryDriftModel,
-  AccountCustomFieldDriftModel,
-  IconCustomDriftModel,
-  TextNotesDriftModel
-])
+@DriftDatabase(tables: [AccountDriftModel, CategoryDriftModel, TOTPDriftModel, PasswordHistoryDriftModel, AccountCustomFieldDriftModel, IconCustomDriftModel, TextNotesDriftModel])
 class DriftSqliteDatabase extends _$DriftSqliteDatabase {
   DriftSqliteDatabase() : super(_openConnection());
 
@@ -30,21 +23,22 @@ class DriftSqliteDatabase extends _$DriftSqliteDatabase {
   static QueryExecutor _openConnection() {
     return LazyDatabase(() async {
       try {
-        // Cấu hình SQLCipher cho Android
-        if (Platform.isAndroid) {
-          open.overrideFor(OperatingSystem.android, openCipherOnAndroid);
-        }
-
         final dbFolder = await getApplicationDocumentsDirectory();
         final file = File(p.join(dbFolder.path, 'cybersafe_secure.db.enc'));
 
         // Lấy password từ KeyManager
         final password = await KeyManager.getKey(KeyType.database);
-        
+
         logInfo('Opening Drift database with encryption at: ${file.path}');
 
         return NativeDatabase.createInBackground(
           file,
+          isolateSetup: () async {
+            open
+              ..overrideFor(OperatingSystem.android, openCipherOnAndroid)
+              ..overrideFor(OperatingSystem.linux, () => DynamicLibrary.open('libsqlcipher.so'))
+              ..overrideFor(OperatingSystem.windows, () => DynamicLibrary.open('sqlcipher.dll'));
+          },
           setup: (database) {
             // Cấu hình SQLCipher
             database.execute('PRAGMA key = "$password"');
@@ -52,14 +46,14 @@ class DriftSqliteDatabase extends _$DriftSqliteDatabase {
             database.execute('PRAGMA kdf_iter = 64000');
             database.execute('PRAGMA cipher_hmac_algorithm = HMAC_SHA512');
             database.execute('PRAGMA cipher_kdf_algorithm = PBKDF2_HMAC_SHA512');
-            
+
             // Cấu hình performance
             database.execute('PRAGMA journal_mode = WAL');
             database.execute('PRAGMA synchronous = NORMAL');
             database.execute('PRAGMA temp_store = MEMORY');
             database.execute('PRAGMA mmap_size = 268435456'); // 256MB
             database.execute('PRAGMA foreign_keys = ON');
-            
+
             // Verify database
             try {
               database.select('SELECT COUNT(*) FROM sqlite_master');
@@ -76,5 +70,6 @@ class DriftSqliteDatabase extends _$DriftSqliteDatabase {
       }
     });
   }
+
   /// Test database connection
 }

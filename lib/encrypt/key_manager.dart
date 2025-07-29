@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
+import 'package:cybersafe_pro/encrypt/cache_key.dart';
 import 'package:cybersafe_pro/encrypt/encryption_config.dart' as config;
 import 'package:cybersafe_pro/localization/keys/error_text.dart';
 import 'package:cybersafe_pro/utils/app_error.dart';
@@ -23,14 +23,14 @@ class KeyManager {
   // Constants
   static const MAX_CACHE_DURATION = config.EncryptionConfig.KEY_CACHE_DURATION;
   static const MAX_CACHE_ITEMS = 20; // Increased for derived keys
-  static const CLEANUP_INTERVAL = Duration(minutes: 10);
+  static const CLEANUP_INTERVAL = Duration(minutes: 4);
   static const DEVICE_KEY_LENGTH = config.EncryptionConfig.KEY_SIZE_BYTES;
   static const SALT_LENGTH = config.EncryptionConfig.SALT_SIZE_BYTES;
   static const DERIVED_KEY_CACHE_DURATION = Duration(minutes: 5); // Shorter for derived keys
 
   final _secureStorage = SecureStorage.instance;
-  final Map<String, _CachedKey> _keyCache = {};
-  final Map<String, _CachedKey> _derivedKeyCache = {}; // New cache for derived keys
+  final Map<String, CachedKey> _keyCache = {};
+  final Map<String, CachedKey> _derivedKeyCache = {}; // New cache for derived keys
   Timer? _cacheCleanupTimer;
   int _failedAttempts = 0;
   DateTime? _lockoutUntil;
@@ -109,7 +109,7 @@ class KeyManager {
     final derivedKey = base64.encode(derivedKeyBytes);
 
     // Cache the derived key
-    _derivedKeyCache[cacheKey] = _CachedKey(derivedKey, customDuration: DERIVED_KEY_CACHE_DURATION);
+    _derivedKeyCache[cacheKey] = CachedKey(derivedKey, customDuration: DERIVED_KEY_CACHE_DURATION);
     _monitorDerivedKeyCache();
 
     // Clear sensitive data
@@ -141,16 +141,8 @@ class KeyManager {
     if (specificContext != null) {
       // Clear only specific context
       final keysToRemove = _derivedKeyCache.keys.where((key) => key.contains('_${specificContext}_')).toList();
-
-      for (final key in keysToRemove) {
-        _derivedKeyCache[key]?.clear();
-        _derivedKeyCache.remove(key);
-      }
+      _derivedKeyCache.removeWhere((key, value) => keysToRemove.contains(key));
     } else {
-      // Clear all derived keys
-      for (final cachedKey in _derivedKeyCache.values) {
-        cachedKey.clear();
-      }
       _derivedKeyCache.clear();
     }
 
@@ -169,7 +161,6 @@ class KeyManager {
 
     while (_derivedKeyCache.length > MAX_CACHE_ITEMS) {
       final oldest = sortedEntries.removeAt(0);
-      oldest.value.clear();
       _derivedKeyCache.remove(oldest.key);
     }
   }
@@ -177,12 +168,6 @@ class KeyManager {
   // Core key generation & management
   static Future<String> getKey(KeyType type) async {
     ArgumentError.checkNotNull(type, 'type');
-
-    // Simple security check
-    if (!kDebugMode) {
-      _simpleSecurityCheck();
-    }
-
     return await instance._getEncryptionKey(type);
   }
 
@@ -201,7 +186,7 @@ class KeyManager {
       final savedKey = await _secureStorage.read(key: storageKey);
 
       if (savedKey != null) {
-        _keyCache[cacheKey] = _CachedKey(savedKey);
+        _keyCache[cacheKey] = CachedKey(savedKey);
         _monitorCache();
         return savedKey;
       }
@@ -218,7 +203,7 @@ class KeyManager {
         'keySize': config.EncryptionConfig.KEY_SIZE_BYTES,
       });
 
-      _keyCache[cacheKey] = _CachedKey(key);
+      _keyCache[cacheKey] = CachedKey(key);
       await _secureStorage.save(key: storageKey, value: key);
       await _setKeyCreationTime(type);
 
@@ -227,40 +212,6 @@ class KeyManager {
       _failedAttempts = 0; // Reset on success
       return key;
     }, functionName: "_getEncryptionKey");
-  }
-
-  // Simplified security check
-  static void _simpleSecurityCheck() {
-    try {
-      // Check for basic tampering indicators
-      if (Platform.isAndroid) {
-        _checkAndroidSecurity();
-      } else if (Platform.isIOS) {
-        _checkIOSSecurity();
-      }
-    } catch (e) {
-      logInfo('Security check completed');
-    }
-  }
-
-  static void _checkAndroidSecurity() {
-    // Basic Android security checks
-    final suspiciousPackages = ['com.koushikdutta.superuser', 'eu.chainfire.supersu', 'com.noshufou.android.su'];
-
-    // Simple check without deep inspection
-    if (suspiciousPackages.any((pkg) => pkg.contains('superuser'))) {
-      logInfo('Device security note: elevated permissions detected');
-    }
-  }
-
-  static void _checkIOSSecurity() {
-    // Basic iOS security checks
-    final jailbreakPaths = ['/Applications/Cydia.app', '/usr/sbin/sshd', '/bin/bash'];
-
-    // Simple check without deep inspection
-    if (jailbreakPaths.any((path) => path.contains('Cydia'))) {
-      logInfo('Device security note: modification detected');
-    }
   }
 
   // Check for rate limiting
@@ -282,16 +233,6 @@ class KeyManager {
     await _secureStorage.save(key: '${storageKey}_creation_time', value: DateTime.now().toIso8601String());
   }
 
-  Future<bool> _isKeyExpired(KeyType type) async {
-    final storageKey = _getStorageKeyForType(type);
-    final creationTimeStr = await _secureStorage.read(key: '${storageKey}_creation_time');
-
-    if (creationTimeStr == null) return true;
-
-    final creationTime = DateTime.parse(creationTimeStr);
-    return DateTime.now().difference(creationTime) > config.EncryptionConfig.MAX_KEY_AGE;
-  }
-
   Future<String> _getDeviceKey() async {
     return await _withRetry(() async {
       final cacheKey = 'device_key';
@@ -305,7 +246,7 @@ class KeyManager {
         return await _getDeviceKey();
       }
 
-      _keyCache[cacheKey] = _CachedKey(key);
+      _keyCache[cacheKey] = CachedKey(key);
       _monitorCache();
       return key;
     }, functionName: "_getDeviceKey");
@@ -340,17 +281,6 @@ class KeyManager {
     return Uint8List.fromList(hash.take(SALT_LENGTH).toList());
   }
 
-  // Check if key needs rotation soon
-  Future<bool> shouldRotateKey(KeyType type) async {
-    final storageKey = _getStorageKeyForType(type);
-    final creationTimeStr = await _secureStorage.read(key: '${storageKey}_creation_time');
-
-    if (creationTimeStr == null) return true;
-
-    final creationTime = DateTime.parse(creationTimeStr);
-    return DateTime.now().difference(creationTime) > config.EncryptionConfig.KEY_ROTATION_WARNING;
-  }
-
   // Cache Management
   void _monitorCache() {
     if (_keyCache.length > MAX_CACHE_ITEMS) {
@@ -363,7 +293,6 @@ class KeyManager {
 
     while (_keyCache.length > MAX_CACHE_ITEMS) {
       final oldest = sortedEntries.removeAt(0);
-      oldest.value.clear();
       _keyCache.remove(oldest.key);
     }
   }
@@ -378,7 +307,6 @@ class KeyManager {
     final expiredKeys = _keyCache.entries.where((entry) => entry.value.isExpired).map((entry) => entry.key).toList();
 
     for (final key in expiredKeys) {
-      _keyCache[key]?.clear();
       _keyCache.remove(key);
     }
 
@@ -386,27 +314,17 @@ class KeyManager {
     final expiredDerivedKeys = _derivedKeyCache.entries.where((entry) => entry.value.isExpired).map((entry) => entry.key).toList();
 
     for (final key in expiredDerivedKeys) {
-      _derivedKeyCache[key]?.clear();
       _derivedKeyCache.remove(key);
     }
   }
 
-  Future<void> _clearAllCache() async {
-    for (final cachedKey in _keyCache.values) {
-      cachedKey.clear();
-    }
+  void _clearAllCache() {
     _keyCache.clear();
-
-    for (final cachedKey in _derivedKeyCache.values) {
-      cachedKey.clear();
-    }
     _derivedKeyCache.clear();
   }
 
   // Security Operations
   Uint8List _generateSecureRandomBytes(int length) {
-    final random = pc.SecureRandom('Fortuna');
-
     // Use multiple entropy sources
     final entropy = <int>[];
     entropy.addAll(utf8.encode(DateTime.now().toIso8601String()));
@@ -419,11 +337,19 @@ class KeyManager {
       entropy.add(systemRandom.nextInt(256));
     }
 
-    // Ensure entropy is exactly 32 bytes (256 bits) for Fortuna
+    // Ensure entropy is exactly 32 bytes (256 bits)
     final entropyBytes = Uint8List.fromList(sha256.convert(Uint8List.fromList(entropy)).bytes);
 
-    random.seed(pc.KeyParameter(entropyBytes));
-    return random.nextBytes(length);
+    // Use entropyBytes to seed our random generation
+    final result = Uint8List(length);
+    final random = Random.secure();
+
+    // Mix entropy with secure random
+    for (int i = 0; i < length; i++) {
+      result[i] = (random.nextInt(256) ^ entropyBytes[i % entropyBytes.length]);
+    }
+
+    return result;
   }
 
   void _secureWipe(Uint8List data) {
@@ -437,8 +363,8 @@ class KeyManager {
   }
 
   // Lifecycle
-  Future<void> onAppBackgroundAsync() async {
-    await _clearAllCache();
+  void onAppBackground() {
+    _clearAllCache();
     logInfo('All caches cleared on app background');
   }
 
@@ -463,7 +389,7 @@ class KeyManager {
   }
 
   void _logError(String message, Object error) {
-    logError('[KeyManager] ERROR: $message: $error', functionName: "KeyManager._logError");
+    logError('[KeyManager] ERROR: $message: $error');
     _failedAttempts++;
   }
 
@@ -493,45 +419,5 @@ class KeyManager {
       }
     }
     throw AppError.instance.createException(ErrorText.tooManyRetries, functionName: functionName);
-  }
-
-  // Security audit
-  Future<Map<String, dynamic>> getSecurityAudit() async {
-    final audit = <String, dynamic>{};
-
-    audit['cacheSize'] = _keyCache.length;
-    audit['derivedKeyCacheSize'] = _derivedKeyCache.length;
-    audit['failedAttempts'] = _failedAttempts;
-    audit['isLockedOut'] = _lockoutUntil != null && DateTime.now().isBefore(_lockoutUntil!);
-    audit['lockoutUntil'] = _lockoutUntil?.toIso8601String();
-
-    final keyStatus = <String, dynamic>{};
-    for (final type in KeyType.values) {
-      keyStatus[type.name] = {
-        'exists': await _secureStorage.read(key: _getStorageKeyForType(type)) != null,
-        'needsRotation': await shouldRotateKey(type),
-        'cached': _keyCache.containsKey('${type.name}_key'),
-      };
-    }
-    audit['keyStatus'] = keyStatus;
-
-    return audit;
-  }
-}
-
-// Enhanced cached key with optional duration
-class _CachedKey {
-  final String _value;
-  final DateTime expiresAt;
-
-  _CachedKey(this._value, {Duration? customDuration}) : expiresAt = DateTime.now().add(customDuration ?? KeyManager.MAX_CACHE_DURATION);
-
-  bool get isExpired => DateTime.now().isAfter(expiresAt);
-
-  String get value => _value;
-
-  void clear() {
-    // Simple clear - let GC handle cleanup
-    // In production, consider using FFI for true memory wiping
   }
 }

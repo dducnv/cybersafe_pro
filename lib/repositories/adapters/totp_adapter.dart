@@ -35,6 +35,23 @@ class TOTPAdapter {
     }
   }
 
+  Future<List<MapEntry<AccountDriftModelData, TOTPDriftModelData>>> getAllWithOTP() async {
+    try {
+      final query = _database.select(_database.accountDriftModel).join([innerJoin(_database.tOTPDriftModel, _database.tOTPDriftModel.accountId.equalsExp(_database.accountDriftModel.id))]);
+
+      final rows = await query.get();
+
+      return rows.map((row) {
+        final account = row.readTable(_database.accountDriftModel);
+        final totp = row.readTable(_database.tOTPDriftModel);
+        return MapEntry(account, totp);
+      }).toList();
+    } catch (e) {
+      logError('Error getting all accounts with TOTP: $e');
+      return [];
+    }
+  }
+
   /// Lấy TOTP theo ID
   Future<TOTPDriftModelData?> getById(int id) async {
     try {

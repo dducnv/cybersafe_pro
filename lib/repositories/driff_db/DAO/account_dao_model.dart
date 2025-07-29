@@ -1,12 +1,12 @@
 import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 
-class AccountDaoModel {
+class AccountAggregate {
   final AccountDriftModelData account;
   final CategoryDriftModelData category;
   final TOTPDriftModelData? totp;
   final List<AccountCustomFieldDriftModelData> customFields;
 
-  AccountDaoModel({required this.account, required this.category, required this.customFields, this.totp});
+  AccountAggregate({required this.account, required this.category, required this.customFields, this.totp});
 
   static AccountDriftModelData fromAccountDriftModelCompanion(AccountDriftModelCompanion accountDriftModelData) {
     return AccountDriftModelData(

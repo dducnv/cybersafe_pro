@@ -160,7 +160,7 @@ class SecureArgon2 {
 
     Uint8List? salt;
     Uint8List? aesKeyBytes;
-    
+
     try {
       // Parse dữ liệu mã hóa
       final package = json.decode(value) as Map<String, dynamic>;

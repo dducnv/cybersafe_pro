@@ -1,3 +1,6 @@
+import 'package:cybersafe_pro/repositories/driff_db/DAO/account_dao_model.dart';
+import 'package:cybersafe_pro/services/account/account_services.dart';
+import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:flutter/material.dart';
 
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
@@ -51,11 +54,14 @@ class AccountFormProvider extends ChangeNotifier {
   }
 
   Future<void> getListIconCustom() async {
-    listIconsCustom = await DriffDbManager.instance.iconCustomAdapter.getAll();
+    listIconsCustom = AccountServices.instance.mapCustomIcon.values.toList();
   }
 
-  Future<void> loadAccountToForm(AccountDriftModelData account) async {
+  Future<void> loadAccountToForm(AccountAggregate accountAggregate) async {
     try {
+      final account = accountAggregate.account;
+      final category = accountAggregate.category;
+
       accountId = account.id;
       appNameController.text = account.title;
       usernameController.text = account.username ?? '';
@@ -73,23 +79,25 @@ class AccountFormProvider extends ChangeNotifier {
       }
 
       // Set category if exists
+      setCategory(category);
 
-      final category = await DriffDbManager.instance.categoryAdapter.getById(account.categoryId);
-      if (category != null) {
-        setCategory(category);
-      }
-
-      final totp = await DriffDbManager.instance.totpAdapter.getByAccountId(account.id);
+      final totp = accountAggregate.totp;
       if (totp != null) {
-        otpController.text = totp.secretKey;
+        otpController.text = await DataSecureService.decryptTOTPKey(totp.secretKey);
+        isAddedTOTP = true;
+      } else {
+        isAddedTOTP = false;
+        otpController.clear();
+        otpError = null;
       }
 
-      final customFields = await DriffDbManager.instance.accountCustomFieldAdapter.getByAccountId(account.id);
+      final customFields = accountAggregate.customFields;
 
       // Convert and add custom fields
       if (customFields.isNotEmpty) {
         for (var field in customFields) {
-          final controller = TextEditingController(text: field.value);
+          final fieldValueDecrypted = field.typeField == "password" ? await DataSecureService.decryptPassword(field.value) : await DataSecureService.decryptInfo(field.value);
+          final controller = TextEditingController(text: fieldValueDecrypted);
           final key = field.name;
 
           // Find matching type for the field
@@ -187,8 +195,12 @@ class AccountFormProvider extends ChangeNotifier {
   }
 
   Future<void> deleteIconCustom(IconCustomDriftModelData iconCustomModel) async {
-    DriffDbManager.instance.iconCustomAdapter.delete(iconCustomModel.id);
-    listIconsCustom = await DriffDbManager.instance.iconCustomAdapter.getAll();
+    await DriffDbManager.instance.iconCustomAdapter.delete(iconCustomModel.id);
+    await AccountServices.instance.getListIconCustom();
+    listIconsCustom = AccountServices.instance.mapCustomIcon.values.toList();
+    if (selectedIconCustom?.id == iconCustomModel.id) {
+      selectedIconCustom = null;
+    }
     notifyListeners();
   }
 

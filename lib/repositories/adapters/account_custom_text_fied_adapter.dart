@@ -10,7 +10,7 @@ class AccountCustomFieldAdapter {
   // ==================== CRUD Operations ====================
 
   Future<void> insertOrUpdateCustomField(AccountCustomFieldDriftModelCompanion data) async {
-    if (data.id.value != 0) {
+    if (data.id.present && data.id.value != 0) {
       await _database.update(_database.accountCustomFieldDriftModel).replace(data);
     } else {
       await _database.into(_database.accountCustomFieldDriftModel).insert(data);

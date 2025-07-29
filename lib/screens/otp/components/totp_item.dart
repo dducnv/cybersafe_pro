@@ -1,7 +1,7 @@
-
 import 'package:cybersafe_pro/components/icon_show_component.dart';
-import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:cybersafe_pro/database/models/icon_custom_model.dart';
+import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
+import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
@@ -12,7 +12,7 @@ import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 
 class TotpItem extends StatefulWidget {
-  final AccountOjbModel account;
+  final AccountDriftModelData account;
   final String secretKey;
   final IconCustomModel iconCustom;
   final String icon;
@@ -48,17 +48,25 @@ class _TotpItemState extends State<TotpItem> {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(15),
-                          child: SizedBox(width: 50.h, height: 50.h, child: ColoredBox(color: Colors.grey.withValues(alpha: 0.2), child: Center(child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: IconShowComponent(account: widget.account, width: 45.w, height: 45.h, isDecrypted: false),
-                          )))),
+                          child: SizedBox(
+                            width: 50.h,
+                            height: 50.h,
+                            child: ColoredBox(
+                              color: Colors.grey.withValues(alpha: 0.2),
+                              child: Center(child: Padding(padding: const EdgeInsets.all(8.0), child: IconShowComponent(account: widget.account, width: 45.w, height: 45.h))),
+                            ),
+                          ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              DecryptText(value: widget.title, decryptTextType: DecryptTextType.info, style: CustomTextStyle.regular(overflow: TextOverflow.ellipsis, fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                              DecryptText(
+                                value: widget.title,
+                                decryptTextType: DecryptTextType.info,
+                                style: CustomTextStyle.regular(overflow: TextOverflow.ellipsis, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                              ),
                               if (widget.email.isNotEmpty) DecryptText(value: widget.email, decryptTextType: DecryptTextType.info, style: CustomTextStyle.regular(color: Colors.grey, fontSize: 12.sp)),
                             ],
                           ),
@@ -69,8 +77,8 @@ class _TotpItemState extends State<TotpItem> {
                   IconButton(
                     onPressed: () async {
                       if (widget.secretKey.isEmpty) return;
-                      String secretKey = await EncryptAppDataService.instance.decryptTOTPKey(widget.secretKey);
-                      if(!context.mounted) return;
+                      String secretKey = await DataSecureService.decryptTOTPKey(widget.secretKey);
+                      if (!context.mounted) return;
                       clipboardCustom(context: context, text: generateTOTPCode(keySecret: secretKey));
                     },
                     icon: Icon(Icons.copy, size: 20.sp),

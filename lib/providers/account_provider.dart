@@ -1,314 +1,215 @@
-import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
-import 'package:cybersafe_pro/providers/category_provider.dart';
+import 'package:cybersafe_pro/providers/account_form_provider.dart';
 import 'package:cybersafe_pro/repositories/driff_db/DAO/account_dao_model.dart';
 import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 import 'package:cybersafe_pro/resources/brand_logo.dart';
+import 'package:cybersafe_pro/services/account/account_services.dart';
 import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/services/otp.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
-import 'package:cybersafe_pro/providers/account_form_provider.dart';
 import 'dart:math' as math;
-import 'package:provider/provider.dart';
 
-/// AccountProvider manages all account-related operations with parallel processing optimization
-/// Handles CRUD operations, caching, search, and category-based grouping
 class AccountProvider extends ChangeNotifier {
-  // ==================== Constants ====================
-  static const int INITIAL_ACCOUNTS_PER_CATEGORY = 5;
-  static const int LOAD_MORE_ACCOUNTS_COUNT = 10;
-  static const int BATCH_SIZE = 20;
-
-  // ==================== State Management ====================
   final Map<int, AccountDriftModelData> _accounts = {};
   final Map<int, List<AccountDriftModelData>> _groupedCategoryIdAccounts = {};
-  final Map<int, CategoryDriftModelData> _categoryCache = {};
   final Map<int, AccountDriftModelData> _basicInfoCache = {};
-  final Map<int, int> _categoryAccountCounts = {};
-  final Map<int, bool> _expandedCategories = {};
-  final Map<int, int> _visibleAccountsPerCategory = {};
+  final Map<int, int> mapCategoryIdTotalAccount = {};
 
-  // UI State
-  bool _isLoading = false;
-  String? _error;
-  int? _selectedCategoryId;
-  List<AccountDriftModelData> accountSelected = [];
-
-  // ==================== Getters ====================
   Map<int, AccountDriftModelData> get accounts => Map.unmodifiable(_accounts);
   List<AccountDriftModelData> get accountList => _accounts.values.toList();
-  bool get hasAccounts => _accounts.isNotEmpty;
-  bool get isLoading => _isLoading;
-  String? get error => _error;
-  int? get selectedCategoryId => _selectedCategoryId;
+  Map<int, List<AccountDriftModelData>> get groupedAccountsByCategoryId => Map.unmodifiable(_groupedCategoryIdAccounts);
+  List<IconCustomDriftModelData> listIconsCustom = [];
 
-  /// Returns grouped accounts based on selected category or all categories
-  Map<int, List<AccountDriftModelData>> get groupedAccounts {
-    final result = <int, List<AccountDriftModelData>>{};
+  Future<void> getLimitAccountsByCategory({required Map<int, CategoryDriftModelData> mapCategories, required int limit}) async {
+    clearData();
+    final categories = mapCategories.values.toList();
+    final accountsByCategory = await DriffDbManager.instance.accountAdapter.getByCategoriesWithLimit(categories, limit);
+    await _processAccountsByCategory(accountsByCategory: accountsByCategory);
+  }
 
-    if (_selectedCategoryId != null) {
-      // Show only selected category
-      if (_groupedCategoryIdAccounts.containsKey(_selectedCategoryId)) {
-        result[_selectedCategoryId!] = _getVisibleAccounts(_selectedCategoryId!, _groupedCategoryIdAccounts[_selectedCategoryId!] ?? []);
-      }
-    } else {
-      // Show all categories
-      _groupedCategoryIdAccounts.forEach((categoryId, accounts) {
-        result[categoryId] = _getVisibleAccounts(categoryId, accounts);
-      });
+  Future<List<AccountDriftModelData>> loadMoreAccountsForCategory({required int categoryId, required int limit, required int offset}) async {
+    // Load more accounts using the provided offset
+    final moreAccounts = await DriffDbManager.instance.accountAdapter.getBasicByCategoryWithLimit(categoryId: categoryId, limit: limit, offset: offset);
+
+    if (moreAccounts.isEmpty) {
+      return [];
     }
 
-    return Map.unmodifiable(result);
-  }
-
-  /// Check if category can be expanded (has more accounts to load)
-  bool canExpandCategory(int categoryId) {
-    final totalCount = _categoryAccountCounts[categoryId] ?? 0;
-    final currentCount = _groupedCategoryIdAccounts[categoryId]?.length ?? 0;
-    return totalCount > currentCount && !(_expandedCategories[categoryId] == true);
-  }
-
-  /// Get total number of accounts in a category
-  int getTotalAccountsInCategory(int categoryId) {
-    return _categoryAccountCounts[categoryId] ?? 0;
-  }
-
-  /// Get number of visible accounts in a category
-  int getVisibleAccountsCount(int categoryId) {
-    if (_expandedCategories[categoryId] == true) {
-      return _groupedCategoryIdAccounts[categoryId]?.length ?? 0;
-    } else if (_visibleAccountsPerCategory.containsKey(categoryId)) {
-      return _visibleAccountsPerCategory[categoryId]!;
-    } else {
-      return math.min(INITIAL_ACCOUNTS_PER_CATEGORY, _groupedCategoryIdAccounts[categoryId]?.length ?? 0);
+    // Get current accounts to filter duplicates
+    final currentAccounts = _groupedCategoryIdAccounts[categoryId] ?? [];
+    final existingAccountIds = currentAccounts.map((a) => a.id).toSet();
+    final newAccounts = moreAccounts.where((a) => !existingAccountIds.contains(a.id)).toList();
+    if (newAccounts.isEmpty) {
+      return [];
     }
+
+    // Process and add new accounts to the cache
+    final decryptedAccounts = await _processNewAccounts(categoryId, newAccounts);
+
+    notifyListeners();
+    return decryptedAccounts;
   }
 
-  /// Check if category is expanded
-  bool isCategoryExpanded(int categoryId) {
-    return _expandedCategories[categoryId] == true;
+  Future<void> getTotalAccountsByCategory({required List<int> categoryIds}) async {
+    final accountCounts = await DriffDbManager.instance.accountAdapter.countByCategories(categoryIds);
+    mapCategoryIdTotalAccount.addAll(accountCounts);
   }
 
-  // ==================== Category Expansion Management ====================
-
-  /// Toggle category expansion state
-  void toggleCategoryExpansion(int categoryId) {
-    final currentState = _expandedCategories[categoryId] ?? false;
-    _expandedCategories[categoryId] = !currentState;
+  /// Refresh total account count for a specific category
+  Future<void> refreshCategoryCount(int categoryId) async {
+    final count = await DriffDbManager.instance.accountAdapter.countByCategory(categoryId);
+    mapCategoryIdTotalAccount[categoryId] = count;
     notifyListeners();
   }
 
-  /// Expand specific category
-  void expandCategory(int categoryId) {
-    if (!(_expandedCategories[categoryId] ?? false)) {
-      _expandedCategories[categoryId] = true;
-      notifyListeners();
-    }
-  }
+  Future<void> _processAccountsByCategory({required Map<int, List<AccountDriftModelData>> accountsByCategory}) async {
+    for (var categoryId in accountsByCategory.keys) {
+      final accounts = accountsByCategory[categoryId] ?? [];
 
-  /// Collapse specific category
-  void collapseCategory(int categoryId) {
-    if (_expandedCategories[categoryId] ?? false) {
-      _expandedCategories[categoryId] = false;
-      notifyListeners();
-    }
-  }
+      // Decrypt accounts (parallel)
+      final decryptedAccounts = await _getDecryptedBasicInfoMany(accounts);
 
-  /// Expand all categories
-  void expandAllCategories() {
-    for (var categoryId in _groupedCategoryIdAccounts.keys) {
-      _expandedCategories[categoryId] = true;
-    }
-    notifyListeners();
-  }
-
-  /// Collapse all categories
-  void collapseAllCategories() {
-    for (var categoryId in _groupedCategoryIdAccounts.keys) {
-      _expandedCategories[categoryId] = false;
-    }
-    notifyListeners();
-  }
-
-  /// Reset expansion state for all categories
-  void resetExpansionState() {
-    _expandedCategories.clear();
-    _visibleAccountsPerCategory.clear();
-    notifyListeners();
-  }
-
-  /// Reset expansion state for specific category
-  void resetCategoryExpansion(int categoryId) {
-    _expandedCategories.remove(categoryId);
-    _visibleAccountsPerCategory.remove(categoryId);
-    notifyListeners();
-  }
-
-  // ==================== Data Loading Operations ====================
-
-  /// Load all accounts with parallel processing optimization
-  Future<void> getAccounts({bool resetExpansion = false}) async {
-    await _handleAsync(funcName: "getAccounts", () async {
-      // Clear old data
-      _clearOldData(resetExpansion);
-
-      // Load categories and cache them
-      final categories = await _loadAndCacheCategories();
-
-      // Load accounts for each category with limit (parallel)
-      final accountsByCategory = await DriffDbManager.instance.accountAdapter.getByCategoriesWithLimit(categories, INITIAL_ACCOUNTS_PER_CATEGORY);
-
-      // Process accounts for each category (parallel)
-      await _processAccountsByCategory(accountsByCategory);
-
-      // Load account counts for each category (parallel)
-      await _updateAccountCountsForCategories(categories);
-    });
-  }
-
-  /// Load more accounts for a specific category
-  Future<void> loadMoreAccountsForCategory(int categoryId) async {
-    showLoadingDialog();
-    await _handleAsync(funcName: "loadMoreAccountsForCategory", () async {
-      final currentAccounts = _groupedCategoryIdAccounts[categoryId] ?? [];
-      final offset = currentAccounts.length;
-
-      // Load more accounts
-      final moreAccounts = await DriffDbManager.instance.accountAdapter.getBasicByCategoryWithLimit(categoryId: categoryId, limit: LOAD_MORE_ACCOUNTS_COUNT, offset: offset);
-
-      if (moreAccounts.isEmpty) return;
-
-      // Filter out existing accounts
-      final existingAccountIds = currentAccounts.map((a) => a.id).toSet();
-      final newAccounts = moreAccounts.where((a) => !existingAccountIds.contains(a.id)).toList();
-
-      if (newAccounts.isEmpty) return;
-
-      // Decrypt and update cache (parallel)
-      await _processNewAccounts(categoryId, newAccounts);
-
-      // Update visible count and check if fully loaded
-      _updateVisibleCountAndExpansion(categoryId);
-
-      notifyListeners();
-    });
-    hideLoadingDialog();
-  }
-
-  /// Load all accounts for a specific category
-  Future<void> loadAllAccountsForCategory(int categoryId) async {
-    await _handleAsync(funcName: "loadAllAccountsForCategory", () async {
-      final category = _categoryCache[categoryId];
-      if (category == null) return;
-
-      // Load all accounts for category
-      final allAccounts = await DriffDbManager.instance.accountAdapter.getBasicByCategoryWithLimit(categoryId: categoryId);
-
-      // Filter out existing accounts
-      final currentAccounts = _groupedCategoryIdAccounts[categoryId] ?? [];
-      final currentAccountIds = currentAccounts.map((a) => a.id).toSet();
-      final newAccounts = allAccounts.where((a) => !currentAccountIds.contains(a.id)).toList();
-
-      if (newAccounts.isEmpty) {
-        _markCategoryAsExpanded(categoryId);
-        return;
+      // Update cache
+      for (var i = 0; i < accounts.length; i++) {
+        final account = accounts[i];
+        final decryptedAccount = decryptedAccounts[i];
+        _accounts[account.id] = account;
+        _groupedCategoryIdAccounts.putIfAbsent(categoryId, () => []).add(decryptedAccount);
       }
 
-      // Process new accounts (parallel)
-      await _processNewAccounts(categoryId, newAccounts);
-      _markCategoryAsExpanded(categoryId);
-    });
+      notifyListeners();
+    }
   }
-
-  // ==================== Create & Update Account ====================
 
   Future<bool> createAccountFromForm(AccountFormProvider form) async {
     if (!form.validateForm()) {
       return false;
     }
+    final now = DateTime.now();
+    final AccountAggregate newAccountDrift = AccountAggregate(
+      account: AccountDriftModelData(
+        id: form.accountId,
+        icon: form.branchLogoSelected?.branchLogoSlug,
+        title: form.appNameController.text.trim(),
+        username: form.usernameController.text.trim(),
+        password: form.passwordController.text,
+        categoryId: form.selectedCategory!.id,
+        iconCustomId: form.selectedIconCustom?.id,
+        notes: form.noteController.text.trim(),
+        createdAt: now,
+        updatedAt: now,
+      ),
+      category: form.selectedCategory!,
+      customFields:
+          form.dynamicTextFieldNotifier.map((e) {
+            return AccountCustomFieldDriftModelData(
+              id: 0,
+              accountId: form.accountId,
+              name: e.customField.key,
+              value: e.controller.text,
+              hintText: e.customField.hintText,
+              typeField: e.customField.typeField.type,
+            );
+          }).toList(),
+      totp:
+          form.otpController.text.isNotEmpty
+              ? TOTPDriftModelData(id: 0, accountId: form.accountId, secretKey: form.otpController.text.toUpperCase().trim(), isShowToHome: false, createdAt: now, updatedAt: now)
+              : null,
+    );
 
-    return await _handleAsync(funcName: "createAccountFromForm", () async {
-          showLoadingDialog();
-          final now = DateTime.now();
-          final AccountDaoModel newAccountDrift = AccountDaoModel(
-            account: AccountDriftModelData(
-              id: form.accountId,
-              icon: form.branchLogoSelected?.branchLogoSlug,
-              title: form.appNameController.text.trim(),
-              username: form.usernameController.text.trim(),
-              password: form.passwordController.text,
-              categoryId: form.selectedCategory!.id,
-              notes: form.noteController.text.trim(),
-              createdAt: now,
-              updatedAt: now,
-            ),
-            category: form.selectedCategory!,
-            customFields:
-                form.dynamicTextFieldNotifier.map((e) {
-                  return AccountCustomFieldDriftModelData(
-                    id: 0,
-                    accountId: form.accountId,
-                    name: e.customField.key,
-                    value: e.controller.text,
-                    hintText: e.customField.hintText,
-                    typeField: e.customField.typeField.type,
-                  );
-                }).toList(),
-            totp:
-                form.otpController.text.isNotEmpty
-                    ? TOTPDriftModelData(id: 0, accountId: form.accountId, secretKey: form.otpController.text.toUpperCase().trim(), isShowToHome: false, createdAt: now, updatedAt: now)
-                    : null,
-          );
+    final result = await createOrUpdateAccount(newAccountDrift, isUpdate: form.accountId != 0);
+    if (result) {
+      form.resetForm();
+    }
+    return result;
+  }
 
-          final result = await createOrUpdateAccount(newAccountDrift, isUpdate: form.accountId != 0);
-          if (result) {
-            form.resetForm();
-          }
-          hideLoadingDialog();
-          return result;
-        }) ??
-        false;
+  Future<bool> createOrUpdateAccount(AccountAggregate accountDaoModel, {bool isUpdate = false}) async {
+    final stopwatch = Stopwatch()..start();
+
+    if (accountDaoModel.account.title.trim().isEmpty) {
+        throw Exception('Tên tài khoản không được để trống');
+      }
+
+    AccountDriftModelData? accountToSave;
+      if (isUpdate) {
+        // Update logic
+      AccountDriftModelData? currentAccount = accountDaoModel.account.id != 0 ? await DriffDbManager.instance.accountAdapter.getById(accountDaoModel.account.id) : null;
+      if (currentAccount == null) throw Exception('Account not found');
+      
+      // Check if password has changed for password history
+      String? newPassword;
+      final currentPassword = await DataSecureService.decryptPassword(currentAccount.password ?? '');
+      final newPasswordFromForm = accountDaoModel.account.password ?? '';
+      
+      // Only save to history if password actually changed and new password is not empty
+      if (currentPassword != newPasswordFromForm && newPasswordFromForm.isNotEmpty) {
+        newPassword = newPasswordFromForm;
+        logInfo('Password changed for account ${accountDaoModel.account.id}: saving to history');
+      }
+      
+      await DriffDbManager.instance.updateAccountWithEncriptData(
+        account: accountDaoModel.account.toCompanion(true),
+        customFields: accountDaoModel.customFields.map((e) => e.toCompanion(true)).toList(),
+        totp: accountDaoModel.totp?.toCompanion(true),
+        newPassword: newPassword ?? '',
+      );
+        accountToSave = currentAccount;
+      } else {
+      final accountCreated = await DriffDbManager.instance.createAccountWithEncriptData(
+        account: accountDaoModel.account.toCompanion(true),
+        customFields: accountDaoModel.customFields.map((e) => e.toCompanion(true)).toList(),
+        totp: accountDaoModel.totp?.toCompanion(true),
+      );
+      accountToSave = accountCreated;
+    }
+      final elapsedTime = stopwatch.elapsed;
+      logInfo('${isUpdate ? "updateAccount" : "createAccount"}: _encryptAccount completed in: ${elapsedTime.inMilliseconds}ms');
+
+    // Update local cache
+    _accounts[accountToSave!.id] = accountToSave;
+    _basicInfoCache.remove(accountToSave.id);
+
+    // Update grouped accounts by category
+    await _updateGroupedAccountsAfterModification(accountToSave, isUpdate);
+
+      logInfo('${isUpdate ? "updateAccount" : "createAccount"}: Operation completed in: ${elapsedTime.inMilliseconds}ms');
+      return true;
   }
 
   Future<bool> createAccountOnlyOtp({required String secretKey, required String appName, required String accountName}) async {
     if (!OTP.isKeyValid(secretKey)) {
       return false;
     }
+    try {
+      final normalizedSecretKey = secretKey.toUpperCase().trim();
+      final now = DateTime.now();
 
-    return await _handleAsync(funcName: "createAccountOnlyOtp", () async {
-          showLoadingDialog();
+      final results = await Future.wait([_getOrCreateOtpCategory(), _findMatchingIcon(appName)]);
 
-          try {
-            final normalizedSecretKey = secretKey.toUpperCase().trim();
-            final now = DateTime.now();
+      final categoryId = results[0] as int;
+      final iconName = results[1] as String?;
 
-            final results = await Future.wait([_getOrCreateOtpCategory(), _findMatchingIcon(appName)]);
+      final newAccount = await DriffDbManager.instance.createAccountWithEncriptData(
+        account: AccountDriftModelCompanion(
+          title: Value(appName),
+          icon: Value(iconName),
+          username: Value(accountName),
+          password: Value(normalizedSecretKey),
+          categoryId: Value(categoryId),
+          notes: const Value(""),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+        totp: TOTPDriftModelCompanion(secretKey: Value(normalizedSecretKey), isShowToHome: const Value(true)),
+      );
 
-            final categoryId = results[0] as int;
-            final iconName = results[1] as String?;
-
-            final newAccount = await DriffDbManager.instance.createAccountWithEncriptData(
-              account: AccountDriftModelCompanion(
-                title: Value(appName),
-                icon: Value(iconName),
-                username: Value(accountName),
-                password: Value(normalizedSecretKey),
-                categoryId: Value(categoryId),
-                notes: const Value(""),
-                createdAt: Value(now),
-                updatedAt: Value(now),
-              ),
-              totp: TOTPDriftModelCompanion(secretKey: Value(normalizedSecretKey), isShowToHome: const Value(true)),
-            );
-
-            return newAccount != null;
-          } finally {
-            hideLoadingDialog();
-          }
-        }) ??
-        false;
+      return newAccount != null;
+    } catch (e) {
+      return false;
+    }
   }
 
   Future<int> _getOrCreateOtpCategory() async {
@@ -325,8 +226,8 @@ class AccountProvider extends ChangeNotifier {
     try {
       final matchingIcon = allBranchLogos.firstWhere((icon) {
         if (icon.keyWords == null || icon.keyWords!.isEmpty) return false;
-        final pattern = icon.keyWords!.map((k) => RegExp.escape(k)).join('|');
-        final regex = RegExp(pattern, caseSensitive: false);
+            final pattern = icon.keyWords!.map((k) => RegExp.escape(k)).join('|');
+            final regex = RegExp(pattern, caseSensitive: false);
         return regex.hasMatch(appNameLower);
       });
       return matchingIcon.branchLogoSlug;
@@ -335,347 +236,229 @@ class AccountProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> createOrUpdateAccount(AccountDaoModel accountDaoModel, {bool isUpdate = false}) async {
-    final stopwatch = Stopwatch()..start();
-    final result = await _handleAsync(funcName: isUpdate ? "updateAccount" : "createAccount", () async {
-      if (accountDaoModel.account.title.trim().isEmpty) {
-        throw Exception('Tên tài khoản không được để trống');
-      }
-
-      AccountDriftModelData? accountToSave;
-      if (isUpdate) {
-        // Update logic
-        AccountDriftModelData? currentAccount = accountDaoModel.account.id != 0 ? await DriffDbManager.instance.accountAdapter.getById(accountDaoModel.account.id) : null;
-        if (currentAccount == null) throw Exception('Account not found');
-        await DriffDbManager.instance.updateAccountWithEncriptData(
-          account: accountDaoModel.account.toCompanion(true),
-          customFields: accountDaoModel.customFields.map((e) => e.toCompanion(true)).toList(),
-          totp: accountDaoModel.totp?.toCompanion(true),
-        );
-        accountToSave = currentAccount;
-      } else {
-        final accountCreated = await DriffDbManager.instance.createAccountWithEncriptData(
-          account: accountDaoModel.account.toCompanion(true),
-          customFields: accountDaoModel.customFields.map((e) => e.toCompanion(true)).toList(),
-          totp: accountDaoModel.totp?.toCompanion(true),
-        );
-        accountToSave = accountCreated;
-      }
-      final elapsedTime = stopwatch.elapsed;
-      logInfo('${isUpdate ? "updateAccount" : "createAccount"}: _encryptAccount completed in: ${elapsedTime.inMilliseconds}ms');
-
-      _accounts[accountToSave!.id] = accountToSave;
-      _basicInfoCache.remove(accountToSave.id);
-      logInfo('${isUpdate ? "updateAccount" : "createAccount"}: Operation completed in: ${elapsedTime.inMilliseconds}ms');
-      return true;
-    });
-
-    if (result != null) {
-      await getAccounts();
-    }
-    return result ?? false;
-  }
-
-  // ==================== Search Operations ====================
-
-  /// Search accounts by query with parallel decryption
-  Future<List<AccountDriftModelData>> searchAccounts(String query) async {
-    final result = await _handleAsync<List<AccountDriftModelData>>(funcName: "searchAccounts", () async {
-      if (query.isEmpty) return <AccountDriftModelData>[];
-
-      final queryLower = query.toLowerCase();
-      final accounts = await DriffDbManager.instance.accountAdapter.getAll();
-      final decryptedAccounts = await _getDecryptedBasicInfoMany(accounts);
-
-      // Search in decrypted data
-      return decryptedAccounts.where((account) {
-        final titleMatch = account.title.toLowerCase().contains(queryLower);
-        final usernameMatch = account.username?.toLowerCase().contains(queryLower) ?? false;
-        return titleMatch || usernameMatch;
-      }).toList();
-    });
-
-    return result ?? <AccountDriftModelData>[];
-  }
-
-  // ==================== CRUD Operations ====================
-
-  /// Delete a single account
   Future<bool> deleteAccount(AccountDriftModelData account) async {
-    final result = await _handleAsync(funcName: "deleteAccount", () async {
-      final isDeleted = await DriffDbManager.instance.accountAdapter.delete(account.id);
-      if (!isDeleted) {
-        throw Exception('Cannot delete account');
-      }
+    try {
+      await DriffDbManager.instance.accountAdapter.deleteAccount(account.id);
+      
+      // Remove from local cache
+      _accounts.remove(account.id);
+      _basicInfoCache.remove(account.id);
 
-      // Remove from cache
-      _removeAccountFromCache(account);
-      await refreshAccounts();
+      // Update grouped accounts after deletion
+      await _updateGroupedAccountsAfterDeletion(account);
+
       return true;
-    });
-    return result ?? false;
+    } catch (e) {
+      logError('Error deleting account: $e');
+      throw Exception('Cannot delete account');
+    }
   }
 
   /// Delete multiple selected accounts (parallel)
-  Future<bool> handleDeleteAllSelectedAccounts() async {
-    final result = await _handleAsync(funcName: "deleteAllAccount", () async {
-      showLoadingDialog();
-      try {
-        final listIds = accountSelected.map((e) => e.id).toList();
-        final deletedCount = await DriffDbManager.instance.accountAdapter.deleteMany(listIds);
+  Future<bool> handleDeleteAllSelectedAccounts({required List<AccountDriftModelData> accountSelected}) async {
+    try {
+      final listIds = accountSelected.map((e) => e.id).toList();
+      final deletedCount = await DriffDbManager.instance.accountAdapter.deleteMany(listIds);
 
-        if (deletedCount != listIds.length) {
-          throw Exception('Cannot delete some accounts');
-        }
-
-        // Remove from cache (parallel)
-        await Future.wait(
-          accountSelected.map((account) async {
-            _removeAccountFromCache(account);
-          }),
-        );
-
-        handleClearAccountsSelected();
-        return true;
-      } finally {
-        hideLoadingDialog();
+      if (deletedCount != listIds.length) {
+        throw Exception('Cannot delete some accounts');
       }
-    });
-
-    return result ?? false;
-  }
-
-  // ==================== Category Management ====================
-
-  /// Select or deselect a category
-  void selectCategory(int? categoryId, {required BuildContext context}) {
-    final accountFormProvider = Provider.of<AccountFormProvider>(context, listen: false);
-    final categoryProvider = Provider.of<CategoryProvider>(context, listen: false);
-
-    if (_selectedCategoryId == categoryId) {
-      _selectedCategoryId = null;
-      accountFormProvider.setCategoryNull();
-    } else {
-      _selectedCategoryId = categoryId;
-      accountFormProvider.setCategory(categoryProvider.categories[categoryId]!);
+      
+      // Remove from local cache
+      for (final account in accountSelected) {
+        _accounts.remove(account.id);
+        _basicInfoCache.remove(account.id);
+      }
+      
+      // Clear search cache when accounts change
+      clearSearchCache();
+      
+      return true;
+    } catch (e) {
+      logError('Error deleting multiple accounts: $e');
+      throw Exception('Cannot delete some accounts');
     }
-    notifyListeners();
   }
 
-  /// Change category for selected accounts (parallel)
-  Future<void> handleChangeCategory(CategoryDriftModelData category) async {
-    final futures = accountSelected.map((account) => DriffDbManager.instance.accountAdapter.updateAccount(account.id, AccountDriftModelCompanion(categoryId: Value(category.id))));
+  // Cache for search results
+  final Map<String, List<AccountDriftModelData>> _searchCache = {};
+  static const int _maxSearchCacheSize = 50;
+  
+  // Cache for all accounts (for search optimization)
+  List<AccountDriftModelData>? _allAccountsCache;
+  DateTime? _allAccountsCacheTime;
+  static const Duration _allAccountsCacheExpiry = Duration(minutes: 5);
 
+  Future<List<AccountDriftModelData>> searchAccounts(String query) async {
+    if (query.isEmpty) return <AccountDriftModelData>[];
+
+    final queryLower = query.toLowerCase().trim();
+    
+    // Check cache first
+    if (_searchCache.containsKey(queryLower)) {
+      return _searchCache[queryLower]!;
+    }
+
+    // Use database search for better performance
+    final searchResults = await _performDatabaseSearch(queryLower);
+    
+    // Cache the results (with size limit)
+    if (_searchCache.length >= _maxSearchCacheSize) {
+      // Remove oldest entries
+      final keysToRemove = _searchCache.keys.take(_searchCache.length - _maxSearchCacheSize + 1);
+      for (final key in keysToRemove) {
+        _searchCache.remove(key);
+      }
+    }
+    _searchCache[queryLower] = searchResults;
+    
+    return searchResults;
+  }
+
+  /// Perform optimized database search
+  Future<List<AccountDriftModelData>> _performDatabaseSearch(String query) async {
+    // Get accounts to search (use cache if available)
+    final accountsToSearch = await _getAccountsForSearch();
+    
+    if (accountsToSearch.isEmpty) {
+      return [];
+    }
+
+    // Decrypt accounts for search
+    final decryptedResults = await _getDecryptedBasicInfoMany(accountsToSearch);
+    
+    // Filter by decrypted content
+    return decryptedResults.where((account) {
+      final titleMatch = account.title.toLowerCase().contains(query);
+      final usernameMatch = account.username?.toLowerCase().contains(query) ?? false;
+      return titleMatch || usernameMatch;
+    }).toList();
+  }
+
+  /// Get accounts for search with caching optimization
+  Future<List<AccountDriftModelData>> _getAccountsForSearch() async {
+    // Check if we have valid cached accounts
+    if (_allAccountsCache != null && _allAccountsCacheTime != null) {
+      final cacheAge = DateTime.now().difference(_allAccountsCacheTime!);
+      if (cacheAge < _allAccountsCacheExpiry) {
+        return _allAccountsCache!;
+      }
+    }
+
+    // Use grouped accounts if available (already loaded)
+    if (_groupedCategoryIdAccounts.isNotEmpty) {
+      final groupedAccounts = _groupedCategoryIdAccounts.values
+          .expand((accounts) => accounts)
+          .toList();
+      
+      // Cache the grouped accounts for search
+      _allAccountsCache = groupedAccounts;
+      _allAccountsCacheTime = DateTime.now();
+      
+      return groupedAccounts;
+    }
+
+    // Fallback to getting all accounts from database
+    final allAccounts = await DriffDbManager.instance.accountAdapter.getAllBasicInfo();
+    
+    // Cache the results
+    _allAccountsCache = allAccounts;
+    _allAccountsCacheTime = DateTime.now();
+    
+    return allAccounts;
+  }
+
+  /// Clear search cache
+  void clearSearchCache() {
+    _searchCache.clear();
+    _allAccountsCache = null;
+    _allAccountsCacheTime = null;
+  }
+
+  /// Preload accounts for search (call this when opening search)
+  Future<void> preloadAccountsForSearch() async {
+    await _getAccountsForSearch();
+  }
+
+  /// Search accounts with pagination for large result sets
+  Future<List<AccountDriftModelData>> searchAccountsWithPagination(String query, {int limit = 20, int offset = 0}) async {
+    if (query.isEmpty) return <AccountDriftModelData>[];
+
+    final queryLower = query.toLowerCase().trim();
+    final cacheKey = '${queryLower}_${limit}_$offset';
+    
+    // Check cache first
+    if (_searchCache.containsKey(cacheKey)) {
+      return _searchCache[cacheKey]!;
+    }
+
+    // Use database search with pagination
+    final searchResults = await _performDatabaseSearchWithPagination(queryLower, limit: limit, offset: offset);
+    
+    // Cache the results
+    if (_searchCache.length >= _maxSearchCacheSize) {
+      final keysToRemove = _searchCache.keys.take(_searchCache.length - _maxSearchCacheSize + 1);
+      for (final key in keysToRemove) {
+        _searchCache.remove(key);
+      }
+    }
+    _searchCache[cacheKey] = searchResults;
+    
+    return searchResults;
+  }
+
+  /// Perform database search with pagination
+  Future<List<AccountDriftModelData>> _performDatabaseSearchWithPagination(String query, {int limit = 20, int offset = 0}) async {
+    // Get all accounts first (for now, can be optimized later with database-level pagination)
+    final allAccounts = await DriffDbManager.instance.accountAdapter.getAllBasicInfo();
+    
+    if (allAccounts.isEmpty) {
+      return [];
+    }
+
+    // Decrypt accounts in batches for better performance
+    final decryptedAccounts = await _getDecryptedBasicInfoMany(allAccounts);
+    
+    // Filter by decrypted content
+    final filteredAccounts = decryptedAccounts.where((account) {
+      final titleMatch = account.title.toLowerCase().contains(query);
+      final usernameMatch = account.username?.toLowerCase().contains(query) ?? false;
+      return titleMatch || usernameMatch;
+    }).toList();
+
+    // Apply pagination
+    final startIndex = offset;
+    final endIndex = math.min(startIndex + limit, filteredAccounts.length);
+    
+    if (startIndex >= filteredAccounts.length) {
+      return [];
+    }
+
+    return filteredAccounts.sublist(startIndex, endIndex);
+  }
+
+  Future<void> handleChangeCategory({required List<AccountDriftModelData> accountSelected, required CategoryDriftModelData category}) async {
+    final futures = accountSelected.map((account) => DriffDbManager.instance.accountAdapter.updateAccount(account.id, AccountDriftModelCompanion(categoryId: Value(category.id))));
     final updatedAccounts = (await Future.wait(futures)).whereType<AccountDriftModelData>().toList();
     await DriffDbManager.instance.accountAdapter.putMany(updatedAccounts);
 
-    handleClearAccountsSelected();
-    await refreshAccounts();
-    notifyListeners();
-  }
-
-  // ==================== Account Selection ====================
-
-  /// Select or remove account from selection
-  void handleSelectOrRemoveAccount(AccountDriftModelData account) {
-    if (accountSelected.contains(account)) {
-      accountSelected = List.from(accountSelected)..remove(account);
-    } else {
-      accountSelected = List.from(accountSelected)..add(account);
-    }
-    notifyListeners();
-  }
-
-  /// Clear selected accounts
-  void handleClearAccountsSelected() {
-    accountSelected = [];
-    notifyListeners();
-  }
-
-  // ==================== Parallel Operations ====================
-
-  /// Load all accounts for multiple categories (parallel)
-  Future<Map<int, List<AccountDriftModelData>>> loadAllAccountsForCategoriesParallel(List<int> categoryIds) async {
-    final futures =
-        categoryIds.map((categoryId) async {
-          final accounts = await DriffDbManager.instance.accountAdapter.getByCategory(categoryId);
-          final decryptedAccounts = await _getDecryptedBasicInfoMany(accounts);
-          return MapEntry(categoryId, decryptedAccounts);
-        }).toList();
-
-    final results = await Future.wait(futures);
-    return Map.fromEntries(results);
-  }
-
-  /// Load more accounts for multiple categories (parallel)
-  Future<Map<int, List<AccountDriftModelData>>> loadMoreAccountsForCategoriesParallel(Map<int, int> categoryOffsets, int loadCount) async {
-    final futures =
-        categoryOffsets.entries.map((entry) async {
-          final categoryId = entry.key;
-          final offset = entry.value;
-
-          final accounts = await DriffDbManager.instance.accountAdapter.getBasicByCategoryWithLimit(categoryId: categoryId, limit: loadCount, offset: offset);
-          final decryptedAccounts = await _getDecryptedBasicInfoMany(accounts);
-          return MapEntry(categoryId, decryptedAccounts);
-        }).toList();
-
-    final results = await Future.wait(futures);
-    return Map.fromEntries(results);
-  }
-
-  /// Update cache for multiple categories (parallel)
-  Future<void> updateCacheForCategoriesParallel(Map<int, List<AccountDriftModelData>> accountsByCategory) async {
-    final futures =
-        accountsByCategory.entries.map((entry) async {
-          final categoryId = entry.key;
-          final accounts = entry.value;
-
-          // Update _accounts and _groupedCategoryIdAccounts (parallel)
-          await Future.wait([
-            Future.wait(
-              accounts.map((account) async {
-                _accounts[account.id] = account;
-              }),
-            ),
-            Future.wait(
-              accounts.map((account) async {
-                _groupedCategoryIdAccounts.putIfAbsent(categoryId, () => []).add(account);
-              }),
-            ),
-          ]);
-        }).toList();
-
-    await Future.wait(futures);
-  }
-
-  /// Load initial data (categories + accounts + counts) with parallel processing
-  Future<void> loadInitialDataParallel() async {
-    final futures = await Future.wait([
-      DriffDbManager.instance.categoryAdapter.getAll(),
-      DriffDbManager.instance.accountAdapter.getByCategoriesWithLimit(await DriffDbManager.instance.categoryAdapter.getAll(), INITIAL_ACCOUNTS_PER_CATEGORY),
-      DriffDbManager.instance.accountAdapter.countByCategories((await DriffDbManager.instance.categoryAdapter.getAll()).map((c) => c.id).toList()),
-    ]);
-
-    final categories = futures[0] as List<CategoryDriftModelData>;
-    final accountsByCategory = futures[1] as Map<int, List<AccountDriftModelData>>;
-    final countsByCategory = futures[2] as Map<int, int>;
-
-    // Update cache (parallel)
-    await Future.wait([
-      // Update category cache
-      Future.wait(
-        categories.map((category) async {
-          _categoryCache[category.id] = category;
-        }),
-      ),
-      // Update accounts cache and decrypt
-      Future.wait(
-        accountsByCategory.entries.map((entry) async {
-          final categoryId = entry.key;
-          final accounts = entry.value;
-          final decryptedAccounts = await _getDecryptedBasicInfoMany(accounts);
-
-          await Future.wait([
-            Future.wait(
-              accounts.map((account) async {
-                _accounts[account.id] = account;
-              }),
-            ),
-            Future.wait(
-              decryptedAccounts.map((account) async {
-                _groupedCategoryIdAccounts.putIfAbsent(categoryId, () => []).add(account);
-              }),
-            ),
-          ]);
-        }),
-      ),
-      // Update counts
-      Future.wait(
-        countsByCategory.entries.map((entry) async {
-          _categoryAccountCounts[entry.key] = entry.value;
-        }),
-      ),
-    ]);
-  }
-
-  // ==================== Statistics Operations ====================
-
-  /// Get account statistics by categories (parallel)
-  Future<Map<int, Map<String, dynamic>>> getAccountStatisticsByCategories(List<int> categoryIds) async {
-    return await DriffDbManager.instance.accountAdapter.getStatisticsByCategories(categoryIds);
-  }
-
-  /// Delete multiple accounts (parallel)
-  Future<int> deleteManyAccountsParallel(List<int> accountIds) async {
-    return await DriffDbManager.instance.accountAdapter.deleteManyParallel(accountIds);
-  }
-
-  // ==================== Utility Operations ====================
-
-  /// Refresh accounts with optional expansion reset
-  Future<void> refreshAccounts({bool resetExpansion = false}) async {
-    showLoadingDialog();
-    await getAccounts(resetExpansion: resetExpansion);
-    hideLoadingDialog();
-  }
-
-  /// Clear all cached data
-  void clearDecryptedCache() {
-    _basicInfoCache.clear();
-    notifyListeners();
-  }
-
-  // ==================== Private Helper Methods ====================
-
-  /// Clear old data and reset state
-  void _clearOldData(bool resetExpansion) {
-    _accounts.clear();
-    _groupedCategoryIdAccounts.clear();
-    _categoryCache.clear();
-    _basicInfoCache.clear();
-    _visibleAccountsPerCategory.clear();
-
-    if (resetExpansion) {
-      _expandedCategories.clear();
-    }
-  }
-
-  /// Load and cache categories
-  Future<List<CategoryDriftModelData>> _loadAndCacheCategories() async {
-    final categories = await DriffDbManager.instance.categoryAdapter.getAll();
-    categories.sort((a, b) => b.indexPos.compareTo(a.indexPos));
-
-    for (var category in categories) {
-      _categoryCache[category.id] = category;
+    // Update local cache and grouped accounts
+    for (final account in updatedAccounts) {
+      _accounts[account.id] = account;
+      _basicInfoCache.remove(account.id);
     }
 
-    return categories;
-  }
+    // Update grouped accounts for all affected accounts
+    await _updateGroupedAccountsAfterCategoryChange(accountSelected, category.id);
 
-  /// Process accounts for each category (parallel)
-  Future<void> _processAccountsByCategory(Map<int, List<AccountDriftModelData>> accountsByCategory) async {
-    for (var categoryId in accountsByCategory.keys) {
-      final accounts = accountsByCategory[categoryId] ?? [];
-      final category = _categoryCache[categoryId] ?? CategoryDriftModelData(id: 0, categoryName: 'Unknown', indexPos: 0, createdAt: DateTime.now(), updatedAt: DateTime.now());
+    // Clear search cache when accounts change
+    clearSearchCache();
 
-      // Decrypt accounts (parallel)
-      final decryptedAccounts = await _getDecryptedBasicInfoMany(accounts);
-
-      // Update cache
-      for (var i = 0; i < accounts.length; i++) {
-        final account = accounts[i];
-        final decryptedAccount = decryptedAccounts[i];
-
-        _accounts[account.id] = account;
-        _groupedCategoryIdAccounts.putIfAbsent(category.id, () => []).add(decryptedAccount);
-      }
-
-      notifyListeners();
-    }
+    notifyListeners();
   }
 
   /// Process new accounts (parallel)
-  Future<void> _processNewAccounts(int categoryId, List<AccountDriftModelData> newAccounts) async {
+  Future<List<AccountDriftModelData>> _processNewAccounts(int categoryId, List<AccountDriftModelData> newAccounts) async {
     final decryptedAccounts = await _getDecryptedBasicInfoMany(newAccounts);
 
     // Update cache (parallel)
@@ -693,149 +476,117 @@ class AccountProvider extends ChangeNotifier {
         }),
       ),
     ]);
+
+    return decryptedAccounts;
   }
 
-  /// Update visible count and check expansion
-  void _updateVisibleCountAndExpansion(int categoryId) {
-    final currentVisibleCount = _visibleAccountsPerCategory[categoryId] ?? INITIAL_ACCOUNTS_PER_CATEGORY;
-    _visibleAccountsPerCategory[categoryId] = currentVisibleCount + LOAD_MORE_ACCOUNTS_COUNT;
-
-    final totalCount = _categoryAccountCounts[categoryId] ?? 0;
-    final currentCount = _groupedCategoryIdAccounts[categoryId]?.length ?? 0;
-
-    if (currentCount >= totalCount) {
-      _markCategoryAsExpanded(categoryId);
-    }
+  Future<List<AccountDriftModelData>> _getDecryptedBasicInfoMany(List<AccountDriftModelData> accounts) async {
+    final futures = accounts.map((account) => getDecryptedBasicInfo(account)).toList();
+    return await Future.wait(futures);
   }
 
-  /// Mark category as expanded
-  void _markCategoryAsExpanded(int categoryId) {
-    _expandedCategories[categoryId] = true;
-    _visibleAccountsPerCategory.remove(categoryId);
-    notifyListeners();
-  }
-
-  /// Remove account from cache
-  void _removeAccountFromCache(AccountDriftModelData account) {
-    _accounts.remove(account.id);
-    _basicInfoCache.remove(account.id);
-    _groupedCategoryIdAccounts[account.categoryId]?.remove(account);
-    _categoryAccountCounts[account.categoryId] = _groupedCategoryIdAccounts[account.categoryId]?.length ?? 0;
-  }
-
-  /// Update account counts for categories (parallel)
-  Future<void> _updateAccountCountsForCategories(List<CategoryDriftModelData> categories) async {
-    final categoryIds = categories.map((c) => c.id).toList();
-    final countsByCategory = await DriffDbManager.instance.accountAdapter.countByCategories(categoryIds);
-    _categoryAccountCounts.addAll(countsByCategory);
-  }
-
-  /// Get visible accounts for a category
-  List<AccountDriftModelData> _getVisibleAccounts(int categoryId, List<AccountDriftModelData> accounts) {
-    if (_expandedCategories[categoryId] == true) {
-      return accounts;
-    } else if (_visibleAccountsPerCategory.containsKey(categoryId)) {
-      final visibleCount = _visibleAccountsPerCategory[categoryId]!;
-      return accounts.take(visibleCount).toList();
-    } else if (accounts.length <= INITIAL_ACCOUNTS_PER_CATEGORY) {
-      return accounts;
-    } else {
-      return accounts.take(INITIAL_ACCOUNTS_PER_CATEGORY).toList();
-    }
-  }
-
-  /// Decrypt basic info for a single account
-  Future<AccountDriftModelData> _getDecryptedBasicInfo(AccountDriftModelData account) async {
+  Future<AccountDriftModelData> getDecryptedBasicInfo(AccountDriftModelData account) async {
     // Check cache first
     if (_basicInfoCache.containsKey(account.id)) {
       return _basicInfoCache[account.id]!;
     }
-
-    final titleDecrypted = await DataSecureService.decryptInfo(account.title);
-    final usernameDecrypted = await DataSecureService.decryptInfo(account.username ?? '');
-
-    final decryptedAccount = AccountDriftModelData(
-      id: account.id,
-      title: titleDecrypted,
-      username: usernameDecrypted,
-      categoryId: account.categoryId,
-      createdAt: account.createdAt,
-      updatedAt: account.updatedAt,
-    );
-
+    final decryptedAccount = await AccountServices.instance.decryptBasicInfo(account);
     // Cache the result
     _basicInfoCache[account.id] = decryptedAccount;
     return decryptedAccount;
   }
 
-  /// Decrypt basic info for multiple accounts (parallel)
-  Future<List<AccountDriftModelData>> _getDecryptedBasicInfoMany(List<AccountDriftModelData> accounts) async {
-    final futures = accounts.map((account) => _getDecryptedBasicInfo(account)).toList();
-    return await Future.wait(futures);
+  Future<AccountDriftModelData> getDecryptedAccount(AccountDriftModelData account) async {
+    return getDecryptedBasicInfo(account);
   }
 
-  /// Decrypt full account data
-  Future<AccountDriftModelData> decryptAccount(AccountDriftModelData account) async {
-    final titleDecrypted = await DataSecureService.decryptInfo(account.title);
-    final usernameDecrypted = await DataSecureService.decryptInfo(account.username ?? '');
-    final passwordDecrypted = await DataSecureService.decryptPassword(account.password ?? '');
-    final notesDecrypted = await DataSecureService.decryptInfo(account.notes ?? '');
-
-    return account.copyWith(title: titleDecrypted, username: Value(usernameDecrypted), password: Value(passwordDecrypted), notes: Value(notesDecrypted));
+  void clearData() {
+    _accounts.clear();
+    _groupedCategoryIdAccounts.clear();
+    _basicInfoCache.clear();
+    clearSearchCache();
   }
 
-  /// Decrypt basic info for display
-  Future<AccountDriftModelData> decryptBasicInfo(AccountDriftModelData account) async {
-    return await _getDecryptedBasicInfo(account);
-  }
+  /// Update grouped accounts after creating or updating an account
+  Future<void> _updateGroupedAccountsAfterModification(AccountDriftModelData account, bool isUpdate) async {
+    final categoryId = account.categoryId;
 
-  /// Set error state
-  void _setError(String? value) {
-    _error = value;
+    if (isUpdate) {
+      // For updates, remove from old category and add to new category
+      _removeAccountFromAllCategories(account.id);
+    }
+
+    // Add to the correct category
+    final decryptedAccount = await getDecryptedBasicInfo(account);
+    _groupedCategoryIdAccounts.putIfAbsent(categoryId, () => []).add(decryptedAccount);
+
+    // Update category total count - get actual count from database
+    final actualCount = await DriffDbManager.instance.accountAdapter.countByCategory(categoryId);
+    mapCategoryIdTotalAccount[categoryId] = actualCount;
+
+    // Clear search cache when accounts change
+    clearSearchCache();
+
     notifyListeners();
   }
 
-  /// Handle async operations with loading state and error handling
-  Future<T?> _handleAsync<T>(Future<T> Function() operation, {required String funcName}) async {
-    final stopwatch = Stopwatch()..start();
-    try {
-      _isLoading = true;
-      _error = null;
-      notifyListeners();
+  /// Update grouped accounts after deleting an account
+  Future<void> _updateGroupedAccountsAfterDeletion(AccountDriftModelData account) async {
+    _removeAccountFromAllCategories(account.id);
 
-      final result = await operation();
+    // Update category total count - get actual count from database
+    final categoryId = account.categoryId;
+    final actualCount = await DriffDbManager.instance.accountAdapter.countByCategory(categoryId);
+    mapCategoryIdTotalAccount[categoryId] = actualCount;
+    
+    // Clear search cache when accounts change
+    clearSearchCache();
+    
+    notifyListeners();
+  }
 
-      final elapsedTime = stopwatch.elapsed;
-      logInfo('$funcName: Operation completed in: ${elapsedTime.inMilliseconds}ms');
-
-      // Add small delay if operation is too fast for user to see loading
-      if (elapsedTime.inMilliseconds < 300) {
-        await Future.delayed(Duration(milliseconds: 300 - elapsedTime.inMilliseconds));
+  /// Remove account from all categories (helper method)
+  void _removeAccountFromAllCategories(int accountId) {
+    // Tạo danh sách categoryIds để tránh concurrent modification
+    final categoryIds = _groupedCategoryIdAccounts.keys.toList();
+    
+    for (final categoryId in categoryIds) {
+      final accounts = _groupedCategoryIdAccounts[categoryId];
+      if (accounts != null) {
+        accounts.removeWhere((account) => account.id == accountId);
+        if (accounts.isEmpty) {
+          _groupedCategoryIdAccounts.remove(categoryId);
+        }
       }
-
-      return result;
-    } catch (e) {
-      final elapsedTime = stopwatch.elapsed;
-      _setError(e.toString());
-      logError('$funcName: Error after ${elapsedTime.inMilliseconds}ms: $e');
-      return null;
-    } finally {
-      stopwatch.stop();
-      _isLoading = false;
-      notifyListeners();
     }
   }
 
-  // ==================== Lifecycle ====================
+  /// Update grouped accounts after category change
+  Future<void> _updateGroupedAccountsAfterCategoryChange(List<AccountDriftModelData> accounts, int newCategoryId) async {
+    // Remove accounts from all categories first
+    for (final account in accounts) {
+      _removeAccountFromAllCategories(account.id);
+    }
 
-  @override
-  void dispose() {
-    _basicInfoCache.clear();
-    _categoryCache.clear();
-    _accounts.clear();
-    _expandedCategories.clear();
-    _categoryAccountCounts.clear();
-    _visibleAccountsPerCategory.clear();
-    super.dispose();
+    // Add accounts to new category
+    final decryptedAccounts = await _getDecryptedBasicInfoMany(accounts);
+    for (final decryptedAccount in decryptedAccounts) {
+      _groupedCategoryIdAccounts.putIfAbsent(newCategoryId, () => []).add(decryptedAccount);
+    }
+
+    // Update category total counts - get actual counts from database
+    final newCategoryCount = await DriffDbManager.instance.accountAdapter.countByCategory(newCategoryId);
+    mapCategoryIdTotalAccount[newCategoryId] = newCategoryCount;
+
+    // Also update counts for old categories if needed
+    final oldCategoryIds = accounts.map((a) => a.categoryId).toSet();
+    for (final oldCategoryId in oldCategoryIds) {
+      if (oldCategoryId != newCategoryId) {
+        final oldCategoryCount = await DriffDbManager.instance.accountAdapter.countByCategory(oldCategoryId);
+        mapCategoryIdTotalAccount[oldCategoryId] = oldCategoryCount;
+      }
+    }
+
+    notifyListeners();
   }
 }

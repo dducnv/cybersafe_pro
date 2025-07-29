@@ -16,8 +16,8 @@ class CategoryProvider extends ChangeNotifier {
   bool isChangedCategoryIndex = false;
 
   // Getters
-  Map<int, CategoryDriftModelData> get categories => Map.unmodifiable(_categories);
-  List<CategoryDriftModelData> get categoryList => _categories.values.toList();
+  Map<int, CategoryDriftModelData> get mapCategoryIdCategory => Map.unmodifiable(_categories);
+  List<CategoryDriftModelData> get categories => _categories.values.toList();
 
   Map<int, int> mapCategoryIdTotalAccount = {};
 
@@ -70,8 +70,9 @@ class CategoryProvider extends ChangeNotifier {
       // Count accounts for all categories in parallel for better performance
       final categoryIds = categoryList.map((c) => c.id).toList();
       final accountCounts = await DriffDbManager.instance.accountAdapter.countByCategories(categoryIds);
-
+      
       // Update account counts map
+      mapCategoryIdTotalAccount.clear();
       for (var category in categoryList) {
         mapCategoryIdTotalAccount[category.id] = accountCounts[category.id] ?? 0;
       }
@@ -83,25 +84,24 @@ class CategoryProvider extends ChangeNotifier {
     List<String> listCategory = [CategoryText.bank, CategoryText.job, CategoryText.study, CategoryText.shopping, CategoryText.entertainment];
     for (var category in listCategory) {
       if (!context.mounted) return;
-      final newCategory = CategoryDriftModelData(id: 0, categoryName: context.read<AppLocale>().categoryLocale.getText(category), indexPos: 0, createdAt: DateTime.now(), updatedAt: DateTime.now());
-      await createCategory(newCategory);
+      await createCategory(context.read<AppLocale>().categoryLocale.getText(category));
     }
   }
 
-  Future<bool> createCategory(CategoryDriftModelData category) async {
+  Future<bool> createCategory(String categoryName) async {
     final result = await _handleAsync(() async {
-      if (category.categoryName.trim().isEmpty) {
+      if (categoryName.trim().isEmpty) {
         throwAppError(ErrorText.categoryNameEmpty);
       }
 
       // Kiểm tra trùng tên
-      if (_categories.values.any((c) => c.categoryName.toLowerCase() == category.categoryName.toLowerCase())) {
+      if (_categories.values.any((c) => c.categoryName.toLowerCase() == categoryName.toLowerCase())) {
         throwAppError(ErrorText.categoryExists);
       }
 
-      final id = await DriffDbManager.instance.categoryAdapter.insertCategory(category.categoryName);
-      category = category.copyWith(id: id);
-      _categories[id] = category;
+      final id = await DriffDbManager.instance.categoryAdapter.insertCategory(categoryName);
+      final newCategory = CategoryDriftModelData(id: id, categoryName: categoryName, indexPos: 0, createdAt: DateTime.now(), updatedAt: DateTime.now());
+      _categories[id] = newCategory;
       txtCategoryName.clear();
       return true;
     });
@@ -144,7 +144,7 @@ class CategoryProvider extends ChangeNotifier {
     }
 
     // Get sorted list by indexPos
-    final List<CategoryDriftModelData> sortedList = categoryList..sort((a, b) => b.indexPos.compareTo(a.indexPos));
+    final List<CategoryDriftModelData> sortedList = categories..sort((a, b) => b.indexPos.compareTo(a.indexPos));
 
     // Remove and insert item
     final CategoryDriftModelData item = sortedList.removeAt(oldIndex);
@@ -173,8 +173,8 @@ class CategoryProvider extends ChangeNotifier {
 
   void clearAllData() {
     _categories.clear();
+    mapCategoryIdCategory.clear();
     categories.clear();
-    categoryList.clear();
 
     notifyListeners();
   }

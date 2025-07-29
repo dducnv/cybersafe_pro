@@ -1,6 +1,6 @@
 import 'package:cybersafe_pro/components/icon_show_component.dart';
-import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
-import 'package:cybersafe_pro/providers/account_provider.dart';
+import 'package:cybersafe_pro/providers/home_provider.dart';
+import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class AccountItemWidget extends StatelessWidget {
-  final AccountOjbModel accountModel;
+  final AccountDriftModelData accountModel;
   final bool isLastItem;
   final bool isSelected;
   final Function()? onTapSubButton;
@@ -62,7 +62,7 @@ class AccountItemWidget extends StatelessWidget {
                         width: 50.h,
                         height: 50.h,
 
-                        child: Selector<AccountProvider, List<AccountOjbModel>>(
+                        child: Selector<HomeProvider, List<AccountDriftModelData>>(
                           selector: (context, provider) => provider.accountSelected,
                           builder: (context, value, child) {
                             bool isSelected = value.where((element) => element.id == accountModel.id).isNotEmpty;
@@ -98,9 +98,9 @@ class AccountItemWidget extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(accountModel.title, overflow: TextOverflow.ellipsis, style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.bold), maxLines: 1),
-                              if (accountModel.email != null && accountModel.email!.isNotEmpty) ...[
+                              if (accountModel.username != null && accountModel.username!.isNotEmpty) ...[
                                 SizedBox(height: 4),
-                                Text(accountModel.email!, maxLines: 1, overflow: TextOverflow.ellipsis, style: CustomTextStyle.regular(color: Colors.grey, fontSize: 12.sp)),
+                                Text(accountModel.username!, maxLines: 1, overflow: TextOverflow.ellipsis, style: CustomTextStyle.regular(color: Colors.grey, fontSize: 12.sp)),
                               ],
                             ],
                           ),

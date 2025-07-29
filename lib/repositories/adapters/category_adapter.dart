@@ -41,6 +41,23 @@ class CategoryAdapter {
     }
   }
 
+  /// lấy theo accountId
+  Future<List<CategoryDriftModelData>> getByAccountId(int accountId) async {
+    try {
+      final query = _database.select(_database.categoryDriftModel).join([innerJoin(_database.accountDriftModel, _database.accountDriftModel.categoryId.equalsExp(_database.categoryDriftModel.id))])
+        ..where(_database.accountDriftModel.id.equals(accountId));
+
+      final rows = await query.get();
+
+      return rows.map((row) {
+        return row.readTable(_database.categoryDriftModel);
+      }).toList();
+    } catch (e) {
+      logError('Error getting categories by account ID with join: $e');
+      return [];
+    }
+  }
+
   /// Tìm category theo tên
   Future<CategoryDriftModelData?> findByName(String name) async {
     try {
@@ -127,7 +144,7 @@ class CategoryAdapter {
     }
   }
 
-  /// Xóa category theo ID
+  /// Xóa category theo ID (bao gồm tất cả accounts và dữ liệu liên quan)
   Future<bool> delete(int id) async {
     try {
       final category = await getById(id);
@@ -144,12 +161,57 @@ class CategoryAdapter {
     }
   }
 
-  /// Xóa tất cả categories
+  /// Xóa nhiều categories (bao gồm tất cả accounts và dữ liệu liên quan)
+  Future<int> deleteMany(List<int> ids) async {
+    try {
+      int deletedCount = 0;
+      for (final id in ids) {
+        if (await delete(id)) {
+          deletedCount++;
+        }
+      }
+      return deletedCount;
+    } catch (e) {
+      logError('Error deleting many categories: $e');
+      return 0;
+    }
+  }
+
+  /// Xóa nhiều categories song song (bao gồm tất cả accounts và dữ liệu liên quan)
+  Future<int> deleteManyParallel(List<int> ids) async {
+    try {
+      // Thực hiện delete song song
+      final futures = ids.map((id) => delete(id)).toList();
+      final results = await Future.wait(futures);
+
+      return results.where((result) => result).length;
+    } catch (e) {
+      logError('Error deleting many categories in parallel: $e');
+      return 0;
+    }
+  }
+
+  /// Xóa tất cả categories (bao gồm tất cả accounts và dữ liệu liên quan)
   Future<void> deleteAll() async {
     try {
-      await _database.delete(_database.categoryDriftModel).go();
+      await _database.transaction(() async {
+        // Delete all TOTPs first
+        await _database.delete(_database.tOTPDriftModel).go();
+        
+        // Delete all Custom Fields
+        await _database.delete(_database.accountCustomFieldDriftModel).go();
+        
+        // Delete all Password History
+        await _database.delete(_database.passwordHistoryDriftModel).go();
+        
+        // Delete all accounts
+        await _database.delete(_database.accountDriftModel).go();
+        
+        // Finally delete all categories
+        await _database.delete(_database.categoryDriftModel).go();
+      });
     } catch (e) {
-      logError('Error deleting all categories: $e');
+      logError('Error deleting all categories with relations: $e');
     }
   }
 
@@ -286,17 +348,33 @@ class CategoryAdapter {
 
   // ==================== Private Helper Methods ====================
 
-  /// Xóa tất cả accounts trong category
+  /// Xóa tất cả accounts trong category (bao gồm tất cả dữ liệu liên quan)
   Future<void> _deleteAccountsInCategory(int categoryId) async {
     try {
       final query = _database.select(_database.accountDriftModel)..where((t) => t.categoryId.equals(categoryId));
-
       final accounts = await query.get();
-      for (final account in accounts) {
-        await _database.delete(_database.accountDriftModel).delete(AccountDriftModelCompanion(id: Value(account.id)));
+      
+      if (accounts.isNotEmpty) {
+        final accountIds = accounts.map((a) => a.id).toList();
+        
+        await _database.transaction(() async {
+          // Delete related TOTPs for all accounts in category
+          await (_database.delete(_database.tOTPDriftModel)..where((tbl) => tbl.accountId.isIn(accountIds))).go();
+          
+          // Delete related Custom Fields for all accounts in category
+          await (_database.delete(_database.accountCustomFieldDriftModel)..where((tbl) => tbl.accountId.isIn(accountIds))).go();
+          
+          // Delete Password History for all accounts in category
+          await (_database.delete(_database.passwordHistoryDriftModel)..where((tbl) => tbl.accountId.isIn(accountIds))).go();
+          
+          // Finally delete all accounts in category
+          await (_database.delete(_database.accountDriftModel)..where((tbl) => tbl.id.isIn(accountIds))).go();
+        });
+        
+        logInfo('Deleted ${accounts.length} accounts and related data from category $categoryId');
       }
     } catch (e) {
-      logError('Error deleting accounts in category: $e');
+      logError('Error deleting accounts in category $categoryId: $e');
     }
   }
 }

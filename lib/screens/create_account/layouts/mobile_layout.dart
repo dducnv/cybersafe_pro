@@ -3,9 +3,9 @@ import 'dart:io';
 
 import 'package:croppy/croppy.dart';
 import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
-import 'package:cybersafe_pro/database/models/icon_custom_model.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
+import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/resources/brand_logo.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/request_pro/request_pro.dart';
@@ -190,7 +190,7 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
   }
 
   Widget _buildListIconsCustom({required BuildContext context, required AccountFormProvider formProvider}) {
-    return Selector<AccountFormProvider, List<IconCustomModel>>(
+    return Selector<AccountFormProvider, List<IconCustomDriftModelData>>(
       selector: (context, formProvider) => formProvider.listIconsCustom,
       builder: (context, listIconsCustom, child) {
         return listIconsCustom.isEmpty

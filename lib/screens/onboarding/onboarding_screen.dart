@@ -1,4 +1,5 @@
 import 'package:cybersafe_pro/components/bottom_sheets/choose_lang_bottom_sheet.dart';
+import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/constants/secure_storage_key.dart' show SecureStorageKey;
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/app_locale.dart';
@@ -206,6 +207,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
                             isDisabled: !value,
                             kMargin: 0,
                             onPressed: () async {
+                              showLoadingDialog();
                               await context.read<CategoryProvider>().initDataCategory(context);
                               await SecureStorage.instance.save(key: SecureStorageKey.firstOpenApp, value: "false");
                               if (context.mounted) {

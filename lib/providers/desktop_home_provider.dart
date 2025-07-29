@@ -1,12 +1,13 @@
 import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
+import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:flutter/foundation.dart';
 
 class DesktopHomeProvider extends ChangeNotifier {
-  AccountOjbModel? _selectedAccount;
+  AccountDriftModelData? _selectedAccount;
   
-  AccountOjbModel? get selectedAccount => _selectedAccount;
-  
-  void selectAccount(AccountOjbModel account) {
+  AccountDriftModelData? get selectedAccount => _selectedAccount;
+
+  void selectAccount(AccountDriftModelData account) {
     _selectedAccount = account;
     notifyListeners();
   }
@@ -18,7 +19,7 @@ class DesktopHomeProvider extends ChangeNotifier {
   
   bool get hasSelectedAccount => _selectedAccount != null;
 
-  void toggleAccountSelection(AccountOjbModel account) {
+  void toggleAccountSelection(AccountDriftModelData account) {
     if (_selectedAccount == account) {
       clearSelectedAccount();
     } else {

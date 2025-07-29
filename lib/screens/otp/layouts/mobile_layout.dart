@@ -1,16 +1,17 @@
 import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/components/icon_show_component.dart';
-import 'package:cybersafe_pro/database/boxes/account_box.dart';
-import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:cybersafe_pro/database/models/icon_custom_model.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
 import 'package:cybersafe_pro/localization/keys/otp_text.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
+import 'package:cybersafe_pro/providers/home_provider.dart';
+import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
+import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/screens/otp/components/totp_item.dart';
-import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
+import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/services/otp.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
@@ -33,7 +34,7 @@ class OtpMobileLayout extends StatefulWidget {
 }
 
 class _OtpMobileLayoutState extends State<OtpMobileLayout> {
-  List<AccountOjbModel> _otpAccounts = [];
+  List<MapEntry<AccountDriftModelData, TOTPDriftModelData>> _otpAccounts = [];
   bool _isLoading = false;
 
   @override
@@ -50,7 +51,7 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
     });
     // Đợi 1 frame để tránh block UI
     await Future.delayed(Duration(milliseconds: 10));
-    final accounts = await Future(() => AccountBox.getAllWithOTP());
+    final accounts = await Future(() => DriffDbManager.instance.totpAdapter.getAllWithOTP());
     if (mounted) {
       setState(() {
         _otpAccounts = accounts;
@@ -82,29 +83,29 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
                         verticalOffset: 30.0,
                         child: FadeInAnimation(
                           child: TotpItem(
-                            account: account,
-                            secretKey: account.totp.target?.secretKey ?? '',
-                            iconCustom: account.getIconCustom ?? IconCustomModel(name: '', imageBase64: ''),
-                            title: account.title,
-                            email: account.email ?? '',
-                            icon: account.icon ?? '',
+                            account: account.key,
+                            secretKey: account.value.secretKey ?? '',
+                            iconCustom: IconCustomModel(name: '', imageBase64: ''),
+                            title: account.key.title,
+                            email: account.key.username ?? '',
+                            icon: account.key.icon ?? '',
                             onTap: () async {
                               // Giải mã trước khi mở bottom sheet
-                              final secretKeyEncrypted = account.totp.target?.secretKey ?? '';
+                              final secretKeyEncrypted = account.value.secretKey ?? '';
                               if (secretKeyEncrypted.isEmpty) {
-                                seeDetailTOTPBottomSheet(context, account, '');
+                                seeDetailTOTPBottomSheet(context, account.key, account.value, '');
                                 return;
                               }
                               showLoadingDialog(context: context); // Sửa lại truyền context đúng dạng
                               String decryptedSecretKey = '';
                               try {
-                                decryptedSecretKey = await EncryptAppDataService.instance.decryptTOTPKey(secretKeyEncrypted);
+                                decryptedSecretKey = await DataSecureService.decryptTOTPKey(secretKeyEncrypted);
                               } catch (e) {
                                 decryptedSecretKey = '';
                               }
                               hideLoadingDialog();
                               if (context.mounted) {
-                                seeDetailTOTPBottomSheet(context, account, decryptedSecretKey); // Truyền trực tiếp
+                                seeDetailTOTPBottomSheet(context, account.key, account.value, decryptedSecretKey); // Truyền trực tiếp
                               }
                             },
                           ),
@@ -137,8 +138,7 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
               addTOTPWithKeyboard(
                 context,
                 callBackSuccess: () {
-                  context.read<CategoryProvider>().refresh();
-                  context.read<AccountProvider>().refreshAccounts();
+                  context.read<HomeProvider>().refreshData();
                   _loadOTPAccounts();
                 },
               );
@@ -173,7 +173,7 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
     }
   }
 
-  Future<void> seeDetailTOTPBottomSheet(BuildContext context, AccountOjbModel totp, String decryptedSecretKey) async {
+  Future<void> seeDetailTOTPBottomSheet(BuildContext context, AccountDriftModelData account, TOTPDriftModelData totp, String decryptedSecretKey) async {
     await showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -190,7 +190,7 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
                       IconButton(
                         onPressed: () {
                           Navigator.pop(context);
-                          AppRoutes.navigateTo(context, AppRoutes.detailsAccount, arguments: {"accountId": totp.id});
+                          AppRoutes.navigateTo(context, AppRoutes.detailsAccount, arguments: {"accountId": account.id});
                         },
                         icon: const Icon(Icons.arrow_outward),
                       ),
@@ -206,14 +206,14 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
                         height: 50.h,
                         child: ColoredBox(
                           color: Colors.grey.withOpacity(0.2),
-                          child: Center(child: Padding(padding: const EdgeInsets.all(8.0), child: IconShowComponent(account: totp, width: 45.w, height: 45.h, isDecrypted: false))),
+                          child: Center(child: Padding(padding: const EdgeInsets.all(8.0), child: IconShowComponent(account: account, width: 45.w, height: 45.h))),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 10),
-                  DecryptText(style: CustomTextStyle.regular(fontSize: 18.sp, fontWeight: FontWeight.bold), value: totp.title, decryptTextType: DecryptTextType.info),
-                  DecryptText(style: CustomTextStyle.regular(fontSize: 16.sp), value: totp.email ?? "", decryptTextType: DecryptTextType.info),
+                  DecryptText(style: CustomTextStyle.regular(fontSize: 18.sp, fontWeight: FontWeight.bold), value: account.title, decryptTextType: DecryptTextType.info),
+                  DecryptText(style: CustomTextStyle.regular(fontSize: 16.sp), value: account.username ?? "", decryptTextType: DecryptTextType.info),
                   const SizedBox(height: 16),
                   Row(
                     children: [

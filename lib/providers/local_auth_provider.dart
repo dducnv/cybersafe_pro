@@ -1,6 +1,7 @@
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
+import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/services/local_auth_service.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
@@ -14,7 +15,6 @@ import 'dart:async';
 import 'package:provider/provider.dart';
 
 class LocalAuthProvider extends ChangeNotifier {
-  final encryptAppDataService = EncryptAppDataService.instance;
 
   // Controllers
   late FocusNode focusNode;
@@ -145,7 +145,7 @@ class LocalAuthProvider extends ChangeNotifier {
   // save pin code
   Future<bool> savePinCode() async {
     if (_pinCodeConfirm.isEmpty) return false;
-    String pinCodeEncrypted = await encryptAppDataService.encryptPinCode(_pinCodeConfirm);
+    String pinCodeEncrypted = await DataSecureService.encryptPinCode(_pinCodeConfirm);
     await SecureStorage.instance.save(key: SecureStorageKey.pinCode, value: pinCodeEncrypted);
     return true;
   }
@@ -225,7 +225,7 @@ class LocalAuthProvider extends ChangeNotifier {
     try {
       String? pinCodeEncryptedFromStorage = await SecureStorage.instance.read(key: SecureStorageKey.pinCode);
       if (pinCodeEncryptedFromStorage == null) return false;
-      String pinCodeEncrypted = await encryptAppDataService.decryptPinCode(pinCodeEncryptedFromStorage);
+      String pinCodeEncrypted = await DataSecureService.decryptPinCode(pinCodeEncryptedFromStorage);
       return pinCodeEncrypted == pinCode;
     } catch (e) {
       logError('Error verifying pin code: $e');

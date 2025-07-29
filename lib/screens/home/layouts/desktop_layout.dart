@@ -1,14 +1,16 @@
 import 'package:cybersafe_pro/components/bottom_sheets/create_category_bottom_sheet.dart';
 import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/components/icon_show_component.dart';
-import 'package:cybersafe_pro/database/boxes/account_box.dart';
-import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/details_account_text.dart';
 import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/providers/desktop_home_provider.dart';
+import 'package:cybersafe_pro/providers/details_account_provider.dart';
+import 'package:cybersafe_pro/providers/home_provider.dart';
+import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
+import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 import 'package:cybersafe_pro/resources/size_text_icon.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/screens/category_manager/layouts/mobile_layout.dart';
@@ -19,7 +21,7 @@ import 'package:cybersafe_pro/screens/password_generator/password_generate_scree
 import 'package:cybersafe_pro/screens/settings/layouts/mobile_layout.dart';
 import 'package:cybersafe_pro/screens/statistic/statistic_screen.dart';
 import 'package:cybersafe_pro/screens/otp/layouts/mobile_layout.dart';
-import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
+import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/utils/device_type.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
@@ -47,7 +49,6 @@ class HomeDesktopLayout extends StatefulWidget {
 
 class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
   final ScrollController _scrollController = ScrollController();
-  final decryptService = EncryptAppDataService.instance;
 
   @override
   void initState() {
@@ -166,11 +167,11 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                           Expanded(
                             child: RefreshIndicator(
                               onRefresh: () {
-                                return Future.wait([context.read<CategoryProvider>().refresh(), context.read<AccountProvider>().refreshAccounts(resetExpansion: true)]);
+                                return Future.wait([]);
                               },
-                              child: Consumer<AccountProvider>(
-                                builder: (context, accountProvider, child) {
-                                  final groupedAccounts = accountProvider.groupedAccounts;
+                              child: Consumer<HomeProvider>(
+                                builder: (context, homeProvider, child) {
+                                  final groupedAccounts = homeProvider.groupedAccounts;
 
                                   if (groupedAccounts.isEmpty) {
                                     return _buildEmptyData();
@@ -181,18 +182,20 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                                     itemCount: groupedAccounts.length,
                                     physics: const AlwaysScrollableScrollPhysics(),
                                     itemBuilder: (context, index) {
+                                      final categoryProvider = homeProvider.categoryProvider;
+
                                       final categoryKeys = groupedAccounts.keys.toList();
                                       final categoryId = categoryKeys[index];
-                                      final category = context.read<CategoryProvider>().categories[categoryId];
+                                      final category = categoryProvider.mapCategoryIdCategory[categoryId];
                                       final accounts = groupedAccounts[categoryId] ?? [];
 
-                                      return CardItem<AccountOjbModel>(
+                                      return CardItem<AccountDriftModelData>(
                                         items: accounts,
                                         title: category?.categoryName ?? "",
-                                        totalItems: accountProvider.getTotalAccountsInCategory(categoryId),
-                                        showSeeMore: accountProvider.canExpandCategory(categoryId),
+                                        totalItems: categoryProvider.mapCategoryIdTotalAccount[categoryId] ?? 0,
+                                        showSeeMore: homeProvider.canExpandCategory(categoryId),
                                         onSeeMoreItems: () {
-                                          accountProvider.loadMoreAccountsForCategory(categoryId);
+                                          homeProvider.loadMoreAccountsForCategory(categoryId);
                                         },
                                         itemBuilder: (account, itemIndex) {
                                           return MouseRegion(
@@ -200,7 +203,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                                             child: AnimatedContainer(
                                               duration: const Duration(milliseconds: 200),
                                               curve: Curves.easeInOut,
-                                              child: Selector<DesktopHomeProvider, AccountOjbModel?>(
+                                              child: Selector<DesktopHomeProvider, AccountDriftModelData?>(
                                                 selector: (context, provider) => provider.selectedAccount,
                                                 builder: (context, selectedAccount, child) {
                                                   return AccountItemWidget(
@@ -210,10 +213,10 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                                                     onLongPress: () {},
                                                     onCallBackPop: () {},
                                                     onTapSubButton: () {
-                                                      bottomSheetOptionAccountItem(viewModel: accountProvider, accountModel: account);
+                                                      bottomSheetOptionAccountItem(viewModel: homeProvider, accountModel: account);
                                                     },
                                                     onSelect: () {
-                                                      context.read<AccountProvider>().handleSelectOrRemoveAccount(account);
+                                                      homeProvider.handleSelectAccount(account);
                                                     },
                                                     onTap: () {
                                                       // Chọn tài khoản để hiển thị chi tiết
@@ -290,7 +293,9 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
     );
   }
 
-  Widget _buildAccountDetails(BuildContext context, AccountOjbModel account) {
+  Widget _buildAccountDetails(BuildContext context, AccountDriftModelData account) {
+    final accountDetailsProvider = context.watch<DetailsAccountProvider>();
+
     return Container(
       color: Theme.of(context).colorScheme.surface,
       child: Column(
@@ -314,16 +319,17 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                       },
                     ),
                     SizedBox(height: 16),
-                    if (account.totp.target != null)
+                    if (accountDetailsProvider.totpDriftModelData != null)
                       TweenAnimationBuilder<double>(
                         duration: const Duration(milliseconds: 500),
                         tween: Tween(begin: 0.0, end: 1.0),
                         builder: (context, value, child) {
-                          return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildTOTPWidget(account)));
+                          return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildTOTPWidget(accountDetailsProvider.totpDriftModelData!)));
                         },
                       ),
                     SizedBox(height: 16),
-                    if ((account.email != null && account.email!.isNotEmpty) || (account.password != null && account.password!.isNotEmpty))
+                    if ((accountDetailsProvider.accountDriftModelData?.username != null && accountDetailsProvider.accountDriftModelData!.username!.isNotEmpty) ||
+                        (accountDetailsProvider.accountDriftModelData?.password != null && accountDetailsProvider.accountDriftModelData!.password!.isNotEmpty))
                       TweenAnimationBuilder<double>(
                         duration: const Duration(milliseconds: 600),
                         tween: Tween(begin: 0.0, end: 1.0),
@@ -336,7 +342,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                       duration: const Duration(milliseconds: 700),
                       tween: Tween(begin: 0.0, end: 1.0),
                       builder: (context, value, child) {
-                        return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildCategory(context, account)));
+                        return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildCategory(context, accountDetailsProvider.categoryDriftModelData!)));
                       },
                     ),
                     SizedBox(height: 16),
@@ -349,20 +355,26 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                         },
                       ),
                     SizedBox(height: 16),
-                    if (account.customFields.isNotEmpty)
+                    if (accountDetailsProvider.accountCustomFieldDriftModelData?.isNotEmpty ?? false)
                       TweenAnimationBuilder<double>(
                         duration: const Duration(milliseconds: 900),
                         tween: Tween(begin: 0.0, end: 1.0),
                         builder: (context, value, child) {
-                          return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildCustomFieldsWidget(account)));
+                          return Transform.translate(
+                            offset: Offset(0, 20 * (1 - value)),
+                            child: Opacity(opacity: value, child: _buildCustomFieldsWidget(accountDetailsProvider.accountCustomFieldDriftModelData!)),
+                          );
                         },
                       ),
-                    if (account.passwordHistories.isNotEmpty)
+                    if (accountDetailsProvider.passwordHistoryDriftModelData?.isNotEmpty ?? false)
                       TweenAnimationBuilder<double>(
                         duration: const Duration(milliseconds: 1000),
                         tween: Tween(begin: 0.0, end: 1.0),
                         builder: (context, value, child) {
-                          return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildPasswordHistoryWidget(account)));
+                          return Transform.translate(
+                            offset: Offset(0, 20 * (1 - value)),
+                            child: Opacity(opacity: value, child: _buildPasswordHistoryWidget(accountDetailsProvider.passwordHistoryDriftModelData!, accountDetailsProvider.accountDriftModelData!)),
+                          );
                         },
                       ),
                     TweenAnimationBuilder<double>(
@@ -382,7 +394,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
     );
   }
 
-  Widget _buildAccountIcon(BuildContext context, AccountOjbModel account) {
+  Widget _buildAccountIcon(BuildContext context, AccountDriftModelData account) {
     return Center(
       child: Column(
         children: [
@@ -404,7 +416,6 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                       account: account,
                       width: 50.h,
                       height: 50.h,
-                      isDecrypted: false,
                       textStyle: CustomTextStyle.regular(fontSize: 30.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
                     ),
                   ),
@@ -429,7 +440,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
     );
   }
 
-  Widget _buildBaseInfo(BuildContext context, AccountOjbModel account) {
+  Widget _buildBaseInfo(BuildContext context, AccountDriftModelData account) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -440,8 +451,8 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
         CardCustomWidget(
           child: Column(
             children: [
-              if (account.email != null && account.email!.isNotEmpty)
-                ItemCopyValue(title: context.trDetails(DetailsAccountText.username), value: account.email!, isLastItem: account.password?.isEmpty ?? true),
+              if (account.username != null && account.username!.isNotEmpty)
+                ItemCopyValue(title: context.trDetails(DetailsAccountText.username), value: account.username!, isLastItem: account.password?.isEmpty ?? true),
               if (account.password != null && account.password!.isNotEmpty)
                 Padding(padding: EdgeInsets.symmetric(vertical: 5.h), child: Divider(color: Theme.of(context).colorScheme.surfaceContainerHighest)),
               if (account.password != null && account.password!.isNotEmpty)
@@ -453,7 +464,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
     );
   }
 
-  Widget _buildCategory(BuildContext context, AccountOjbModel account) {
+  Widget _buildCategory(BuildContext context, CategoryDriftModelData category) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -465,7 +476,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
             children: [
               Icon(Icons.folder, color: Theme.of(context).colorScheme.primary, size: 24.sp),
               const SizedBox(width: 10),
-              Text(account.category.target?.categoryName ?? "", style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w400)),
+              Text(category.categoryName, style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w400)),
             ],
           ),
         ),
@@ -473,7 +484,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
     );
   }
 
-  Widget _buildNoteWidget(BuildContext context, AccountOjbModel account) {
+  Widget _buildNoteWidget(BuildContext context, AccountDriftModelData account) {
     return Column(
       children: [
         const SizedBox(height: 16),
@@ -485,7 +496,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
             ),
             const SizedBox(height: 5),
             FutureBuilder(
-              future: decryptService.decryptInfo(account.notes ?? ""),
+              future: DataSecureService.decryptInfo(account.notes ?? ""),
               builder: (context, snapshot) {
                 if (snapshot.hasData && snapshot.data != null) {
                   return CustomTextField(
@@ -518,7 +529,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
     );
   }
 
-  Widget _buildCustomFieldsWidget(AccountOjbModel account) {
+  Widget _buildCustomFieldsWidget(List<AccountCustomFieldDriftModelData> customFields) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -528,16 +539,11 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
         CardCustomWidget(
           child: Column(
             children: [
-              ...account.customFields.map(
+              ...customFields.map(
                 (element) => Column(
                   children: [
-                    ItemCopyValue(
-                      title: element.hintText,
-                      value: element.value,
-                      isPrivateValue: element.typeField.toLowerCase().contains("password"),
-                      isLastItem: account.customFields.last == element,
-                    ),
-                    if (account.customFields.last != element) Divider(color: Theme.of(context).colorScheme.surfaceContainerHighest),
+                    ItemCopyValue(title: element.hintText, value: element.value, isPrivateValue: element.typeField.toLowerCase().contains("password"), isLastItem: customFields.last == element),
+                    if (customFields.last != element) Divider(color: Theme.of(context).colorScheme.surfaceContainerHighest),
                   ],
                 ),
               ),
@@ -548,7 +554,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
     );
   }
 
-  Widget _buildTOTPWidget(AccountOjbModel account) {
+  Widget _buildTOTPWidget(TOTPDriftModelData totp) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -563,8 +569,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
               child: InkWell(
                 onTap: () async {
                   HapticFeedback.selectionClick();
-                  final decryptService = EncryptAppDataService.instance;
-                  final decryptPassword = await decryptService.decryptTOTPKey(account.totp.target!.secretKey);
+                  final decryptPassword = await DataSecureService.decryptTOTPKey(totp.secretKey);
                   final otpCode = generateTOTPCode(keySecret: decryptPassword);
                   if (otpCode.isNotEmpty && mounted) {
                     clipboardCustom(context: context, text: otpCode);
@@ -576,7 +581,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       FutureBuilder(
-                        future: decryptService.decryptTOTPKey(account.totp.target!.secretKey),
+                        future: DataSecureService.decryptTOTPKey(totp.secretKey),
                         builder: (context, snapshot) {
                           if (snapshot.hasData && snapshot.data != null) {
                             return OtpTextWithCountdown(keySecret: snapshot.data!);
@@ -596,18 +601,18 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
     );
   }
 
-  Widget _buildUpdatedAtWidget(AccountOjbModel account) {
+  Widget _buildUpdatedAtWidget(AccountDriftModelData account) {
     return RichText(
       text: TextSpan(
         children: [
           TextSpan(text: "${context.trDetails(DetailsAccountText.updatedAt)}: ", style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
-          TextSpan(text: account.updatedAtFormat, style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.grey[600])),
+          TextSpan(text: formatDateTime(account.updatedAt), style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.grey[600])),
         ],
       ),
     );
   }
 
-  Widget _buildPasswordHistoryWidget(AccountOjbModel account) {
+  Widget _buildPasswordHistoryWidget(List<PasswordHistoryDriftModelData> passwordHistories, AccountDriftModelData account) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -618,8 +623,11 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
             RichText(
               text: TextSpan(
                 children: [
-                  TextSpan(text: "${context.trDetails(DetailsAccountText.passwordHistoryTitle)}: ", style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
-                  TextSpan(text: "${account.passwordHistories.length}", style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary)),
+                  TextSpan(
+                    text: "${context.trDetails(DetailsAccountText.passwordHistoryTitle)}: ",
+                    style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]),
+                  ),
+                  TextSpan(text: "${passwordHistories.length}", style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary)),
                 ],
               ),
             ),
@@ -627,7 +635,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(50),
                 onTap: () {
-                  bottomSheetPasswordHistory(context: context, accountOjbModel: account);
+                  bottomSheetPasswordHistory(context: context, account: account, passwordHistories: passwordHistories);
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
@@ -644,7 +652,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
     );
   }
 
-  Future<void> bottomSheetPasswordHistory({required BuildContext context, required AccountOjbModel accountOjbModel}) {
+  Future<void> bottomSheetPasswordHistory({required BuildContext context, required AccountDriftModelData account, required List<PasswordHistoryDriftModelData> passwordHistories}) async {
     return showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -673,17 +681,16 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                 ),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: accountOjbModel.passwordHistories.length,
+                    itemCount: passwordHistories.length,
                     itemBuilder: (BuildContext context, int index) {
-                      final passwordHistory = accountOjbModel.passwordHistories[index];
+                      final passwordHistory = passwordHistories[index];
                       return ListTile(
                         title: DecryptText(decryptTextType: DecryptTextType.password, style: Theme.of(context).textTheme.bodyLarge!, value: passwordHistory.password),
-                        subtitle: Text(passwordHistory.createdAtFormat, style: Theme.of(context).textTheme.bodyMedium),
+                        subtitle: Text(formatDateTime(passwordHistory.createdAt), style: Theme.of(context).textTheme.bodyMedium),
                         trailing: IconButton(
                           icon: const Icon(Icons.copy),
                           onPressed: () async {
-                            final decryptService = EncryptAppDataService.instance;
-                            final decryptPassword = await decryptService.decryptPassword(passwordHistory.password);
+                            final decryptPassword = await DataSecureService.decryptPassword(passwordHistory.password);
                             if (decryptPassword.isNotEmpty && context.mounted) {
                               clipboardCustom(context: context, text: decryptPassword);
                             }
@@ -727,9 +734,9 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                 Flexible(
                   child: SizedBox(
                     height: 35.h,
-                    child: Consumer2<CategoryProvider, AccountProvider>(
+                    child: Consumer2<CategoryProvider, HomeProvider>(
                       builder: (context, categoryProvider, accountProvider, child) {
-                        final categories = categoryProvider.categoryList;
+                        final categories = categoryProvider.categories;
                         return ListView.separated(
                           separatorBuilder: (context, index) => SizedBox(width: 10.w),
                           scrollDirection: Axis.horizontal,
@@ -754,7 +761,9 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                                       children: [
                                         Padding(
                                           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 2.w),
-                                          child: Center(child: Text(category.categoryName, style: CustomTextStyle.regular(fontSize: 14.sp, color: isSelected ? Theme.of(context).colorScheme.onPrimary : null))),
+                                          child: Center(
+                                            child: Text(category.categoryName, style: CustomTextStyle.regular(fontSize: 14.sp, color: isSelected ? Theme.of(context).colorScheme.onPrimary : null)),
+                                          ),
                                         ),
                                         if (isSelected)
                                           Positioned(
@@ -805,7 +814,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
     );
   }
 
-  Future<void> bottomSheetOptionAccountItem({required AccountProvider viewModel, required AccountOjbModel accountModel}) async {
+  Future<void> bottomSheetOptionAccountItem({required HomeProvider viewModel, required AccountDriftModelData accountModel}) async {
     return showModalBottomSheet(
       context: context,
       builder: (_) {
@@ -816,14 +825,14 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
               children: [
                 Container(width: 40.w, height: 4.h, decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(10))),
 
-                Selector<AccountProvider, bool>(
+                Selector<HomeProvider, bool>(
                   selector: (context, viewModel) => viewModel.accountSelected.contains(accountModel),
                   builder: (context, isSelected, child) {
                     return ListTile(
                       leading: isSelected ? Icon(Icons.cancel_outlined, size: 24.sp) : Icon(Icons.check_circle_outline_rounded, size: 24.sp),
                       title: Text(isSelected ? context.trHome(HomeLocale.unSelectAccount) : context.trHome(HomeLocale.selectAccount), style: titleHomeOptiomItemStyle),
                       onTap: () {
-                        viewModel.handleSelectOrRemoveAccount(accountModel);
+                        viewModel.handleSelectAccount(accountModel);
                         Navigator.pop(context);
                       },
                     );
@@ -853,7 +862,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                     if (!mounted) return;
                     Future.delayed(const Duration(milliseconds: 500), () {
                       if (!mounted) return;
-                      AccountBox.getById(accountModel.id).then((value) {
+                      DriffDbManager.instance.accountAdapter.getById(accountModel.id).then((value) {
                         if (value != null && mounted) {
                           context.read<DesktopHomeProvider>().selectAccount(value);
                         }
@@ -861,13 +870,13 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                     });
                   },
                 ),
-                if (accountModel.email != null && accountModel.email != "")
+                if (accountModel.username != null && accountModel.username != "")
                   ListTile(
                     leading: Icon(Icons.account_circle_rounded, size: 24.sp),
                     title: Text(context.trHome(HomeLocale.copyUsername), style: titleHomeOptiomItemStyle),
                     onTap: () async {
                       Navigator.pop(context);
-                      clipboardCustom(context: context, text: accountModel.email ?? "");
+                      clipboardCustom(context: context, text: accountModel.username ?? "");
                     },
                   ),
                 if (accountModel.password != null && accountModel.password != "")
@@ -876,7 +885,7 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                     title: Text(context.trHome(HomeLocale.copyPassword), style: titleHomeOptiomItemStyle),
                     onTap: () async {
                       Navigator.pop(context);
-                      String password = await EncryptAppDataService.instance.decryptPassword(accountModel.password ?? "");
+                      String password = await DataSecureService.decryptPassword(accountModel.password ?? "");
                       if (!context.mounted) return;
                       clipboardCustom(context: context, text: password);
                     },

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
@@ -9,6 +11,7 @@ import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
+import 'package:intl/intl.dart';
 import 'package:timezone/timezone.dart' as timezone;
 import 'package:url_launcher/url_launcher.dart';
 
@@ -81,4 +84,9 @@ Future<bool> checkAppInstalled(String packageName) async {
     logError(e.toString(), functionName: "checkAppInstalled");
     return false;
   }
+}
+
+String formatDateTime(DateTime? dateTime) {
+  if (dateTime == null) return '';
+  return "${DateFormat.yMMMd(Platform.localeName).format(dateTime)} ${DateFormat.Hm(Platform.localeName).format(dateTime)}";
 }

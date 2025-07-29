@@ -5,6 +5,7 @@ import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
+import 'package:cybersafe_pro/providers/home_provider.dart';
 import 'package:cybersafe_pro/resources/app_config.dart';
 import 'package:cybersafe_pro/resources/size_text_icon.dart';
 import 'package:cybersafe_pro/screens/login_master_password/login_master_password.dart';
@@ -190,8 +191,7 @@ class SettingMobileLayout extends StatelessWidget {
                         context,
                       ).showSnackBar(SnackBar(content: Text(context.trSafe('Data restore successfully')), backgroundColor: Colors.green, duration: const Duration(seconds: 3)));
                     });
-                    await GlobalKeys.appRootNavigatorKey.currentContext!.read<CategoryProvider>().refresh();
-                    GlobalKeys.appRootNavigatorKey.currentContext!.read<AccountProvider>().refreshAccounts(resetExpansion: true);
+                    if (context.mounted) context.read<HomeProvider>().refreshData();
                   },
                 ),
 
