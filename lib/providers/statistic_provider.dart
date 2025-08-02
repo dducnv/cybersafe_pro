@@ -1,12 +1,11 @@
 import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
+import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 import 'package:cybersafe_pro/services/data_secure_service.dart';
-import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
-import 'package:cybersafe_pro/providers/account_provider.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 // Nhóm các thống kê liên quan vào một class riêng
 class PasswordStatistics {
@@ -14,9 +13,15 @@ class PasswordStatistics {
   final int totalStrong;
   final int totalSame;
   final List<List<AccountDriftModelData>> sameGroups;
-  final List<CategoryDriftModelData> weakByCategories;
+  final Map<int, List<AccountDriftModelData>> weakByCategories;
 
-  PasswordStatistics({required this.totalWeak, required this.totalStrong, required this.totalSame, required this.sameGroups, required this.weakByCategories});
+  PasswordStatistics({
+    required this.totalWeak,
+    required this.totalStrong,
+    required this.totalSame,
+    required this.sameGroups,
+    required this.weakByCategories,
+  });
 }
 
 class StatisticProvider extends ChangeNotifier {
@@ -41,7 +46,10 @@ class StatisticProvider extends ChangeNotifier {
   }
 
   // Giải mã cả basic info và password cùng lúc
-  Future<(AccountDriftModelData, String?)?> _getDecryptedAccount(AccountDriftModelData account, AccountProvider accountProvider) async {
+  Future<(AccountDriftModelData, String?)?> _getDecryptedAccount(
+    AccountDriftModelData account,
+    AccountProvider accountProvider,
+  ) async {
     if (account.password == null || account.password!.isEmpty) return null;
 
     final baseInfoAccount = await accountProvider.getDecryptedBasicInfo(account);
@@ -78,22 +86,31 @@ class StatisticProvider extends ChangeNotifier {
       await Future.delayed(const Duration(milliseconds: 1));
     }
 
-    final result = await compute(_processAccountsInIsolate, {'decryptedList': decryptedList, 'categories': categories});
+    final result = await compute(_processAccountsInIsolate, {
+      'decryptedList': decryptedList,
+      'categories': categories,
+    });
     return PasswordStatistics(
       totalWeak: result['totalWeak'],
       totalStrong: result['totalStrong'],
       totalSame: result['totalSame'],
-      sameGroups: (result['sameGroups'] as List).map<List<AccountDriftModelData>>((group) => (group as List).cast<AccountDriftModelData>()).toList(),
-      weakByCategories: [],
+      sameGroups:
+          (result['sameGroups'] as List)
+              .map<List<AccountDriftModelData>>(
+                (group) => (group as List).cast<AccountDriftModelData>(),
+              )
+              .toList(),
+      weakByCategories: result['weakByCategories'],
     );
   }
 
   // Hàm isolate: chỉ xử lý gom nhóm/thống kê, không giải mã
   static Map<String, dynamic> _processAccountsInIsolate(Map<String, dynamic> args) {
-    final List<Map<String, dynamic>> decryptedList = List<Map<String, dynamic>>.from(args['decryptedList']);
-    final List<CategoryDriftModelData> categories = List<CategoryDriftModelData>.from(args['categories']);
+    final List<Map<String, dynamic>> decryptedList = List<Map<String, dynamic>>.from(
+      args['decryptedList'],
+    );
     Map<String, List<AccountDriftModelData>> passwordGroups = {};
-    Map<String, List<AccountDriftModelData>> categoryWeakPasswords = {};
+    Map<int, List<AccountDriftModelData>> categoryWeakPasswords = {};
     int weakCount = 0;
     int strongCount = 0;
     final String pattern = r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$%&*()?£\-_=]).{12,}$';
@@ -108,25 +125,22 @@ class StatisticProvider extends ChangeNotifier {
       } else {
         weakCount++;
         final categoryId = account.categoryId;
-        categoryWeakPasswords.putIfAbsent(categoryId.toString(), () => []);
-        categoryWeakPasswords[categoryId.toString()]!.add(account);
+        categoryWeakPasswords.putIfAbsent(categoryId, () => []);
+        categoryWeakPasswords[categoryId]!.add(account);
       }
       passwordGroups.putIfAbsent(password, () => []);
       passwordGroups[password]!.add(account);
     }
 
     final samePasswordGroups = passwordGroups.values.where((group) => group.length > 1).toList();
-    final weakCategories =
-        categories
-            .map((category) {
-              final weakAccounts = categoryWeakPasswords[category.id.toString()] ?? [];
-              if (weakAccounts.isEmpty) return null;
-              return CategoryDriftModelData(id: category.id, categoryName: category.categoryName, indexPos: category.indexPos, createdAt: category.createdAt, updatedAt: category.updatedAt);
-            })
-            .whereType<CategoryDriftModelData>()
-            .toList();
 
-    return {'totalWeak': weakCount, 'totalStrong': strongCount, 'totalSame': samePasswordGroups.length, 'sameGroups': samePasswordGroups, 'weakByCategories': weakCategories};
+    return {
+      'totalWeak': weakCount,
+      'totalStrong': strongCount,
+      'totalSame': samePasswordGroups.length,
+      'sameGroups': samePasswordGroups,
+      'weakByCategories': categoryWeakPasswords,
+    };
   }
 
   Future<void> init(BuildContext context) async {
@@ -169,7 +183,8 @@ class StatisticProvider extends ChangeNotifier {
   }
 
   // Getters để truy cập dễ dàng
-  List<CategoryDriftModelData> get accountPasswordWeakByCategories => statistics?.weakByCategories ?? [];
+  Map<int, List<AccountDriftModelData>> get accountPasswordWeakByCategories =>
+      statistics?.weakByCategories ?? {};
 
   List<List<AccountDriftModelData>> get accountSamePassword => statistics?.sameGroups ?? [];
 

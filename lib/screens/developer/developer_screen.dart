@@ -38,17 +38,17 @@ class DeveloperScreen extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  showLoadingDialog();
-                  bool restoreResult = await DataManagerService.restoreBackup(context, "123456");
-                  log(restoreResult.toString());
-                  if (restoreResult) {
-                    context.read<HomeProvider>().refreshData(clearCategory: true);
-                    hideLoadingDialog();
-                    showToastSuccess("Backup success", context: context);
-                  } else {
-                    hideLoadingDialog();
-                    showToastError("Backup failed", context: context);
-                  }
+                  // showLoadingDialog();
+                  // bool restoreResult = await DataManagerService.restoreBackup(context, "123456");
+                  // log(restoreResult.toString());
+                  // if (restoreResult) {
+                  //   context.read<HomeProvider>().refreshData(clearCategory: true);
+                  //   hideLoadingDialog();
+                  //   showToastSuccess("Backup success", context: context);
+                  // } else {
+                  //   hideLoadingDialog();
+                  //   showToastError("Backup failed", context: context);
+                  // }
                 },
                 child: const Text("restore"),
               ),

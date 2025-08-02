@@ -18,7 +18,12 @@ class SecureAse256 {
   static const int _hmacKeyLength = config.EncryptionConfig.HMAC_KEY_LENGTH;
 
   // HKDF implementation for key derivation
-  static Uint8List _hkdf({required Uint8List inputKeyMaterial, required Uint8List salt, required Uint8List info, required int length}) {
+  static Uint8List _hkdf({
+    required Uint8List inputKeyMaterial,
+    required Uint8List salt,
+    required Uint8List info,
+    required int length,
+  }) {
     if (length > 255 * 32) {
       throw ArgumentError('Output length too large for HKDF');
     }
@@ -70,7 +75,12 @@ class SecureAse256 {
     final salt = Uint8List(_saltLength); // Zero salt for HKDF
     final info = utf8.encode('${config.EncryptionConfig.KEY_PURPOSES['hmac']}_$purpose');
 
-    return _hkdf(inputKeyMaterial: masterKey, salt: salt, info: Uint8List.fromList(info), length: _hmacKeyLength);
+    return _hkdf(
+      inputKeyMaterial: masterKey,
+      salt: salt,
+      info: Uint8List.fromList(info),
+      length: _hmacKeyLength,
+    );
   }
 
   // Create HMAC for integrity check
@@ -134,13 +144,17 @@ class SecureAse256 {
       final encrypter = enc.Encrypter(enc.AES(encKey, mode: enc.AESMode.gcm));
 
       // Encrypt with associated data if provided
-      final encrypted = associatedData != null ? encrypter.encrypt(value, iv: iv, associatedData: utf8.encode(associatedData)) : encrypter.encrypt(value, iv: iv);
+      final encrypted =
+          associatedData != null
+              ? encrypter.encrypt(value, iv: iv, associatedData: utf8.encode(associatedData))
+              : encrypter.encrypt(value, iv: iv);
 
       // Derive HMAC key using HKDF
       final hmacKey = _deriveHmacKey(Uint8List.fromList(keyBytes), 'encryption');
 
       // Create data for HMAC (include all critical components)
-      final dataForHmac = '$value|${base64.encode(salt)}|${base64.encode(iv.bytes)}|${associatedData ?? ''}';
+      final dataForHmac =
+          '$value|${base64.encode(salt)}|${base64.encode(iv.bytes)}|${associatedData ?? ''}';
       final integrityHmac = _createHMAC(dataForHmac, hmacKey);
 
       final package = {
@@ -210,12 +224,16 @@ class SecureAse256 {
       final encrypter = enc.Encrypter(enc.AES(encKey, mode: enc.AESMode.gcm));
 
       // Decrypt with associated data if provided
-      final decrypted = associatedData != null ? encrypter.decrypt(encrypted, iv: iv, associatedData: utf8.encode(associatedData)) : encrypter.decrypt(encrypted, iv: iv);
+      final decrypted =
+          associatedData != null
+              ? encrypter.decrypt(encrypted, iv: iv, associatedData: utf8.encode(associatedData))
+              : encrypter.decrypt(encrypted, iv: iv);
 
       // Verify integrity
       if (package.containsKey('hmac')) {
         final hmacKey = _deriveHmacKey(Uint8List.fromList(keyBytes), 'encryption');
-        final dataForHmac = '$decrypted|${base64.encode(salt)}|${base64.encode(iv.bytes)}|${associatedData ?? ''}';
+        final dataForHmac =
+            '$decrypted|${base64.encode(salt)}|${base64.encode(iv.bytes)}|${associatedData ?? ''}';
         final expectedHmac = package['hmac'];
 
         if (!_verifyHMAC(dataForHmac, expectedHmac, hmacKey)) {
@@ -300,7 +318,10 @@ class SecureAse256 {
 
       return combined;
     } catch (e, stackTrace) {
-      logError("Lỗi mã hóa dữ liệu bytes: $e\n$stackTrace", functionName: "SecureAse256.encryptDataBytes");
+      logError(
+        "Lỗi mã hóa dữ liệu bytes: $e\n$stackTrace",
+        functionName: "SecureAse256.encryptDataBytes",
+      );
       throw Exception("Lỗi mã hóa dữ liệu bytes: $e");
     }
   }
@@ -308,7 +329,7 @@ class SecureAse256 {
   static List<int> decryptDataBytes({required List<int> encryptedData, required String key}) {
     try {
       if (encryptedData.length < _saltLength + _ivLength) {
-        throw Exception("Dữ liệu không hợp lệ");
+        throw Exception("Data is not valid");
       }
 
       final keyBytes = base64.decode(key);
@@ -322,12 +343,18 @@ class SecureAse256 {
       final encKey = enc.Key(keyBytes);
       final encrypter = enc.Encrypter(enc.AES(encKey, mode: enc.AESMode.gcm));
 
-      final decrypted = encrypter.decryptBytes(enc.Encrypted(Uint8List.fromList(encrypted)), iv: enc.IV(Uint8List.fromList(iv)));
+      final decrypted = encrypter.decryptBytes(
+        enc.Encrypted(Uint8List.fromList(encrypted)),
+        iv: enc.IV(Uint8List.fromList(iv)),
+      );
 
       return decrypted;
     } catch (e, stackTrace) {
-      logError("Lỗi giải mã dữ liệu bytes: $e\n$stackTrace", functionName: "SecureAse256.decryptDataBytes");
-      throw Exception("Lỗi giải mã dữ liệu bytes: $e");
+      logError(
+        "Lỗi giải mã dữ liệu bytes: $e\n$stackTrace",
+        functionName: "SecureAse256.decryptDataBytes",
+      );
+      throw Exception("KEY_INVALID");
     }
   }
 }

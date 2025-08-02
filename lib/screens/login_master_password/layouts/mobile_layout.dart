@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cybersafe_pro/components/dialog/confirm_exit_dialog.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
@@ -30,7 +30,12 @@ class MobileLayout extends StatefulWidget {
   final bool isFromRestore;
   final bool isFromDeleteData;
   final SecureApplicationController? secureApplicationController;
-  final Function({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey})? callBackLoginCallback;
+  final Function({
+    bool? isLoginSuccess,
+    String? pin,
+    GlobalKey<AppPinCodeFieldsState>? appPinCodeKey,
+  })?
+  callBackLoginCallback;
 
   const MobileLayout({
     super.key,
@@ -61,7 +66,9 @@ class _MobileLayoutState extends State<MobileLayout> {
   }
 
   void _setupLockStatusCheck() {
-    _lockStatusSubscription = Stream.periodic(const Duration(seconds: 1), (count) => count).listen((_) {
+    _lockStatusSubscription = Stream.periodic(const Duration(seconds: 1), (count) => count).listen((
+      _,
+    ) {
       if (mounted) {
         final provider = context.read<LocalAuthProvider>();
         provider.updateLockStatus();
@@ -115,7 +122,9 @@ class _MobileLayoutState extends State<MobileLayout> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      widget.isFromBackup ? context.trLogin(LoginText.enterAnyPin) : context.trLogin(LoginText.enterPin),
+                      widget.isFromBackup
+                          ? context.trLogin(LoginText.enterAnyPin)
+                          : context.trLogin(LoginText.enterPin),
                       style: CustomTextStyle.regular(fontSize: 20.sp, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
@@ -123,19 +132,29 @@ class _MobileLayoutState extends State<MobileLayout> {
                     if (widget.isFromBackup)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
-                        child: Text(context.trLogin(LoginText.backupNote), textAlign: TextAlign.center, style: CustomTextStyle.regular(fontSize: 14, fontStyle: FontStyle.italic)),
+                        child: Text(
+                          context.trLogin(LoginText.backupNote),
+                          textAlign: TextAlign.center,
+                          style: CustomTextStyle.regular(fontSize: 14, fontStyle: FontStyle.italic),
+                        ),
                       ),
                     if (widget.isFromRestore)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
-                        child: Text(context.trLogin(LoginText.restoreNote), textAlign: TextAlign.center, style: CustomTextStyle.regular(fontSize: 14, fontStyle: FontStyle.italic)),
+                        child: Text(
+                          context.trLogin(LoginText.restoreNote),
+                          textAlign: TextAlign.center,
+                          style: CustomTextStyle.regular(fontSize: 14, fontStyle: FontStyle.italic),
+                        ),
                       ),
                     if (isCurrentlyLocked) _buildLockedStatus(provider),
 
                     if (!isCurrentlyLocked) _buildPinCodeFields(provider),
 
                     if (!isCurrentlyLocked)
-                      if (widget.showBiometric && LocalAuthConfig.instance.isAvailableBiometrics && LocalAuthConfig.instance.isOpenUseBiometric) ...[
+                      if (widget.showBiometric &&
+                          LocalAuthConfig.instance.isAvailableBiometrics &&
+                          LocalAuthConfig.instance.isOpenUseBiometric) ...[
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
@@ -145,7 +164,12 @@ class _MobileLayoutState extends State<MobileLayout> {
                               },
                               icon:
                                   Platform.isIOS
-                                      ? SvgPicture.asset('assets/icons/face_id.svg', width: 20.w, height: 20.h, color: Theme.of(context).colorScheme.primary)
+                                      ? SvgPicture.asset(
+                                        'assets/icons/face_id.svg',
+                                        width: 20.w,
+                                        height: 20.h,
+                                        color: Theme.of(context).colorScheme.primary,
+                                      )
                                       : const Icon(Icons.fingerprint),
                             ),
                           ],
@@ -165,7 +189,11 @@ class _MobileLayoutState extends State<MobileLayout> {
                                 await handleLogin(provider);
                               },
                       text: "",
-                      child: Icon(Icons.arrow_forward, size: 24, color: isCurrentlyLocked ? Colors.grey : Colors.white),
+                      child: Icon(
+                        Icons.arrow_forward,
+                        size: 24,
+                        color: isCurrentlyLocked ? Colors.grey : Colors.white,
+                      ),
                     ),
                   ],
                 ),
@@ -182,9 +210,19 @@ class _MobileLayoutState extends State<MobileLayout> {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10).copyWith(bottom: 24),
       child: Column(
         children: [
-          Text(context.trLogin(LoginText.loginLockDescription), textAlign: TextAlign.center, style: CustomTextStyle.regular(color: Colors.red, fontWeight: FontWeight.bold)),
+          Text(
+            context.trLogin(LoginText.loginLockDescription),
+            textAlign: TextAlign.center,
+            style: CustomTextStyle.regular(color: Colors.red, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 10),
-          Text(context.trLogin(LoginText.pleaseTryAgainLater).replaceAll("{0}", provider.formattedRemainingTime), textAlign: TextAlign.center, style: CustomTextStyle.regular(fontWeight: FontWeight.w500)),
+          Text(
+            context
+                .trLogin(LoginText.pleaseTryAgainLater)
+                .replaceAll("{0}", provider.formattedRemainingTime),
+            textAlign: TextAlign.center,
+            style: CustomTextStyle.regular(fontWeight: FontWeight.w500),
+          ),
           const SizedBox(height: 5),
           _buildCountdownDisplay(provider),
         ],
@@ -196,8 +234,18 @@ class _MobileLayoutState extends State<MobileLayout> {
     return Container(
       margin: const EdgeInsets.only(top: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(20)),
-      child: Text(provider.formattedRemainingTime, style: CustomTextStyle.regular(fontWeight: FontWeight.bold, fontSize: 18, color: Theme.of(context).colorScheme.error)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        provider.formattedRemainingTime,
+        style: CustomTextStyle.regular(
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+          color: Theme.of(context).colorScheme.error,
+        ),
+      ),
     );
   }
 
@@ -234,28 +282,31 @@ class _MobileLayoutState extends State<MobileLayout> {
   Future<void> handleLogin(LocalAuthProvider provider) async {
     if (!mounted) return;
 
-    // Nếu có secureApplicationController (khi ở chế độ unlock), xử lý riêng
     if (widget.secureApplicationController != null) {
-      // Kiểm tra mật khẩu trước khi unlock
       bool isLoginSuccess = await provider.handleLogin();
 
       if (isLoginSuccess) {
-        // Gọi callback để thông báo login thành công
         if (widget.callBackLoginCallback != null) {
-          widget.callBackLoginCallback!(isLoginSuccess: true, pin: provider.textEditingController.text, appPinCodeKey: _pinCodeKey);
+          widget.callBackLoginCallback!(
+            isLoginSuccess: true,
+            pin: provider.textEditingController.text,
+            appPinCodeKey: _pinCodeKey,
+          );
         }
-        // Unlock ứng dụng0
         widget.secureApplicationController?.authSuccess(unlock: true);
         SecureApplicationUtil.instance.setSecureState(SecureAppState.secured);
       } else {
-        // Nếu login thất bại, không unlock
         widget.secureApplicationController?.authFailed(unlock: false);
       }
       return;
     }
     if (widget.isFromBackup || widget.isFromRestore) {
       if (widget.callBackLoginCallback != null) {
-        widget.callBackLoginCallback!(isLoginSuccess: true, pin: provider.textEditingController.text ?? '', appPinCodeKey: _pinCodeKey);
+        widget.callBackLoginCallback!(
+          isLoginSuccess: true,
+          pin: provider.textEditingController.text ?? '',
+          appPinCodeKey: _pinCodeKey,
+        );
       }
       return;
     }
@@ -265,7 +316,11 @@ class _MobileLayoutState extends State<MobileLayout> {
     if (isLoginSuccess && mounted) {
       SecureApplicationUtil.instance.setSecureState(SecureAppState.secured);
       if (widget.callBackLoginCallback != null) {
-        widget.callBackLoginCallback!(isLoginSuccess: true, pin: provider.textEditingController.text, appPinCodeKey: _pinCodeKey);
+        widget.callBackLoginCallback!(
+          isLoginSuccess: true,
+          pin: provider.textEditingController.text,
+          appPinCodeKey: _pinCodeKey,
+        );
         return;
       }
 
@@ -281,7 +336,11 @@ class _MobileLayoutState extends State<MobileLayout> {
       }
     } else {
       if (!mounted) return;
-      showToastError(context.trSafe(LoginText.incorrectPin), context: context, position: StyledToastPosition.top);
+      showToastError(
+        context.trSafe(LoginText.incorrectPin),
+        context: context,
+        position: StyledToastPosition.top,
+      );
     }
   }
 }
