@@ -190,18 +190,66 @@ class AccountOjbModel {
   final EncryptAppDataService _encryptAppDataService = EncryptAppDataService.instance;
 
   Future<Map<String, dynamic>> toDecryptedJson() async {
+    // Decrypt tất cả các trường text cùng một lúc để tối ưu hiệu suất
+    final futures = <Future<String>>[];
+    final keys = <String>[];
+    
+    // Thêm các trường cần decrypt
+    if (title.isNotEmpty) {
+      futures.add(_encryptAppDataService.decryptInfo(title));
+      keys.add('title');
+    }
+    if (email != null && email!.isNotEmpty) {
+      futures.add(_encryptAppDataService.decryptInfo(email!));
+      keys.add('email');
+    }
+    if (password != null && password!.isNotEmpty) {
+      futures.add(_encryptAppDataService.decryptPassword(password!));
+      keys.add('password');
+    }
+    if (notes != null && notes!.isNotEmpty) {
+      futures.add(_encryptAppDataService.decryptInfo(notes!));
+      keys.add('notes');
+    }
+    
+    // Chạy tất cả decrypt cùng lúc
+    final decryptedValues = futures.isNotEmpty ? await Future.wait(futures) : <String>[];
+    
+    // Map kết quả
+    final decryptedMap = <String, String>{};
+    for (int i = 0; i < keys.length; i++) {
+      decryptedMap[keys[i]] = decryptedValues[i];
+    }
+    
+    // Decrypt custom fields và password histories song song
+    final customFieldsFuture = getCustomFields.isNotEmpty 
+        ? Future.wait(getCustomFields.map((e) => e.toDecryptedJson()))
+        : Future.value(<Map<String, dynamic>>[]);
+        
+    final passwordHistoriesFuture = getPasswordHistories.isNotEmpty
+        ? Future.wait(getPasswordHistories.map((e) => e.toDecryptedJson()))
+        : Future.value(<Map<String, dynamic>>[]);
+        
+    final totpFuture = getTotp?.toDecryptedJson();
+    
+    final results = await Future.wait([
+      customFieldsFuture,
+      passwordHistoriesFuture,
+      if (totpFuture != null) totpFuture else Future.value(null),
+    ]);
+    
     return {
       'id': id,
-      'title': await _encryptAppDataService.decryptInfo(title),
-      'email': await _encryptAppDataService.decryptInfo(email ?? ''),
-      'password': await _encryptAppDataService.decryptPassword(password ?? ''),
-      'notes': await _encryptAppDataService.decryptInfo(notes ?? ''),
+      'title': decryptedMap['title'] ?? title,
+      'email': decryptedMap['email'] ?? email ?? '',
+      'password': decryptedMap['password'] ?? password ?? '',
+      'notes': decryptedMap['notes'] ?? notes ?? '',
       'icon': icon,
-      'customFields': await Future.wait(getCustomFields.map((e) => e.toDecryptedJson())),
-      'totp': getTotp != null ? await getTotp!.toDecryptedJson() : null,
+      'customFields': results[0] as List<Map<String, dynamic>>,
+      'totp': results.length > 2 ? results[2] : null,
       'category': getCategory?.toJson(),
       'passwordUpdatedAt': passwordUpdatedAt?.toIso8601String(),
-      'passwordHistories': await Future.wait(getPasswordHistories.map((e) => e.toDecryptedJson())),
+      'passwordHistories': results[1] as List<Map<String, dynamic>>,
       'iconCustom': getIconCustom?.toJson(),
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),

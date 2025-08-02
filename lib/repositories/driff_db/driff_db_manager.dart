@@ -93,6 +93,114 @@ class DriffDbManager {
     return await accountAdapter.getById(id);
   }
 
+  // Batch create accounts - tối ưu cho migrate
+  Future<List<AccountDriftModelData>> batchCreateAccountsWithEncryptData(List<Map<String, dynamic>> accountsData) async {
+    if (accountsData.isEmpty) return [];
+
+    final stopwatch = Stopwatch()..start();
+    logInfo("Starting batch create ${accountsData.length} accounts");
+
+    try {
+      await _preWarmEncryptionKeys();
+      logInfo("Pre-warmed encryption keys: ${stopwatch.elapsed}");
+
+      final encryptedAccountsData = await DataSecureService.batchEncryptAccountsData(accountsData);
+      logInfo("Batch encrypted accounts: ${stopwatch.elapsed}");
+
+      final results = <AccountDriftModelData>[];
+      const batchSize = 20;
+      
+      for (int i = 0; i < encryptedAccountsData.length; i += batchSize) {
+        final end = (i + batchSize < encryptedAccountsData.length) ? i + batchSize : encryptedAccountsData.length;
+        final batch = encryptedAccountsData.sublist(i, end);
+        
+        final batchResults = await transaction(() async {
+          final batchAccountResults = <AccountDriftModelData>[];
+          
+          for (final accountData in batch) {
+            try {
+              final account = AccountDriftModelCompanion.insert(
+                title: accountData['title'],
+                username: Value(accountData['username']),
+                password: Value(accountData['password']),
+                notes: Value(accountData['notes']),
+                icon: Value(accountData['icon'] ?? 'account_circle'),
+                categoryId: accountData['categoryId'],
+                createdAt: Value(accountData['createdAt'] ?? DateTime.now()),
+                updatedAt: Value(accountData['updatedAt'] ?? DateTime.now()),
+                passwordUpdatedAt: Value(accountData['passwordUpdatedAt'] ?? DateTime.now()),
+              );
+
+              final accountId = await accountAdapter.insertAccount(account);
+
+              // Insert custom fields
+              if (accountData['customFields'] != null && (accountData['customFields'] as List).isNotEmpty) {
+                for (final fieldData in accountData['customFields'] as List) {
+                  final customField = AccountCustomFieldDriftModelCompanion.insert(
+                    accountId: accountId,
+                    name: fieldData['name'],
+                    value: fieldData['value'],
+                    hintText: fieldData['hintText'],
+                    typeField: fieldData['typeField'],
+                  );
+                  await accountCustomFieldAdapter.insertOrUpdateCustomField(customField);
+                }
+              }
+
+              // Insert TOTP
+              if (accountData['totp'] != null) {
+                final totpData = accountData['totp'] as Map<String, dynamic>;
+                await totpAdapter.insertOrUpdateTOTP(
+                  accountId, 
+                  totpData['secretKey'], 
+                  totpData['isShowToHome'] ?? false
+                );
+              }
+
+              // Insert password histories
+              if (accountData['passwordHistories'] != null && (accountData['passwordHistories'] as List).isNotEmpty) {
+                for (final historyData in accountData['passwordHistories'] as List) {
+                  await passwordHistoryAdapter.insertPasswordHistory(accountId, historyData['password']);
+                }
+              }
+
+              final createdAccount = await accountAdapter.getById(accountId);
+              if (createdAccount != null) {
+                batchAccountResults.add(createdAccount);
+              }
+            } catch (e) {
+              logError('Error creating account in batch: $e');
+            }
+          }
+          
+          return batchAccountResults;
+        });
+        
+        results.addAll(batchResults);
+        
+        // Progress log
+        logInfo("Batch ${(i ~/ batchSize) + 1}/${(encryptedAccountsData.length / batchSize).ceil()} completed: ${stopwatch.elapsed}");
+      }
+
+      logInfo("Batch create completed: ${stopwatch.elapsed}, created ${results.length} accounts");
+      return results;
+    } catch (e) {
+      logError('Error in batch create accounts: $e');
+      rethrow;
+    }
+  }
+
+  // Pre-warm encryption keys để tránh tạo keys nhiều lần
+  Future<void> _preWarmEncryptionKeys() async {
+    try {
+      await Future.wait([
+        DataSecureService.preWarmKeys(),
+      ]);
+    } catch (e) {
+      logError('Error pre-warming keys: $e');
+    }
+  }
+
   Future<AccountDriftModelData?> updateAccountWithEncriptData({
     required AccountDriftModelCompanion account,
     List<AccountCustomFieldDriftModelCompanion>? customFields,

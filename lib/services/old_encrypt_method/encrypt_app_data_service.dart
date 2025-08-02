@@ -134,7 +134,7 @@ class EncryptAppDataService {
   // Bảo vệ khóa trong bộ nhớ bằng orchestration key
   String _protectKey(String key) {
     if (!_isOrchestrationKeyInitialized) {
-      _logError('Orchestration key chưa được khởi tạo', 'Không thể bảo vệ khóa');
+      // _logError('Orchestration key chưa được khởi tạo', 'Không thể bảo vệ khóa');
       return key; // Fallback nếu chưa khởi tạo
     }
     final keyBytes = utf8.encode(key);
@@ -151,7 +151,7 @@ class EncryptAppDataService {
   // Khôi phục khóa đã được bảo vệ
   String _unprotectKey(String protectedKey) {
     if (!_isOrchestrationKeyInitialized) {
-      _logError('Orchestration key chưa được khởi tạo', 'Không thể khôi phục khóa');
+      // _logError('Orchestration key chưa được khởi tạo', 'Không thể khôi phục khóa');
       return protectedKey; // Fallback nếu chưa khởi tạo
     }
 
@@ -219,6 +219,25 @@ class EncryptAppDataService {
     }
   }
 
+  // Batch decrypt info - tối ưu cho nhiều trường cùng lúc
+  Future<List<String>> batchDecryptInfo(List<String> encryptedList) async {
+    if (encryptedList.isEmpty) return encryptedList;
+
+    try {
+      final deviceKey = await _getDeviceKey();
+      final encryptionKey = await _generateEncryptionKey(deviceKey, KeyType.info);
+      
+      return await compute(_batchDecryptInIsolate, {
+        'values': encryptedList,
+        'key': encryptionKey,
+        'type': 'info'
+      });
+    } catch (e) {
+      _logError('Lỗi batch giải mã thông tin', e);
+      return encryptedList;
+    }
+  }
+
   // Mã hóa mật khẩu
   Future<String> encryptPassword(String password) async {
     if (password.isEmpty) return password;
@@ -247,6 +266,25 @@ class EncryptAppDataService {
     }
   }
 
+  // Batch decrypt password - tối ưu cho nhiều password cùng lúc
+  Future<List<String>> batchDecryptPassword(List<String> encryptedList) async {
+    if (encryptedList.isEmpty) return encryptedList;
+
+    try {
+      final deviceKey = await _getDeviceKey();
+      final encryptionKey = await _generateEncryptionKey(deviceKey, KeyType.password);
+      
+      return await compute(_batchDecryptInIsolate, {
+        'values': encryptedList,
+        'key': encryptionKey,
+        'type': 'password'
+      });
+    } catch (e) {
+      _logError('Lỗi batch giải mã mật khẩu', e);
+      rethrow;
+    }
+  }
+
   // Giải mã TOTP
   Future<String> decryptTOTPKey(String encrypted) async {
     if (encrypted.isEmpty) return encrypted;
@@ -257,6 +295,83 @@ class EncryptAppDataService {
       return EncryptService.decryptData(value: encrypted, key: encryptionKey);
     } catch (e) {
       _logError('Lỗi giải mã TOTP', e);
+      rethrow;
+    }
+  }
+
+  // Batch decrypt TOTP - tối ưu cho nhiều TOTP key cùng lúc
+  Future<List<String>> batchDecryptTOTPKey(List<String> encryptedList) async {
+    if (encryptedList.isEmpty) return encryptedList;
+
+    try {
+      final deviceKey = await _getDeviceKey();
+      final encryptionKey = await _generateEncryptionKey(deviceKey, KeyType.totp);
+      
+      return await compute(_batchDecryptInIsolate, {
+        'values': encryptedList,
+        'key': encryptionKey,
+        'type': 'totp'
+      });
+    } catch (e) {
+      _logError('Lỗi batch giải mã TOTP', e);
+      rethrow;
+    }
+  }
+
+  // Batch decrypt account - tối ưu cho việc decrypt toàn bộ account
+  Future<List<Map<String, dynamic>>> batchDecryptAccounts(List<AccountOjbModel> accounts) async {
+    if (accounts.isEmpty) return [];
+
+    try {
+      // Lấy tất cả keys cần thiết trước
+      final deviceKey = await _getDeviceKey();
+      final keys = await Future.wait([
+        _generateEncryptionKey(deviceKey, KeyType.info),
+        _generateEncryptionKey(deviceKey, KeyType.password),
+        _generateEncryptionKey(deviceKey, KeyType.totp),
+      ]);
+
+      // Chuyển đổi accounts thành format có thể serialize
+      final accountsData = accounts.map((account) => {
+        'id': account.id,
+        'title': account.title,
+        'email': account.email ?? '',
+        'password': account.password ?? '',
+        'notes': account.notes ?? '',
+        'icon': account.icon,
+        'customFields': account.getCustomFields.map((field) => {
+          'id': field.id,
+          'name': field.name,
+          'value': field.value,
+          'hintText': field.hintText,
+          'typeField': field.typeField,
+        }).toList(),
+        'totp': account.getTotp != null ? {
+          'secretKey': account.getTotp!.secretKey,
+          'isShowToHome': account.getTotp!.isShowToHome,
+          'createdAt': account.getTotp!.createdAt.toIso8601String(),
+          'updatedAt': account.getTotp!.updatedAt.toIso8601String(),
+        } : null,
+        'category': account.getCategory?.toJson(),
+        'passwordUpdatedAt': account.passwordUpdatedAt?.toIso8601String(),
+        'passwordHistories': account.getPasswordHistories.map((history) => {
+          'password': history.password,
+          'createdAt': history.createdAt.toIso8601String(),
+        }).toList(),
+        'iconCustom': account.getIconCustom?.toJson(),
+        'createdAt': account.createdAt?.toIso8601String(),
+        'updatedAt': account.updatedAt?.toIso8601String(),
+      }).toList();
+
+      // Gửi tất cả vào isolate để decrypt
+      return await compute(_batchDecryptAccountsInIsolate, {
+        'accounts': accountsData,
+        'infoKey': keys[0],
+        'passwordKey': keys[1],
+        'totpKey': keys[2],
+      });
+    } catch (e) {
+      _logError('Lỗi batch giải mã accounts', e);
       rethrow;
     }
   }
@@ -423,6 +538,108 @@ class EncryptAppDataService {
 
   static String _decryptInIsolate(Map<String, String> params) {
     return EncryptService.decryptData(value: params['value']!, key: params['key']!);
+  }
+
+  // Batch decrypt trong isolate - xử lý nhiều giá trị cùng lúc
+  static List<String> _batchDecryptInIsolate(Map<String, dynamic> params) {
+    final List<String> values = List<String>.from(params['values']);
+    final String key = params['key'];
+    
+    return values.map((value) {
+      if (value.isEmpty) return value;
+      try {
+        return EncryptService.decryptData(value: value, key: key);
+      } catch (e) {
+        // Trả về giá trị gốc nếu decrypt thất bại
+        return value;
+      }
+    }).toList();
+  }
+
+  // Batch decrypt accounts trong isolate - xử lý toàn bộ accounts
+  static List<Map<String, dynamic>> _batchDecryptAccountsInIsolate(Map<String, dynamic> params) {
+    final List<Map<String, dynamic>> accounts = List<Map<String, dynamic>>.from(params['accounts']);
+    final String infoKey = params['infoKey'];
+    final String passwordKey = params['passwordKey'];
+    final String totpKey = params['totpKey'];
+
+    return accounts.map((account) {
+      try {
+        // Decrypt basic fields
+        final decryptedAccount = <String, dynamic>{
+          'id': account['id'],
+          'title': _safeDecrypt(account['title'], infoKey),
+          'email': _safeDecrypt(account['email'], infoKey),
+          'password': _safeDecrypt(account['password'], passwordKey),
+          'notes': _safeDecrypt(account['notes'], infoKey),
+          'icon': account['icon'],
+          'category': account['category'],
+          'passwordUpdatedAt': account['passwordUpdatedAt'],
+          'iconCustom': account['iconCustom'],
+          'createdAt': account['createdAt'],
+          'updatedAt': account['updatedAt'],
+        };
+
+        // Decrypt custom fields
+        final customFields = (account['customFields'] as List<dynamic>).map((field) {
+          final fieldMap = field as Map<String, dynamic>;
+          final isPassword = fieldMap['typeField'] == 'password';
+          final decryptedValue = _safeDecrypt(
+            fieldMap['value'], 
+            isPassword ? passwordKey : infoKey
+          );
+          
+          return {
+            'id': fieldMap['id'],
+            'name': fieldMap['name'],
+            'value': decryptedValue,
+            'hintText': fieldMap['hintText'],
+            'typeField': fieldMap['typeField'],
+          };
+        }).toList();
+
+        decryptedAccount['customFields'] = customFields;
+
+        // Decrypt TOTP
+        if (account['totp'] != null) {
+          final totpMap = account['totp'] as Map<String, dynamic>;
+          decryptedAccount['totp'] = {
+            'secretKey': _safeDecrypt(totpMap['secretKey'], totpKey),
+            'isShowToHome': totpMap['isShowToHome'],
+            'createdAt': totpMap['createdAt'],
+            'updatedAt': totpMap['updatedAt'],
+          };
+        } else {
+          decryptedAccount['totp'] = null;
+        }
+
+        // Decrypt password histories
+        final passwordHistories = (account['passwordHistories'] as List<dynamic>).map((history) {
+          final historyMap = history as Map<String, dynamic>;
+          return {
+            'password': _safeDecrypt(historyMap['password'], passwordKey),
+            'createdAt': historyMap['createdAt'],
+          };
+        }).toList();
+
+        decryptedAccount['passwordHistories'] = passwordHistories;
+
+        return decryptedAccount;
+      } catch (e) {
+        // Trả về dữ liệu gốc nếu có lỗi
+        return account;
+      }
+    }).toList();
+  }
+
+  // Helper method để decrypt an toàn
+  static String _safeDecrypt(dynamic value, String key) {
+    if (value == null || value.toString().isEmpty) return '';
+    try {
+      return EncryptService.decryptData(value: value.toString(), key: key);
+    } catch (e) {
+      return value.toString(); // Trả về giá trị gốc nếu decrypt thất bại
+    }
   }
 
   String _getStorageKeyForType(KeyType type) {
@@ -953,6 +1170,14 @@ extension EncryptAppDataServiceExtension on EncryptAppDataService {
     }
 
     return true;
+  }
+
+  void clearAllKey() {
+    _secureStorage.delete(key: SecureStorageKey.deviceKeyStorageKey);
+    _secureStorage.delete(key: SecureStorageKey.infoKeyStorageKey);
+    _secureStorage.delete(key: SecureStorageKey.passwordKeyStorageKey);
+    _secureStorage.delete(key: SecureStorageKey.totpKeyStorageKey);
+    _secureStorage.delete(key: SecureStorageKey.pinCodeKeyStorageKey);
   }
 }
 

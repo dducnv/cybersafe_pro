@@ -2,6 +2,7 @@ import 'package:cybersafe_pro/components/bottom_sheets/select_category_bottom_sh
 import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
+import 'package:cybersafe_pro/providers/account_form_provider.dart';
 import 'package:cybersafe_pro/resources/brand_logo.dart';
 import 'package:cybersafe_pro/screens/password_generator/password_generate_screen.dart';
 import 'package:cybersafe_pro/services/otp.dart';
@@ -13,10 +14,9 @@ import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
 import 'package:cybersafe_pro/widgets/modal_side_sheet/modal_side_sheet.dart';
 import 'package:cybersafe_pro/widgets/otp_qrcode_scan/otp_qrcode_scan.dart';
 import 'package:cybersafe_pro/widgets/otp_text_with_countdown/otp_text_with_countdown.dart';
+import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
 import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
-import 'package:cybersafe_pro/providers/account_form_provider.dart';
-import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
 import 'package:password_strength_checker/password_strength_checker.dart';
 import 'package:provider/provider.dart';
 
@@ -24,18 +24,20 @@ class AccountFormFields extends StatelessWidget {
   final AccountFormProvider formProvider;
   final Function() onAddField;
 
-  const AccountFormFields({super.key, required this.formProvider, required this.onAddField});
+  const AccountFormFields({required this.formProvider, required this.onAddField, super.key});
 
   @override
   Widget build(BuildContext context) {
-    formProvider.passNotifier.value = PasswordStrength.calculate(text: formProvider.passwordController.text);
+    formProvider.passNotifier.value = PasswordStrength.calculate(
+      text: formProvider.passwordController.text,
+    );
     return Column(
       children: [
         CustomTextField(
           requiredTextField: true,
           autoFocus: true,
           titleTextField: context.trCreateAccount(CreateAccountText.appName),
-          hintText: "Social App Name, Bank Name,...",
+          hintText: 'Social App Name, Bank Name,...',
           controller: formProvider.appNameController,
           textError: formProvider.appNameError,
           onChanged: (_) => formProvider.validateAppName(),
@@ -60,13 +62,25 @@ class AccountFormFields extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(left: 5, bottom: 5),
                             child: Text(
-                              context.appLocale.createAccountLocale.getText(CreateAccountText.twoFactorAuth),
-                              style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]),
+                              context.appLocale.createAccountLocale.getText(
+                                CreateAccountText.twoFactorAuth,
+                              ),
+                              style: CustomTextStyle.regular(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[600],
+                              ),
                             ),
                           ),
                           Row(
                             children: [
-                              Expanded(child: CardCustomWidget(child: OtpTextWithCountdown(keySecret: formProvider.otpController.text))),
+                              Expanded(
+                                child: CardCustomWidget(
+                                  child: OtpTextWithCountdown(
+                                    keySecret: formProvider.otpController.text,
+                                  ),
+                                ),
+                              ),
                               IconButton(
                                 onPressed: () {
                                   formProvider.handleDeleteTOTP();
@@ -92,7 +106,7 @@ class AccountFormFields extends StatelessWidget {
   Widget _buildUsernameField(BuildContext context) {
     return CustomTextField(
       titleTextField: context.trCreateAccount(CreateAccountText.username),
-      hintText: "Email, Phone, Username,...",
+      hintText: 'Email, Phone, Username,...',
       controller: formProvider.usernameController,
       autofillHints: const [AutofillHints.username],
       textInputAction: TextInputAction.next,
@@ -106,7 +120,14 @@ class AccountFormFields extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 5),
-          child: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.password), style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+          child: Text(
+            context.appLocale.createAccountLocale.getText(CreateAccountText.password),
+            style: CustomTextStyle.regular(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
+            ),
+          ),
         ),
         const SizedBox(height: 5),
         Row(
@@ -155,7 +176,12 @@ class AccountFormFields extends StatelessWidget {
         const SizedBox(height: 10),
         PasswordStrengthChecker(
           strength: formProvider.passNotifier,
-          configuration: PasswordStrengthCheckerConfiguration(borderWidth: 1, height: 12.h, inactiveBorderColor: Theme.of(context).colorScheme.surfaceContainerHighest, showStatusWidget: false),
+          configuration: PasswordStrengthCheckerConfiguration(
+            borderWidth: 1,
+            height: 12.h,
+            inactiveBorderColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+            showStatusWidget: false,
+          ),
         ),
       ],
     );
@@ -173,9 +199,16 @@ class AccountFormFields extends StatelessWidget {
       isObscure: false,
       readOnly: true,
       textError: formProvider.categoryError,
-      suffixIcon: Padding(padding: const EdgeInsets.only(right: 12), child: const Icon(Icons.keyboard_arrow_down)),
+      suffixIcon: Padding(
+        padding: const EdgeInsets.only(right: 12),
+        child: const Icon(Icons.keyboard_arrow_down),
+      ),
       onTap: () {
-        showSelectCategoryBottomSheet(context, selectedCategory: formProvider.selectedCategory, onSelected: formProvider.setCategory);
+        showSelectCategoryBottomSheet(
+          context,
+          selectedCategory: formProvider.selectedCategory,
+          onSelected: formProvider.setCategory,
+        );
       },
     );
   }
@@ -186,7 +219,14 @@ class AccountFormFields extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 5, left: 5),
-          child: Text(context.trCreateAccount(CreateAccountText.twoFactorAuth), style: CustomTextStyle.regular(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+          child: Text(
+            context.trCreateAccount(CreateAccountText.twoFactorAuth),
+            style: CustomTextStyle.regular(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
+            ),
+          ),
         ),
         Row(
           children: [
@@ -200,7 +240,8 @@ class AccountFormFields extends StatelessWidget {
                 textInputType: TextInputType.text,
                 onTapUpOutside: (event) {
                   if (formProvider.otpController.text.isNotEmpty) {
-                    if (OTP.isKeyValid(formProvider.otpController.text)) {
+                    final bool isValid = OTP.isKeyValid(formProvider.otpController.text);
+                    if (isValid) {
                       formProvider.handleAddTOTP();
                     } else {
                       formProvider.otpError = context.trSafe(CreateAccountText.otpError);
@@ -222,19 +263,21 @@ class AccountFormFields extends StatelessWidget {
             const SizedBox(width: 12),
             IconButton(
               onPressed: () async {
-                final uri = await Navigator.of(context).push(MaterialPageRoute(builder: (context) => const QrcodeScaner()));
+                final uri = await Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (context) => const QrcodeScaner()));
                 if (uri != null) {
                   var otpCustom = OTP.fromUri(uri.toString()).toJson();
-                  logInfo("otpCustom.toString(): ${otpCustom.toString()}");
+                  logInfo('otpCustom.toString(): ${otpCustom.toString()}');
                   formProvider.otpError = null;
                   formProvider.handleAddTOTP();
-                  formProvider.otpController.text = otpCustom['secret'].toUpperCase();
-                  formProvider.appNameController.text = otpCustom['issuer'];
-                  formProvider.usernameController.text = otpCustom['accountName'];
+                  formProvider.otpController.text = (otpCustom['secret'] as String).toUpperCase();
+                  formProvider.appNameController.text = otpCustom['issuer'] as String;
+                  formProvider.usernameController.text = otpCustom['accountName'] as String;
                   for (var icon in allBranchLogos) {
                     final pattern = icon.keyWords!.map((k) => RegExp.escape(k)).join('|');
                     final regex = RegExp(pattern, caseSensitive: false);
-                    if (regex.hasMatch(otpCustom['issuer'])) {
+                    if (regex.hasMatch(otpCustom['issuer'] as String)) {
                       formProvider.branchLogoSelected = icon;
                       break;
                     }
@@ -272,7 +315,9 @@ class AccountFormFields extends StatelessWidget {
 
   Widget _buildAddFieldButton(BuildContext context) {
     return OutlinedButton.icon(
-      style: OutlinedButton.styleFrom(side: BorderSide(color: Theme.of(context).colorScheme.primary)),
+      style: OutlinedButton.styleFrom(
+        side: BorderSide(color: Theme.of(context).colorScheme.primary),
+      ),
       onPressed: onAddField,
       icon: const Icon(Icons.add),
       label: Text(context.trCreateAccount(CreateAccountText.addField)),

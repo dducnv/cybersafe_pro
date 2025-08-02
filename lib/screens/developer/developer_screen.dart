@@ -2,7 +2,8 @@ import 'dart:developer';
 
 import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/providers/home_provider.dart';
-import 'package:cybersafe_pro/services/data_manager_service_new.dart';
+import 'package:cybersafe_pro/screens/pin_code_widget/pin_code_widget.dart';
+import 'package:cybersafe_pro/services/data_manager_service.dart';
 import 'package:cybersafe_pro/utils/toast_noti.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +23,7 @@ class DeveloperScreen extends StatelessWidget {
             children: [
               ElevatedButton(
                 onPressed: () async {
-                  bool deleteAllResult = await DataManagerServiceNew.deleteAllData(context);
+                  bool deleteAllResult = await DataManagerService.deleteAllData();
                   log(deleteAllResult.toString());
                   context.read<HomeProvider>().refreshData(clearCategory: true);
                 },
@@ -30,7 +31,7 @@ class DeveloperScreen extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  bool backUpResult = await DataManagerServiceNew.backupData(context, "123456");
+                  bool backUpResult = await DataManagerService.backupData(context, "123456");
                   log(backUpResult.toString());
                 },
                 child: const Text("backup"),
@@ -38,7 +39,7 @@ class DeveloperScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () async {
                   showLoadingDialog();
-                  bool restoreResult = await DataManagerServiceNew.restoreBackup(context, "123456");
+                  bool restoreResult = await DataManagerService.restoreBackup(context, "123456");
                   log(restoreResult.toString());
                   if (restoreResult) {
                     context.read<HomeProvider>().refreshData(clearCategory: true);
@@ -51,10 +52,10 @@ class DeveloperScreen extends StatelessWidget {
                 },
                 child: const Text("restore"),
               ),
-                 ElevatedButton(
+              ElevatedButton(
                 onPressed: () async {
                   showLoadingDialog();
-                  bool restoreResult = await DataManagerServiceNew.importDataFromBrowser();
+                  bool restoreResult = await DataManagerService.importDataFromBrowser();
                   log(restoreResult.toString());
                   if (restoreResult) {
                     context.read<HomeProvider>().refreshData(clearCategory: true);
@@ -66,6 +67,16 @@ class DeveloperScreen extends StatelessWidget {
                   }
                 },
                 child: const Text("IMPORT FROM CHROME"),
+              ),
+
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => PinCodeWidget(hintText: "Nhập mã pin")),
+                  );
+                },
+                child: const Text("Pincode"),
               ),
             ],
           ),

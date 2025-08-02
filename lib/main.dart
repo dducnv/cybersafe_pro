@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
+import 'package:cybersafe_pro/migrate_data/migrate_from_old_data.dart';
 import 'package:cybersafe_pro/my_app.dart';
 import 'package:cybersafe_pro/providers/provider.dart';
 import 'package:cybersafe_pro/providers/theme_provider.dart';
@@ -113,7 +114,7 @@ Future<void> initApp() async {
     final countryCode = defaultLocale.split('_').last;
     initialLocale = Locale(languageCode, countryCode);
   }
-
+  await MigrateFromOldData.startMigrate();
   await initializeDateFormatting(initialLocale.toString(), null);
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   runApp(MultiProvider(providers: ListProvider.providers, child: ScreenSizeObserver(child: MyApp(initialRoute: initialRoute, initialLocale: initialLocale))));

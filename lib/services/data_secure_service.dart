@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cybersafe_pro/encrypt/argon2/secure_argon2.dart';
 import 'package:cybersafe_pro/encrypt/ase_256/secure_ase256.dart';
 import 'package:cybersafe_pro/encrypt/key_manager.dart';
+import 'package:cybersafe_pro/utils/logger.dart';
 
 class DataSecureService {
   static Future<String> encryptInfo(String value) async {
@@ -166,6 +167,122 @@ class DataSecureService {
     return results;
   }
 
+  static Future<void> preWarmKeys() async {
+    try {
+      await Future.wait([
+        KeyManager.getKey(KeyType.info),
+        KeyManager.getKey(KeyType.password),
+        KeyManager.getKey(KeyType.totp),
+        KeyManager.getKey(KeyType.note),
+        KeyManager.getKey(KeyType.pinCode),
+        KeyManager.getKey(KeyType.database),
+      ]);
+    } catch (e) {
+      throw Exception('Failed to pre-warm keys: $e');
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> batchEncryptAccountsData(List<Map<String, dynamic>> accountsData) async {
+    if (accountsData.isEmpty) return [];
+
+    try {
+      // Không sử dụng compute() vì SecureArgon2 cần KeyManager trong main isolate
+      // Thay vào đó xử lý batch trong main isolate với Future.wait()
+      await preWarmKeys();
+
+      const batchSize = 20;
+      final results = <Map<String, dynamic>>[];
+
+      for (int i = 0; i < accountsData.length; i += batchSize) {
+        final end = (i + batchSize < accountsData.length) ? i + batchSize : accountsData.length;
+        final batch = accountsData.sublist(i, end);
+
+        // Xử lý batch song song trong main isolate
+        final batchResults = await Future.wait(batch.map((accountData) => _encryptSingleAccount(accountData)));
+
+        results.addAll(batchResults);
+
+        // Delay nhỏ để không block UI
+        if (i + batchSize < accountsData.length) {
+          await Future.delayed(const Duration(milliseconds: 1));
+        }
+      }
+
+      return results;
+    } catch (e) {
+      throw Exception('Failed to batch encrypt accounts: $e');
+    }
+  }
+
+  /// Encrypt single account trong main isolate
+  static Future<Map<String, dynamic>> _encryptSingleAccount(Map<String, dynamic> accountData) async {
+    try {
+      final encryptedAccount = <String, dynamic>{
+        'title': await encryptInfo(accountData['title']?.toString() ?? ''),
+        'username': await encryptInfo(accountData['email']?.toString() ?? ''),
+        'password': await encryptPassword(accountData['password']?.toString() ?? ''),
+        'notes': await encryptInfo(accountData['notes']?.toString() ?? ''),
+        'icon': accountData['icon'] ?? 'account_circle',
+        'categoryId': accountData['categoryId'] ?? 0,
+        'iconCustomId': accountData['iconCustomId'],
+        'createdAt': accountData['createdAt'] != null ? DateTime.tryParse(accountData['createdAt']) : DateTime.now(),
+        'updatedAt': accountData['updatedAt'] != null ? DateTime.tryParse(accountData['updatedAt']) : DateTime.now(),
+        'passwordUpdatedAt': accountData['passwordUpdatedAt'] != null ? DateTime.tryParse(accountData['passwordUpdatedAt']) : DateTime.now(),
+      };
+
+      // Encrypt custom fields
+      final customFields = <Map<String, dynamic>>[];
+      if (accountData['customFields'] != null && accountData['customFields'] is List) {
+        for (final field in accountData['customFields'] as List) {
+          if (field is Map<String, dynamic>) {
+            final isPassword = field['typeField'] == 'password';
+            final encryptedValue = isPassword ? await encryptPassword(field['value']?.toString() ?? '') : await encryptInfo(field['value']?.toString() ?? '');
+
+            customFields.add({'name': field['name'] ?? '', 'value': encryptedValue, 'hintText': field['hintText'] ?? '', 'typeField': field['typeField'] ?? 'text'});
+          }
+        }
+      }
+      encryptedAccount['customFields'] = customFields;
+
+      // Encrypt TOTP
+      if (accountData['totp'] != null && accountData['totp'] is Map<String, dynamic>) {
+        final totpData = accountData['totp'] as Map<String, dynamic>;
+        encryptedAccount['totp'] = {'secretKey': await encryptTOTPKey(totpData['secretKey']?.toString() ?? ''), 'isShowToHome': totpData['isShowToHome'] ?? false};
+      }
+
+      // Encrypt password histories
+      final passwordHistories = <Map<String, dynamic>>[];
+      if (accountData['passwordHistories'] != null && accountData['passwordHistories'] is List) {
+        for (final history in accountData['passwordHistories'] as List) {
+          if (history is Map<String, dynamic>) {
+            passwordHistories.add({'password': await encryptPassword(history['password']?.toString() ?? ''), 'createdAt': history['createdAt']});
+          }
+        }
+      }
+      encryptedAccount['passwordHistories'] = passwordHistories;
+
+      return encryptedAccount;
+    } catch (e) {
+      logError('Error encrypting single account: $e', functionName: 'DataSecureService._encryptSingleAccount');
+      // Return empty data if encryption fails
+      return {
+        'title': '',
+        'username': '',
+        'password': '',
+        'notes': '',
+        'icon': accountData['icon'] ?? 'account_circle',
+        'categoryId': accountData['categoryId'] ?? 0,
+        'iconCustomId': accountData['iconCustomId'],
+        'customFields': [],
+        'totp': null,
+        'passwordHistories': [],
+        'createdAt': DateTime.now(),
+        'updatedAt': DateTime.now(),
+        'passwordUpdatedAt': DateTime.now(),
+      };
+    }
+  }
+
   static String encryptData({required String value, required String key}) {
     if (value.isEmpty || key.isEmpty) return "";
     try {
@@ -185,7 +302,4 @@ class DataSecureService {
       throw Exception('Failed to decrypt data: $e');
     }
   }
-
-
-  
 }

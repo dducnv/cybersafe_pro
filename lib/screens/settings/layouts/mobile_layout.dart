@@ -15,9 +15,11 @@ import 'package:cybersafe_pro/screens/settings/widgets/set_theme_color.dart';
 import 'package:cybersafe_pro/screens/settings/widgets/set_theme_mode_widget.dart';
 import 'package:cybersafe_pro/screens/settings/widgets/use_biometric_login.dart';
 import 'package:cybersafe_pro/services/data_manager_service.dart';
+import 'package:cybersafe_pro/services/old_encrypt_method/data_manager_service_old.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/utils/toast_noti.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/app_custom_switch/app_custom_switch.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
@@ -109,52 +111,51 @@ class SettingMobileLayout extends StatelessWidget {
                 // ),
                 const SizedBox(height: 16),
                 Padding(padding: const EdgeInsets.only(left: 16), child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.backup), style: settingTitleCardStyle)),
-                const SizedBox(height: 5),
-                if (!AppConfig.isProApp && !Platform.isMacOS && !Platform.isWindows)
-                  SettingItemWidget(
-                    isGradientBg: true,
-                    titleStyle: settingTitleItemStyle.copyWith(color: Colors.white),
-                    title: context.appLocale.settingsLocale.getText(SettingsLocale.transferData),
-                    icon: Icons.import_export_rounded,
-                    onTap: () async {
-                      showAppCustomDialog(
-                        context,
-                        AppCustomDialog(
-                          title: context.trSafe(SettingsLocale.transferData),
-                          message: context.trSafe(SettingsLocale.transferDataMessage),
-                          confirmText: context.trSafe(SettingsLocale.confirm),
-                          canConfirmInitially: true,
-                          cancelText: context.trSafe(SettingsLocale.cancel),
-                          onConfirm: () async {
-                            try {
-                              bool checkUri = await canLaunchUrlString("cybersafepro://transfer");
-                              if (checkUri) {
-                                DataManagerService.transferData(context);
-                              } else {
-                                openUrl(AppConfig.proPlayStoreUrl, context: context);
-                              }
-                            } catch (e) {
-                              logError(e.toString());
-                            }
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                const SizedBox(height: 5),
+                // const SizedBox(height: 5),
+                // if (!AppConfig.isProApp && !Platform.isMacOS && !Platform.isWindows)
+                //   SettingItemWidget(
+                //     isGradientBg: true,
+                //     titleStyle: settingTitleItemStyle.copyWith(color: Colors.white),
+                //     title: context.appLocale.settingsLocale.getText(SettingsLocale.transferData),
+                //     icon: Icons.import_export_rounded,
+                //     onTap: () async {
+                //       showAppCustomDialog(
+                //         context,
+                //         AppCustomDialog(
+                //           title: context.trSafe(SettingsLocale.transferData),
+                //           message: context.trSafe(SettingsLocale.transferDataMessage),
+                //           confirmText: context.trSafe(SettingsLocale.confirm),
+                //           canConfirmInitially: true,
+                //           cancelText: context.trSafe(SettingsLocale.cancel),
+                //           onConfirm: () async {
+                //             try {
+                //               bool checkUri = await canLaunchUrlString("cybersafepro://transfer");
+                //               if (checkUri) {
+                //                 DataManagerServiceOld.transferData(context);
+                //               } else {
+                //                 openUrl(AppConfig.proPlayStoreUrl, context: context);
+                //               }
+                //             } catch (e) {
+                //               logError(e.toString());
+                //             }
+                //           },
+                //         ),
+                //       );
+                //     },
+                //   ),
+
+                // const SizedBox(height: 5),
                 SettingItemWidget(
                   title: context.appLocale.settingsLocale.getText(SettingsLocale.importDataFromBrowser),
                   icon: Icons.browser_updated_rounded,
-                  onTap: () {
-                    DataManagerService.importDataFromBrowser(context);
-                  },
+                  onTap: () => _importDataFromBrowser(context),
                 ),
                 const SizedBox(height: 5),
                 SettingItemWidget(
                   title: context.appLocale.settingsLocale.getText(SettingsLocale.backupData),
                   icon: Icons.upload_file,
                   onTap: () async {
-                    if (!DataManagerService.checkData(context)) {
+                    if (!DataManagerServiceOld.checkData(context)) {
                       showToast(context.trSafe(SettingsLocale.dataIsEmpty), context: context);
                       return;
                     }
@@ -167,7 +168,7 @@ class SettingMobileLayout extends StatelessWidget {
                             callBackLoginCallback: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
                               if (isLoginSuccess == true && pin != null) {
                                 Navigator.of(context).pop();
-                                await DataManagerService.backupData(GlobalKeys.appRootNavigatorKey.currentContext!, pin);
+                                await DataManagerServiceOld.backupData(GlobalKeys.appRootNavigatorKey.currentContext!, pin);
                               }
                             },
                           );
@@ -181,7 +182,7 @@ class SettingMobileLayout extends StatelessWidget {
                   title: context.appLocale.settingsLocale.getText(SettingsLocale.restore),
                   icon: Icons.restore,
                   onTap: () async {
-                    await DataManagerService.restoreData(context).then((value) {
+                    await DataManagerServiceOld.restoreData(context).then((value) {
                       if (!value) {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.trSafe('Data restore failed')), backgroundColor: Colors.red, duration: const Duration(seconds: 3)));
                         return;
@@ -201,7 +202,7 @@ class SettingMobileLayout extends StatelessWidget {
                   suffix: Icon(Icons.delete, color: Theme.of(context).colorScheme.error, size: 24.sp),
                   titleStyle: settingTitleItemStyle.copyWith(color: Theme.of(context).colorScheme.error),
                   onTap: () async {
-                    await DataManagerService.deleteAllDataPopup(context: context);
+                    await DataManagerServiceOld.deleteAllDataPopup(context: context);
                   },
                 ),
               ],
@@ -293,5 +294,43 @@ class SettingMobileLayout extends StatelessWidget {
         );
       },
     );
+  }
+
+  void _handleBackupData(BuildContext context) async {
+    if (!context.read<AccountProvider>().accounts.isNotEmpty) {
+      showToast(context.trSafe(SettingsLocale.dataIsEmpty), context: context);
+      return;
+    }
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          return LoginMasterPassword(
+            isFromBackup: true,
+            showBiometric: false,
+            callBackLoginCallback: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
+              if (isLoginSuccess == true && pin != null) {
+                Navigator.of(context).pop();
+                await DataManagerService.backupData(GlobalKeys.appRootNavigatorKey.currentContext!, pin);
+              }
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  void _importDataFromBrowser(BuildContext context) async {
+    try {
+      final result = await DataManagerService.importDataFromBrowser();
+      if (!context.mounted) return;
+      if (result) {
+        showToastSuccess("Import data from browser success", context: context);
+        context.read<HomeProvider>().refreshData(clearCategory: true);
+      } else {
+        showToastError("Import data from browser failed", context: context);
+      }
+    } catch (e) {
+      if (context.mounted) showToastError("Backup failed", context: context);
+    }
   }
 }

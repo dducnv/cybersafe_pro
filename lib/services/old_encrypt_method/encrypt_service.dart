@@ -339,4 +339,10 @@ class EncryptService {
       }
     }
   }
+
+  void clearAllKey() {
+    _derivedKeyCache.clear();
+    _encrypterCache.clear();
+    _decryptionResultCache.clear();
+  }
 }

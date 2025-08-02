@@ -1,4 +1,4 @@
-import 'package:cybersafe_pro/repositories/driff_db/DAO/account_dao_model.dart';
+import 'package:cybersafe_pro/repositories/driff_db/models/account_aggregate.dart';
 import 'package:cybersafe_pro/services/account/account_services.dart';
 import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:flutter/material.dart';

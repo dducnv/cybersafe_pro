@@ -7,6 +7,7 @@ import 'package:cybersafe_pro/localization/keys/onboarding_text.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/resources/app_config.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
+import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
@@ -37,6 +38,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
 
   void initialization() async {
     FlutterNativeSplash.remove();
+    DataSecureService.preWarmKeys();
   }
 
   @override

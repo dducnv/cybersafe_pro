@@ -1,5 +1,5 @@
 import 'package:cybersafe_pro/providers/account_form_provider.dart';
-import 'package:cybersafe_pro/repositories/driff_db/DAO/account_dao_model.dart';
+import 'package:cybersafe_pro/repositories/driff_db/models/account_aggregate.dart';
 import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 import 'package:cybersafe_pro/resources/brand_logo.dart';

@@ -53,4 +53,6 @@ class SecureStorageKey {
   static const String devicePerformanceTestTime = '@device_performance_test_time';
   static const String securityViolationCount = '@security_violation_count';
   static const String lastSecurityViolationTime = '@last_security_violation_time';
+
+  static const String isMigrateOldData = '3e36bc68f4ae416621fbf6569cd2686d';
 }

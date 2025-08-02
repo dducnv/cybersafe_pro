@@ -1,4 +1,4 @@
-import 'package:cybersafe_pro/repositories/driff_db/DAO/account_dao_model.dart';
+import 'package:cybersafe_pro/repositories/driff_db/models/account_aggregate.dart';
 import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 import 'package:cybersafe_pro/services/data_secure_service.dart';
@@ -177,29 +177,63 @@ class AccountServices {
         }
       }
 
-      // Xử lý tất cả account trong một transaction
-      await DriffDbManager.instance.transaction(() async {
-        for (var aggregate in accountAggregates) {
-          final categoryId = processedCategories[aggregate.category.categoryName]!;
-          int? iconId;
-          
-          if (aggregate.iconCustom != null && aggregate.iconCustom!.name.isNotEmpty) {
-            iconId = processedIcons[aggregate.iconCustom!.name];
-          }
-
-          await DriffDbManager.instance.createAccountWithEncriptData(
-            account: aggregate.account.toCompanion(true).copyWith(
-              categoryId: Value(categoryId), 
-              iconCustomId: iconId != null ? Value(iconId) : const Value.absent()
-            ),
-            customFields: aggregate.customFields.map((e) => e.toCompanion(true)).toList(),
-            totp: aggregate.totp?.toCompanion(true),
-            passwordHistories: aggregate.passwordHistories?.map((e) => e.toCompanion(true)).toList(),
-          );
-        }
-      });
+      // Convert aggregates to data format for batch processing
+      final accountsData = <Map<String, dynamic>>[];
       
-      return true;
+      for (var aggregate in accountAggregates) {
+        final categoryId = processedCategories[aggregate.category.categoryName]!;
+        int? iconId;
+        
+        if (aggregate.iconCustom != null && aggregate.iconCustom!.name.isNotEmpty) {
+          iconId = processedIcons[aggregate.iconCustom!.name];
+        }
+
+        // Convert AccountAggregate to Map format
+        final accountData = <String, dynamic>{
+          'title': aggregate.account.title,
+          'email': aggregate.account.username ?? '',
+          'password': aggregate.account.password ?? '',
+          'notes': aggregate.account.notes ?? '',
+          'icon': aggregate.account.icon ?? 'default',
+          'categoryId': categoryId,
+          'iconCustomId': iconId,
+          'createdAt': aggregate.account.createdAt.toIso8601String(),
+          'updatedAt': aggregate.account.updatedAt.toIso8601String(),
+          'passwordUpdatedAt': aggregate.account.passwordUpdatedAt?.toIso8601String(),
+        };
+
+        // Add custom fields
+        if (aggregate.customFields.isNotEmpty) {
+          accountData['customFields'] = aggregate.customFields.map((field) => {
+            'name': field.name,
+            'value': field.value,
+            'hintText': field.hintText,
+            'typeField': field.typeField,
+          }).toList();
+        }
+
+        // Add TOTP
+        if (aggregate.totp != null) {
+          accountData['totp'] = {
+            'secretKey': aggregate.totp!.secretKey,
+            'isShowToHome': aggregate.totp!.isShowToHome,
+          };
+        }
+
+        // Add password histories
+        if (aggregate.passwordHistories != null && aggregate.passwordHistories!.isNotEmpty) {
+          accountData['passwordHistories'] = aggregate.passwordHistories!.map((history) => {
+            'password': history.password,
+            'createdAt': history.createdAt.toIso8601String(),
+          }).toList();
+        }
+
+        accountsData.add(accountData);
+      }
+
+      // Use batch create method for better performance
+      final results = await DriffDbManager.instance.batchCreateAccountsWithEncryptData(accountsData);
+      return results.length == accountAggregates.length;
     } catch (e) {
       logError('Error saving accounts from account aggregates: $e');
       return false;
