@@ -50,10 +50,10 @@ dependencies:
   flutter_svg: ^2.0.17
   file_picker: ^9.2.1
   app_links: ^6.4.0
+  fuzzywuzzy: ^1.2.0
   characters: ^1.4.0
   image_picker: ^1.1.2
   numberpicker: ^2.1.2
-  flutter_sharing_intent: ^1.1.1
   desktop_window: ^0.4.2
   in_app_review: ^2.0.10
   pin_code_fields: ^8.0.1
@@ -64,8 +64,9 @@ dependencies:
   permission_handler: ^11.4.0
   shared_preferences: ^2.5.2
   flutter_styled_toast: ^2.2.1
-  qr_code_scanner_plus: ^2.0.10+1
   flutter_native_splash: ^2.4.5
+  qr_code_scanner_plus: ^2.0.10+1
+  flutter_sharing_intent: ^1.1.1
   password_strength_checker: ^1.2.4
   flutter_staggered_animations: ^1.1.1
 dev_dependencies:

@@ -41,6 +41,20 @@ class CategoryAdapter {
     }
   }
 
+  Future<List<CategoryDriftModelData>> getByIds(List<int> ids) async {
+    try {
+      // Nếu danh sách rỗng, trả về ngay để tránh query lỗi
+      if (ids.isEmpty) return [];
+
+      final query = _database.select(_database.categoryDriftModel)..where((t) => t.id.isIn(ids));
+
+      return await query.get();
+    } catch (e) {
+      logError('Error getting custom icons by IDs: $e');
+      return [];
+    }
+  }
+
   /// lấy theo accountId
   Future<List<CategoryDriftModelData>> getByAccountId(int accountId) async {
     try {
@@ -197,16 +211,16 @@ class CategoryAdapter {
       await _database.transaction(() async {
         // Delete all TOTPs first
         await _database.delete(_database.tOTPDriftModel).go();
-        
+
         // Delete all Custom Fields
         await _database.delete(_database.accountCustomFieldDriftModel).go();
-        
+
         // Delete all Password History
         await _database.delete(_database.passwordHistoryDriftModel).go();
-        
+
         // Delete all accounts
         await _database.delete(_database.accountDriftModel).go();
-        
+
         // Finally delete all categories
         await _database.delete(_database.categoryDriftModel).go();
       });
@@ -353,24 +367,24 @@ class CategoryAdapter {
     try {
       final query = _database.select(_database.accountDriftModel)..where((t) => t.categoryId.equals(categoryId));
       final accounts = await query.get();
-      
+
       if (accounts.isNotEmpty) {
         final accountIds = accounts.map((a) => a.id).toList();
-        
+
         await _database.transaction(() async {
           // Delete related TOTPs for all accounts in category
           await (_database.delete(_database.tOTPDriftModel)..where((tbl) => tbl.accountId.isIn(accountIds))).go();
-          
+
           // Delete related Custom Fields for all accounts in category
           await (_database.delete(_database.accountCustomFieldDriftModel)..where((tbl) => tbl.accountId.isIn(accountIds))).go();
-          
+
           // Delete Password History for all accounts in category
           await (_database.delete(_database.passwordHistoryDriftModel)..where((tbl) => tbl.accountId.isIn(accountIds))).go();
-          
+
           // Finally delete all accounts in category
           await (_database.delete(_database.accountDriftModel)..where((tbl) => tbl.id.isIn(accountIds))).go();
         });
-        
+
         logInfo('Deleted ${accounts.length} accounts and related data from category $categoryId');
       }
     } catch (e) {

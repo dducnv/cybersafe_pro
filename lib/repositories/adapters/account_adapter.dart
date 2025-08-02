@@ -13,10 +13,12 @@ class AccountAdapter {
   Future<int> insertAccount(AccountDriftModelCompanion data) async {
     final account = AccountDriftModelCompanion.insert(
       title: data.title.value,
+      icon: data.icon.present ? Value(data.icon.value) : const Value.absent(),
       username: data.username.present ? Value(data.username.value) : const Value.absent(),
       password: data.password.present ? Value(data.password.value) : const Value.absent(),
       notes: data.notes.present ? Value(data.notes.value) : const Value.absent(),
       categoryId: data.categoryId.value,
+      iconCustomId: data.iconCustomId.present ? Value(data.iconCustomId.value) : const Value.absent(),
     );
     final id = await _database.accountDriftModel.insertOne(account);
     return id;
@@ -388,17 +390,17 @@ class AccountAdapter {
       await _database.transaction(() async {
         // Delete related TOTP first
         await (_database.delete(_database.tOTPDriftModel)..where((tbl) => tbl.accountId.equals(id))).go();
-        
+
         // Delete related Custom Fields
         await (_database.delete(_database.accountCustomFieldDriftModel)..where((tbl) => tbl.accountId.equals(id))).go();
-        
+
         // Delete Password History
         await (_database.delete(_database.passwordHistoryDriftModel)..where((tbl) => tbl.accountId.equals(id))).go();
-        
+
         // Finally delete the account itself
         await (_database.delete(_database.accountDriftModel)..where((tbl) => tbl.id.equals(id))).go();
       });
-      
+
       return true;
     } catch (e) {
       logError('Error deleting account with relations: $e');
@@ -412,17 +414,17 @@ class AccountAdapter {
       await _database.transaction(() async {
         // Delete related TOTPs for all accounts
         await (_database.delete(_database.tOTPDriftModel)..where((tbl) => tbl.accountId.isIn(ids))).go();
-        
+
         // Delete related Custom Fields for all accounts
         await (_database.delete(_database.accountCustomFieldDriftModel)..where((tbl) => tbl.accountId.isIn(ids))).go();
-        
+
         // Delete Password History for all accounts
         await (_database.delete(_database.passwordHistoryDriftModel)..where((tbl) => tbl.accountId.isIn(ids))).go();
-        
+
         // Finally delete all accounts
         await (_database.delete(_database.accountDriftModel)..where((tbl) => tbl.id.isIn(ids))).go();
       });
-      
+
       return ids.length; // Return the number of accounts that were supposed to be deleted
     } catch (e) {
       logError('Error deleting many accounts with relations: $e');
@@ -436,13 +438,13 @@ class AccountAdapter {
       await _database.transaction(() async {
         // Delete all TOTPs first
         await _database.delete(_database.tOTPDriftModel).go();
-        
+
         // Delete all Custom Fields
         await _database.delete(_database.accountCustomFieldDriftModel).go();
-        
+
         // Delete all Password History
         await _database.delete(_database.passwordHistoryDriftModel).go();
-        
+
         // Finally delete all accounts
         await _database.delete(_database.accountDriftModel).go();
       });

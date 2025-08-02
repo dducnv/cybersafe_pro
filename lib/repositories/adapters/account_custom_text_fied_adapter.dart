@@ -47,6 +47,16 @@ class AccountCustomFieldAdapter {
     }
   }
 
+  Future<List<AccountCustomFieldDriftModelData>> getByAccountIds(List<int> accountIds) async {
+    try {
+      final query = _database.select(_database.accountCustomFieldDriftModel)..where((t) => t.accountId.isIn(accountIds));
+      return await query.get();
+    } catch (e) {
+      logError('Error getting TOTP by account ID: $e');
+      return [];
+    }
+  }
+
   /// Lấy custom field theo ID
   Future<AccountCustomFieldDriftModelData?> getById(int id) async {
     try {

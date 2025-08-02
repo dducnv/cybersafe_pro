@@ -198,6 +198,15 @@ class AccountFormFields extends StatelessWidget {
                 textInputAction: TextInputAction.done,
                 textAlign: TextAlign.start,
                 textInputType: TextInputType.text,
+                onTapUpOutside: (event) {
+                  if (formProvider.otpController.text.isNotEmpty) {
+                    if (OTP.isKeyValid(formProvider.otpController.text)) {
+                      formProvider.handleAddTOTP();
+                    } else {
+                      formProvider.otpError = context.trSafe(CreateAccountText.otpError);
+                    }
+                  }
+                },
                 onFieldSubmitted: (value) {
                   if (value.isNotEmpty) {
                     if (OTP.isKeyValid(value)) {

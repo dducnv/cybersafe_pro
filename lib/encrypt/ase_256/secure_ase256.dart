@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
@@ -17,12 +18,7 @@ class SecureAse256 {
   static const int _hmacKeyLength = config.EncryptionConfig.HMAC_KEY_LENGTH;
 
   // HKDF implementation for key derivation
-  static Uint8List _hkdf({
-    required Uint8List inputKeyMaterial,
-    required Uint8List salt,
-    required Uint8List info,
-    required int length,
-  }) {
+  static Uint8List _hkdf({required Uint8List inputKeyMaterial, required Uint8List salt, required Uint8List info, required int length}) {
     if (length > 255 * 32) {
       throw ArgumentError('Output length too large for HKDF');
     }
@@ -49,31 +45,32 @@ class SecureAse256 {
 
   // Generate secure salt for each encryption operation
   static Uint8List _generateSalt() {
-    final random = pc.SecureRandom('Fortuna');
-    
-    // Seed with multiple entropy sources
+    // Use multiple entropy sources
     final entropy = <int>[];
     entropy.addAll(utf8.encode(DateTime.now().toIso8601String()));
     entropy.addAll(utf8.encode(DateTime.now().microsecondsSinceEpoch.toString()));
-    
-    // Ensure entropy is exactly 32 bytes (256 bits) for Fortuna
+
+    // Ensure entropy is exactly 32 bytes (256 bits)
     final entropyBytes = Uint8List.fromList(sha256.convert(Uint8List.fromList(entropy)).bytes);
-    
-    random.seed(pc.KeyParameter(entropyBytes));
-    return random.nextBytes(_saltLength);
+
+    // Use entropyBytes to seed our random generation
+    final result = Uint8List(_saltLength);
+    final random = Random.secure();
+
+    // Mix entropy with secure random
+    for (int i = 0; i < _saltLength; i++) {
+      result[i] = (random.nextInt(256) ^ entropyBytes[i % entropyBytes.length]);
+    }
+
+    return result;
   }
 
   // Derive HMAC key using HKDF
   static Uint8List _deriveHmacKey(Uint8List masterKey, String purpose) {
     final salt = Uint8List(_saltLength); // Zero salt for HKDF
     final info = utf8.encode('${config.EncryptionConfig.KEY_PURPOSES['hmac']}_$purpose');
-    
-    return _hkdf(
-      inputKeyMaterial: masterKey,
-      salt: salt,
-      info: Uint8List.fromList(info),
-      length: _hmacKeyLength,
-    );
+
+    return _hkdf(inputKeyMaterial: masterKey, salt: salt, info: Uint8List.fromList(info), length: _hmacKeyLength);
   }
 
   // Create HMAC for integrity check
@@ -91,7 +88,7 @@ class SecureAse256 {
   // Constant time string comparison to prevent timing attacks
   static bool _constantTimeEquals(String a, String b) {
     if (a.length != b.length) return false;
-    
+
     var result = 0;
     for (int i = 0; i < a.length; i++) {
       result |= a.codeUnitAt(i) ^ b.codeUnitAt(i);
@@ -102,13 +99,13 @@ class SecureAse256 {
   // Generate secure IV
   static enc.IV _generateIV() {
     final random = pc.SecureRandom('Fortuna');
-    
+
     // Seed with multiple entropy sources
     final entropy = utf8.encode(DateTime.now().microsecondsSinceEpoch.toString());
-    
+
     // Ensure entropy is exactly 32 bytes (256 bits) for Fortuna
     final entropyBytes = Uint8List.fromList(sha256.convert(Uint8List.fromList(entropy)).bytes);
-    
+
     random.seed(pc.KeyParameter(entropyBytes));
     return enc.IV(random.nextBytes(_ivLength));
   }
@@ -131,19 +128,17 @@ class SecureAse256 {
 
       final salt = _generateSalt(); // Salt for HMAC only
       final iv = _generateIV();
-      
+
       // Sử dụng trực tiếp key từ KeyManager (không derive thêm)
       final encKey = enc.Key(Uint8List.fromList(keyBytes));
       final encrypter = enc.Encrypter(enc.AES(encKey, mode: enc.AESMode.gcm));
-      
+
       // Encrypt with associated data if provided
-      final encrypted = associatedData != null
-          ? encrypter.encrypt(value, iv: iv, associatedData: utf8.encode(associatedData))
-          : encrypter.encrypt(value, iv: iv);
+      final encrypted = associatedData != null ? encrypter.encrypt(value, iv: iv, associatedData: utf8.encode(associatedData)) : encrypter.encrypt(value, iv: iv);
 
       // Derive HMAC key using HKDF
       final hmacKey = _deriveHmacKey(Uint8List.fromList(keyBytes), 'encryption');
-      
+
       // Create data for HMAC (include all critical components)
       final dataForHmac = '$value|${base64.encode(salt)}|${base64.encode(iv.bytes)}|${associatedData ?? ''}';
       final integrityHmac = _createHMAC(dataForHmac, hmacKey);
@@ -213,18 +208,16 @@ class SecureAse256 {
       // Direct key usage (no derivation)
       final encKey = enc.Key(keyBytes);
       final encrypter = enc.Encrypter(enc.AES(encKey, mode: enc.AESMode.gcm));
-      
+
       // Decrypt with associated data if provided
-      final decrypted = associatedData != null
-          ? encrypter.decrypt(encrypted, iv: iv, associatedData: utf8.encode(associatedData))
-          : encrypter.decrypt(encrypted, iv: iv);
+      final decrypted = associatedData != null ? encrypter.decrypt(encrypted, iv: iv, associatedData: utf8.encode(associatedData)) : encrypter.decrypt(encrypted, iv: iv);
 
       // Verify integrity
       if (package.containsKey('hmac')) {
         final hmacKey = _deriveHmacKey(Uint8List.fromList(keyBytes), 'encryption');
         final dataForHmac = '$decrypted|${base64.encode(salt)}|${base64.encode(iv.bytes)}|${associatedData ?? ''}';
         final expectedHmac = package['hmac'];
-        
+
         if (!_verifyHMAC(dataForHmac, expectedHmac, hmacKey)) {
           logError("AES256 HMAC integrity check failed", functionName: "SecureAse256.decrypt");
           throw Exception("AES256 HMAC integrity check failed");
@@ -262,20 +255,79 @@ class SecureAse256 {
   static void _secureWipe(Uint8List data) {
     for (int pass = 0; pass < config.EncryptionConfig.MEMORY_WIPE_PASSES; pass++) {
       final random = pc.SecureRandom('Fortuna');
-      
+
       // Seed with multiple entropy sources
       final entropy = utf8.encode(DateTime.now().microsecondsSinceEpoch.toString());
-      
+
       // Ensure entropy is exactly 32 bytes (256 bits) for Fortuna
       final entropyBytes = Uint8List.fromList(sha256.convert(Uint8List.fromList(entropy)).bytes);
-      
+
       random.seed(pc.KeyParameter(entropyBytes));
-      
+
       final randomBytes = random.nextBytes(data.length);
       for (int i = 0; i < data.length; i++) {
         data[i] = randomBytes[i];
       }
     }
     data.fillRange(0, data.length, 0);
+  }
+
+  static List<int> encryptDataBytes({required List<int> data, required String key}) {
+    try {
+      if (data.isEmpty) return [];
+
+      // Decode key từ KeyManager (base64 encoded)
+      final keyBytes = base64.decode(key);
+      if (keyBytes.length != config.EncryptionConfig.KEY_SIZE_BYTES) {
+        throw ArgumentError('Invalid key length: ${keyBytes.length}');
+      }
+
+      final salt = _generateSalt(); // Salt for HMAC only
+      final iv = _generateIV();
+
+      // Sử dụng trực tiếp key từ KeyManager
+      final encKey = enc.Key(Uint8List.fromList(keyBytes));
+      final encrypter = enc.Encrypter(enc.AES(encKey, mode: enc.AESMode.gcm));
+
+      // Mã hóa dữ liệu bytes
+      final encrypted = encrypter.encryptBytes(Uint8List.fromList(data), iv: iv);
+
+      // Tạo combined output: salt + iv + encrypted data
+      final combined = Uint8List(salt.length + iv.bytes.length + encrypted.bytes.length);
+      combined.setAll(0, salt);
+      combined.setAll(salt.length, iv.bytes);
+      combined.setAll(salt.length + iv.bytes.length, encrypted.bytes);
+
+      return combined;
+    } catch (e, stackTrace) {
+      logError("Lỗi mã hóa dữ liệu bytes: $e\n$stackTrace", functionName: "SecureAse256.encryptDataBytes");
+      throw Exception("Lỗi mã hóa dữ liệu bytes: $e");
+    }
+  }
+
+  static List<int> decryptDataBytes({required List<int> encryptedData, required String key}) {
+    try {
+      if (encryptedData.length < _saltLength + _ivLength) {
+        throw Exception("Dữ liệu không hợp lệ");
+      }
+
+      final keyBytes = base64.decode(key);
+      if (keyBytes.length != config.EncryptionConfig.KEY_SIZE_BYTES) {
+        throw ArgumentError('Invalid key length: ${keyBytes.length}');
+      }
+
+      final iv = encryptedData.sublist(_saltLength, _saltLength + _ivLength);
+      final encrypted = encryptedData.sublist(_saltLength + _ivLength);
+
+      final encKey = enc.Key(keyBytes);
+      final encrypter = enc.Encrypter(enc.AES(encKey, mode: enc.AESMode.gcm));
+
+      final decrypted = encrypter.decryptBytes(enc.Encrypted(Uint8List.fromList(encrypted)), iv: enc.IV(Uint8List.fromList(iv)));
+
+      return decrypted;
+    } catch (e, stackTrace) {
+      logError("Lỗi giải mã dữ liệu bytes: $e\n$stackTrace", functionName: "SecureAse256.decryptDataBytes");
+      throw Exception("Lỗi giải mã dữ liệu bytes: $e");
+    }
   }
 }

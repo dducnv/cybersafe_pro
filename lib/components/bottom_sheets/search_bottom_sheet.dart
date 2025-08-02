@@ -69,17 +69,17 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
     // Hủy timer cũ nếu có
     _debounceTimer?.cancel();
     
-    final query = _searchController.text.trim();
+      final query = _searchController.text.trim();
     
     // Clear results immediately if query is empty
-    if (query.isEmpty) {
-      setState(() {
-        _searchResults = [];
-        _isLoading = false;
+      if (query.isEmpty) {
+        setState(() {
+          _searchResults = [];
+          _isLoading = false;
         _lastQuery = '';
-      });
-      return;
-    }
+        });
+        return;
+      }
 
     // Don't search if it's the same query
     if (query == _lastQuery) {
@@ -87,15 +87,15 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
     }
 
     // Show loading state
-    setState(() => _isLoading = true);
+      setState(() => _isLoading = true);
     
     // Tạo timer mới để debounce
     _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
       if (!mounted) return;
       
       try {
-        // Thực hiện tìm kiếm
-        final accountProvider = context.read<AccountProvider>();
+      // Thực hiện tìm kiếm
+      final accountProvider = context.read<AccountProvider>();
         final results = await accountProvider.searchAccounts(query);
         
         if (mounted) {
@@ -110,7 +110,7 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
           setState(() {
             _searchResults = [];
             _isLoading = false;
-          });
+      });
         }
       }
     });

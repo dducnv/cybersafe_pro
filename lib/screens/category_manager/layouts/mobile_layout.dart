@@ -41,43 +41,53 @@ class CategoryManagerMobileLayout extends StatelessWidget {
                 ? Center(child: Image.asset("assets/images/exclamation-mark.png", width: 60.w, height: 60.h))
                 : ClipRRect(
                   borderRadius: BorderRadius.circular(25),
-                  child: ReorderableListView.builder(
-                    shrinkWrap: true,
-                    onReorderEnd: (index) {},
-                    padding: EdgeInsets.all(16),
-                    itemBuilder: (BuildContext context, int index) {
-                      var category = categoryProvider.item1[index];
-                      return Padding(
-                        key: ValueKey(category.indexPos),
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: CardCustomWidget(
-                          padding: const EdgeInsets.all(12),
-                          child: Row(
-                            children: [
-                              Expanded(child: Text("${category.categoryName} (${accountProvider.mapCategoryIdTotalAccount[category.id] ?? 0})", style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w500))),
-                              IconButton(
-                                onPressed: () {
-                                  showCreateCategoryBottomSheet(context, isUpdate: true, categoryDriftModelData: category);
-                                },
-                                icon: Icon(Icons.edit_note_rounded, size: 21.sp),
-                              ),
-                              IconButton(
-                                onPressed: () {
-                                  _showDeleteCategoryPopup(context: context, category: category);
-                                },
-                                icon: Icon(Icons.delete, color: Colors.red[600], size: 21.sp),
-                              ),
-                              SizedBox(width: 20.w),
-                              Icon(Icons.drag_indicator_outlined, size: 21.sp),
-                            ],
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      await context.read<CategoryProvider>().refresh();
+                    },
+                    child: ReorderableListView.builder(
+                      shrinkWrap: true,
+                      onReorderEnd: (index) {},
+                      padding: EdgeInsets.all(16),
+                      itemBuilder: (BuildContext context, int index) {
+                        var category = categoryProvider.item1[index];
+                        return Padding(
+                          key: ValueKey(category.indexPos),
+                          padding: const EdgeInsets.only(bottom: 6),
+                          child: CardCustomWidget(
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    "${category.categoryName} (${accountProvider.mapCategoryIdTotalAccount[category.id] ?? 0})",
+                                    style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w500),
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    showCreateCategoryBottomSheet(context, isUpdate: true, categoryDriftModelData: category);
+                                  },
+                                  icon: Icon(Icons.edit_note_rounded, size: 21.sp),
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    _showDeleteCategoryPopup(context: context, category: category);
+                                  },
+                                  icon: Icon(Icons.delete, color: Colors.red[600], size: 21.sp),
+                                ),
+                                SizedBox(width: 20.w),
+                                Icon(Icons.drag_indicator_outlined, size: 21.sp),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                    itemCount: categoryProvider.item1.length,
-                    onReorder: (int oldIndex, int newIndex) {
-                      context.read<CategoryProvider>().reorderCategory(oldIndex, newIndex);
-                    },
+                        );
+                      },
+                      itemCount: categoryProvider.item1.length,
+                      onReorder: (int oldIndex, int newIndex) {
+                        context.read<CategoryProvider>().reorderCategory(oldIndex, newIndex);
+                      },
+                    ),
                   ),
                 );
           },

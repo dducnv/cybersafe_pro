@@ -70,7 +70,7 @@ class CategoryProvider extends ChangeNotifier {
       // Count accounts for all categories in parallel for better performance
       final categoryIds = categoryList.map((c) => c.id).toList();
       final accountCounts = await DriffDbManager.instance.accountAdapter.countByCategories(categoryIds);
-      
+
       // Update account counts map
       mapCategoryIdTotalAccount.clear();
       for (var category in categoryList) {
@@ -167,15 +167,14 @@ class CategoryProvider extends ChangeNotifier {
   // Helper method để refresh data
   Future<void> refresh() async {
     _categories.clear();
+    mapCategoryIdTotalAccount.clear();
     await getCategories();
     notifyListeners();
   }
 
   void clearAllData() {
     _categories.clear();
-    mapCategoryIdCategory.clear();
-    categories.clear();
-
+    mapCategoryIdTotalAccount.clear();
     notifyListeners();
   }
 }

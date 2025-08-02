@@ -21,8 +21,16 @@ class IconShowComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (account.iconCustomId != null) {
-      final iconCustom = AccountServices.instance.mapCustomIcon[account.iconCustomId!];
+    final branchLogo = allBranchLogos.firstWhere((element) => element.branchLogoSlug == account.icon, orElse: () => BranchLogo([], "default"));
+    final iconCustom = AccountServices.instance.mapCustomIcon[account.iconCustomId];
+    final canShowAppIcon =
+        account.icon != "default" &&
+        account.icon != null &&
+        account.icon!.isNotEmpty &&
+        branchLogo.branchLogoSlug != "default" &&
+        branchLogo.branchLogoPathDarkMode != null &&
+        branchLogo.branchLogoPathLightMode != null;
+    if (account.iconCustomId != null && iconCustom?.imageBase64 != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(10),
         child: Image(
@@ -34,8 +42,7 @@ class IconShowComponent extends StatelessWidget {
           gaplessPlayback: true,
         ),
       );
-    } else if (account.icon != "default" && account.icon != null && account.icon!.isNotEmpty) {
-      final branchLogo = allBranchLogos.firstWhere((element) => element.branchLogoSlug == account.icon, orElse: () => BranchLogo([], "default"));
+    } else if (canShowAppIcon) {
       return SvgPicture.asset(context.darkMode ? branchLogo.branchLogoPathDarkMode! : branchLogo.branchLogoPathLightMode!, width: width ?? 30.h, height: height ?? 30.h);
     } else {
       return Center(

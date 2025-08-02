@@ -3,7 +3,6 @@ import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
-import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/providers/home_provider.dart';
 import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/resources/app_config.dart';
@@ -48,7 +47,9 @@ class _HomeAppBarCustomState extends State<HomeAppBarCustom> {
                   ? IconButton(
                     icon: const Icon(Icons.sort_rounded),
                     onPressed: () {
-                      widget.scaffoldKey?.currentState?.openDrawer();
+                      if (widget.scaffoldKey?.currentState != null) {
+                        widget.scaffoldKey?.currentState?.openDrawer();
+                      }
                     },
                   )
                   : null,

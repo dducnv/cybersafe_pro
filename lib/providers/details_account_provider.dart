@@ -35,7 +35,6 @@ class DetailsAccountProvider extends ChangeNotifier {
       ]);
 
       totpDriftModelData = results[0] as TOTPDriftModelData?;
-      print("results[0]: ${totpDriftModelData.toString()}");
       accountCustomFieldDriftModelData = results[1] as List<AccountCustomFieldDriftModelData>?;
       passwordHistoryDriftModelData = results[2] as List<PasswordHistoryDriftModelData>?;
       categoryDriftModelData = results[3] as CategoryDriftModelData?;

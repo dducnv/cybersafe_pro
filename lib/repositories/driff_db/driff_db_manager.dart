@@ -21,15 +21,23 @@ class DriffDbManager {
   late final IconCustomAdapter iconCustomAdapter;
   late final PasswordHistoryAdapter passwordHistoryAdapter;
   late final TOTPAdapter totpAdapter;
+  DriftSqliteDatabase? _database;
 
   Future<void> init() async {
-    final database = DriftSqliteDatabase();
-    accountAdapter = AccountAdapter(database);
-    accountCustomFieldAdapter = AccountCustomFieldAdapter(database);
-    categoryAdapter = CategoryAdapter(database);
-    iconCustomAdapter = IconCustomAdapter(database);
-    passwordHistoryAdapter = PasswordHistoryAdapter(database);
-    totpAdapter = TOTPAdapter(database);
+    if (_database != null) return;
+    _database = DriftSqliteDatabase();
+    if (_database == null) return;
+    accountAdapter = AccountAdapter(_database!);
+    accountCustomFieldAdapter = AccountCustomFieldAdapter(_database!);
+    categoryAdapter = CategoryAdapter(_database!);
+    iconCustomAdapter = IconCustomAdapter(_database!);
+    passwordHistoryAdapter = PasswordHistoryAdapter(_database!);
+    totpAdapter = TOTPAdapter(_database!);
+  }
+
+  Future<T> transaction<T>(Future<T> Function() action) {
+    _database ??= DriftSqliteDatabase();
+    return _database!.transaction(action);
   }
 
   // ================= CATEGORY =================
@@ -51,6 +59,7 @@ class DriffDbManager {
     required AccountDriftModelCompanion account,
     List<AccountCustomFieldDriftModelCompanion>? customFields,
     TOTPDriftModelCompanion? totp,
+    List<PasswordHistoryDriftModelCompanion>? passwordHistories,
   }) async {
     final futures = await Future.wait([
       DataSecureService.encryptInfo(account.title.value),
@@ -68,7 +77,7 @@ class DriffDbManager {
     );
     final id = await accountAdapter.insertAccount(account);
 
-    if (customFields != null) {
+    if (customFields != null && customFields.isNotEmpty) {
       await Future.wait(customFields.map((customField) => createAccountCustomFieldWithEncriptData(customField: customField, accountId: id)));
     }
 
@@ -76,6 +85,11 @@ class DriffDbManager {
       final encryptedSecretKey = await DataSecureService.encryptTOTPKey(totp.secretKey.value);
       await totpAdapter.insertOrUpdateTOTP(id, encryptedSecretKey, totp.isShowToHome.value);
     }
+
+    if (passwordHistories != null && passwordHistories.isNotEmpty) {
+      await Future.wait(passwordHistories.map((passwordHistory) => passwordHistoryAdapter.insertPasswordHistory(id, passwordHistory.password.value)));
+    }
+
     return await accountAdapter.getById(id);
   }
 
@@ -83,6 +97,7 @@ class DriffDbManager {
     required AccountDriftModelCompanion account,
     List<AccountCustomFieldDriftModelCompanion>? customFields,
     TOTPDriftModelCompanion? totp,
+    List<PasswordHistoryDriftModelCompanion>? passwordHistories,
     String newPassword = "",
   }) async {
     final futures = await Future.wait([

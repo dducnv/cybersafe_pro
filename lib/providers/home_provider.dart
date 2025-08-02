@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:provider/provider.dart';
 import 'dart:math' as math;
+import 'package:cybersafe_pro/utils/logger.dart';
 
 class HomeProvider extends ChangeNotifier {
   late AccountProvider accountProvider;
@@ -21,15 +22,9 @@ class HomeProvider extends ChangeNotifier {
     accountProvider.removeListener(_onAccountProviderChanged);
     super.dispose();
   }
-  
+
   void _onAccountProviderChanged() {
     notifyListeners();
-  }
-
-  /// Refresh category counts when needed
-  Future<void> refreshCategoryCounts() async {
-    final categoryIds = categoryProvider.mapCategoryIdCategory.keys.toList();
-    await accountProvider.getTotalAccountsByCategory(categoryIds: categoryIds);
   }
 
   // ==================== Constants ====================
@@ -57,20 +52,25 @@ class HomeProvider extends ChangeNotifier {
     await AccountServices.instance.getListIconCustom();
     await categoryProvider.getCategories();
     await accountProvider.getLimitAccountsByCategory(mapCategories: categoryProvider.mapCategoryIdCategory, limit: INITIAL_ACCOUNTS_PER_CATEGORY);
-
+    if (categoryProvider.mapCategoryIdCategory.isEmpty) return;
     for (final categoryId in categoryProvider.mapCategoryIdCategory.keys) {
       final totalAccounts = accountProvider.groupedAccountsByCategoryId[categoryId]?.length ?? 0;
       if (totalAccounts > INITIAL_ACCOUNTS_PER_CATEGORY) {
         _visibleAccountsPerCategory[categoryId] = INITIAL_ACCOUNTS_PER_CATEGORY;
       }
     }
-
     notifyListeners();
   }
 
-  Future<void> refreshData() async {
-    clearData();
-    await initData();
+  Future<void> refreshData({bool clearCategory = false}) async {
+    try {
+      clearData(clearCategory: clearCategory);
+      
+      await initData();
+    } catch (e) {
+      notifyListeners();
+      rethrow;
+    }
   }
 
   Map<int, List<AccountDriftModelData>> get groupedAccounts {
@@ -261,10 +261,27 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void clearData() {
-    _expandedCategories.clear();
-    _visibleAccountsPerCategory.clear();
-    accountSelected.clear();
-    notifyListeners();
+  void clearData({bool clearCategory = false}) {
+    try {
+      _expandedCategories.clear();
+      _visibleAccountsPerCategory.clear();
+      
+      // Xóa dữ liệu danh mục nếu cần
+      if (clearCategory) {
+        categoryProvider.clearAllData();
+      }
+      
+      // Xóa các tài khoản đã chọn
+      accountSelected.clear();
+      
+      notifyListeners();
+    } catch (e) {
+      logError('Lỗi khi xóa dữ liệu: $e');
+      // Đảm bảo vẫn xóa được những gì có thể
+      _expandedCategories.clear();
+      _visibleAccountsPerCategory.clear();
+      accountSelected.clear();
+      notifyListeners();
+    }
   }
 }

@@ -40,6 +40,20 @@ class IconCustomAdapter {
     }
   }
 
+  Future<List<IconCustomDriftModelData>> getByIds(List<int> ids) async {
+    try {
+      // Nếu danh sách rỗng, trả về ngay để tránh query lỗi
+      if (ids.isEmpty) return [];
+
+      final query = _database.select(_database.iconCustomDriftModel)..where((t) => t.id.isIn(ids));
+
+      return await query.get();
+    } catch (e) {
+      logError('Error getting custom icons by IDs: $e');
+      return [];
+    }
+  }
+
   /// Tìm custom icon theo tên
   Future<IconCustomDriftModelData?> findByName(String name) async {
     try {
@@ -140,19 +154,15 @@ class IconCustomAdapter {
           variables: [Variable.withInt(id)],
           updates: {_database.accountDriftModel},
         );
-        
+
         logInfo('Updated $updateCount accounts to remove icon reference');
-        
+
         // 2. Xóa icon bằng raw SQL
-        final deleteCount = await _database.customUpdate(
-          'DELETE FROM icon_custom_drift_model WHERE id = ?',
-          variables: [Variable.withInt(id)],
-          updates: {_database.iconCustomDriftModel},
-        );
-        
+        final deleteCount = await _database.customUpdate('DELETE FROM icon_custom_drift_model WHERE id = ?', variables: [Variable.withInt(id)], updates: {_database.iconCustomDriftModel});
+
         logInfo('Deleted $deleteCount icon records');
       });
-      
+
       return true;
     } catch (e) {
       logError('Error deleting custom icon $id: $e');
@@ -171,19 +181,19 @@ class IconCustomAdapter {
           variables: ids.map((id) => Variable.withInt(id)).toList(),
           updates: {_database.accountDriftModel},
         );
-        
+
         logInfo('Updated $updateCount accounts to remove icon references');
-        
+
         // 2. Xóa tất cả icons bằng raw SQL
         final deleteCount = await _database.customUpdate(
           'DELETE FROM icon_custom_drift_model WHERE id IN (${ids.map((_) => '?').join(',')})',
           variables: ids.map((id) => Variable.withInt(id)).toList(),
           updates: {_database.iconCustomDriftModel},
         );
-        
+
         logInfo('Deleted $deleteCount icon records');
       });
-      
+
       return ids.length;
     } catch (e) {
       logError('Error deleting many custom icons: $e');
@@ -197,19 +207,13 @@ class IconCustomAdapter {
       await _database.transaction(() async {
         // Sử dụng raw SQL để bypass foreign key constraints
         // 1. Update accounts để set iconCustomId = NULL
-        final updateCount = await _database.customUpdate(
-          'UPDATE account_drift_model SET icon_custom_id = NULL WHERE icon_custom_id IS NOT NULL',
-          updates: {_database.accountDriftModel},
-        );
-        
+        final updateCount = await _database.customUpdate('UPDATE account_drift_model SET icon_custom_id = NULL WHERE icon_custom_id IS NOT NULL', updates: {_database.accountDriftModel});
+
         logInfo('Updated $updateCount accounts to remove all icon references');
-        
+
         // 2. Xóa tất cả custom icons bằng raw SQL
-        final deleteCount = await _database.customUpdate(
-          'DELETE FROM icon_custom_drift_model',
-          updates: {_database.iconCustomDriftModel},
-        );
-        
+        final deleteCount = await _database.customUpdate('DELETE FROM icon_custom_drift_model', updates: {_database.iconCustomDriftModel});
+
         logInfo('Deleted $deleteCount icon records');
       });
     } catch (e) {
@@ -468,10 +472,11 @@ class IconCustomAdapter {
   /// Kiểm tra xem icon có đang được sử dụng bởi accounts không
   Future<bool> isIconUsed(int iconId) async {
     try {
-      final query = _database.selectOnly(_database.accountDriftModel)
-        ..where(_database.accountDriftModel.iconCustomId.equals(iconId))
-        ..limit(1);
-      
+      final query =
+          _database.selectOnly(_database.accountDriftModel)
+            ..where(_database.accountDriftModel.iconCustomId.equals(iconId))
+            ..limit(1);
+
       final rows = await query.get();
       return rows.isNotEmpty;
     } catch (e) {
@@ -483,10 +488,11 @@ class IconCustomAdapter {
   /// Lấy danh sách accounts đang sử dụng icon
   Future<List<AccountDriftModelData>> getAccountsUsingIcon(int iconId) async {
     try {
-      final query = _database.select(_database.accountDriftModel)
-        ..where((tbl) => tbl.iconCustomId.equals(iconId))
-        ..orderBy([(t) => OrderingTerm.asc(t.title)]);
-      
+      final query =
+          _database.select(_database.accountDriftModel)
+            ..where((tbl) => tbl.iconCustomId.equals(iconId))
+            ..orderBy([(t) => OrderingTerm.asc(t.title)]);
+
       return await query.get();
     } catch (e) {
       logError('Error getting accounts using icon: $e');
@@ -497,9 +503,8 @@ class IconCustomAdapter {
   /// Lấy số lượng accounts đang sử dụng icon
   Future<int> getUsageCount(int iconId) async {
     try {
-      final query = _database.selectOnly(_database.accountDriftModel)
-        ..where(_database.accountDriftModel.iconCustomId.equals(iconId));
-      
+      final query = _database.selectOnly(_database.accountDriftModel)..where(_database.accountDriftModel.iconCustomId.equals(iconId));
+
       final rows = await query.get();
       return rows.length;
     } catch (e) {
@@ -528,12 +533,12 @@ class IconCustomAdapter {
       final usageCount = await getUsageCount(id);
       if (usageCount > 0) {
         logInfo('Icon $id is used by $usageCount accounts. Setting iconCustomId to NULL for these accounts.');
-        
+
         // Lấy danh sách accounts đang sử dụng
         final accounts = await getAccountsUsingIcon(id);
         logInfo('Accounts using icon $id: ${accounts.map((a) => a.title).join(', ')}');
       }
-      
+
       return await delete(id);
     } catch (e) {
       logError('Error in safe delete for icon $id: $e');
@@ -547,14 +552,14 @@ class IconCustomAdapter {
       // Test 1: Kiểm tra foreign key constraints
       final fkResult = await _database.customSelect('PRAGMA foreign_keys').getSingle();
       logInfo('Foreign keys status: ${fkResult.data.values.first}');
-      
+
       // Test 2: Kiểm tra có thể update accounts không
       final testUpdate = await _database.customUpdate(
         'UPDATE account_drift_model SET icon_custom_id = icon_custom_id WHERE icon_custom_id IS NOT NULL LIMIT 1',
         updates: {_database.accountDriftModel},
       );
       logInfo('Test update result: $testUpdate');
-      
+
       return true;
     } catch (e) {
       logError('Test raw SQL operations failed: $e');

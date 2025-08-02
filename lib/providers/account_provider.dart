@@ -7,6 +7,7 @@ import 'package:cybersafe_pro/services/account/account_services.dart';
 import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/services/otp.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
+import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
@@ -24,7 +25,9 @@ class AccountProvider extends ChangeNotifier {
 
   Future<void> getLimitAccountsByCategory({required Map<int, CategoryDriftModelData> mapCategories, required int limit}) async {
     clearData();
+    if (mapCategories.isEmpty) return;
     final categories = mapCategories.values.toList();
+    await getTotalAccountsByCategory(categoryIds: categories.map((e) => e.id).toList());
     final accountsByCategory = await DriffDbManager.instance.accountAdapter.getByCategoriesWithLimit(categories, limit);
     await _processAccountsByCategory(accountsByCategory: accountsByCategory);
   }
@@ -130,34 +133,31 @@ class AccountProvider extends ChangeNotifier {
     final stopwatch = Stopwatch()..start();
 
     if (accountDaoModel.account.title.trim().isEmpty) {
-        throw Exception('Tên tài khoản không được để trống');
-      }
+      throw Exception('Tên tài khoản không được để trống');
+    }
 
     AccountDriftModelData? accountToSave;
-      if (isUpdate) {
-        // Update logic
+    if (isUpdate) {
       AccountDriftModelData? currentAccount = accountDaoModel.account.id != 0 ? await DriffDbManager.instance.accountAdapter.getById(accountDaoModel.account.id) : null;
       if (currentAccount == null) throw Exception('Account not found');
-      
-      // Check if password has changed for password history
+
       String? newPassword;
       final currentPassword = await DataSecureService.decryptPassword(currentAccount.password ?? '');
       final newPasswordFromForm = accountDaoModel.account.password ?? '';
-      
-      // Only save to history if password actually changed and new password is not empty
+
       if (currentPassword != newPasswordFromForm && newPasswordFromForm.isNotEmpty) {
         newPassword = newPasswordFromForm;
         logInfo('Password changed for account ${accountDaoModel.account.id}: saving to history');
       }
-      
+
       await DriffDbManager.instance.updateAccountWithEncriptData(
         account: accountDaoModel.account.toCompanion(true),
         customFields: accountDaoModel.customFields.map((e) => e.toCompanion(true)).toList(),
         totp: accountDaoModel.totp?.toCompanion(true),
         newPassword: newPassword ?? '',
       );
-        accountToSave = currentAccount;
-      } else {
+      accountToSave = currentAccount;
+    } else {
       final accountCreated = await DriffDbManager.instance.createAccountWithEncriptData(
         account: accountDaoModel.account.toCompanion(true),
         customFields: accountDaoModel.customFields.map((e) => e.toCompanion(true)).toList(),
@@ -165,8 +165,8 @@ class AccountProvider extends ChangeNotifier {
       );
       accountToSave = accountCreated;
     }
-      final elapsedTime = stopwatch.elapsed;
-      logInfo('${isUpdate ? "updateAccount" : "createAccount"}: _encryptAccount completed in: ${elapsedTime.inMilliseconds}ms');
+    final elapsedTime = stopwatch.elapsed;
+    logInfo('${isUpdate ? "updateAccount" : "createAccount"}: _encryptAccount completed in: ${elapsedTime.inMilliseconds}ms');
 
     // Update local cache
     _accounts[accountToSave!.id] = accountToSave;
@@ -175,8 +175,8 @@ class AccountProvider extends ChangeNotifier {
     // Update grouped accounts by category
     await _updateGroupedAccountsAfterModification(accountToSave, isUpdate);
 
-      logInfo('${isUpdate ? "updateAccount" : "createAccount"}: Operation completed in: ${elapsedTime.inMilliseconds}ms');
-      return true;
+    logInfo('${isUpdate ? "updateAccount" : "createAccount"}: Operation completed in: ${elapsedTime.inMilliseconds}ms');
+    return true;
   }
 
   Future<bool> createAccountOnlyOtp({required String secretKey, required String appName, required String accountName}) async {
@@ -226,8 +226,8 @@ class AccountProvider extends ChangeNotifier {
     try {
       final matchingIcon = allBranchLogos.firstWhere((icon) {
         if (icon.keyWords == null || icon.keyWords!.isEmpty) return false;
-            final pattern = icon.keyWords!.map((k) => RegExp.escape(k)).join('|');
-            final regex = RegExp(pattern, caseSensitive: false);
+        final pattern = icon.keyWords!.map((k) => RegExp.escape(k)).join('|');
+        final regex = RegExp(pattern, caseSensitive: false);
         return regex.hasMatch(appNameLower);
       });
       return matchingIcon.branchLogoSlug;
@@ -239,7 +239,7 @@ class AccountProvider extends ChangeNotifier {
   Future<bool> deleteAccount(AccountDriftModelData account) async {
     try {
       await DriffDbManager.instance.accountAdapter.deleteAccount(account.id);
-      
+
       // Remove from local cache
       _accounts.remove(account.id);
       _basicInfoCache.remove(account.id);
@@ -263,16 +263,16 @@ class AccountProvider extends ChangeNotifier {
       if (deletedCount != listIds.length) {
         throw Exception('Cannot delete some accounts');
       }
-      
+
       // Remove from local cache
       for (final account in accountSelected) {
         _accounts.remove(account.id);
         _basicInfoCache.remove(account.id);
       }
-      
+
       // Clear search cache when accounts change
       clearSearchCache();
-      
+
       return true;
     } catch (e) {
       logError('Error deleting multiple accounts: $e');
@@ -283,7 +283,7 @@ class AccountProvider extends ChangeNotifier {
   // Cache for search results
   final Map<String, List<AccountDriftModelData>> _searchCache = {};
   static const int _maxSearchCacheSize = 50;
-  
+
   // Cache for all accounts (for search optimization)
   List<AccountDriftModelData>? _allAccountsCache;
   DateTime? _allAccountsCacheTime;
@@ -293,7 +293,7 @@ class AccountProvider extends ChangeNotifier {
     if (query.isEmpty) return <AccountDriftModelData>[];
 
     final queryLower = query.toLowerCase().trim();
-    
+
     // Check cache first
     if (_searchCache.containsKey(queryLower)) {
       return _searchCache[queryLower]!;
@@ -301,7 +301,7 @@ class AccountProvider extends ChangeNotifier {
 
     // Use database search for better performance
     final searchResults = await _performDatabaseSearch(queryLower);
-    
+
     // Cache the results (with size limit)
     if (_searchCache.length >= _maxSearchCacheSize) {
       // Remove oldest entries
@@ -311,7 +311,7 @@ class AccountProvider extends ChangeNotifier {
       }
     }
     _searchCache[queryLower] = searchResults;
-    
+
     return searchResults;
   }
 
@@ -319,14 +319,14 @@ class AccountProvider extends ChangeNotifier {
   Future<List<AccountDriftModelData>> _performDatabaseSearch(String query) async {
     // Get accounts to search (use cache if available)
     final accountsToSearch = await _getAccountsForSearch();
-    
+
     if (accountsToSearch.isEmpty) {
       return [];
     }
 
     // Decrypt accounts for search
     final decryptedResults = await _getDecryptedBasicInfoMany(accountsToSearch);
-    
+
     // Filter by decrypted content
     return decryptedResults.where((account) {
       final titleMatch = account.title.toLowerCase().contains(query);
@@ -347,24 +347,22 @@ class AccountProvider extends ChangeNotifier {
 
     // Use grouped accounts if available (already loaded)
     if (_groupedCategoryIdAccounts.isNotEmpty) {
-      final groupedAccounts = _groupedCategoryIdAccounts.values
-          .expand((accounts) => accounts)
-          .toList();
-      
+      final groupedAccounts = _groupedCategoryIdAccounts.values.expand((accounts) => accounts).toList();
+
       // Cache the grouped accounts for search
       _allAccountsCache = groupedAccounts;
       _allAccountsCacheTime = DateTime.now();
-      
+
       return groupedAccounts;
     }
 
     // Fallback to getting all accounts from database
     final allAccounts = await DriffDbManager.instance.accountAdapter.getAllBasicInfo();
-    
+
     // Cache the results
     _allAccountsCache = allAccounts;
     _allAccountsCacheTime = DateTime.now();
-    
+
     return allAccounts;
   }
 
@@ -386,7 +384,7 @@ class AccountProvider extends ChangeNotifier {
 
     final queryLower = query.toLowerCase().trim();
     final cacheKey = '${queryLower}_${limit}_$offset';
-    
+
     // Check cache first
     if (_searchCache.containsKey(cacheKey)) {
       return _searchCache[cacheKey]!;
@@ -394,7 +392,7 @@ class AccountProvider extends ChangeNotifier {
 
     // Use database search with pagination
     final searchResults = await _performDatabaseSearchWithPagination(queryLower, limit: limit, offset: offset);
-    
+
     // Cache the results
     if (_searchCache.length >= _maxSearchCacheSize) {
       final keysToRemove = _searchCache.keys.take(_searchCache.length - _maxSearchCacheSize + 1);
@@ -403,7 +401,7 @@ class AccountProvider extends ChangeNotifier {
       }
     }
     _searchCache[cacheKey] = searchResults;
-    
+
     return searchResults;
   }
 
@@ -411,30 +409,49 @@ class AccountProvider extends ChangeNotifier {
   Future<List<AccountDriftModelData>> _performDatabaseSearchWithPagination(String query, {int limit = 20, int offset = 0}) async {
     // Get all accounts first (for now, can be optimized later with database-level pagination)
     final allAccounts = await DriffDbManager.instance.accountAdapter.getAllBasicInfo();
-    
+
     if (allAccounts.isEmpty) {
       return [];
     }
 
     // Decrypt accounts in batches for better performance
     final decryptedAccounts = await _getDecryptedBasicInfoMany(allAccounts);
-    
+
     // Filter by decrypted content
-    final filteredAccounts = decryptedAccounts.where((account) {
-      final titleMatch = account.title.toLowerCase().contains(query);
-      final usernameMatch = account.username?.toLowerCase().contains(query) ?? false;
-      return titleMatch || usernameMatch;
-    }).toList();
+    final filteredAccounts =
+        decryptedAccounts.where((account) {
+          final titleMatch = _smartFuzzyMatch(account.title, query);
+          final usernameMatch = account.username != null ? _smartFuzzyMatch(account.username!, query) : false;
+          return titleMatch || usernameMatch;
+        }).toList();
 
     // Apply pagination
     final startIndex = offset;
     final endIndex = math.min(startIndex + limit, filteredAccounts.length);
-    
+
     if (startIndex >= filteredAccounts.length) {
       return [];
     }
 
     return filteredAccounts.sublist(startIndex, endIndex);
+  }
+
+  String _normalize(String input) {
+    return input
+        .toLowerCase()
+        .replaceAll(RegExp(r'https?://'), '')
+        .replaceAll(RegExp(r'^www\.'), '')
+        .replaceAll(RegExp(r'\.(com|net|org|vn|info|xyz|io)$'), '')
+        .replaceAll(RegExp(r'[^a-z0-9\s]'), ' ')
+        .trim();
+  }
+
+  bool _smartFuzzyMatch(String text, String query, {int threshold = 40}) {
+    final normalizedText = _normalize(text);
+    final normalizedQuery = _normalize(query);
+
+    final score = ratio(normalizedText, normalizedQuery);
+    return score >= threshold;
   }
 
   Future<void> handleChangeCategory({required List<AccountDriftModelData> accountSelected, required CategoryDriftModelData category}) async {
@@ -538,10 +555,10 @@ class AccountProvider extends ChangeNotifier {
     final categoryId = account.categoryId;
     final actualCount = await DriffDbManager.instance.accountAdapter.countByCategory(categoryId);
     mapCategoryIdTotalAccount[categoryId] = actualCount;
-    
+
     // Clear search cache when accounts change
     clearSearchCache();
-    
+
     notifyListeners();
   }
 
@@ -549,7 +566,7 @@ class AccountProvider extends ChangeNotifier {
   void _removeAccountFromAllCategories(int accountId) {
     // Tạo danh sách categoryIds để tránh concurrent modification
     final categoryIds = _groupedCategoryIdAccounts.keys.toList();
-    
+
     for (final categoryId in categoryIds) {
       final accounts = _groupedCategoryIdAccounts[categoryId];
       if (accounts != null) {

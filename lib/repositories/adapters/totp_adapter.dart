@@ -76,6 +76,17 @@ class TOTPAdapter {
     }
   }
 
+  Future<List<TOTPDriftModelData>> getByAccountIds(List<int> accountIds) async {
+    try {
+      final query = _database.select(_database.tOTPDriftModel)..where((t) => t.accountId.isIn(accountIds));
+
+      return await query.get();
+    } catch (e) {
+      logError('Error getting TOTP by account ID: $e');
+      return [];
+    }
+  }
+
   /// Lấy TOTP hiển thị trên home
   Future<List<TOTPDriftModelData>> getShowToHome() async {
     try {

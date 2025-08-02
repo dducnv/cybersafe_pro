@@ -133,7 +133,7 @@ class DataSecureService {
   /// Get encryption version from encrypted data
   static String? getEncryptionVersion(String value) {
     if (!isValueEncrypted(value)) return null;
-    
+
     try {
       final package = json.decode(value) as Map<String, dynamic>;
       return package['version'] as String?;
@@ -165,4 +165,27 @@ class DataSecureService {
     }
     return results;
   }
+
+  static String encryptData({required String value, required String key}) {
+    if (value.isEmpty || key.isEmpty) return "";
+    try {
+      final encryptedData = SecureAse256.encrypt(value: value, key: key);
+      return encryptedData;
+    } catch (e) {
+      throw Exception('Failed to encrypt data: $e');
+    }
+  }
+
+  static String decryptData({required String value, required String key}) {
+    if (value.isEmpty || key.isEmpty) return "";
+    try {
+      final decryptedData = SecureAse256.decrypt(encryptedData: value, key: key);
+      return decryptedData;
+    } catch (e) {
+      throw Exception('Failed to decrypt data: $e');
+    }
+  }
+
+
+  
 }

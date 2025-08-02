@@ -62,6 +62,16 @@ class PasswordHistoryAdapter {
     }
   }
 
+  Future<List<PasswordHistoryDriftModelData>> getByAccountIds(List<int> accountIds) async {
+    try {
+      final query = _database.select(_database.passwordHistoryDriftModel)..where((t) => t.accountId.isIn(accountIds));
+      return await query.get();
+    } catch (e) {
+      logError('Error getting TOTP by account ID: $e');
+      return [];
+    }
+  }
+
   /// Lấy password history theo account ID với giới hạn
   Future<List<PasswordHistoryDriftModelData>> getByAccountIdWithLimit(int accountId, int limit) async {
     try {

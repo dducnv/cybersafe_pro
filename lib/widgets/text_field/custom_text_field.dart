@@ -36,6 +36,7 @@ class CustomTextField extends StatefulWidget {
     this.validator,
     this.onTap,
     this.focusChanged,
+    this.onTapUpOutside,
     this.prefixIcon,
     this.suffixIcon,
     this.textColor,
@@ -74,6 +75,7 @@ class CustomTextField extends StatefulWidget {
   final String? Function(String?)? validator;
   final Function()? onTap;
   final void Function(bool isFocus)? focusChanged;
+  final Function(PointerUpEvent)? onTapUpOutside;
 
   final Widget? prefixIcon, suffixIcon;
   final Color? textColor, colorBackGround, cursorColor, borderColor;
@@ -140,7 +142,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
             inputFormatters: widget.inputFormatters,
             onFieldSubmitted: widget.onFieldSubmitted,
             autocorrect: false,
-
+            onTapUpOutside: widget.onTapUpOutside,
             stylusHandwritingEnabled: false,
             textAlign: widget.textAlign,
             controller: widget.controller,

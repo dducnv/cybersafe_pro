@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:croppy/croppy.dart';
 import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
+import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
 import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
@@ -73,7 +74,9 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
   }
 
   Future<void> _handleSubmit(BuildContext context, AccountFormProvider formProvider, AccountProvider accountProvider) async {
+    showLoadingDialog(context: context);
     final success = await accountProvider.createAccountFromForm(formProvider);
+    hideLoadingDialog();
     if (success && context.mounted) {
       Navigator.pop(context);
     }
@@ -164,7 +167,10 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
       itemBuilder: (context, index) {
         var column = Column(
           children: [
-            Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Text(branchLogoCategories[index].categoryName, style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w600))),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(branchLogoCategories[index].categoryName, style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w600)),
+            ),
             const SizedBox(height: 10),
             Column(
               children:
