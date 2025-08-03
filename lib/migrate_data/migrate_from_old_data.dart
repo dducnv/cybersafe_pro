@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/database/boxes/account_box.dart';
 import 'package:cybersafe_pro/database/boxes/account_custom_field_box.dart';
@@ -27,7 +28,7 @@ class MigrateFromOldData {
       final stopwatch = Stopwatch()..start();
       final docsDir = await getApplicationDocumentsDirectory();
       final dbPath = path.join(docsDir.path, "cyber_safe");
-      if (File(dbPath).existsSync()) {
+      if (!await File(dbPath).exists()) {
         return false;
       }
       await _migratePinCode();
@@ -40,13 +41,14 @@ class MigrateFromOldData {
       logInfo("Convert old data to account aggregates: ${stopwatch.elapsed}ms");
       log(accountAggregates.map((e) => e.toString()).toString());
       await AccountServices.instance.saveAccountsFromAccountAggregates(accountAggregates);
-      await SecureStorage.instance.save(key: SecureStorageKey.isMigrateOldData, value: "true");
       deleteData();
       EncryptAppDataService.instance.clearAllKey();
       return true;
     } catch (e) {
       logError('Error migrating data: $e');
       return false;
+    } finally {
+      await SecureStorage.instance.save(key: SecureStorageKey.isMigrateOldData, value: "true");
     }
   }
 

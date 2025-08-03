@@ -1,3 +1,4 @@
+import 'package:cybersafe_pro/migrate_data/migrate_from_old_data.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/local_auth_provider.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
 import 'package:secure_application/secure_application_controller.dart';
+
 // import 'package:secure_application/secure_application_controller.dart';
 import 'layouts/mobile_layout.dart';
 
@@ -19,7 +21,12 @@ class LoginMasterPassword extends StatefulWidget {
   final bool isFromDeleteData;
   final bool fromSecureGate;
   final SecureApplicationController? secureApplicationController;
-  final Function({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey})? callBackLoginCallback;
+  final Function({
+    bool? isLoginSuccess,
+    String? pin,
+    GlobalKey<AppPinCodeFieldsState>? appPinCodeKey,
+  })?
+  callBackLoginCallback;
 
   const LoginMasterPassword({
     super.key,
@@ -52,15 +59,21 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
 
     if (!_mounted) return;
     FlutterNativeSplash.remove();
+
     try {
       // Sử dụng provider có sẵn thay vì tạo mới
       final authProvider = Provider.of<LocalAuthProvider>(context, listen: false);
       // if (SecureApplicationUtil.instance.secureApplicationController != null) SecureApplicationUtil.instance.secureApplicationController?.open();
-      await authProvider.init(widget.showBiometric && !widget.isFromBackup && !widget.isFromRestore, () {
-        if (widget.secureApplicationController != null) widget.secureApplicationController?.authSuccess(unlock: true);
-        widget.callBackLoginCallback?.call(isLoginSuccess: true);
-        SecureApplicationUtil.instance.setSecureState(SecureAppState.secured);
-      }, isNavigateToHome: widget.secureApplicationController == null);
+      await authProvider.init(
+        widget.showBiometric && !widget.isFromBackup && !widget.isFromRestore,
+        () {
+          if (widget.secureApplicationController != null)
+            widget.secureApplicationController?.authSuccess(unlock: true);
+          widget.callBackLoginCallback?.call(isLoginSuccess: true);
+          SecureApplicationUtil.instance.setSecureState(SecureAppState.secured);
+        },
+        isNavigateToHome: widget.secureApplicationController == null,
+      );
       // Dừng timer
       if (_mounted && mounted) {
         context.read<AppProvider>().stopTimer();
@@ -68,6 +81,10 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
     } catch (e) {
       logError('Error initializing login screen: $e');
     }
+  }
+
+  Future<void> _handleMigrateData() async {
+    await MigrateFromOldData.startMigrate();
   }
 
   @override
