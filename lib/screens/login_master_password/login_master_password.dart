@@ -1,3 +1,4 @@
+import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/migrate_data/migrate_from_old_data.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/local_auth_provider.dart';
@@ -59,7 +60,7 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
 
     if (!_mounted) return;
     FlutterNativeSplash.remove();
-
+    await _handleMigrateData();
     try {
       // Sử dụng provider có sẵn thay vì tạo mới
       final authProvider = Provider.of<LocalAuthProvider>(context, listen: false);
@@ -84,7 +85,9 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
   }
 
   Future<void> _handleMigrateData() async {
+    showLoadingDialog(loadingText: ValueNotifier<String>('Migrating data...'));
     await MigrateFromOldData.startMigrate();
+    hideLoadingDialog();
   }
 
   @override
