@@ -1,7 +1,7 @@
 import 'dart:convert';
 
+import 'package:cybersafe_pro/encrypt/aes_256/secure_aes256.dart';
 import 'package:cybersafe_pro/encrypt/argon2/secure_argon2.dart';
-import 'package:cybersafe_pro/encrypt/ase_256/secure_ase256.dart';
 import 'package:cybersafe_pro/encrypt/key_manager.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 
@@ -11,7 +11,7 @@ class DataSecureService {
     if (isValueEncrypted(value)) return value;
     try {
       final key = await KeyManager.getKey(KeyType.info);
-      return SecureAse256.encrypt(value: value, key: key);
+      return SecureAes256.encrypt(value: value, key: key);
     } catch (e) {
       throw Exception('Failed to encrypt info: $e');
     }
@@ -22,7 +22,7 @@ class DataSecureService {
     if (!isValueEncrypted(value)) return "";
     try {
       final key = await KeyManager.getKey(KeyType.info);
-      return SecureAse256.decrypt(encryptedData: value, key: key);
+      return SecureAes256.decrypt(encryptedData: value, key: key);
     } catch (e) {
       throw Exception('Failed to decrypt info: $e');
     }
@@ -33,7 +33,7 @@ class DataSecureService {
     if (isValueEncrypted(value)) return value;
     try {
       final key = await KeyManager.getKey(KeyType.note);
-      return SecureAse256.encrypt(value: value, key: key);
+      return SecureAes256.encrypt(value: value, key: key);
     } catch (e) {
       throw Exception('Failed to encrypt note: $e');
     }
@@ -44,7 +44,7 @@ class DataSecureService {
     if (!isValueEncrypted(value)) return "";
     try {
       final key = await KeyManager.getKey(KeyType.note);
-      return SecureAse256.decrypt(encryptedData: value, key: key);
+      return SecureAes256.decrypt(encryptedData: value, key: key);
     } catch (e) {
       throw Exception('Failed to decrypt note: $e');
     }
@@ -116,7 +116,11 @@ class DataSecureService {
     try {
       final package = json.decode(value) as Map<String, dynamic>;
 
-      final hasRequiredFields = package.containsKey('salt') && package.containsKey('iv') && package.containsKey('data') && package.containsKey('version');
+      final hasRequiredFields =
+          package.containsKey('salt') &&
+          package.containsKey('iv') &&
+          package.containsKey('data') &&
+          package.containsKey('version');
       if (!hasRequiredFields) return false;
 
       // Validate field types
@@ -182,7 +186,9 @@ class DataSecureService {
     }
   }
 
-  static Future<List<Map<String, dynamic>>> batchEncryptAccountsData(List<Map<String, dynamic>> accountsData) async {
+  static Future<List<Map<String, dynamic>>> batchEncryptAccountsData(
+    List<Map<String, dynamic>> accountsData,
+  ) async {
     if (accountsData.isEmpty) return [];
 
     try {
@@ -198,7 +204,9 @@ class DataSecureService {
         final batch = accountsData.sublist(i, end);
 
         // Xử lý batch song song trong main isolate
-        final batchResults = await Future.wait(batch.map((accountData) => _encryptSingleAccount(accountData)));
+        final batchResults = await Future.wait(
+          batch.map((accountData) => _encryptSingleAccount(accountData)),
+        );
 
         results.addAll(batchResults);
 
@@ -215,7 +223,9 @@ class DataSecureService {
   }
 
   /// Encrypt single account trong main isolate
-  static Future<Map<String, dynamic>> _encryptSingleAccount(Map<String, dynamic> accountData) async {
+  static Future<Map<String, dynamic>> _encryptSingleAccount(
+    Map<String, dynamic> accountData,
+  ) async {
     try {
       final encryptedAccount = <String, dynamic>{
         'title': await encryptInfo(accountData['title']?.toString() ?? ''),
@@ -225,9 +235,18 @@ class DataSecureService {
         'icon': accountData['icon'] ?? 'account_circle',
         'categoryId': accountData['categoryId'] ?? 0,
         'iconCustomId': accountData['iconCustomId'],
-        'createdAt': accountData['createdAt'] != null ? DateTime.tryParse(accountData['createdAt']) : DateTime.now(),
-        'updatedAt': accountData['updatedAt'] != null ? DateTime.tryParse(accountData['updatedAt']) : DateTime.now(),
-        'passwordUpdatedAt': accountData['passwordUpdatedAt'] != null ? DateTime.tryParse(accountData['passwordUpdatedAt']) : DateTime.now(),
+        'createdAt':
+            accountData['createdAt'] != null
+                ? DateTime.tryParse(accountData['createdAt'])
+                : DateTime.now(),
+        'updatedAt':
+            accountData['updatedAt'] != null
+                ? DateTime.tryParse(accountData['updatedAt'])
+                : DateTime.now(),
+        'passwordUpdatedAt':
+            accountData['passwordUpdatedAt'] != null
+                ? DateTime.tryParse(accountData['passwordUpdatedAt'])
+                : DateTime.now(),
       };
 
       // Encrypt custom fields
@@ -236,9 +255,17 @@ class DataSecureService {
         for (final field in accountData['customFields'] as List) {
           if (field is Map<String, dynamic>) {
             final isPassword = field['typeField'] == 'password';
-            final encryptedValue = isPassword ? await encryptPassword(field['value']?.toString() ?? '') : await encryptInfo(field['value']?.toString() ?? '');
+            final encryptedValue =
+                isPassword
+                    ? await encryptPassword(field['value']?.toString() ?? '')
+                    : await encryptInfo(field['value']?.toString() ?? '');
 
-            customFields.add({'name': field['name'] ?? '', 'value': encryptedValue, 'hintText': field['hintText'] ?? '', 'typeField': field['typeField'] ?? 'text'});
+            customFields.add({
+              'name': field['name'] ?? '',
+              'value': encryptedValue,
+              'hintText': field['hintText'] ?? '',
+              'typeField': field['typeField'] ?? 'text',
+            });
           }
         }
       }
@@ -247,7 +274,10 @@ class DataSecureService {
       // Encrypt TOTP
       if (accountData['totp'] != null && accountData['totp'] is Map<String, dynamic>) {
         final totpData = accountData['totp'] as Map<String, dynamic>;
-        encryptedAccount['totp'] = {'secretKey': await encryptTOTPKey(totpData['secretKey']?.toString() ?? ''), 'isShowToHome': totpData['isShowToHome'] ?? false};
+        encryptedAccount['totp'] = {
+          'secretKey': await encryptTOTPKey(totpData['secretKey']?.toString() ?? ''),
+          'isShowToHome': totpData['isShowToHome'] ?? false,
+        };
       }
 
       // Encrypt password histories
@@ -255,7 +285,10 @@ class DataSecureService {
       if (accountData['passwordHistories'] != null && accountData['passwordHistories'] is List) {
         for (final history in accountData['passwordHistories'] as List) {
           if (history is Map<String, dynamic>) {
-            passwordHistories.add({'password': await encryptPassword(history['password']?.toString() ?? ''), 'createdAt': history['createdAt']});
+            passwordHistories.add({
+              'password': await encryptPassword(history['password']?.toString() ?? ''),
+              'createdAt': history['createdAt'],
+            });
           }
         }
       }
@@ -263,7 +296,10 @@ class DataSecureService {
 
       return encryptedAccount;
     } catch (e) {
-      logError('Error encrypting single account: $e', functionName: 'DataSecureService._encryptSingleAccount');
+      logError(
+        'Error encrypting single account: $e',
+        functionName: 'DataSecureService._encryptSingleAccount',
+      );
       // Return empty data if encryption fails
       return {
         'title': '',
@@ -286,7 +322,7 @@ class DataSecureService {
   static String encryptData({required String value, required String key}) {
     if (value.isEmpty || key.isEmpty) return "";
     try {
-      final encryptedData = SecureAse256.encrypt(value: value, key: key);
+      final encryptedData = SecureAes256.encrypt(value: value, key: key);
       return encryptedData;
     } catch (e) {
       throw Exception('Failed to encrypt data: $e');
@@ -296,7 +332,7 @@ class DataSecureService {
   static String decryptData({required String value, required String key}) {
     if (value.isEmpty || key.isEmpty) return "";
     try {
-      final decryptedData = SecureAse256.decrypt(encryptedData: value, key: key);
+      final decryptedData = SecureAes256.decrypt(encryptedData: value, key: key);
       return decryptedData;
     } catch (e) {
       throw Exception('Failed to decrypt data: $e');

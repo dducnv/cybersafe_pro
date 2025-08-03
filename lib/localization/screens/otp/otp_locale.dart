@@ -4,9 +4,9 @@ import 'package:cybersafe_pro/localization/keys/otp_text.dart';
 
 class OtpLocale extends BaseLocale {
   final AppLocale appLocale;
-  
+
   OtpLocale(this.appLocale);
-  
+
   @override
   String get languageCode => appLocale.currentLocaleModel.languageCode;
   @override
@@ -120,5 +120,19 @@ class OtpLocale extends BaseLocale {
     OtpText.invalidSecretKey: 'Geçersiz doğrulama kodu',
     OtpText.enterManually: 'Manuel olarak gir',
     OtpText.secretKeyValidation: 'Boş bırakılamaz',
+  };
+
+  @override
+  // TODO: implement es
+  Map<String, String> get es => {
+    OtpText.title: 'Autenticación en dos pasos',
+    OtpText.scanQrCode: 'Escanear código QR',
+    OtpText.manualEntry: 'Ingresar manualmente',
+    OtpText.addAccount: 'Agregar cuenta',
+    OtpText.accountName: 'Nombre de la cuenta',
+    OtpText.secretKey: 'Código de autenticación',
+    OtpText.invalidSecretKey: 'Código de autenticación inválido',
+    OtpText.enterManually: 'Ingresar manualmente',
+    OtpText.secretKeyValidation: 'No puede estar vacío',
   };
 }

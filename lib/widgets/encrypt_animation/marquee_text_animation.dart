@@ -8,6 +8,7 @@ class MarqueeTextAnimation extends StatefulWidget {
   final Duration animationDuration;
   final Duration pauseDuration;
   final double blankSpace;
+  final bool reverse;
 
   /// Tốc độ và hướng di chuyển của văn bản
   /// Giá trị âm: chạy từ phải sang trái (mặc định)
@@ -32,6 +33,7 @@ class MarqueeTextAnimation extends StatefulWidget {
     this.fontSize = 16.0,
     this.gradient = false,
     this.gradientColors,
+    this.reverse = true,
   });
 
   @override
@@ -141,7 +143,7 @@ class _MarqueeTextAnimationState extends State<MarqueeTextAnimation> {
     final listView = ListView.builder(
       controller: _scrollController,
       scrollDirection: Axis.horizontal,
-      reverse: true,
+      reverse: widget.reverse,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: _items.length,
       itemBuilder: (context, index) {

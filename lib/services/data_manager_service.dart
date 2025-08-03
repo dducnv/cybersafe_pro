@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:csv/csv.dart';
-import 'package:cybersafe_pro/encrypt/ase_256/secure_ase256.dart';
+import 'package:cybersafe_pro/encrypt/aes_256/secure_aes256.dart';
 import 'package:cybersafe_pro/env/env.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/error_text.dart';
@@ -81,7 +81,7 @@ class DataManagerService {
       final keyEncryptFile = await _generateBackupKey(Env.backupFileEncryptKey);
       final keyEncryptData = await _generateBackupKey(pin);
 
-      final decryptedData = SecureAse256.decryptDataBytes(
+      final decryptedData = SecureAes256.decryptDataBytes(
         encryptedData: encryptedBytes,
         key: keyEncryptFile,
       );
@@ -218,7 +218,7 @@ class DataManagerService {
         _encodeBackupInIsolate,
         encryptedData,
       );
-      List<int> encryptedDataBytes = SecureAse256.encryptDataBytes(
+      List<int> encryptedDataBytes = SecureAes256.encryptDataBytes(
         data: backupJsonBytes,
         key: keyEncryptFile,
       );

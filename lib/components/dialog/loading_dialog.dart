@@ -1,5 +1,6 @@
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
+import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/encrypt_animation/encrypt_animation.dart';
 import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ bool _isLoadingDialogShowing = false;
 /// Hiển thị dialog loading
 Future<void> showLoadingDialog({
   BuildContext? context,
+  bool animationReverse = true,
   ValueNotifier<double>? loadingProgress,
   ValueNotifier<String>? loadingText,
 }) async {
@@ -37,9 +39,10 @@ Future<void> showLoadingDialog({
                   SizedBox(
                     height: 50,
                     width: 250,
-                    child: const EncryptAnimation(
+                    child: EncryptAnimation(
                       plainText: 'Abcdefgh',
                       encryptedText: '#\$%^&*()_+=',
+                      reverse: animationReverse,
                     ),
                   ),
                   ValueListenableBuilder(
@@ -47,13 +50,14 @@ Future<void> showLoadingDialog({
                     builder: (context, value, child) {
                       if (value.isEmpty) return const SizedBox.shrink();
                       return Padding(
-                        padding: const EdgeInsets.only(top: 8),
+                        padding: EdgeInsets.symmetric(horizontal: 16.w).copyWith(top: 8),
                         child: Text(
                           value,
                           style: CustomTextStyle.regular(
                             fontSize: 16,
                             color: Colors.white.withValues(alpha: 0.8),
                           ),
+                          textAlign: TextAlign.center,
                         ),
                       );
                     },

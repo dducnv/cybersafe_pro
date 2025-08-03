@@ -12,17 +12,18 @@ abstract class BaseLocale {
 
   // Abstract method để lấy bản dịch theo ngôn ngữ
   Map<String, String> get vi;
-  Map<String, String> get en;  // Mặc định là en_US
-  Map<String, String> get pt;  // Mặc định là pt_PT
+  Map<String, String> get en; // Mặc định là en_US
+  Map<String, String> get pt; // Mặc định là pt_PT
   Map<String, String> get hi;
   Map<String, String> get ja;
   Map<String, String> get ru;
   Map<String, String> get id;
-  Map<String, String> get en_GB => en;  // Fallback to default English
-  Map<String, String> get en_US => en;  // Same as default en
-  Map<String, String> get pt_PT => pt;  // Same as default pt
-  Map<String, String> get pt_BR => pt;  // Fallback to default Portuguese
+  Map<String, String> get en_GB => en; // Fallback to default English
+  Map<String, String> get en_US => en; // Same as default en
+  Map<String, String> get pt_PT => pt; // Same as default pt
+  Map<String, String> get pt_BR => pt; // Fallback to default Portuguese
   Map<String, String> get tr;
+  Map<String, String> get es;
 
   // Helper method để lấy text theo key
   String getText(String key, {Map<String, String>? args}) {
@@ -39,6 +40,7 @@ abstract class BaseLocale {
       'pt' => pt,
       'en' => en,
       'tr' => tr,
+      'es' => es,
       _ => en_US, // fallback to English
     };
     return translations[key] ?? key;
@@ -57,4 +59,5 @@ final supportedLocales = [
   const Locale('pt', 'PT'), // Tiếng Bồ Đào Nha (Portugal)
   const Locale('pt', 'BR'), // Tiếng Bồ Đào Nha (Brazil)
   const Locale('tr', 'TR'), // Tiếng Thổ Nhĩ Kỳ
-]; 
+  const Locale('es', 'ES'), // tây ban nha
+];

@@ -30,7 +30,10 @@ class _PasswordGenerateMobileLayoutState extends State<PasswordGenerateMobileLay
     final viewModel = Provider.of<PasswordGenerateProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(automaticallyImplyLeading: false, title: Text(context.trHome(HomeLocale.passwordGenerator))),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text(context.trHome(HomeLocale.passwordGenerator)),
+      ),
       floatingActionButton: SizedBox(
         width: 61.h,
         height: 61.h,
@@ -84,7 +87,13 @@ class _PasswordGenerateMobileLayoutState extends State<PasswordGenerateMobileLay
                     return;
                   }
                   Clipboard.setData(ClipboardData(text: viewModel.password));
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Đã sao chép mật khẩu vào bộ nhớ tạm"), behavior: SnackBarBehavior.floating, duration: const Duration(seconds: 2)));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Đã sao chép mật khẩu vào bộ nhớ tạm"),
+                      behavior: SnackBarBehavior.floating,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
                 },
               ),
             ),
@@ -100,13 +109,25 @@ class _PasswordGenerateMobileLayoutState extends State<PasswordGenerateMobileLay
             children: [
               Expanded(
                 child: DecoratedBox(
-                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.secondaryContainer, borderRadius: BorderRadius.circular(30)),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Center(
                       child: Consumer<PasswordGenerateProvider>(
                         builder: (context, viewModel, child) {
-                          return RichText(textAlign: TextAlign.center, text: TextSpan(children: viewModel.passwordInline, style: CustomTextStyle.regular(fontSize: 25, fontWeight: FontWeight.bold)));
+                          return RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              children: viewModel.passwordInline,
+                              style: CustomTextStyle.regular(
+                                fontSize: 25,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          );
                         },
                       ),
                     ),
@@ -167,13 +188,28 @@ class _PasswordGenerateMobileLayoutState extends State<PasswordGenerateMobileLay
                           haptics: true,
                           zeroPad: false,
                           value: viewModel.passLength,
-                          textStyle: CustomTextStyle.regular(color: Theme.of(context).colorScheme.primary, fontSize: 25.sp, fontWeight: FontWeight.bold),
+                          textStyle: CustomTextStyle.regular(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontSize: 22.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
                           itemCount: 5,
+                          selectedTextStyle: CustomTextStyle.regular(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontSize: 25.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
                           minValue: 8,
                           maxValue: 100,
                           itemWidth: 60.h,
                           itemHeight: 60.h,
-                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2)),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.primary,
+                              width: 2,
+                            ),
+                          ),
                           axis: Axis.horizontal,
                           onChanged: (value) {
                             viewModel.passLength = value;
@@ -194,11 +230,18 @@ class _PasswordGenerateMobileLayoutState extends State<PasswordGenerateMobileLay
   }
 
   // Helper method để tạo các mục trong thanh điều hướng
-  Widget _buildNavItem(BuildContext context, {required IconData icon, required VoidCallback onTap}) {
+  Widget _buildNavItem(
+    BuildContext context, {
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
-      child: Padding(padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8.h), child: Column(mainAxisSize: MainAxisSize.min, children: [Icon(icon, size: 22)])),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8.h),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [Icon(icon, size: 22)]),
+      ),
     );
   }
 }

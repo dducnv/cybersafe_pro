@@ -4,9 +4,9 @@ import 'package:cybersafe_pro/localization/keys/onboarding_text.dart';
 
 class OnboardingLocale extends BaseLocale {
   final AppLocale appLocale;
-  
+
   OnboardingLocale(this.appLocale);
-  
+
   @override
   String get languageCode => appLocale.currentLocaleModel.languageCode;
   @override
@@ -26,13 +26,16 @@ class OnboardingLocale extends BaseLocale {
     OnboardingText.termsAndConditions: 'Đồng ý với chính sách và điều khoản',
     OnboardingText.agree: 'Đồng ý',
     OnboardingText.createMasterPassword: 'Tạo mật khẩu chính',
-    OnboardingText.welcomeDescription: 'Chào mừng đến với CyberSafe Pro, ứng dụng bảo mật và quản lý mật khẩu an toàn.',
+    OnboardingText.welcomeDescription:
+        'Chào mừng đến với CyberSafe Pro, ứng dụng bảo mật và quản lý mật khẩu an toàn.',
     OnboardingText.terms: 'Điều khoản sử dụng',
     OnboardingText.policy: 'Chính sách bảo mật',
     OnboardingText.continueText: 'Tiếp tục',
     OnboardingText.agreeRedirectLink: 'Đồng ý và đi đến đường dẫn',
     OnboardingText.doNotAgreeRedirectLink: 'Bạn có đồng ý đi đến đường dẫn không?',
     OnboardingText.showLink: 'Hiển thị đường dẫn',
+
+    OnboardingText.initDatabase: 'Đang khởi tạo cơ sở dữ liệu...',
   };
 
   @override
@@ -43,13 +46,16 @@ class OnboardingLocale extends BaseLocale {
     OnboardingText.termsAndConditions: 'Agree to the policy and terms',
     OnboardingText.agree: 'Agree',
     OnboardingText.createMasterPassword: 'Create master password',
-    OnboardingText.welcomeDescription: 'Welcome to CyberSafe Pro, a secure and safe password management application.',
+    OnboardingText.welcomeDescription:
+        'Welcome to CyberSafe Pro, a secure and safe password management application.',
     OnboardingText.terms: 'Terms of use',
     OnboardingText.policy: 'Privacy policy',
     OnboardingText.continueText: 'Continue',
     OnboardingText.agreeRedirectLink: 'Agree and go to the link',
     OnboardingText.doNotAgreeRedirectLink: 'Do you agree to go to the link?',
     OnboardingText.showLink: 'Show link',
+
+    OnboardingText.initDatabase: 'Initializing database...',
   };
 
   @override
@@ -60,13 +66,16 @@ class OnboardingLocale extends BaseLocale {
     OnboardingText.termsAndConditions: 'Concordar com a política e os termos',
     OnboardingText.agree: 'Concordar',
     OnboardingText.createMasterPassword: 'Criar senha principal',
-    OnboardingText.welcomeDescription: 'Bem-vindo ao CyberSafe Pro, aplicativo seguro para gerenciamento de senhas.',
+    OnboardingText.welcomeDescription:
+        'Bem-vindo ao CyberSafe Pro, aplicativo seguro para gerenciamento de senhas.',
     OnboardingText.terms: 'Termos de uso',
     OnboardingText.policy: 'Política de privacidade',
     OnboardingText.continueText: 'Continuar',
     OnboardingText.agreeRedirectLink: 'Concordar e ir para o link',
     OnboardingText.doNotAgreeRedirectLink: 'Você concorda em ir para o link?',
     OnboardingText.showLink: 'Mostrar link',
+
+    OnboardingText.initDatabase: 'Inicializando a base de dados...',
   };
 
   @override
@@ -77,13 +86,16 @@ class OnboardingLocale extends BaseLocale {
     OnboardingText.termsAndConditions: 'नीति और शर्तों से सहमत',
     OnboardingText.agree: 'सहमत',
     OnboardingText.createMasterPassword: 'मुख्य पासवर्ड बनाएं',
-    OnboardingText.welcomeDescription: 'CyberSafe Pro में आपका स्वागत है, एक सुरक्षित पासवर्ड प्रबंधन ऐप।',
+    OnboardingText.welcomeDescription:
+        'CyberSafe Pro में आपका स्वागत है, एक सुरक्षित पासवर्ड प्रबंधन ऐप।',
     OnboardingText.terms: 'उपयोग की शर्तें',
     OnboardingText.policy: 'गोपनीयता नीति',
     OnboardingText.continueText: 'जारी रखें',
     OnboardingText.agreeRedirectLink: 'सहमत हैं और लिंक पर जाएं',
     OnboardingText.doNotAgreeRedirectLink: 'क्या आप लिंक पर जाना स्वीकार करते हैं?',
     OnboardingText.showLink: 'लिंक दिखाएं',
+
+    OnboardingText.initDatabase: 'डेटाबेस प्रारंभ किया जा रहा है...',
   };
 
   @override
@@ -101,6 +113,8 @@ class OnboardingLocale extends BaseLocale {
     OnboardingText.agreeRedirectLink: '同意してリンクへ進む',
     OnboardingText.doNotAgreeRedirectLink: 'リンクへ進みますか？',
     OnboardingText.showLink: 'リンクを表示',
+
+    OnboardingText.initDatabase: 'データベースを初期化しています...',
   };
 
   @override
@@ -111,13 +125,16 @@ class OnboardingLocale extends BaseLocale {
     OnboardingText.termsAndConditions: 'Согласиться с политикой и условиями',
     OnboardingText.agree: 'Согласен',
     OnboardingText.createMasterPassword: 'Создать основной пароль',
-    OnboardingText.welcomeDescription: 'Добро пожаловать в CyberSafe Pro — безопасное приложение для управления паролями.',
+    OnboardingText.welcomeDescription:
+        'Добро пожаловать в CyberSafe Pro — безопасное приложение для управления паролями.',
     OnboardingText.terms: 'Условия использования',
     OnboardingText.policy: 'Политика конфиденциальности',
     OnboardingText.continueText: 'Продолжить',
     OnboardingText.agreeRedirectLink: 'Согласен и перейти по ссылке',
     OnboardingText.doNotAgreeRedirectLink: 'Вы согласны перейти по ссылке?',
     OnboardingText.showLink: 'Показать ссылку',
+
+    OnboardingText.initDatabase: 'Инициализация базы данных...',
   };
 
   @override
@@ -128,13 +145,16 @@ class OnboardingLocale extends BaseLocale {
     OnboardingText.termsAndConditions: 'Setuju dengan kebijakan dan syarat',
     OnboardingText.agree: 'Setuju',
     OnboardingText.createMasterPassword: 'Buat kata sandi utama',
-    OnboardingText.welcomeDescription: 'Selamat datang di CyberSafe Pro, aplikasi manajemen kata sandi yang aman dan terpercaya.',
+    OnboardingText.welcomeDescription:
+        'Selamat datang di CyberSafe Pro, aplikasi manajemen kata sandi yang aman dan terpercaya.',
     OnboardingText.terms: 'Syarat penggunaan',
     OnboardingText.policy: 'Kebijakan privasi',
     OnboardingText.continueText: 'Lanjutkan',
     OnboardingText.agreeRedirectLink: 'Setuju dan pergi ke tautan',
     OnboardingText.doNotAgreeRedirectLink: 'Apakah Anda setuju untuk pergi ke tautan?',
     OnboardingText.showLink: 'Tampilkan tautan',
+
+    OnboardingText.initDatabase: 'Menginisialisasi basis data...',
   };
 
   @override
@@ -145,12 +165,36 @@ class OnboardingLocale extends BaseLocale {
     OnboardingText.termsAndConditions: 'Politika ve şartları kabul et',
     OnboardingText.agree: 'Kabul et',
     OnboardingText.createMasterPassword: 'Ana parola oluştur',
-    OnboardingText.welcomeDescription: 'CyberSafe Pro\'ya hoş geldiniz, güvenli ve emniyetli bir parola yönetim uygulaması.',
+    OnboardingText.welcomeDescription:
+        'CyberSafe Pro\'ya hoş geldiniz, güvenli ve emniyetli bir parola yönetim uygulaması.',
     OnboardingText.terms: 'Kullanım şartları',
     OnboardingText.policy: 'Gizlilik politikası',
     OnboardingText.continueText: 'Devam et',
     OnboardingText.agreeRedirectLink: 'Kabul et ve bağlantıya git',
     OnboardingText.doNotAgreeRedirectLink: 'Bağlantıya gitmeyi kabul ediyor musunuz?',
     OnboardingText.showLink: 'Bağlantıyı göster',
+
+    OnboardingText.initDatabase: 'Veritabanı başlatılıyor...',
   };
-} 
+
+  @override
+  // TODO: implement es
+  Map<String, String> get es => {
+    OnboardingText.welcome: 'Bienvenido',
+    OnboardingText.selectLanguage: 'Seleccionar idioma',
+    OnboardingText.getStarted: 'Comenzar',
+    OnboardingText.termsAndConditions: 'Aceptar la política y los términos',
+    OnboardingText.agree: 'Aceptar',
+    OnboardingText.createMasterPassword: 'Crear contraseña maestra',
+    OnboardingText.welcomeDescription:
+        'Bienvenido a CyberSafe Pro, una aplicación segura para la gestión de contraseñas.',
+    OnboardingText.terms: 'Términos de uso',
+    OnboardingText.policy: 'Política de privacidad',
+    OnboardingText.continueText: 'Continuar',
+    OnboardingText.agreeRedirectLink: 'Aceptar y abrir el enlace',
+    OnboardingText.doNotAgreeRedirectLink: '¿Aceptas abrir el enlace?',
+    OnboardingText.showLink: 'Mostrar enlace',
+
+    OnboardingText.initDatabase: 'Inicializando la base de datos...',
+  };
+}

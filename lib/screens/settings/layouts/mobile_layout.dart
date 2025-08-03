@@ -132,7 +132,7 @@ class SettingMobileLayout extends StatelessWidget {
                     style: settingTitleCardStyle,
                   ),
                 ),
-                // const SizedBox(height: 5),
+                const SizedBox(height: 5),
                 // if (!AppConfig.isProApp && !Platform.isMacOS && !Platform.isWindows)
                 //   SettingItemWidget(
                 //     isGradientBg: true,

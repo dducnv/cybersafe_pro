@@ -14,6 +14,7 @@ class EncryptAnimation extends StatefulWidget {
   final bool autoPlay;
   final bool loop;
   final String? prefix;
+  final bool reverse;
 
   const EncryptAnimation({
     super.key,
@@ -25,6 +26,7 @@ class EncryptAnimation extends StatefulWidget {
     this.autoPlay = true,
     this.loop = false,
     this.prefix = '',
+    this.reverse = true,
   });
 
   @override
@@ -88,6 +90,7 @@ class _EncryptAnimationState extends State<EncryptAnimation> with TickerProvider
                     child: MarqueeTextAnimation(
                       key: const ValueKey('encrypted_marquee'),
                       text: widget.plainText,
+                      reverse: widget.reverse,
                       textStyle: CustomTextStyle.regular(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -112,6 +115,7 @@ class _EncryptAnimationState extends State<EncryptAnimation> with TickerProvider
                     child: MarqueeTextAnimation(
                       key: const ValueKey('plaintext_marquee'),
                       text: _encryptedText,
+                      reverse: widget.reverse,
                       textStyle: CustomTextStyle.regular(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,

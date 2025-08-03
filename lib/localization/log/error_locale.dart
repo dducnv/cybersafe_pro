@@ -4,9 +4,9 @@ import 'package:cybersafe_pro/localization/keys/error_text.dart';
 
 class ErrorLocale extends BaseLocale {
   final AppLocale appLocale;
-  
+
   ErrorLocale(this.appLocale);
-  
+
   @override
   String get languageCode => appLocale.currentLocaleModel.languageCode;
   @override
@@ -53,7 +53,8 @@ class ErrorLocale extends BaseLocale {
     ErrorText.cannotReadFile: 'Không thể đọc file',
     ErrorText.invalidFileFormat: 'Định dạng file không hợp lệ',
     ErrorText.emptyCsvFile: 'File CSV trống',
-    ErrorText.invalidCsvFormat: 'File CSV không đúng định dạng. Cần có các cột: name, url, username, password, note',
+    ErrorText.invalidCsvFormat:
+        'File CSV không đúng định dạng. Cần có các cột: name, url, username, password, note',
     ErrorText.invalidBackupFile: 'File không phải backup hợp lệ',
     ErrorText.corruptedBackupFile: 'File backup không hợp lệ hoặc đã bị hỏng',
     ErrorText.missingBackupField: 'Thiếu trường trong file backup',
@@ -66,7 +67,7 @@ class ErrorLocale extends BaseLocale {
     ErrorText.dataEncryptionMismatch: 'Dữ liệu không khớp sau khi mã hóa lại',
     ErrorText.encryptionVerificationFailed: 'Xác minh mã hóa thất bại',
     ErrorText.migrationFailed: 'Di chuyển dữ liệu thất bại',
-    
+
     // TOTP errors
     ErrorText.emptySecretKey: 'Khóa bí mật trống',
     ErrorText.invalidSecretKey: 'Khóa bí mật không hợp lệ',
@@ -77,7 +78,7 @@ class ErrorLocale extends BaseLocale {
     ErrorText.missingIssuer: 'Thiếu thông tin nhà phát hành',
     ErrorText.missingSecret: 'Thiếu thông tin bí mật',
     ErrorText.invalidAlgorithm: 'Thuật toán không hợp lệ',
-    
+
     // Operation limits
     ErrorText.tooManyRetries: 'Đã vượt quá số lần thử lại',
     ErrorText.tryAgainLater: 'Vui lòng thử lại sau',
@@ -118,7 +119,8 @@ class ErrorLocale extends BaseLocale {
     ErrorText.cannotReadFile: 'Cannot read file',
     ErrorText.invalidFileFormat: 'Invalid file format',
     ErrorText.emptyCsvFile: 'CSV file is empty',
-    ErrorText.invalidCsvFormat: 'CSV file format is invalid. It must have columns: name, url, username, password, note',
+    ErrorText.invalidCsvFormat:
+        'CSV file format is invalid. It must have columns: name, url, username, password, note',
     ErrorText.invalidBackupFile: 'Invalid backup file',
     ErrorText.corruptedBackupFile: 'Backup file is corrupted or invalid',
     ErrorText.missingBackupField: 'Missing field in backup file',
@@ -131,7 +133,7 @@ class ErrorLocale extends BaseLocale {
     ErrorText.dataEncryptionMismatch: 'Data mismatch after re-encryption',
     ErrorText.encryptionVerificationFailed: 'Encryption verification failed',
     ErrorText.migrationFailed: 'Data migration failed',
-    
+
     // TOTP errors
     ErrorText.emptySecretKey: 'Secret key is empty',
     ErrorText.invalidSecretKey: 'Invalid secret key',
@@ -142,7 +144,7 @@ class ErrorLocale extends BaseLocale {
     ErrorText.missingIssuer: 'Missing issuer',
     ErrorText.missingSecret: 'Missing secret',
     ErrorText.invalidAlgorithm: 'Invalid algorithm',
-    
+
     // Operation limits
     ErrorText.tooManyRetries: 'Too many retries',
     ErrorText.tryAgainLater: 'Please try again later',
@@ -183,7 +185,8 @@ class ErrorLocale extends BaseLocale {
     ErrorText.cannotReadFile: 'Não é possível ler o arquivo',
     ErrorText.invalidFileFormat: 'Formato de arquivo inválido',
     ErrorText.emptyCsvFile: 'Arquivo CSV vazio',
-    ErrorText.invalidCsvFormat: 'Formato do arquivo CSV inválido. Deve ter colunas: name, url, username, password, note',
+    ErrorText.invalidCsvFormat:
+        'Formato do arquivo CSV inválido. Deve ter colunas: name, url, username, password, note',
     ErrorText.invalidBackupFile: 'Arquivo de backup inválido',
     ErrorText.corruptedBackupFile: 'Arquivo de backup corrompido ou inválido',
     ErrorText.missingBackupField: 'Campo ausente no arquivo de backup',
@@ -196,14 +199,14 @@ class ErrorLocale extends BaseLocale {
     ErrorText.dataEncryptionMismatch: 'Incompatibilidade de dados após recriptografia',
     ErrorText.encryptionVerificationFailed: 'Falha na verificação de criptografia',
     ErrorText.migrationFailed: 'Falha na migração de dados',
-    
+
     // TOTP errors
     ErrorText.emptySecretKey: 'Chave secreta vazia',
     ErrorText.invalidSecretKey: 'Chave secreta inválida',
     ErrorText.invalidOtpUri: 'URI OTP inválido',
     ErrorText.missingOtpIssuer: 'Emissor OTP ausente',
     ErrorText.missingOtpSecret: 'Segredo OTP ausente',
-    
+
     // Operation limits
     ErrorText.tooManyRetries: 'Muitas tentativas',
     ErrorText.tryAgainLater: 'Por favor, tente novamente mais tarde',
@@ -249,7 +252,8 @@ class ErrorLocale extends BaseLocale {
     ErrorText.cannotReadFile: 'फ़ाइल पढ़ नहीं सकते',
     ErrorText.invalidFileFormat: 'अमान्य फ़ाइल प्रारूप',
     ErrorText.emptyCsvFile: 'CSV फ़ाइल खाली है',
-    ErrorText.invalidCsvFormat: 'CSV फ़ाइल प्रारूप अमान्य है। इसमें कॉलम होने चाहिए: name, url, username, password, note',
+    ErrorText.invalidCsvFormat:
+        'CSV फ़ाइल प्रारूप अमान्य है। इसमें कॉलम होने चाहिए: name, url, username, password, note',
     ErrorText.invalidBackupFile: 'अमान्य बैकअप फ़ाइल',
     ErrorText.corruptedBackupFile: 'बैकअप फ़ाइल दूषित या अमान्य है',
     ErrorText.missingBackupField: 'बैकअप फ़ाइल में फ़ील्ड गायब है',
@@ -262,14 +266,14 @@ class ErrorLocale extends BaseLocale {
     ErrorText.dataEncryptionMismatch: 'पुन: एन्क्रिप्शन के बाद डेटा मेल नहीं खाता',
     ErrorText.encryptionVerificationFailed: 'एन्क्रिप्शन सत्यापन विफल',
     ErrorText.migrationFailed: 'डेटा माइग्रेशन विफल',
-    
+
     // TOTP errors
     ErrorText.emptySecretKey: 'गुप्त कुंजी खाली है',
     ErrorText.invalidSecretKey: 'अमान्य गुप्त कुंजी',
     ErrorText.invalidOtpUri: 'अमान्य OTP URI',
     ErrorText.missingOtpIssuer: 'OTP जारीकर्ता गायब है',
     ErrorText.missingOtpSecret: 'OTP गुप्त गायब है',
-    
+
     // Operation limits
     ErrorText.tooManyRetries: 'बहुत अधिक प्रयास',
     ErrorText.tryAgainLater: 'कृपया बाद में पुन: प्रयास करें',
@@ -328,14 +332,14 @@ class ErrorLocale extends BaseLocale {
     ErrorText.dataEncryptionMismatch: '再暗号化後のデータが一致しません',
     ErrorText.encryptionVerificationFailed: '暗号化の検証に失敗しました',
     ErrorText.migrationFailed: 'データ移行に失敗しました',
-    
+
     // TOTP errors
     ErrorText.emptySecretKey: '秘密鍵が空です',
     ErrorText.invalidSecretKey: '無効な秘密鍵',
     ErrorText.invalidOtpUri: '無効なOTP URI',
     ErrorText.missingOtpIssuer: 'OTP発行者がありません',
     ErrorText.missingOtpSecret: 'OTP秘密がありません',
-    
+
     // Operation limits
     ErrorText.tooManyRetries: '再試行回数が多すぎます',
     ErrorText.tryAgainLater: '後でもう一度お試しください',
@@ -381,7 +385,8 @@ class ErrorLocale extends BaseLocale {
     ErrorText.cannotReadFile: 'Невозможно прочитать файл',
     ErrorText.invalidFileFormat: 'Неверный формат файла',
     ErrorText.emptyCsvFile: 'CSV файл пуст',
-    ErrorText.invalidCsvFormat: 'Неверный формат CSV файла. Должны быть столбцы: name, url, username, password, note',
+    ErrorText.invalidCsvFormat:
+        'Неверный формат CSV файла. Должны быть столбцы: name, url, username, password, note',
     ErrorText.invalidBackupFile: 'Недействительный файл резервной копии',
     ErrorText.corruptedBackupFile: 'Файл резервной копии поврежден или недействителен',
     ErrorText.missingBackupField: 'Отсутствует поле в файле резервной копии',
@@ -394,14 +399,14 @@ class ErrorLocale extends BaseLocale {
     ErrorText.dataEncryptionMismatch: 'Несоответствие данных после повторного шифрования',
     ErrorText.encryptionVerificationFailed: 'Ошибка проверки шифрования',
     ErrorText.migrationFailed: 'Ошибка миграции данных',
-    
+
     // TOTP errors
     ErrorText.emptySecretKey: 'Секретный ключ пуст',
     ErrorText.invalidSecretKey: 'Недействительный секретный ключ',
     ErrorText.invalidOtpUri: 'Недействительный OTP URI',
     ErrorText.missingOtpIssuer: 'Отсутствует издатель OTP',
     ErrorText.missingOtpSecret: 'Отсутствует секрет OTP',
-    
+
     // Operation limits
     ErrorText.tooManyRetries: 'Слишком много попыток',
     ErrorText.tryAgainLater: 'Повторите попытку позже',
@@ -447,7 +452,8 @@ class ErrorLocale extends BaseLocale {
     ErrorText.cannotReadFile: 'Tidak dapat membaca file',
     ErrorText.invalidFileFormat: 'Format file tidak valid',
     ErrorText.emptyCsvFile: 'File CSV kosong',
-    ErrorText.invalidCsvFormat: 'Format file CSV tidak valid. Harus memiliki kolom: name, url, username, password, note',
+    ErrorText.invalidCsvFormat:
+        'Format file CSV tidak valid. Harus memiliki kolom: name, url, username, password, note',
     ErrorText.invalidBackupFile: 'File cadangan tidak valid',
     ErrorText.corruptedBackupFile: 'File cadangan rusak atau tidak valid',
     ErrorText.missingBackupField: 'Bidang hilang dalam file cadangan',
@@ -460,14 +466,14 @@ class ErrorLocale extends BaseLocale {
     ErrorText.dataEncryptionMismatch: 'Data tidak cocok setelah re-enkripsi',
     ErrorText.encryptionVerificationFailed: 'Verifikasi enkripsi gagal',
     ErrorText.migrationFailed: 'Migrasi data gagal',
-    
+
     // TOTP errors
     ErrorText.emptySecretKey: 'Kunci rahasia kosong',
     ErrorText.invalidSecretKey: 'Kunci rahasia tidak valid',
     ErrorText.invalidOtpUri: 'URI OTP tidak valid',
     ErrorText.missingOtpIssuer: 'Penerbit OTP hilang',
     ErrorText.missingOtpSecret: 'Rahasia OTP hilang',
-    
+
     // Operation limits
     ErrorText.tooManyRetries: 'Terlalu banyak percobaan ulang',
     ErrorText.tryAgainLater: 'Silakan coba lagi nanti',
@@ -512,7 +518,8 @@ class ErrorLocale extends BaseLocale {
     ErrorText.cannotReadFile: 'Dosya okunamadı',
     ErrorText.invalidFileFormat: 'Geçersiz dosya formatı',
     ErrorText.emptyCsvFile: 'CSV dosyası boş',
-    ErrorText.invalidCsvFormat: 'Geçersiz CSV formatı. Gerekli sütunlar: name, url, username, password, note',
+    ErrorText.invalidCsvFormat:
+        'Geçersiz CSV formatı. Gerekli sütunlar: name, url, username, password, note',
     ErrorText.invalidBackupFile: 'Geçersiz yedekleme dosyası',
     ErrorText.corruptedBackupFile: 'Yedekleme dosyası bozuk veya geçersiz',
     ErrorText.missingBackupField: 'Yedekleme dosyasında eksik alan',
@@ -540,5 +547,70 @@ class ErrorLocale extends BaseLocale {
     ErrorText.invalidUriScheme: 'Geçersiz URI şeması',
     ErrorText.missingIssuer: 'Yayıncı eksik',
     ErrorText.missingSecret: 'Gizli anahtar eksik',
+  };
+
+  @override
+  Map<String, String> get es => {
+    ErrorText.generalError: 'Ocurrió un error',
+    ErrorText.networkError: 'Error de red',
+    ErrorText.unknownError: 'Error desconocido',
+    ErrorText.operationFailed: 'La operación falló',
+    ErrorText.invalidData: 'Datos inválidos',
+
+    // Errores de autenticación
+    ErrorText.pinTooShort: 'El PIN debe tener al menos 6 caracteres',
+    ErrorText.pinIncorrect: 'PIN incorrecto',
+    ErrorText.authenticationFailed: 'Falló la autenticación',
+    ErrorText.deviceKeyMissing: 'Clave del dispositivo no creada',
+    ErrorText.keyVerificationFailed: 'Falló la verificación de clave',
+
+    // Errores de cuenta
+    ErrorText.accountEmpty: 'La cuenta no puede estar vacía',
+    ErrorText.accountNotFound: 'Cuenta no encontrada',
+    ErrorText.accountNameRequired: 'Se requiere el nombre de la cuenta',
+    ErrorText.cannotDeleteAccount: 'No se puede eliminar la cuenta',
+    ErrorText.cannotDeleteSomeAccounts: 'No se pueden eliminar algunas cuentas',
+
+    // Errores de categoría
+    ErrorText.categoryNameEmpty: 'El nombre de la categoría no puede estar vacío',
+    ErrorText.categoryExists: 'Esta categoría ya existe',
+    ErrorText.cannotDeleteCategory: 'No se puede eliminar la categoría',
+    ErrorText.categoryNotFound: 'Categoría no encontrada',
+
+    // Errores de archivo
+    ErrorText.fileNotSelected: 'No se ha seleccionado ningún archivo',
+    ErrorText.fileNotFound: 'Archivo no encontrado',
+    ErrorText.cannotReadFile: 'No se puede leer el archivo',
+    ErrorText.invalidFileFormat: 'Formato de archivo inválido',
+    ErrorText.emptyCsvFile: 'El archivo CSV está vacío',
+    ErrorText.invalidCsvFormat:
+        'Formato de archivo CSV inválido. Debe tener las columnas: nombre, url, usuario, contraseña, nota',
+    ErrorText.invalidBackupFile: 'Archivo de respaldo inválido',
+    ErrorText.corruptedBackupFile: 'El archivo de respaldo está dañado o es inválido',
+    ErrorText.missingBackupField: 'Falta un campo en el archivo de respaldo',
+    ErrorText.backupTooLarge: 'El tamaño del respaldo es demasiado grande',
+    ErrorText.restoreFailed: 'Error al restaurar',
+
+    // Errores de encriptación
+    ErrorText.encryptionFailed: 'Error al encriptar',
+    ErrorText.decryptionFailed: 'Error al desencriptar',
+    ErrorText.dataEncryptionMismatch: 'Los datos no coinciden después de la reencriptación',
+    ErrorText.encryptionVerificationFailed: 'Falló la verificación de encriptación',
+    ErrorText.migrationFailed: 'Falló la migración de datos',
+
+    // Errores TOTP
+    ErrorText.emptySecretKey: 'La clave secreta está vacía',
+    ErrorText.invalidSecretKey: 'Clave secreta inválida',
+    ErrorText.invalidOtpUri: 'URI de OTP inválido',
+    ErrorText.missingOtpIssuer: 'Falta el emisor del OTP',
+    ErrorText.missingOtpSecret: 'Falta la clave secreta del OTP',
+    ErrorText.invalidUriScheme: 'Esquema de URI inválido',
+    ErrorText.missingIssuer: 'Falta el emisor',
+    ErrorText.missingSecret: 'Falta la clave secreta',
+    ErrorText.invalidAlgorithm: 'Algoritmo inválido',
+
+    // Límites de operación
+    ErrorText.tooManyRetries: 'Demasiados intentos',
+    ErrorText.tryAgainLater: 'Por favor, inténtalo más tarde',
   };
 }

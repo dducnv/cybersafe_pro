@@ -25,7 +25,8 @@ class CategoryLocale extends BaseLocale {
     CategoryText.confirmDelete: 'Xác nhận xoá',
     CategoryText.cancelDelete: 'Huỷ',
     CategoryText.deleteConfirmation: 'Bạn có chắc chắn muốn xoá danh mục này?',
-    CategoryText.deleteWarningWithAccounts: 'Danh mục này đã có tài khoản. Nếu xóa, tất cả tài khoản trong danh mục này sẽ bị xóa.',
+    CategoryText.deleteWarningWithAccounts:
+        'Danh mục này đã có tài khoản. Nếu xóa, tất cả tài khoản trong danh mục này sẽ bị xóa.',
     CategoryText.deleteWarningEmpty: 'Bạn có chắc chắn muốn xoá danh mục này?',
     CategoryText.categoryCount: '{0} mục',
     CategoryText.createCategory: 'Tạo danh mục',
@@ -49,7 +50,8 @@ class CategoryLocale extends BaseLocale {
     CategoryText.confirmDelete: 'Confirm Delete',
     CategoryText.cancelDelete: 'Cancel',
     CategoryText.deleteConfirmation: 'Are you sure you want to delete this category?',
-    CategoryText.deleteWarningWithAccounts: 'This category already has accounts. If deleted, all accounts in this category will be deleted.',
+    CategoryText.deleteWarningWithAccounts:
+        'This category already has accounts. If deleted, all accounts in this category will be deleted.',
     CategoryText.deleteWarningEmpty: 'Are you sure you want to delete this category?',
     CategoryText.categoryCount: '{0} items',
     CategoryText.createCategory: 'Create Category',
@@ -73,7 +75,8 @@ class CategoryLocale extends BaseLocale {
     CategoryText.confirmDelete: 'Confirmar Exclusão',
     CategoryText.cancelDelete: 'Cancelar',
     CategoryText.deleteConfirmation: 'Tem certeza de que deseja excluir esta categoria?',
-    CategoryText.deleteWarningWithAccounts: 'Esta categoria já possui contas. Se excluída, todas as contas nesta categoria serão excluídas.',
+    CategoryText.deleteWarningWithAccounts:
+        'Esta categoria já possui contas. Se excluída, todas as contas nesta categoria serão excluídas.',
     CategoryText.deleteWarningEmpty: 'Tem certeza de que deseja excluir esta categoria?',
     CategoryText.categoryCount: '{0} itens',
     CategoryText.createCategory: 'Criar Categoria',
@@ -97,7 +100,8 @@ class CategoryLocale extends BaseLocale {
     CategoryText.confirmDelete: 'हटाने की पुष्टि करें',
     CategoryText.cancelDelete: 'रद्द करें',
     CategoryText.deleteConfirmation: 'क्या आप वाकई इस श्रेणी को हटाना चाहते हैं?',
-    CategoryText.deleteWarningWithAccounts: 'इस श्रेणी में पहले से खाते हैं। यदि हटाया गया, तो इस श्रेणी के सभी खाते हटा दिए जाएंगे।',
+    CategoryText.deleteWarningWithAccounts:
+        'इस श्रेणी में पहले से खाते हैं। यदि हटाया गया, तो इस श्रेणी के सभी खाते हटा दिए जाएंगे।',
     CategoryText.deleteWarningEmpty: 'क्या आप वाकई इस श्रेणी को हटाना चाहते हैं?',
     CategoryText.categoryCount: '{0} आइटम',
     CategoryText.createCategory: 'श्रेणी बनाएं',
@@ -145,7 +149,8 @@ class CategoryLocale extends BaseLocale {
     CategoryText.confirmDelete: 'Подтвердить удаление',
     CategoryText.cancelDelete: 'Отмена',
     CategoryText.deleteConfirmation: 'Вы уверены, что хотите удалить эту категорию?',
-    CategoryText.deleteWarningWithAccounts: 'В этой категории уже есть аккаунты. Если удалить, все аккаунты в этой категории будут удалены.',
+    CategoryText.deleteWarningWithAccounts:
+        'В этой категории уже есть аккаунты. Если удалить, все аккаунты в этой категории будут удалены.',
     CategoryText.deleteWarningEmpty: 'Вы уверены, что хотите удалить эту категорию?',
     CategoryText.categoryCount: '{0} элементов',
     CategoryText.createCategory: 'Создать категорию',
@@ -169,7 +174,8 @@ class CategoryLocale extends BaseLocale {
     CategoryText.confirmDelete: 'Konfirmasi Hapus',
     CategoryText.cancelDelete: 'Batal',
     CategoryText.deleteConfirmation: 'Apakah Anda yakin ingin menghapus kategori ini?',
-    CategoryText.deleteWarningWithAccounts: 'Kategori ini sudah memiliki akun. Jika dihapus, semua akun dalam kategori ini akan dihapus.',
+    CategoryText.deleteWarningWithAccounts:
+        'Kategori ini sudah memiliki akun. Jika dihapus, semua akun dalam kategori ini akan dihapus.',
     CategoryText.deleteWarningEmpty: 'Apakah Anda yakin ingin menghapus kategori ini?',
     CategoryText.categoryCount: '{0} item',
     CategoryText.createCategory: 'Buat Kategori',
@@ -193,7 +199,8 @@ class CategoryLocale extends BaseLocale {
     CategoryText.confirmDelete: 'Silme Onayı',
     CategoryText.cancelDelete: 'İptal',
     CategoryText.deleteConfirmation: 'Bu kategoriyi silmek istediğinizden emin misiniz?',
-    CategoryText.deleteWarningWithAccounts: 'Bu kategoride zaten hesaplar var. Silinirse, bu kategorideki tüm hesaplar silinecek.',
+    CategoryText.deleteWarningWithAccounts:
+        'Bu kategoride zaten hesaplar var. Silinirse, bu kategorideki tüm hesaplar silinecek.',
     CategoryText.deleteWarningEmpty: 'Bu kategoriyi silmek istediğinizden emin misiniz?',
     CategoryText.categoryCount: '{0} öğe',
     CategoryText.createCategory: 'Kategori Oluştur',
@@ -210,4 +217,28 @@ class CategoryLocale extends BaseLocale {
     CategoryText.updateCategory: 'Kategoriyi Güncelle',
   };
 
+  @override
+  Map<String, String> get es => {
+    CategoryText.title: 'Gestión de categorías',
+    CategoryText.deleteCategory: 'Eliminar categoría',
+    CategoryText.confirmDelete: 'Confirmar eliminación',
+    CategoryText.cancelDelete: 'Cancelar',
+    CategoryText.deleteConfirmation: '¿Estás seguro de que deseas eliminar esta categoría?',
+    CategoryText.deleteWarningWithAccounts:
+        'Esta categoría ya contiene cuentas. Si la eliminas, todas las cuentas en esta categoría también serán eliminadas.',
+    CategoryText.deleteWarningEmpty: '¿Estás seguro de que deseas eliminar esta categoría?',
+    CategoryText.categoryCount: '{0} elementos',
+    CategoryText.createCategory: 'Crear categoría',
+    CategoryText.editCategory: 'Editar categoría',
+    CategoryText.categoryName: 'Nombre de la categoría',
+    CategoryText.categoryIcon: 'Ícono de la categoría',
+    CategoryText.cancel: 'Cancelar',
+    CategoryText.bank: '💰 Banco',
+    CategoryText.job: '💼 Trabajo',
+    CategoryText.study: '🎓 Estudio',
+    CategoryText.shopping: '🛍️ Compras',
+    CategoryText.entertainment: '🎮 Entretenimiento',
+    CategoryText.other: '🔍 Otro',
+    CategoryText.updateCategory: 'Actualizar categoría',
+  };
 }

@@ -57,19 +57,41 @@ class OnboardingScreenState extends State<OnboardingScreen> {
         extendBodyBehindAppBar: true,
         extendBody: true,
         backgroundColor: theme.colorScheme.secondaryContainer,
-        body: Stack(alignment: Alignment.bottomCenter, children: [buildVNFlagMapBg(), buildBackground(width), buildContent(theme), buildBottomSection(theme)]),
+        body: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            buildVNFlagMapBg(),
+            buildBackground(width),
+            buildContent(theme),
+            buildBottomSection(theme),
+          ],
+        ),
       ),
     );
   }
 
   Positioned buildVNFlagMapBg() {
     return Positioned.fill(
-      child: Padding(padding: const EdgeInsets.all(16), child: SvgPicture.asset("assets/images/flag_map.svg", color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2))),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: SvgPicture.asset(
+          "assets/images/flag_map.svg",
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+        ),
+      ),
     );
   }
 
   Positioned buildBackground(double width) {
-    return Positioned(top: 0, left: 0, child: SvgPicture.asset('assets/images/onboarding_bg.svg', fit: BoxFit.fitWidth, width: width));
+    return Positioned(
+      top: 0,
+      left: 0,
+      child: SvgPicture.asset(
+        'assets/images/onboarding_bg.svg',
+        fit: BoxFit.fitWidth,
+        width: width,
+      ),
+    );
   }
 
   Positioned buildContent(ThemeData theme) {
@@ -80,7 +102,13 @@ class OnboardingScreenState extends State<OnboardingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [buildLogo(theme), const SizedBox(height: 16), buildWelcomeText(theme), const SizedBox(height: 40), buildAnimation()],
+        children: [
+          buildLogo(theme),
+          const SizedBox(height: 16),
+          buildWelcomeText(theme),
+          const SizedBox(height: 40),
+          buildAnimation(),
+        ],
       ),
     );
   }
@@ -90,18 +118,40 @@ class OnboardingScreenState extends State<OnboardingScreen> {
       decoration: BoxDecoration(
         color: theme.colorScheme.secondaryContainer,
         borderRadius: BorderRadius.circular(30),
-        boxShadow: [BoxShadow(color: theme.colorScheme.shadow, blurRadius: 10, offset: const Offset(0, 5))],
+        boxShadow: [
+          BoxShadow(color: theme.colorScheme.shadow, blurRadius: 10, offset: const Offset(0, 5)),
+        ],
       ),
-      child: ClipRRect(borderRadius: BorderRadius.circular(30), child: Image.asset('assets/images/app_logo.png', width: 100.h, height: 100.h)),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(30),
+        child: Image.asset('assets/images/app_logo.png', width: 100.h, height: 100.h),
+      ),
     );
   }
 
   Widget buildWelcomeText(ThemeData theme) {
-    return Column(children: [Text('CyberSafe', style: CustomTextStyle.regular(color: theme.colorScheme.primary, fontSize: 25.sp, fontWeight: FontWeight.bold))]);
+    return Column(
+      children: [
+        Text(
+          'CyberSafe',
+          style: CustomTextStyle.regular(
+            color: theme.colorScheme.primary,
+            fontSize: 25.sp,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
   }
 
   Widget buildAnimation() {
-    return Lottie.asset('assets/animations/onboarding.json', width: 250.w, height: 250.h, fit: BoxFit.contain, frameRate: FrameRate.max);
+    return Lottie.asset(
+      'assets/animations/onboarding.json',
+      width: 250.w,
+      height: 250.h,
+      fit: BoxFit.contain,
+      frameRate: FrameRate.max,
+    );
   }
 
   Positioned buildBottomSection(ThemeData theme) {
@@ -112,7 +162,11 @@ class OnboardingScreenState extends State<OnboardingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
-        children: [buildLanguageSelector(theme), const SizedBox(height: 20), buildNextButton(context)],
+        children: [
+          buildLanguageSelector(theme),
+          const SizedBox(height: 20),
+          buildNextButton(context),
+        ],
       ),
     );
   }
@@ -123,11 +177,18 @@ class OnboardingScreenState extends State<OnboardingScreen> {
         showLanguageBottomSheet(context);
       },
       child: Selector<AppLocale, (Locale, String)>(
-        selector: (_, provider) => (provider.locale, provider.currentLocaleModel.languageNativeName),
+        selector:
+            (_, provider) => (provider.locale, provider.currentLocaleModel.languageNativeName),
         shouldRebuild: (prev, next) => prev.$1 != next.$1,
         builder: (context, data, child) {
           final (locale, nativeName) = data;
-          return Row(mainAxisSize: MainAxisSize.min, children: [Text(nativeName, style: theme.textTheme.titleSmall), const Icon(Icons.arrow_drop_down_rounded)]);
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(nativeName, style: theme.textTheme.titleSmall),
+              const Icon(Icons.arrow_drop_down_rounded),
+            ],
+          );
         },
       ),
     );
@@ -163,7 +224,10 @@ class OnboardingScreenState extends State<OnboardingScreen> {
                     titleWidth: 400,
                     title: context.appLocale.onboardingLocale.getText(OnboardingText.policy),
                     onTap: () {
-                      AppConfig.showDialogRedirectLink(context, url: AppConfig.privacyPolicyUrl(context.localeRead.languageCode));
+                      AppConfig.showDialogRedirectLink(
+                        context,
+                        url: AppConfig.privacyPolicyUrl(context.localeRead.languageCode),
+                      );
                     },
                   ),
                   const SizedBox(height: 10),
@@ -172,7 +236,10 @@ class OnboardingScreenState extends State<OnboardingScreen> {
                     titleWidth: 400,
                     title: context.appLocale.onboardingLocale.getText(OnboardingText.terms),
                     onTap: () {
-                      AppConfig.showDialogRedirectLink(context, url: AppConfig.termsOfServiceUrl(context.localeRead.languageCode));
+                      AppConfig.showDialogRedirectLink(
+                        context,
+                        url: AppConfig.termsOfServiceUrl(context.localeRead.languageCode),
+                      );
                     },
                   ),
                   const SizedBox(height: 5),
@@ -195,7 +262,9 @@ class OnboardingScreenState extends State<OnboardingScreen> {
                                     isDegreed.value = !isDegreed.value;
                                   },
                                   child: Text(
-                                    context.appLocale.onboardingLocale.getText(OnboardingText.termsAndConditions),
+                                    context.appLocale.onboardingLocale.getText(
+                                      OnboardingText.termsAndConditions,
+                                    ),
                                     maxLines: 2,
                                     style: CustomTextStyle.regular(fontSize: 14.sp),
                                     overflow: TextOverflow.ellipsis,
@@ -209,14 +278,24 @@ class OnboardingScreenState extends State<OnboardingScreen> {
                             isDisabled: !value,
                             kMargin: 0,
                             onPressed: () async {
-                              showLoadingDialog();
+                              showLoadingDialog(
+                                loadingText: ValueNotifier(
+                                  context.trSafe(OnboardingText.initDatabase),
+                                ),
+                              );
                               await context.read<CategoryProvider>().initDataCategory(context);
-                              await SecureStorage.instance.save(key: SecureStorageKey.firstOpenApp, value: "false");
+                              await SecureStorage.instance.save(
+                                key: SecureStorageKey.firstOpenApp,
+                                value: "false",
+                              );
+                              hideLoadingDialog();
                               if (context.mounted) {
                                 Navigator.pushNamed(context, AppRoutes.registerMasterPin);
                               }
                             },
-                            text: context.appLocale.onboardingLocale.getText(OnboardingText.continueText),
+                            text: context.appLocale.onboardingLocale.getText(
+                              OnboardingText.continueText,
+                            ),
                           ),
                         ],
                       );

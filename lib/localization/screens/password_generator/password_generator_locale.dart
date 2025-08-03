@@ -4,9 +4,9 @@ import 'package:cybersafe_pro/localization/keys/password_generator_text.dart';
 
 class PasswordGeneratorLocale extends BaseLocale {
   final AppLocale appLocale;
-  
+
   PasswordGeneratorLocale(this.appLocale);
-  
+
   @override
   String get languageCode => appLocale.currentLocaleModel.languageCode;
   @override
@@ -120,5 +120,19 @@ class PasswordGeneratorLocale extends BaseLocale {
     PasswordGeneratorText.passwordLength: 'Parola uzunluğu',
     PasswordGeneratorText.generatePassword: 'Parola oluştur',
     PasswordGeneratorText.copyPassword: 'Parola kopyala',
+  };
+
+  @override
+  // TODO: implement es
+  Map<String, String> get es => {
+    PasswordGeneratorText.title: 'Generador de contraseñas',
+    PasswordGeneratorText.passwordCopied: 'Contraseña copiada al portapapeles',
+    PasswordGeneratorText.specialChars: 'Caracteres especiales (!@#,... )',
+    PasswordGeneratorText.numbers: 'Números (0-9)',
+    PasswordGeneratorText.uppercase: 'Letras mayúsculas (A-Z)',
+    PasswordGeneratorText.lowercase: 'Letras minúsculas (a-z)',
+    PasswordGeneratorText.passwordLength: 'Longitud de la contraseña',
+    PasswordGeneratorText.generatePassword: 'Generar contraseña',
+    PasswordGeneratorText.copyPassword: 'Copiar contraseña',
   };
 }

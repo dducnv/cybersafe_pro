@@ -44,7 +44,6 @@ class SettingsLocale extends BaseLocale {
   static const String transferData = 'transfer_data';
   static const String transferDataMessage = 'transfer_data_message';
 
-
   static const String appIsNotInstalled = 'app_is_not_installed';
   static const String appIsNotInstalledMessage = 'app_is_not_installed_message';
   static const String installNow = 'install_now';
@@ -83,7 +82,8 @@ class SettingsLocale extends BaseLocale {
     transferDataMessage: 'Bạn có chắc chắn muốn chuyển dữ liệu từ Lite sang Pro?',
 
     receiveData: 'Nhận dữ liệu',
-    receiveDataMessage: 'Để tiếp tục nhận dữ liệu từ bản Lite, vui lòng chọn file để thêm dữ liệu vào bản Pro!',
+    receiveDataMessage:
+        'Để tiếp tục nhận dữ liệu từ bản Lite, vui lòng chọn file để thêm dữ liệu vào bản Pro!',
   };
 
   @override
@@ -117,7 +117,8 @@ class SettingsLocale extends BaseLocale {
     transferDataMessage: 'Do you want to transfer data from Lite to Pro?',
 
     receiveData: 'Receive data',
-    receiveDataMessage: 'To continue receiving data from the Lite version, please select a file to add data to the Pro version!',
+    receiveDataMessage:
+        'To continue receiving data from the Lite version, please select a file to add data to the Pro version!',
   };
 
   @override
@@ -151,7 +152,8 @@ class SettingsLocale extends BaseLocale {
     transferDataMessage: 'Do you want to transfer data from Lite to Pro?',
 
     receiveData: 'Receive data',
-    receiveDataMessage: 'To continue receiving data from the Lite version, please select a file to add data to the Pro version!',
+    receiveDataMessage:
+        'To continue receiving data from the Lite version, please select a file to add data to the Pro version!',
   };
 
   // Thêm các bản dịch cho các ngôn ngữ khác tương tự
@@ -186,7 +188,8 @@ class SettingsLocale extends BaseLocale {
     transferDataMessage: 'Você deseja transferir dados do Lite para o Pro?',
 
     receiveData: 'Receber dados',
-    receiveDataMessage: 'Para continuar recebendo dados da versão Lite, por favor selecione um arquivo para adicionar dados à versão Pro!',
+    receiveDataMessage:
+        'Para continuar recebendo dados da versão Lite, por favor selecione um arquivo para adicionar dados à versão Pro!',
   };
   @override
   Map<String, String> get pt_BR => {
@@ -219,7 +222,8 @@ class SettingsLocale extends BaseLocale {
     transferDataMessage: 'Você deseja transferir dados do Lite para o Pro?',
 
     receiveData: 'Receber dados',
-    receiveDataMessage: 'Para continuar recebendo dados da versão Lite, por favor selecione um arquivo para adicionar dados à versão Pro!',
+    receiveDataMessage:
+        'Para continuar recebendo dados da versão Lite, por favor selecione um arquivo para adicionar dados à versão Pro!',
   };
   @override
   Map<String, String> get hi => {
@@ -251,7 +255,8 @@ class SettingsLocale extends BaseLocale {
     transferData: 'डेटा Pro में ट्रांसफर करें',
     transferDataMessage: 'क्या आप वाकई Lite से Pro में डेटा ट्रांसफर करना चाहते हैं?',
     receiveData: 'डेटा प्राप्त करें',
-    receiveDataMessage: 'Lite से डेटा प्राप्त करने के लिए, कृपया Pro में जोड़ने के लिए एक फ़ाइल चुनें!',
+    receiveDataMessage:
+        'Lite से डेटा प्राप्त करने के लिए, कृपया Pro में जोड़ने के लिए एक फ़ाइल चुनें!',
   };
   @override
   Map<String, String> get ja => {
@@ -315,7 +320,8 @@ class SettingsLocale extends BaseLocale {
     transferData: 'Передать данные в Pro',
     transferDataMessage: 'Вы уверены, что хотите передать данные из Lite в Pro?',
     receiveData: 'Получить данные',
-    receiveDataMessage: 'Чтобы продолжить получение данных из Lite, выберите файл для добавления данных в Pro!',
+    receiveDataMessage:
+        'Чтобы продолжить получение данных из Lite, выберите файл для добавления данных в Pro!',
   };
   @override
   Map<String, String> get id => {
@@ -347,7 +353,8 @@ class SettingsLocale extends BaseLocale {
     transferData: 'Transfer data ke Pro',
     transferDataMessage: 'Apakah Anda yakin ingin mentransfer data dari Lite ke Pro?',
     receiveData: 'Terima data',
-    receiveDataMessage: 'Untuk terus menerima data dari Lite, silakan pilih file untuk menambahkan data ke Pro!',
+    receiveDataMessage:
+        'Untuk terus menerima data dari Lite, silakan pilih file untuk menambahkan data ke Pro!',
   };
 
   @override
@@ -380,7 +387,8 @@ class SettingsLocale extends BaseLocale {
     transferData: 'Transfer data to Pro version',
     transferDataMessage: 'Are you sure you want to transfer data from Lite to Pro?',
     receiveData: 'Receive data',
-    receiveDataMessage: 'To continue receiving data from Lite, please select a file to add data to Pro!',
+    receiveDataMessage:
+        'To continue receiving data from Lite, please select a file to add data to Pro!',
   };
 
   @override
@@ -413,7 +421,8 @@ class SettingsLocale extends BaseLocale {
     transferData: 'Transferir dados para o Pro',
     transferDataMessage: 'Você tem certeza que deseja transferir os dados do Lite para o Pro?',
     receiveData: 'Receber dados',
-    receiveDataMessage: 'Para continuar recebendo dados do Lite, selecione um arquivo para adicionar dados ao Pro!',
+    receiveDataMessage:
+        'Para continuar recebendo dados do Lite, selecione um arquivo para adicionar dados ao Pro!',
   };
 
   @override
@@ -446,6 +455,43 @@ class SettingsLocale extends BaseLocale {
     transferData: 'Verileri Pro sürüme aktar',
     transferDataMessage: "Lite'dan Pro'ya veri aktarmak istediğinizden emin misiniz?",
     receiveData: 'Veri al',
-    receiveDataMessage: "Lite'dan veri almaya devam etmek için lütfen Pro'ya eklemek üzere bir dosya seçin!",
+    receiveDataMessage:
+        "Lite'dan veri almaya devam etmek için lütfen Pro'ya eklemek üzere bir dosya seçin!",
+  };
+
+  @override
+  // TODO: implement es
+  Map<String, String> get es => {
+    settings: 'Configuración',
+    general: 'General',
+    security: 'Seguridad',
+    language: 'Idioma',
+    theme: 'Tema',
+    darkMode: 'Modo oscuro',
+    biometric: 'Biometría',
+    autoLock: 'Bloqueo automático',
+    changePin: 'Cambiar PIN',
+    backup: 'Copia de seguridad',
+    restore: 'Restaurar',
+    about: 'Acerca de',
+    chooseLanguage: 'Elegir idioma',
+    importDataFromBrowser: 'Importar datos desde el navegador',
+    backupData: 'Hacer copia de seguridad',
+    deleteData: 'Eliminar datos',
+    deleteDataConfirmation: 'Confirmación de eliminación de datos',
+    confirm: 'Confirmar',
+    lockOnBackground: 'Bloquear en segundo plano',
+    dataIsEmpty: 'Los datos están vacíos',
+    deleteDataQuestion: '¿Estás seguro de que deseas eliminar todos los datos?',
+    cancel: 'Cancelar',
+    appIsNotInstalled: 'La aplicación no está instalada',
+    appIsNotInstalledMessage: '¿Por favor, instala la aplicación antes de transferir los datos?',
+    installNow: 'Instalar ahora',
+    transferData: 'Transferir datos a la versión Pro',
+    transferDataMessage: '¿Deseas transferir los datos de la versión Lite a la versión Pro?',
+
+    receiveData: 'Recibir datos',
+    receiveDataMessage:
+        'Para continuar recibiendo datos desde la versión Lite, ¡por favor selecciona un archivo para agregar los datos a la versión Pro!',
   };
 }

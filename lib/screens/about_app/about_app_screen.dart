@@ -18,57 +18,56 @@ class AboutAppScreen extends StatelessWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              buildLogo(Theme.of(context)),
-              const SizedBox(height: 24),
-              Text(
-                AppConfig.isProApp ? "CyberSafe PRO" : "CyberSafe",
-                style: CustomTextStyle.regular(
-                  fontSize: 24.sp,
-                  fontWeight: FontWeight.bold,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                buildLogo(Theme.of(context)),
+                const SizedBox(height: 24),
+                Text(
+                  AppConfig.isProApp ? "CyberSafe PRO" : "CyberSafe",
+                  style: CustomTextStyle.regular(fontSize: 24.sp, fontWeight: FontWeight.bold),
                 ),
-              ),
-              Text(
-                "v${packageInfo.version} (${packageInfo.buildNumber})",
-                style: CustomTextStyle.regular(
-                  fontSize: 14.sp,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                Text(
+                  "v${packageInfo.version} (${packageInfo.buildNumber})",
+                  style: CustomTextStyle.regular(
+                    fontSize: 14.sp,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 32),
-              _buildFeatureCard(
-                context,
-                icon: Icons.security,
-                title: context.trAbout(GeneralText.securityOfflineTitle),
-                description: context.trAbout(GeneralText.securityOfflineDesc),
-              ),
-              const SizedBox(height: 16),
-              _buildFeatureCard(
-                context,
-                icon: Icons.folder,
-                title: context.trAbout(GeneralText.categoryOrganizeTitle),
-                description: context.trAbout(GeneralText.categoryOrganizeDesc),
-              ),
-              const SizedBox(height: 16),
-              _buildFeatureCard(
-                context,
-                icon: Icons.backup,
-                title: context.trAbout(GeneralText.backupRestoreTitle),
-                description: context.trAbout(GeneralText.backupRestoreDesc),
-              ),
-              const SizedBox(height: 16),
-              _buildFeatureCard(
-                context,
-                icon: Icons.privacy_tip,
-                title: context.trAbout(GeneralText.privacyMaxTitle),
-                description: context.trAbout(GeneralText.privacyMaxDesc),
-              ),
-            ],
+                const SizedBox(height: 32),
+                _buildFeatureCard(
+                  context,
+                  icon: Icons.security,
+                  title: context.trAbout(GeneralText.securityOfflineTitle),
+                  description: context.trAbout(GeneralText.securityOfflineDesc),
+                ),
+                const SizedBox(height: 16),
+                _buildFeatureCard(
+                  context,
+                  icon: Icons.folder,
+                  title: context.trAbout(GeneralText.categoryOrganizeTitle),
+                  description: context.trAbout(GeneralText.categoryOrganizeDesc),
+                ),
+                const SizedBox(height: 16),
+                _buildFeatureCard(
+                  context,
+                  icon: Icons.backup,
+                  title: context.trAbout(GeneralText.backupRestoreTitle),
+                  description: context.trAbout(GeneralText.backupRestoreDesc),
+                ),
+                const SizedBox(height: 16),
+                _buildFeatureCard(
+                  context,
+                  icon: Icons.privacy_tip,
+                  title: context.trAbout(GeneralText.privacyMaxTitle),
+                  description: context.trAbout(GeneralText.privacyMaxDesc),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -88,11 +87,7 @@ class AboutAppScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(
-              icon,
-              size: 32,
-              color: Theme.of(context).colorScheme.primary,
-            ),
+            Icon(icon, size: 32, color: Theme.of(context).colorScheme.primary),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -100,10 +95,7 @@ class AboutAppScreen extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: CustomTextStyle.regular(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -127,15 +119,13 @@ class AboutAppScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.colorScheme.secondaryContainer,
         borderRadius: BorderRadius.circular(25),
-        boxShadow: [BoxShadow(color: theme.colorScheme.shadow, blurRadius: 10, offset: const Offset(0, 5))],
+        boxShadow: [
+          BoxShadow(color: theme.colorScheme.shadow, blurRadius: 10, offset: const Offset(0, 5)),
+        ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(25),
-        child: Image.asset(
-          'assets/images/app_logo.png',
-          width: 100.h,
-          height: 100.h,
-        ),
+        child: Image.asset('assets/images/app_logo.png', width: 100.h, height: 100.h),
       ),
     );
   }

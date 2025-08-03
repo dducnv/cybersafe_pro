@@ -10,6 +10,8 @@ import 'package:cybersafe_pro/database/boxes/icon_custom_box.dart';
 import 'package:cybersafe_pro/database/boxes/password_history_box.dart';
 import 'package:cybersafe_pro/database/boxes/totp_box.dart';
 import 'package:cybersafe_pro/database/objectbox.dart';
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/migrate_data/old_data_decrypt.dart';
 import 'package:cybersafe_pro/repositories/driff_db/models/account_aggregate.dart';
 import 'package:cybersafe_pro/services/account/account_services.dart';
@@ -27,13 +29,17 @@ class MigrateFromOldData {
       if (await SecureStorage.instance.read(key: SecureStorageKey.isMigrateOldData) == "true") {
         return false;
       }
-      showLoadingDialog(loadingText: ValueNotifier<String>('Đang di chuyển dữ liệu...'));
+      if (!context.mounted) return false;
+      showLoadingDialog(
+        loadingText: ValueNotifier<String>(context.trSafe(HomeLocale.migrationData)),
+      );
       final stopwatch = Stopwatch()..start();
       final docsDir = await getApplicationDocumentsDirectory();
       final dbPath = path.join(docsDir.path, "cyber_safe");
       logInfo("dbPath: $dbPath");
       logInfo("dbPath exists: ${await Directory(dbPath).exists()}");
       if (!await Directory(dbPath).exists()) {
+        await SecureStorage.instance.save(key: SecureStorageKey.isMigrateOldData, value: "true");
         return false;
       }
       await _migratePinCode();
@@ -46,14 +52,14 @@ class MigrateFromOldData {
       logInfo("Convert old data to account aggregates: ${stopwatch.elapsed}ms");
       log(accountAggregates.map((e) => e.toString()).toString());
       await AccountServices.instance.saveAccountsFromAccountAggregates(accountAggregates);
-      // deleteData();
-      // EncryptAppDataService.instance.clearAllKey();
+      deleteData();
+      EncryptAppDataService.instance.clearAllKey();
+      await SecureStorage.instance.save(key: SecureStorageKey.isMigrateOldData, value: "true");
       return true;
     } catch (e) {
       logError('Error migrating data: $e');
       return false;
     } finally {
-      await SecureStorage.instance.save(key: SecureStorageKey.isMigrateOldData, value: "true");
       hideLoadingDialog();
     }
   }
