@@ -1,6 +1,6 @@
-import 'package:cybersafe_pro/database/boxes/account_box.dart';
-import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
+import 'package:cybersafe_pro/providers/details_account_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'layouts/mobile_layout.dart';
 
 class DetailsAccountScreen extends StatefulWidget {
@@ -13,32 +13,32 @@ class DetailsAccountScreen extends StatefulWidget {
 }
 
 class _DetailsAccountScreenState extends State<DetailsAccountScreen> {
-  late AccountOjbModel accountOjbModel;
-  bool isLoading = false;
   @override
   void initState() {
     super.initState();
-    loadData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadData();
+    });
   }
 
   Future<void> loadData() async {
-    setState(() {
-      isLoading = true;
-    });
-    AccountOjbModel? accountOjbModelLoaded = await AccountBox.getById(widget.accountId);
-    if (accountOjbModelLoaded != null) {
-      setState(() {
-        accountOjbModel = accountOjbModelLoaded;
-        isLoading = false;
-      });
+    try {
+      final provider = context.read<DetailsAccountProvider>();
+      await provider.loadAccountDetails(widget.accountId);
+    } catch (e) {
+      // Handle error if needed
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-    return DetailsAccountMobileLayout(accountOjbModel: accountOjbModel);
+    return Consumer<DetailsAccountProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
+          return Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+        return DetailsAccountMobileLayout(accountId: widget.accountId);
+      },
+    );
   }
 }

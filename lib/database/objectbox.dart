@@ -13,7 +13,7 @@ class ObjectBox {
   late final Store store;
   Admin? admin;
   
-  // Boxes
+  // // Boxes
   late final Box<AccountOjbModel> accountBox;
   late final Box<CategoryOjbModel> categoryBox;
   late final Box<IconCustomModel> iconCustomBox;

@@ -19,41 +19,38 @@ enum SecureStorageKeys {
   versionEncryptKey,
   numberLogin,
 }
+
 class SecureStorage {
   static final instance = SecureStorage._internal();
 
-  final _storage = const FlutterSecureStorage();
+  final _storage = const FlutterSecureStorage(
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock_this_device),
+    aOptions: AndroidOptions(
+      encryptedSharedPreferences: true,
+      keyCipherAlgorithm: KeyCipherAlgorithm.RSA_ECB_PKCS1Padding,
+      storageCipherAlgorithm: StorageCipherAlgorithm.AES_CBC_PKCS7Padding,
+    ),
+  );
 
   SecureStorage._internal();
 
-  Future<void> save({
-   required String key,required String value
-  }) async {
+  Future<void> save({required String key, required String value}) async {
     await _storage.write(key: key, value: value);
   }
 
-  Future<String?> read({
-    required String key,
-  }) async {
+  Future<String?> read({required String key}) async {
     return await _storage.read(key: key);
   }
 
-  Future<void> delete({
-    required String key,
-  }) async {
+  Future<void> delete({required String key}) async {
     await _storage.delete(key: key);
   }
 
-  Future<void> saveObject<T>({
-    required String key,
-    required T value,
-  }) async {
+  Future<void> saveObject<T>({required String key, required T value}) async {
     await save(key: key, value: jsonEncode(value));
   }
 
-  Future<T> readObject<T>({
-    required String key,
-  }) async {
+  Future<T> readObject<T>({required String key}) async {
     String? value = await read(key: key);
     if (value != null) {
       return jsonDecode(value) as T;
@@ -67,7 +64,7 @@ class SecureStorage {
   }
 
   Future<bool?> readBool(String key) async {
-    String? value = await read(key:key);
+    String? value = await read(key: key);
     if (value != null) {
       return value.toLowerCase() == 'true';
     }
@@ -79,7 +76,7 @@ class SecureStorage {
   }
 
   Future<int?> readInt(String key) async {
-    String? value = await read(key:key);
+    String? value = await read(key: key);
     if (value != null) {
       return int.tryParse(value);
     }
@@ -91,7 +88,7 @@ class SecureStorage {
   }
 
   Future<double?> readDouble(String key) async {
-    String? value = await read(key:key);
+    String? value = await read(key: key);
     if (value != null) {
       return double.tryParse(value);
     }

@@ -1,6 +1,7 @@
 import 'package:cybersafe_pro/providers/statistic_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'layouts/mobile_layout.dart';
 
 class StatisticScreen extends StatefulWidget {

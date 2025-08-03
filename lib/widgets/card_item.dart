@@ -1,6 +1,7 @@
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 
 typedef ItemBuilder<T> = Widget Function(T item, int index);
@@ -49,7 +50,8 @@ class _CardItemState<T> extends State<CardItem<T>> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final remainingItems = (widget.totalItems ?? widget.items.length) - widget.items.length;
+    final totalItems = widget.totalItems ?? widget.items.length;
+    final remainingItems = totalItems - widget.items.length;
     final shouldShowSeeMore = widget.showSeeMore == true && remainingItems > 0;
 
     return Column(
@@ -59,8 +61,8 @@ class _CardItemState<T> extends State<CardItem<T>> with SingleTickerProviderStat
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(widget.title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp)),
-            if (widget.totalItems != null) Text('${widget.totalItems} ${context.appLocale.homeLocale.getText(HomeLocale.items)}', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            Text(widget.title, style: CustomTextStyle.regular(fontWeight: FontWeight.bold, fontSize: 18.sp)),
+            if (widget.totalItems != null) Text('${widget.totalItems} ${context.appLocale.homeLocale.getText(HomeLocale.items)}', style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Theme.of(context).colorScheme.onSurfaceVariant)),
           ],
         ),
         const SizedBox(height: 10),
@@ -106,7 +108,7 @@ class _CardItemState<T> extends State<CardItem<T>> with SingleTickerProviderStat
                             children: [
                               Text(
                                 remainingItems > 10 ? context.appLocale.homeLocale.getText(HomeLocale.seeMore10) : context.appLocale.homeLocale.getText(HomeLocale.seeMore).replaceAll("{count}", remainingItems.toString()),
-                                style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w500, fontSize: 14.sp),
+                                style: CustomTextStyle.regular(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w500, fontSize: 14.sp),
                               ),
                               const SizedBox(width: 4),
                               Icon(Icons.keyboard_arrow_down, color: Theme.of(context).colorScheme.primary),

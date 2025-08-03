@@ -225,4 +225,31 @@ class DetailsAccountLocale extends BaseLocale {
     DetailsAccountText.passwordHistoryDetail: "Detaylar",
     DetailsAccountText.passwordHistoryTitle: "Şifre Değişiklik Geçmişi",
   };
+
+  @override
+  // TODO: implement es
+  Map<String, String> get es => {
+    DetailsAccountText.editAccount: 'Editar cuenta',
+    DetailsAccountText.deleteAccount: 'Eliminar cuenta',
+    DetailsAccountText.copy: 'Copiar',
+    DetailsAccountText.show: 'Mostrar',
+    DetailsAccountText.hide: 'Ocultar',
+    DetailsAccountText.copied: 'Copiado',
+    DetailsAccountText.deleteConfirmation: 'Eliminar cuenta',
+    DetailsAccountText.deleteAccountQuestion: '¿Estás seguro de que deseas eliminar esta cuenta?',
+    DetailsAccountText.otpCode: 'Código de autenticación',
+    DetailsAccountText.baseInfo: 'Información de la cuenta',
+    DetailsAccountText.category: 'Categoría',
+    DetailsAccountText.note: 'Nota',
+    DetailsAccountText.customFields: 'Información adicional',
+    DetailsAccountText.passwordHistory: 'Historial de contraseñas',
+    DetailsAccountText.updatedAt: 'Última actualización',
+    DetailsAccountText.cancel: 'Cancelar',
+    DetailsAccountText.confirm: 'Confirmar',
+    DetailsAccountText.username: 'Nombre de la cuenta',
+    DetailsAccountText.password: 'Contraseña',
+    DetailsAccountText.email: 'Correo electrónico',
+    DetailsAccountText.passwordHistoryDetail: 'Detalles',
+    DetailsAccountText.passwordHistoryTitle: 'Historial de contraseñas',
+  };
 }

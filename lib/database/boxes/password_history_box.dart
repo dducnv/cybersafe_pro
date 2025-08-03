@@ -2,7 +2,6 @@ import 'package:cybersafe_pro/database/models/password_history_model.dart';
 import 'package:cybersafe_pro/database/objectbox.dart';
 import 'package:cybersafe_pro/objectbox.g.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
-import 'package:flutter/foundation.dart';
 
 class PasswordHistoryBox {
   static final box = ObjectBox.instance.store.box<PasswordHistory>();

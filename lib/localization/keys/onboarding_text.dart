@@ -12,4 +12,6 @@ class OnboardingText {
   static const String agreeRedirectLink = 'agree_redirect_link';
   static const String doNotAgreeRedirectLink = 'do_not_agree_redirect_link';
   static const String showLink = 'show_link';
-} 
+
+  static const String initDatabase = 'init_database';
+}

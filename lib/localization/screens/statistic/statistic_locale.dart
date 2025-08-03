@@ -4,9 +4,9 @@ import 'package:cybersafe_pro/localization/keys/statistic_text.dart';
 
 class StatisticLocale extends BaseLocale {
   final AppLocale appLocale;
-  
+
   StatisticLocale(this.appLocale);
-  
+
   @override
   String get languageCode => appLocale.currentLocaleModel.languageCode;
   @override
@@ -161,4 +161,23 @@ class StatisticLocale extends BaseLocale {
     StatisticText.totalAccountPasswordWeak: 'Toplam Zayıf Parola',
     StatisticText.totalAccountSamePassword: 'Toplam Yinelenen Parola',
   };
-} 
+
+  @override
+  // TODO: implement es
+  Map<String, String> get es => {
+    StatisticText.title: 'Estadísticas',
+    StatisticText.securityScore: 'Nivel de seguridad',
+    StatisticText.weakPasswords: 'Débiles',
+    StatisticText.duplicatePasswords: 'Duplicadas',
+    StatisticText.strongPasswords: 'Fuertes',
+    StatisticText.securityCheck: 'Verificación de seguridad',
+    StatisticText.passwordAge: 'Antigüedad de la contraseña',
+    StatisticText.passwordStrength: 'Fortaleza de la contraseña',
+    StatisticText.twoFactorEnabled: 'Autenticación en dos pasos',
+    StatisticText.accountsProtected: 'Cuentas protegidas',
+    StatisticText.totalAccount: 'Total de cuentas',
+    StatisticText.totalAccountPasswordStrong: 'Total de contraseñas fuertes',
+    StatisticText.totalAccountPasswordWeak: 'Total de contraseñas débiles',
+    StatisticText.totalAccountSamePassword: 'Total de contraseñas duplicadas',
+  };
+}

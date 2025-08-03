@@ -7,6 +7,7 @@ import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:cybersafe_pro/widgets/app_custom_switch/app_custom_switch.dart';
 import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -73,7 +74,7 @@ class _UseBiometricLoginState extends State<UseBiometricLogin> {
                 children: [
                   Expanded(
                     child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.biometric), 
-                      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500)
+                      style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w500)
                     ),
                   ),
                   Row(

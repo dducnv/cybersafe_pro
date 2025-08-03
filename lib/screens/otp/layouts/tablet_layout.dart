@@ -1,115 +1,120 @@
+import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/components/icon_show_component.dart';
-import 'package:cybersafe_pro/database/boxes/account_box.dart';
-import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:cybersafe_pro/database/models/icon_custom_model.dart';
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
+import 'package:cybersafe_pro/localization/keys/otp_text.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
+import 'package:cybersafe_pro/providers/home_provider.dart';
+import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
+import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/screens/otp/components/totp_item.dart';
-import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
+import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/services/otp.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
-import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
 import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
 import 'package:cybersafe_pro/widgets/decrypt_text/decrypt_text.dart';
 import 'package:cybersafe_pro/widgets/otp_qrcode_scan/otp_qrcode_scan.dart';
 import 'package:cybersafe_pro/widgets/otp_text_with_countdown/otp_text_with_countdown.dart';
 import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:provider/provider.dart';
 
-class OtpTabletLayout extends StatefulWidget {
-  const OtpTabletLayout({super.key});
+class OtpMobileLayout extends StatefulWidget {
+  const OtpMobileLayout({super.key});
 
   @override
-  State<OtpTabletLayout> createState() => _OtpTabletLayoutState();
+  State<OtpMobileLayout> createState() => _OtpMobileLayoutState();
 }
 
-class _OtpTabletLayoutState extends State<OtpTabletLayout> {
-  List<AccountOjbModel> _otpAccounts = [];
+class _OtpMobileLayoutState extends State<OtpMobileLayout> {
+  List<MapEntry<AccountDriftModelData, TOTPDriftModelData>> _otpAccounts = [];
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadOTPAccounts();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadOTPAccounts();
+    });
   }
 
-  void _loadOTPAccounts() {
-    final accounts = AccountBox.getAllWithOTP();
+  Future<void> _loadOTPAccounts() async {
     setState(() {
-      _otpAccounts = accounts;
+      _isLoading = true;
     });
+    // Đợi 1 frame để tránh block UI
+    await Future.delayed(Duration(milliseconds: 10));
+    final accounts = await Future(() => DriffDbManager.instance.totpAdapter.getAllWithOTP());
+    if (mounted) {
+      setState(() {
+        _otpAccounts = accounts;
+        _isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('OTP Accounts'), 
-        elevation: 0, 
-        scrolledUnderElevation: 0, 
-        backgroundColor: Theme.of(context).colorScheme.surface
-      ),
-      body: _otpAccounts.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset("assets/images/exclamation-mark.png", width: 80.w, height: 80.h),
-                  SizedBox(height: 20.h),
-                  Text(
-                    "Không có tài khoản OTP nào",
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w500,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  )
-                ],
-              ),
-            )
-          : Padding(
-              padding: const EdgeInsets.all(16),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  // Tính toán số cột dựa trên độ rộng của màn hình
-                  int crossAxisCount = constraints.maxWidth > 900 ? 3 : 2;
-                  
-                  return GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 2.5,
-                    ),
-                    itemCount: _otpAccounts.length,
-                    itemBuilder: (context, index) {
-                      final account = _otpAccounts[index];
-                      return TotpItem(
-                        account: account,
-                        secretKey: account.totp.target?.secretKey ?? '',
-                        iconCustom: account.getIconCustom ?? IconCustomModel(name: '', imageBase64: ''),
-                        title: account.title,
-                        email: account.email ?? '',
-                        icon: account.icon ?? '',
-                        onTap: () {
-                          seeDetailTOTPBottomSheet(
-                            context,
-                            account,
-                            callBackSuccess: () {
-                              context.read<CategoryProvider>().refresh();
-                              _loadOTPAccounts();
+      appBar: AppBar(title: Text(context.trOtp(OtpText.title)), elevation: 0, scrolledUnderElevation: 0, backgroundColor: Theme.of(context).colorScheme.surface),
+      body:
+          _isLoading
+              ? Center(child: CircularProgressIndicator())
+              : _otpAccounts.isEmpty
+              ? Center(child: Image.asset("assets/images/exclamation-mark.png", width: 60.w, height: 60.h))
+              : AnimationLimiter(
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _otpAccounts.length,
+                  separatorBuilder: (context, index) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final account = _otpAccounts[index];
+                    return AnimationConfiguration.staggeredList(
+                      position: index,
+                      duration: const Duration(milliseconds: 400),
+                      child: SlideAnimation(
+                        verticalOffset: 30.0,
+                        child: FadeInAnimation(
+                          child: TotpItem(
+                            account: account.key,
+                            secretKey: account.value.secretKey ?? '',
+                            iconCustom: IconCustomModel(name: '', imageBase64: ''),
+                            title: account.key.title,
+                            email: account.key.username ?? '',
+                            icon: account.key.icon ?? '',
+                            onTap: () async {
+                              // Giải mã trước khi mở bottom sheet
+                              final secretKeyEncrypted = account.value.secretKey ?? '';
+                              if (secretKeyEncrypted.isEmpty) {
+                                seeDetailTOTPBottomSheet(context, account.key, account.value, '');
+                                return;
+                              }
+                              showLoadingDialog(context: context); // Sửa lại truyền context đúng dạng
+                              String decryptedSecretKey = '';
+                              try {
+                                decryptedSecretKey = await DataSecureService.decryptTOTPKey(secretKeyEncrypted);
+                              } catch (e) {
+                                decryptedSecretKey = '';
+                              }
+                              hideLoadingDialog();
+                              if (context.mounted) {
+                                seeDetailTOTPBottomSheet(context, account.key, account.value, decryptedSecretKey); // Truyền trực tiếp
+                              }
                             },
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
 
       floatingActionButton: SpeedDial(
         icon: Icons.add,
@@ -130,7 +135,13 @@ class _OtpTabletLayoutState extends State<OtpTabletLayout> {
             shape: const CircleBorder(),
             child: const Icon(Icons.keyboard_alt_rounded),
             onTap: () {
-              addTOTPWithKeyboard(context);
+              addTOTPWithKeyboard(
+                context,
+                callBackSuccess: () {
+                  context.read<HomeProvider>().refreshData();
+                  _loadOTPAccounts();
+                },
+              );
             },
           ),
         ],
@@ -138,12 +149,12 @@ class _OtpTabletLayoutState extends State<OtpTabletLayout> {
     );
   }
 
-  Future<void> addTOTPWithKeyboard(BuildContext context) async {
+  Future<void> addTOTPWithKeyboard(BuildContext context, {Function? callBackSuccess}) async {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) {
-        return const AddTOTPWithKeyboardBottomSheet();
+        return AddTOTPWithKeyboardBottomSheet(callBackSuccess: callBackSuccess);
       },
     );
   }
@@ -162,109 +173,69 @@ class _OtpTabletLayoutState extends State<OtpTabletLayout> {
     }
   }
 
-  Future<void> seeDetailTOTPBottomSheet(BuildContext context, AccountOjbModel totp, {Function? callBackSuccess}) async {
+  Future<void> seeDetailTOTPBottomSheet(BuildContext context, AccountDriftModelData account, TOTPDriftModelData totp, String decryptedSecretKey) async {
     await showModalBottomSheet(
       context: context,
-      isScrollControlled: true,
       builder: (context) {
-        return Container(
-          width: double.infinity,
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.7,
-          ),
-          child: Center(
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 600),
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+        return SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              AppRoutes.navigateTo(context, AppRoutes.detailsAccount, arguments: {"accountId": totp.id});
-                            },
-                            icon: const Icon(Icons.arrow_outward, size: 24),
-                            tooltip: "Xem chi tiết tài khoản",
-                          ),
-                        ],
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          AppRoutes.navigateTo(context, AppRoutes.detailsAccount, arguments: {"accountId": account.id});
+                        },
+                        icon: const Icon(Icons.arrow_outward),
                       ),
-                      const SizedBox(height: 20),
-                      Align(
-                        alignment: Alignment.center,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(15),
-                          child: SizedBox(
-                            width: 80.h,
-                            height: 80.h,
-                            child: ColoredBox(
-                              color: Colors.grey.withOpacity(0.2),
-                              child: Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12.0), 
-                                  child: IconShowComponent(
-                                    account: totp, 
-                                    width: 60.w, 
-                                    height: 60.h, 
-                                    isDecrypted: false
-                                  )
-                                )
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      DecryptText(
-                        style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold), 
-                        value: totp.title, 
-                        decryptTextType: DecryptTextType.info
-                      ),
-                      if (totp.email != null && totp.email!.isNotEmpty)
-                        DecryptText(
-                          style: TextStyle(fontSize: 18.sp, color: Theme.of(context).colorScheme.onSurfaceVariant), 
-                          value: totp.email ?? "", 
-                          decryptTextType: DecryptTextType.info
-                        ),
-                      const SizedBox(height: 30),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DecryptText(
-                              style: TextStyle(fontSize: 18.sp),
-                              decryptTextType: DecryptTextType.opt,
-                              value: totp.totp.target?.secretKey ?? "",
-                              builder: (context, value) {
-                                return CardCustomWidget(
-                                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20), 
-                                  child: OtpTextWithCountdown(keySecret: value)
-                                );
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 15),
-                          IconButton(
-                            onPressed: () async {
-                              Navigator.pop(context);
-                              if (totp.totp.target?.secretKey == null) return;
-                              String secretKey = await EncryptAppDataService.instance.decryptTOTPKey(totp.totp.target?.secretKey ?? "");
-                              if(!context.mounted) return;
-                              clipboardCustom(context: context, text: generateTOTPCode(keySecret: secretKey));
-                            },
-                            icon: Icon(Icons.copy, size: 24.sp),
-                            tooltip: "Sao chép mã OTP",
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 30),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.center,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      child: SizedBox(
+                        width: 50.h,
+                        height: 50.h,
+                        child: ColoredBox(
+                          color: Colors.grey.withOpacity(0.2),
+                          child: Center(child: Padding(padding: const EdgeInsets.all(8.0), child: IconShowComponent(account: account, width: 45.w, height: 45.h))),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  DecryptText(style: CustomTextStyle.regular(fontSize: 18.sp, fontWeight: FontWeight.bold), value: account.title, decryptTextType: DecryptTextType.info),
+                  DecryptText(style: CustomTextStyle.regular(fontSize: 16.sp), value: account.username ?? "", decryptTextType: DecryptTextType.info),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CardCustomWidget(
+                          padding: EdgeInsets.all(10),
+                          child: (decryptedSecretKey.isEmpty) ? Text('Error', style: CustomTextStyle.regular(color: Colors.red)) : OtpTextWithCountdown(keySecret: decryptedSecretKey),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      IconButton(
+                        onPressed: () async {
+                          Navigator.pop(context);
+                          if (decryptedSecretKey.isEmpty) return;
+                          clipboardCustom(context: context, text: generateTOTPCode(keySecret: decryptedSecretKey));
+                        },
+                        icon: Icon(Icons.copy, size: 20.sp),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                ],
               ),
             ),
           ),
@@ -275,7 +246,8 @@ class _OtpTabletLayoutState extends State<OtpTabletLayout> {
 }
 
 class AddTOTPWithKeyboardBottomSheet extends StatefulWidget {
-  const AddTOTPWithKeyboardBottomSheet({super.key});
+  final Function? callBackSuccess;
+  const AddTOTPWithKeyboardBottomSheet({super.key, this.callBackSuccess});
 
   @override
   State<AddTOTPWithKeyboardBottomSheet> createState() => _AddTOTPWithKeyboardBottomSheetState();
@@ -283,97 +255,116 @@ class AddTOTPWithKeyboardBottomSheet extends StatefulWidget {
 
 class _AddTOTPWithKeyboardBottomSheetState extends State<AddTOTPWithKeyboardBottomSheet> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _secretController = TextEditingController();
-  final TextEditingController _issuerController = TextEditingController();
-  final TextEditingController _accountController = TextEditingController();
+  final controllerSecretKey = TextEditingController();
+  final controllerIssuer = TextEditingController();
+  final controllerAccountName = TextEditingController();
+  bool isCreating = false;
+
+  void _handleSubmit(BuildContext context) async {
+    if (_formKey.currentState?.validate() ?? false) {
+      if (controllerAccountName.text.isNotEmpty && controllerIssuer.text.isNotEmpty && controllerSecretKey.text.isNotEmpty && !isCreating) {
+        setState(() {
+          isCreating = true;
+        });
+        await context.read<AccountProvider>().createAccountOnlyOtp(secretKey: controllerSecretKey.text, appName: controllerIssuer.text, accountName: controllerAccountName.text);
+        widget.callBackSuccess?.call();
+        if (!context.mounted) return;
+        Navigator.pop(context);
+        if (!mounted) return;
+        setState(() {
+          isCreating = false;
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {
-    _secretController.dispose();
-    _issuerController.dispose();
-    _accountController.dispose();
+    controllerSecretKey.dispose();
+    controllerIssuer.dispose();
+    controllerAccountName.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 600),
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-          left: 24, 
-          right: 24,
-          top: 24,
-        ),
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(16, 5, 16, MediaQuery.of(context).viewInsets.bottom),
         child: Form(
           key: _formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                'Thêm tài khoản OTP',
-                style: TextStyle(
-                  fontSize: 22.sp,
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
+                  Expanded(child: Center(child: Text(context.trOtp(OtpText.enterManually), style: CustomTextStyle.regular(fontSize: 18, fontWeight: FontWeight.w600)))),
+                  IconButton(onPressed: () => _handleSubmit(context), icon: const Icon(Icons.check)),
+                ],
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 10),
               CustomTextField(
-                controller: _secretController,
-                hintText: 'Nhập Mã bí mật',
-                labelText: 'Secret Key *',
-                textAlign: TextAlign.start,
+                titleTextField: context.trOtp(OtpText.accountName),
+                controller: controllerIssuer,
+                autoFocus: true,
                 textInputAction: TextInputAction.next,
+                textAlign: TextAlign.start,
+                hintText: context.trCreateAccount(CreateAccountText.appName),
+                maxLines: 1,
+                isObscure: false,
+                requiredTextField: true,
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Vui lòng nhập secret key';
+                  if (value?.isEmpty ?? true) {
+                    return context.trSafe(CreateAccountText.appNameValidation);
                   }
                   return null;
                 },
+                onChanged: (value) {},
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
               CustomTextField(
-                controller: _issuerController,
-                hintText: 'Ví dụ: Google, Facebook,...',
-                labelText: 'Issuer (Tên ứng dụng) *',
-                textAlign: TextAlign.start,
+                titleTextField: context.trCreateAccount(CreateAccountText.username),
+                controller: controllerAccountName,
                 textInputAction: TextInputAction.next,
+                textAlign: TextAlign.start,
+                hintText: context.trCreateAccount(CreateAccountText.username),
+                maxLines: 1,
+                isObscure: false,
+                requiredTextField: true,
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Vui lòng nhập tên ứng dụng';
+                  if (value?.isEmpty ?? true) {
+                    return context.trSafe(CreateAccountText.usernameValidation);
                   }
                   return null;
                 },
+                onChanged: (value) {},
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
               CustomTextField(
-                controller: _accountController,
-                hintText: 'Ví dụ: example@gmail.com',
-                labelText: 'Account Name (Tên tài khoản)',
-                textAlign: TextAlign.start,
+                titleTextField: context.trOtp(OtpText.secretKey),
+                controller: controllerSecretKey,
                 textInputAction: TextInputAction.done,
+                textAlign: TextAlign.start,
+                hintText: context.trOtp(OtpText.secretKey),
+                requiredTextField: true,
+                maxLines: 1,
+                isObscure: true,
+                validator: (value) {
+                  if (value?.isEmpty ?? true) {
+                    return context.trSafe(OtpText.secretKeyValidation);
+                  }
+                  if (!OTP.isKeyValid(value ?? '')) {
+                    return context.trSafe(OtpText.invalidSecretKey);
+                  }
+                  return null;
+                },
+                onFieldSubmitted: (value) => _handleSubmit(context),
+                onChanged: (value) {},
               ),
-              const SizedBox(height: 30),
-              SizedBox(
-                width: double.infinity,
-                child: CustomButtonWidget(
-                  text: 'Thêm tài khoản',
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      await context.read<AccountProvider>().createAccountOnlyOtp(
-                            secretKey: _secretController.text,
-                            appName: _issuerController.text,
-                            accountName: _accountController.text,
-                          );
-                      if (context.mounted) {
-                        Navigator.pop(context);
-                      }
-                    }
-                  },
-                ),
-              ),
+              const SizedBox(height: 16),
             ],
           ),
         ),

@@ -1,14 +1,14 @@
 import 'package:cybersafe_pro/components/bottom_sheets/select_category_bottom_sheets.dart';
 import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
-import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
-import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
-import 'package:cybersafe_pro/providers/category_provider.dart';
+import 'package:cybersafe_pro/providers/home_provider.dart';
+import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/resources/app_config.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -27,7 +27,7 @@ class HomeAppBarCustom extends StatefulWidget implements PreferredSizeWidget {
 class _HomeAppBarCustomState extends State<HomeAppBarCustom> {
   @override
   Widget build(BuildContext context) {
-    return Selector<AccountProvider, List<AccountOjbModel>>(
+    return Selector<HomeProvider, List<AccountDriftModelData>>(
       selector: (context, provider) => provider.accountSelected,
       builder: (context, accountSelected, child) {
         bool isHasAccountSelected = accountSelected.isNotEmpty;
@@ -40,14 +40,16 @@ class _HomeAppBarCustomState extends State<HomeAppBarCustom> {
                   ? IconButton(
                     icon: Icon(Icons.close, color: Colors.white, size: 24.sp),
                     onPressed: () {
-                      context.read<AccountProvider>().handleClearAccountsSelected();
+                      context.read<HomeProvider>().handleClearAccountsSelected();
                     },
                   )
                   : widget.scaffoldKey != null
                   ? IconButton(
                     icon: const Icon(Icons.sort_rounded),
                     onPressed: () {
-                      widget.scaffoldKey?.currentState?.openDrawer();
+                      if (widget.scaffoldKey?.currentState != null) {
+                        widget.scaffoldKey?.currentState?.openDrawer();
+                      }
                     },
                   )
                   : null,
@@ -57,7 +59,7 @@ class _HomeAppBarCustomState extends State<HomeAppBarCustom> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text("CyberSafe", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: context.darkMode ? Colors.white : Colors.black)),
+                      Text("CyberSafe", style: CustomTextStyle.regular(fontSize: 20, fontWeight: FontWeight.bold, color: context.darkMode ? Colors.white : Colors.black)),
                       if (AppConfig.isProApp)
                         Container(
                           margin: EdgeInsets.only(left: 10),
@@ -67,7 +69,7 @@ class _HomeAppBarCustomState extends State<HomeAppBarCustom> {
                             gradient: LinearGradient(colors: [Theme.of(context).colorScheme.primary.withValues(alpha: .6), Theme.of(context).colorScheme.primary]),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Text("PRO", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                          child: Text("PRO", style: CustomTextStyle.regular(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                         ),
                     ],
                   )
@@ -80,8 +82,9 @@ class _HomeAppBarCustomState extends State<HomeAppBarCustom> {
                       onPressed: () {
                         showSelectCategoryBottomSheet(
                           context,
-                          onSelected: (CategoryOjbModel category) {
-                            context.read<AccountProvider>().handleChangeCategory(category);
+                          onSelected: (CategoryDriftModelData category) {
+                            final homeProvider = context.read<HomeProvider>();
+                            context.read<AccountProvider>().handleChangeCategory(accountSelected: homeProvider.accountSelected, category: category);
                           },
                           isFromChangeCategory: true,
                         );
@@ -103,9 +106,11 @@ class _HomeAppBarCustomState extends State<HomeAppBarCustom> {
                             isCountDownTimer: true,
                             onConfirm: () async {
                               Navigator.pop(context);
-                              await context.read<AccountProvider>().handleDeleteAllSelectedAccounts();
-                              if (context.mounted) return;
-                              Future.wait([context.read<CategoryProvider>().refresh(), context.read<AccountProvider>().refreshAccounts(resetExpansion: true)]);
+                              final homeProvider = context.read<HomeProvider>();
+                              await context.read<AccountProvider>().handleDeleteAllSelectedAccounts(accountSelected: homeProvider.accountSelected);
+                              if (context.mounted) {
+                                context.read<HomeProvider>().refreshData();
+                              }
                             },
                           ),
                         );
@@ -114,7 +119,7 @@ class _HomeAppBarCustomState extends State<HomeAppBarCustom> {
                         children: [
                           Icon(Icons.delete_rounded, color: Colors.redAccent, size: 24.sp),
                           const SizedBox(width: 5),
-                          Text(accountSelected.length.toString(), style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 18.sp)),
+                          Text(accountSelected.length.toString(), style: CustomTextStyle.regular(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 18.sp)),
                         ],
                       ),
                     ),

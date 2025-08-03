@@ -1,12 +1,16 @@
 import 'dart:async';
 
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
+import 'package:cybersafe_pro/encrypt/key_manager.dart';
+import 'package:cybersafe_pro/providers/account_provider.dart';
+import 'package:cybersafe_pro/providers/home_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
-import 'package:cybersafe_pro/services/data_manager_service.dart';
+import 'package:cybersafe_pro/services/old_encrypt_method/data_manager_service_old.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class AppProvider extends ChangeNotifier {
   static final instance = AppProvider._internal();
@@ -24,7 +28,7 @@ class AppProvider extends ChangeNotifier {
   bool get isOpenAutoLock => _isOpenAutoLock;
   int _timeAutoLock = 5;
   int get timeAutoLock => _timeAutoLock;
-  
+
   // Thêm biến cho tính năng khóa tự động khi ứng dụng ở chế độ nền
   bool _lockOnBackground = false;
   bool get lockOnBackground => _lockOnBackground;
@@ -97,7 +101,7 @@ class AppProvider extends ChangeNotifier {
     initializeTimer();
     notifyListeners();
   }
-  
+
   // Phương thức để cài đặt khóa khi ứng dụng ở nền
   void setLockOnBackground(bool value) {
     _lockOnBackground = value;
@@ -105,26 +109,28 @@ class AppProvider extends ChangeNotifier {
     // Cập nhật secure_application
     notifyListeners();
   }
-  
-  // Xử lý khi ứng dụng chuyển sang chế độ nền
-  void handleAppBackground() {
-    stopTimer(); // clear timer khi vào background
-    if (_lockOnBackground && DataManagerService.canLockApp) {
-      logAction('Khóa ứng dụng do chạy nền');
-      
+
+  Future<void> handleAppResume(BuildContext context) async {
+    logInfo("APP RESUME");
+    context.read<AppProvider>().initializeTimer();
+    await context.read<HomeProvider>().initData();
+  }
+
+  void handleAppBackground(BuildContext context) {
+    stopTimer();
+    logInfo("APP BACKGROUND");
+    context.read<AccountProvider>().clearData();
+    context.read<HomeProvider>().clearData();
+    KeyManager.instance.onAppBackground();
+    if (_lockOnBackground && DataManagerServiceOld.canLockApp) {
       try {
-        // Dừng bộ đếm thời gian
         _rootTimer?.cancel();
-        // Tạo trễ ngắn để đảm bảo giao diện cập nhật trước khi đăng xuất
-        // Future.delayed(const Duration(milliseconds: 100), () {
-        //   logOutUser();
-        // });
       } catch (e) {
         logError('Lỗi khi xử lý ứng dụng chạy nền: $e');
       }
     }
   }
-  
+
   // Log các hành động quan trọng
   void logAction(String message) {
     logInfo('[AppProvider] $message');

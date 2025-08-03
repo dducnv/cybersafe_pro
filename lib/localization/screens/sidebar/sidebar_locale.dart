@@ -4,9 +4,9 @@ import 'package:cybersafe_pro/localization/keys/sidebar_text.dart';
 
 class SidebarLocale extends BaseLocale {
   final AppLocale appLocale;
-  
+
   SidebarLocale(this.appLocale);
-  
+
   @override
   String get languageCode => appLocale.currentLocaleModel.languageCode;
   @override
@@ -137,4 +137,20 @@ class SidebarLocale extends BaseLocale {
     SidebarText.requestLanguage: 'Dil Talebi',
     SidebarText.contact: 'İletişim',
   };
-} 
+
+  @override
+  // TODO: implement es
+  Map<String, String> get es => {
+    SidebarText.appName: 'CyberSafe',
+    SidebarText.categoryManager: 'Gestión de categorías',
+    SidebarText.about: 'Acerca de',
+    SidebarText.faqs: 'Preguntas frecuentes',
+    SidebarText.featureRequest: 'Solicitar función',
+    SidebarText.privacyPolicy: 'Política de privacidad',
+    SidebarText.termsOfService: 'Términos de servicio',
+    SidebarText.rateApp: 'Calificar la aplicación',
+    SidebarText.support: 'Soporte',
+    SidebarText.requestLanguage: 'Solicitar idioma',
+    SidebarText.contact: 'Contacto',
+  };
+}

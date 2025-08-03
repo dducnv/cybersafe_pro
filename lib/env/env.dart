@@ -43,4 +43,10 @@ abstract class Env {
 
   @EnviedField(varName: 'TRANSFER_FILE_ENCRYPT_KEY', obfuscate: true)
   static final String transferFileEncryptKey = _Env.transferFileEncryptKey;
+
+  @EnviedField(varName: 'APP_SIGNATURE_KEY', obfuscate: true)
+  static final String appSignatureKey = _Env.appSignatureKey;
+
+  @EnviedField(varName: 'ORCHESTRATION_ENCRYPTION_KEY', obfuscate: true)
+  static final String orchestrationEncryptionKey = _Env.orchestrationEncryptionKey;
 }

@@ -4,6 +4,7 @@ import 'package:cybersafe_pro/providers/local_auth_provider.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -33,7 +34,7 @@ class _CreatePinCodeWidgetState extends State<CreatePinCodeWidget> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(widget.isChangePin ? context.trLogin(LoginText.changePinCode) : context.trCreatePinCode(LoginText.createPinCode), style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+          Text(widget.isChangePin ? context.trLogin(LoginText.changePinCode) : context.trCreatePinCode(LoginText.createPinCode), style: CustomTextStyle.regular(fontSize: 20.sp, fontWeight: FontWeight.bold)),
           const SizedBox(height: 20),
           Container(
             constraints: const BoxConstraints(maxWidth: 300),

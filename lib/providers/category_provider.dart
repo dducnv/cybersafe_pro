@@ -1,23 +1,26 @@
-import 'package:cybersafe_pro/database/boxes/category_box.dart';
-import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
 import 'package:cybersafe_pro/localization/app_locale.dart';
 import 'package:cybersafe_pro/localization/keys/category_text.dart';
 import 'package:cybersafe_pro/localization/keys/error_text.dart';
+import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
+import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 import 'package:cybersafe_pro/utils/app_error.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class CategoryProvider extends ChangeNotifier {
-  final Map<int, CategoryOjbModel> _categories = {};
+  final Map<int, CategoryDriftModelData> _categories = {};
   TextEditingController txtCategoryName = TextEditingController();
   bool _isLoading = false;
   String? _error;
   bool isChangedCategoryIndex = false;
 
   // Getters
-  Map<int, CategoryOjbModel> get categories => Map.unmodifiable(_categories);
-  List<CategoryOjbModel> get categoryList => _categories.values.toList();
+  Map<int, CategoryDriftModelData> get mapCategoryIdCategory => Map.unmodifiable(_categories);
+  List<CategoryDriftModelData> get categories => _categories.values.toList();
+
+  Map<int, int> mapCategoryIdTotalAccount = {};
+
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get hasCategories => _categories.isNotEmpty;
@@ -52,13 +55,27 @@ class CategoryProvider extends ChangeNotifier {
     super.dispose();
   }
 
+  /// Load all categories with parallel account counting for better performance
   Future<void> getCategories() async {
     await _handleAsync(() async {
-      final categoryList = await CategoryBox.getAllAsync();
+      // Get all categories and sort by index position
+      final categoryList = await DriffDbManager.instance.categoryAdapter.getAll();
       categoryList.sort((a, b) => b.indexPos.compareTo(a.indexPos));
+
+      // Update categories cache
       _categories
         ..clear()
         ..addAll({for (var category in categoryList) category.id: category});
+
+      // Count accounts for all categories in parallel for better performance
+      final categoryIds = categoryList.map((c) => c.id).toList();
+      final accountCounts = await DriffDbManager.instance.accountAdapter.countByCategories(categoryIds);
+
+      // Update account counts map
+      mapCategoryIdTotalAccount.clear();
+      for (var category in categoryList) {
+        mapCategoryIdTotalAccount[category.id] = accountCounts[category.id] ?? 0;
+      }
     });
   }
 
@@ -67,25 +84,24 @@ class CategoryProvider extends ChangeNotifier {
     List<String> listCategory = [CategoryText.bank, CategoryText.job, CategoryText.study, CategoryText.shopping, CategoryText.entertainment];
     for (var category in listCategory) {
       if (!context.mounted) return;
-      final newCategory = CategoryOjbModel(categoryName: context.read<AppLocale>().categoryLocale.getText(category));
-      await createCategory(newCategory);
+      await createCategory(context.read<AppLocale>().categoryLocale.getText(category));
     }
   }
 
-  Future<bool> createCategory(CategoryOjbModel category) async {
+  Future<bool> createCategory(String categoryName) async {
     final result = await _handleAsync(() async {
-      if (category.categoryName.trim().isEmpty) {
+      if (categoryName.trim().isEmpty) {
         throwAppError(ErrorText.categoryNameEmpty);
       }
 
       // Kiểm tra trùng tên
-      if (_categories.values.any((c) => c.categoryName.toLowerCase() == category.categoryName.toLowerCase())) {
+      if (_categories.values.any((c) => c.categoryName.toLowerCase() == categoryName.toLowerCase())) {
         throwAppError(ErrorText.categoryExists);
       }
 
-      final id = CategoryBox.put(category);
-      category.id = id;
-      _categories[id] = category;
+      final id = await DriffDbManager.instance.categoryAdapter.insertCategory(categoryName);
+      final newCategory = CategoryDriftModelData(id: id, categoryName: categoryName, indexPos: 0, createdAt: DateTime.now(), updatedAt: DateTime.now());
+      _categories[id] = newCategory;
       txtCategoryName.clear();
       return true;
     });
@@ -93,28 +109,26 @@ class CategoryProvider extends ChangeNotifier {
     return result ?? false;
   }
 
-  Future<bool> updateCategory(CategoryOjbModel category) async {
+  Future<bool> updateCategory({required int id, required String categoryName}) async {
     final result = await _handleAsync(() async {
-      if (category.categoryName.trim().isEmpty) {
+      if (categoryName.trim().isEmpty) {
         throwAppError(ErrorText.categoryNameEmpty);
       }
-
       // Kiểm tra trùng tên với các category khác
-      if (_categories.values.any((c) => c.id != category.id && c.categoryName.toLowerCase() == category.categoryName.toLowerCase())) {
+      if (_categories.values.any((c) => c.id != id && c.categoryName.toLowerCase() == categoryName.toLowerCase())) {
         throwAppError(ErrorText.categoryExists);
       }
-
-      CategoryBox.put(category);
-      _categories[category.id] = category;
+      final newId = await DriffDbManager.instance.categoryAdapter.updateCategory(id, categoryName);
+      _categories[newId] = _categories[id]!.copyWith(id: newId, categoryName: categoryName);
+      _categories.remove(id);
       return true;
     });
-
     return result ?? false;
   }
 
-  Future<bool> deleteCategory(CategoryOjbModel category) async {
+  Future<bool> deleteCategory(CategoryDriftModelData category) async {
     final result = await _handleAsync(() async {
-      if (!await CategoryBox.delete(category.id)) {
+      if (!await DriffDbManager.instance.categoryAdapter.delete(category.id)) {
         throwAppError(ErrorText.cannotDeleteCategory);
       }
       _categories.remove(category.id);
@@ -124,47 +138,28 @@ class CategoryProvider extends ChangeNotifier {
     return result ?? false;
   }
 
-  Future<CategoryOjbModel?> getCategoryById(int id) async {
-    return await _handleAsync<CategoryOjbModel?>(() async {
-      // Kiểm tra trong cache
-      if (_categories.containsKey(id)) {
-        return _categories[id]!;
-      }
-
-      // Query từ database
-      final category = await CategoryBox.getByIdAsync(id);
-      if (category != null) {
-        _categories[id] = category;
-        return category;
-      }
-      throwAppError(ErrorText.categoryNotFound);
-      throw Exception('Unreachable code');
-    });
-  }
-
-  void reorderCategory(int oldIndex, int newIndex) {
+  Future<void> reorderCategory(int oldIndex, int newIndex) async {
     if (oldIndex < newIndex) {
       newIndex -= 1;
     }
 
     // Get sorted list by indexPos
-    final List<CategoryOjbModel> sortedList = categoryList..sort((a, b) => b.indexPos.compareTo(a.indexPos));
+    final List<CategoryDriftModelData> sortedList = categories..sort((a, b) => b.indexPos.compareTo(a.indexPos));
 
     // Remove and insert item
-    final CategoryOjbModel item = sortedList.removeAt(oldIndex);
+    final CategoryDriftModelData item = sortedList.removeAt(oldIndex);
     sortedList.insert(newIndex, item);
 
     // Update positions and cache
     _categories.clear();
     for (int i = 0; i < sortedList.length; i++) {
       final category = sortedList[i];
-      category.indexPos = sortedList.length - i;
+      category.copyWith(indexPos: sortedList.length - i);
       _categories[category.id] = category;
     }
 
     // Batch update to database
-    CategoryBox.putMany(sortedList);
-
+    await DriffDbManager.instance.categoryAdapter.putMany(sortedList);
     isChangedCategoryIndex = true;
     notifyListeners();
   }
@@ -172,15 +167,14 @@ class CategoryProvider extends ChangeNotifier {
   // Helper method để refresh data
   Future<void> refresh() async {
     _categories.clear();
+    mapCategoryIdTotalAccount.clear();
     await getCategories();
     notifyListeners();
   }
 
   void clearAllData() {
     _categories.clear();
-    categories.clear();
-    categoryList.clear();
-
+    mapCategoryIdTotalAccount.clear();
     notifyListeners();
   }
 }

@@ -1,16 +1,19 @@
-import 'package:cybersafe_pro/database/boxes/icon_custom_box.dart';
-import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
-import 'package:cybersafe_pro/database/models/icon_custom_model.dart';
+import 'package:cybersafe_pro/repositories/driff_db/models/account_aggregate.dart';
+import 'package:cybersafe_pro/services/account/account_services.dart';
+import 'package:cybersafe_pro/services/data_secure_service.dart';
+import 'package:flutter/material.dart';
+
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
+import 'package:password_strength_checker/password_strength_checker.dart';
 import 'package:cybersafe_pro/resources/brand_logo.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/type_text_field.dart';
 import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
-import 'package:flutter/material.dart';
-import 'package:cybersafe_pro/database/models/category_ojb_model.dart';
-import 'package:password_strength_checker/password_strength_checker.dart';
+
+import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
+import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 
 final List<TypeTextField> typeTextFields = [TypeTextField(title: "Text", type: 'text'), TypeTextField(title: "Password", type: 'password')];
 
@@ -36,52 +39,65 @@ class AccountFormProvider extends ChangeNotifier {
   List<DynamicTextField> dynamicTextFieldNotifier = [];
 
   BranchLogo? branchLogoSelected;
-  IconCustomModel? selectedIconCustom;
+  IconCustomDriftModelData? selectedIconCustom;
 
-  CategoryOjbModel? selectedCategory;
+  CategoryDriftModelData? selectedCategory;
   String? appNameError;
   String? categoryError;
   String? otpError;
 
   bool isAddedTOTP = false;
-  List<IconCustomModel> listIconsCustom = [];
+  List<IconCustomDriftModelData> listIconsCustom = [];
 
   AccountFormProvider() {
-    listIconsCustom = IconCustomBox.getAll();
+    getListIconCustom();
   }
 
-  Future<void> loadAccountToForm(AccountOjbModel account) async {
+  Future<void> getListIconCustom() async {
+    listIconsCustom = AccountServices.instance.mapCustomIcon.values.toList();
+  }
+
+  Future<void> loadAccountToForm(AccountAggregate accountAggregate) async {
     try {
+      final account = accountAggregate.account;
+      final category = accountAggregate.category;
+
       accountId = account.id;
       appNameController.text = account.title;
-      usernameController.text = account.email ?? '';
+      usernameController.text = account.username ?? '';
       passwordController.text = account.password ?? '';
       noteController.text = account.notes ?? '';
 
       if (account.icon != "default" && account.icon != null && account.icon != "") {
         final branchLogo = allBranchLogos.firstWhere((element) => element.branchLogoSlug == account.icon, orElse: () => BranchLogo([], "default"));
         branchLogoSelected = branchLogo;
-      } else if (account.iconCustom.target != null) {
-        selectedIconCustom = account.iconCustom.target;
+      } else if (account.iconCustomId != null) {
+        selectedIconCustom = listIconsCustom.firstWhere((element) => element.id == account.iconCustomId);
       } else {
         selectedIconCustom = null;
         branchLogoSelected = null;
       }
 
       // Set category if exists
-      if (account.category.target != null) {
-        setCategory(account.category.target!);
+      setCategory(category);
+
+      final totp = accountAggregate.totp;
+      if (totp != null) {
+        otpController.text = await DataSecureService.decryptTOTPKey(totp.secretKey);
+        isAddedTOTP = true;
+      } else {
+        isAddedTOTP = false;
+        otpController.clear();
+        otpError = null;
       }
 
-      // Set TOTP if exists
-      if (account.getTotp != null) {
-        otpController.text = account.getTotp!.secretKey;
-      }
+      final customFields = accountAggregate.customFields;
 
       // Convert and add custom fields
-      if (account.getCustomFields.isNotEmpty) {
-        for (var field in account.getCustomFields) {
-          final controller = TextEditingController(text: field.value);
+      if (customFields.isNotEmpty) {
+        for (var field in customFields) {
+          final fieldValueDecrypted = field.typeField == "password" ? await DataSecureService.decryptPassword(field.value) : await DataSecureService.decryptInfo(field.value);
+          final controller = TextEditingController(text: fieldValueDecrypted);
           final key = field.name;
 
           // Find matching type for the field
@@ -154,7 +170,7 @@ class AccountFormProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void pickIcon({bool? isCustomIcon, IconCustomModel? iconCustomModel, BranchLogo? branchLogo}) {
+  void pickIcon({bool? isCustomIcon, IconCustomDriftModelData? iconCustomModel, BranchLogo? branchLogo}) {
     if (isCustomIcon != null && isCustomIcon) {
       selectedIconCustom = null;
       selectedIconCustom = iconCustomModel;
@@ -169,18 +185,22 @@ class AccountFormProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void handleSaveIcon({required String imageBase64}) {
+  Future<void> handleSaveIcon({required String imageBase64}) async {
     if (imageBase64.isNotEmpty) {
-      selectedIconCustom = IconCustomModel(name: iconCustomName.text, imageBase64: imageBase64);
-      IconCustomBox.put(selectedIconCustom!);
-      listIconsCustom = IconCustomBox.getAll();
+      selectedIconCustom = IconCustomDriftModelData(id: 0, name: iconCustomName.text, imageBase64: imageBase64);
+      DriffDbManager.instance.iconCustomAdapter.put(selectedIconCustom!);
+      listIconsCustom = await DriffDbManager.instance.iconCustomAdapter.getAll();
       notifyListeners();
     }
   }
 
-  void deleteIconCustom(IconCustomModel iconCustomModel) {
-    IconCustomBox.delete(iconCustomModel.id);
-    listIconsCustom = IconCustomBox.getAll();
+  Future<void> deleteIconCustom(IconCustomDriftModelData iconCustomModel) async {
+    await DriffDbManager.instance.iconCustomAdapter.delete(iconCustomModel.id);
+    await AccountServices.instance.getListIconCustom();
+    listIconsCustom = AccountServices.instance.mapCustomIcon.values.toList();
+    if (selectedIconCustom?.id == iconCustomModel.id) {
+      selectedIconCustom = null;
+    }
     notifyListeners();
   }
 
@@ -225,7 +245,7 @@ class AccountFormProvider extends ChangeNotifier {
   }
 
   // Xử lý khi chọn category
-  void setCategory(CategoryOjbModel category) {
+  void setCategory(CategoryDriftModelData category) {
     selectedCategory = category;
     categoryController.text = category.categoryName;
     validateCategory();
@@ -309,7 +329,6 @@ class AccountFormProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    print("hello");
     txtFieldTitle.dispose();
     appNameController.dispose();
     usernameController.dispose();

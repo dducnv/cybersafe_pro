@@ -5,22 +5,21 @@ import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/my_app.dart';
 import 'package:cybersafe_pro/providers/provider.dart';
 import 'package:cybersafe_pro/providers/theme_provider.dart';
+import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 import 'package:cybersafe_pro/resources/shared_preferences/constants.dart';
 import 'package:cybersafe_pro/resources/shared_preferences/shared_preferences_helper.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
-import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/services/local_auth_service.dart';
+import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/utils/device_type.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:in_app_review/in_app_review.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
-import 'database/objectbox.dart';
 import 'package:timezone/data/latest.dart' as timezone;
-import 'package:in_app_review/in_app_review.dart';
 
 final InAppReview inAppReview = InAppReview.instance;
 late final PackageInfo packageInfo;
@@ -85,11 +84,10 @@ Future<void> initApp() async {
   timezone.initializeTimeZones();
   //only show status bar
   // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.top]);
-
-  // Khởi tạo ObjectBox
+  await DriffDbManager.instance.init();
   await SharedPreferencesHelper.init();
   await clearSecureStorageOnReinstall();
-  await ObjectBox.create();
+
   LocalAuthConfig.instance.init();
   final encryptService = EncryptAppDataService.instance;
   final themeProvider = ThemeProvider();
@@ -113,10 +111,16 @@ Future<void> initApp() async {
     final countryCode = defaultLocale.split('_').last;
     initialLocale = Locale(languageCode, countryCode);
   }
-
   await initializeDateFormatting(initialLocale.toString(), null);
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  runApp(MultiProvider(providers: ListProvider.providers, child: ScreenSizeObserver(child: MyApp(initialRoute: initialRoute, initialLocale: initialLocale))));
+  runApp(
+    MultiProvider(
+      providers: ListProvider.providers,
+      child: ScreenSizeObserver(
+        child: MyApp(initialRoute: initialRoute, initialLocale: initialLocale),
+      ),
+    ),
+  );
 }
 
 void main() {

@@ -3,6 +3,7 @@ import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/onboarding_text.dart';
 import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 
 class AppConfig {
@@ -49,7 +50,7 @@ class AppConfig {
             const SizedBox(height: 5),
             ExpansionTile(
               title: Text(context.trSafe(OnboardingText.showLink)),
-              children: [Padding(padding: const EdgeInsets.all(8.0), child: Text(url, style: TextStyle(color: Theme.of(context).colorScheme.primary)))],
+              children: [Padding(padding: const EdgeInsets.all(8.0), child: Text(url, style: CustomTextStyle.regular(color: Theme.of(context).colorScheme.primary)))],
             ),
           ],
         ),

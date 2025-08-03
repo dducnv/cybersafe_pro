@@ -4,6 +4,7 @@ import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart
 import 'package:cybersafe_pro/resources/app_config.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 
@@ -58,7 +59,7 @@ class ProIntroBottomSheet extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text("CyberSafe", style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold, color: context.darkMode ? Colors.white : Colors.black)),
+                Text("CyberSafe", style: CustomTextStyle.regular(fontSize: 24.sp, fontWeight: FontWeight.bold, color: context.darkMode ? Colors.white : Colors.black)),
                 Container(
                   margin: EdgeInsets.only(left: 10),
                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -67,13 +68,13 @@ class ProIntroBottomSheet extends StatelessWidget {
                     gradient: LinearGradient(colors: [Theme.of(context).colorScheme.primary.withValues(alpha: 0.6), Theme.of(context).colorScheme.primary]),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Text("PRO", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                  child: Text("PRO", style: CustomTextStyle.regular(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                 ),
               ],
             ),
             const SizedBox(height: 8),
             // Mô tả
-            Text(context.trAbout(GeneralText.proIntroTitle), textAlign: TextAlign.center, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500)),
+            Text(context.trAbout(GeneralText.proIntroTitle), textAlign: TextAlign.center, style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w500)),
 
             const SizedBox(height: 24),
 
@@ -114,7 +115,7 @@ class ProIntroBottomSheet extends StatelessWidget {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text(context.trAbout(GeneralText.notNowText), style: TextStyle(fontSize: 14.sp)),
+              child: Text(context.trAbout(GeneralText.notNowText), style: CustomTextStyle.regular(fontSize: 14.sp)),
             ),
 
             const SizedBox(height: 16),
@@ -136,7 +137,7 @@ class ProIntroBottomSheet extends StatelessWidget {
             child: Icon(icon, color: Colors.white, size: 20),
           ),
           const SizedBox(width: 16),
-          Expanded(child: Text(text, style: TextStyle(fontSize: 16.sp))),
+          Expanded(child: Text(text, style: CustomTextStyle.regular(fontSize: 16.sp))),
         ],
       ),
     );

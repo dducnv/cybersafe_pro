@@ -5,6 +5,7 @@ import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart
 import 'package:cybersafe_pro/resources/size_text_icon.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/setting_item_widget/setting_item_widget.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -30,7 +31,7 @@ class ChangeLangWidget extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 _getLocaleFlag(context),
-                style: TextStyle(fontSize: 20.sp)
+                style: CustomTextStyle.regular(fontSize: 20.sp)
               ),
               const SizedBox(width: 8),
               Icon(Icons.arrow_drop_down, size: 20.sp)

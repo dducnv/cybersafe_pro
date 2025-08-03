@@ -4,9 +4,9 @@ import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
 
 class CreateAccountLocale extends BaseLocale {
   final AppLocale appLocale;
-  
+
   CreateAccountLocale(this.appLocale);
-  
+
   @override
   String get languageCode => appLocale.currentLocaleModel.languageCode;
   @override
@@ -64,7 +64,8 @@ class CreateAccountLocale extends BaseLocale {
     CreateAccountText.twoFactorAuth: 'Two-factor authentication',
     CreateAccountText.password: 'Password',
     CreateAccountText.overwritePassword: 'Overwrite password',
-    CreateAccountText.overwritePasswordMessage: 'The old password will be overwritten by the new password!',
+    CreateAccountText.overwritePasswordMessage:
+        'The old password will be overwritten by the new password!',
     CreateAccountText.cancel: 'Cancel',
     CreateAccountText.confirm: 'Agree',
     CreateAccountText.addField: 'Add information field',
@@ -138,7 +139,8 @@ class CreateAccountLocale extends BaseLocale {
     CreateAccountText.twoFactorAuth: 'दो-कारक प्रमाणीकरण',
     CreateAccountText.password: 'पासवर्ड',
     CreateAccountText.overwritePassword: 'पासवर्ड अधिलेखित करें',
-    CreateAccountText.overwritePasswordMessage: 'पुराना पासवर्ड नए पासवर्ड से अधिलेखित कर दिया जाएगा!',
+    CreateAccountText.overwritePasswordMessage:
+        'पुराना पासवर्ड नए पासवर्ड से अधिलेखित कर दिया जाएगा!',
     CreateAccountText.cancel: 'रद्द करें',
     CreateAccountText.confirm: 'सहमत',
     CreateAccountText.addField: 'जानकारी फ़ील्ड जोड़ें',
@@ -249,7 +251,8 @@ class CreateAccountLocale extends BaseLocale {
     CreateAccountText.twoFactorAuth: 'Autentikasi dua faktor',
     CreateAccountText.password: 'Kata sandi',
     CreateAccountText.overwritePassword: 'Timpa kata sandi',
-    CreateAccountText.overwritePasswordMessage: 'Kata sandi lama akan ditimpa dengan kata sandi baru!',
+    CreateAccountText.overwritePasswordMessage:
+        'Kata sandi lama akan ditimpa dengan kata sandi baru!',
     CreateAccountText.cancel: 'Batal',
     CreateAccountText.confirm: 'Setuju',
     CreateAccountText.addField: 'Tambah kolom informasi',
@@ -275,7 +278,7 @@ class CreateAccountLocale extends BaseLocale {
     CreateAccountText.confirmPasswordValidation: 'Konfirmasi kata sandi tidak boleh kosong',
     CreateAccountText.noteValidation: 'Catatan tidak boleh kosong',
     CreateAccountText.categoryValidation: 'Kategori tidak boleh kosong',
-  };  
+  };
 
   @override
   Map<String, String> get tr => {
@@ -315,4 +318,44 @@ class CreateAccountLocale extends BaseLocale {
     CreateAccountText.noteValidation: 'Not boş olamaz',
     CreateAccountText.categoryValidation: 'Kategori boş olamaz',
   };
-} 
+
+  @override
+  // TODO: implement es
+  Map<String, String> get es => {
+    CreateAccountText.title: 'Crear cuenta',
+    CreateAccountText.updateAccount: 'Actualizar cuenta',
+    CreateAccountText.chooseIcon: 'Elegir ícono',
+    CreateAccountText.noSelect: 'Sin selección',
+    CreateAccountText.twoFactorAuth: 'Autenticación en dos pasos',
+    CreateAccountText.password: 'Contraseña',
+    CreateAccountText.overwritePassword: 'Sobrescribir contraseña',
+    CreateAccountText.overwritePasswordMessage:
+        '¡La contraseña anterior será reemplazada por la nueva!',
+    CreateAccountText.cancel: 'Cancelar',
+    CreateAccountText.confirm: 'Aceptar',
+    CreateAccountText.addField: 'Agregar campo de información',
+    CreateAccountText.customFields: 'Información adicional',
+    CreateAccountText.chooseFieldType: 'Elegir tipo de información',
+
+    CreateAccountText.appName: 'Nombre de la aplicación',
+    CreateAccountText.username: 'Nombre de la cuenta',
+    CreateAccountText.confirmPassword: 'Confirmar contraseña',
+    CreateAccountText.note: 'Nota',
+    CreateAccountText.category: 'Categoría',
+    CreateAccountText.chooseCategory: 'Elegir categoría',
+    CreateAccountText.enterKey: 'Introducir código de autenticación en dos pasos',
+    CreateAccountText.otpError: 'Código de autenticación inválido',
+    CreateAccountText.titleField: 'Nombre del campo de información',
+    CreateAccountText.fieldType: 'Tipo de información',
+    CreateAccountText.iconApp: 'Ícono predeterminado',
+    CreateAccountText.iconCustom: 'Ícono personalizado',
+
+    CreateAccountText.appNameValidation: 'El nombre de la aplicación no puede estar vacío',
+    CreateAccountText.usernameValidation: 'El nombre de la cuenta no puede estar vacío',
+    CreateAccountText.passwordValidation: 'La contraseña no puede estar vacía',
+    CreateAccountText.confirmPasswordValidation:
+        'La confirmación de la contraseña no puede estar vacía',
+    CreateAccountText.noteValidation: 'La nota no puede estar vacía',
+    CreateAccountText.categoryValidation: 'La categoría no puede estar vacía',
+  };
+}

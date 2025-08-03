@@ -5,23 +5,18 @@ packages:
     dependency: transitive
     description:
       name: _fe_analyzer_shared
-      sha256: "16e298750b6d0af7ce8a3ba7c18c69c3785d11b15ec83f6dcd0ad2a0009b3cab"
+      sha256: da0d9209ca76bde579f2da330aeb9df62b6319c834fa7baae052021b0462401f
       url: "https://pub.dev"
     source: hosted
-    version: "76.0.0"
-  _macros:
-    dependency: transitive
-    description: dart
-    source: sdk
-    version: "0.3.3"
+    version: "85.0.0"
   analyzer:
     dependency: transitive
     description:
       name: analyzer
-      sha256: "1f14db053a8c23e260789e9b0980fa27f2680dd640932cae5e1137cce0e46e1e"
+      sha256: "754aed101003afceca3e6637fe88150dbe9739068e0135788a62645a131867bb"
       url: "https://pub.dev"
     source: hosted
-    version: "6.11.0"
+    version: "7.5.9"
   ansicolor:
     dependency: transitive
     description:
@@ -78,14 +73,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.4"
-  argon2:
-    dependency: "direct main"
-    description:
-      name: argon2
-      sha256: ee456fa6f71392faadd9c43f4a2cc66c8d56132337fe71dc09d217d4e994102e
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   args:
     dependency: transitive
     description:
@@ -230,6 +217,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.3"
+  cli_util:
+    dependency: transitive
+    description:
+      name: cli_util
+      sha256: ff6785f7e9e3c38ac98b2fb035701789de90154024a75b6cb926445e83197d1c
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.2"
   clock:
     dependency: transitive
     description:
@@ -286,14 +281,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.6"
-  cryptography:
-    dependency: "direct main"
-    description:
-      name: cryptography
-      sha256: d146b76d33d94548cf035233fbc2f4338c1242fa119013bead807d033fc4ae05
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.7.0"
   csslib:
     dependency: transitive
     description:
@@ -322,10 +309,10 @@ packages:
     dependency: transitive
     description:
       name: dart_style
-      sha256: "7306ab8a2359a48d22310ad823521d723acfed60ee1f7e37388e8986853b6820"
+      sha256: "5b236382b47ee411741447c1f1e111459c941ea1b3f2b540dde54c210a3662af"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.8"
+    version: "3.1.0"
   dartx:
     dependency: transitive
     description:
@@ -382,6 +369,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  drift:
+    dependency: "direct main"
+    description:
+      name: drift
+      sha256: dce2723fb0dd03563af21f305f8f96514c27f870efba934b4fe84d4fedb4eff7
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.28.0"
+  drift_dev:
+    dependency: "direct dev"
+    description:
+      name: drift_dev
+      sha256: "68c138e884527d2bd61df2ade276c3a144df84d1adeb0ab8f3196b5afe021bd4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.28.0"
   encrypt:
     dependency: "direct main"
     description:
@@ -634,6 +637,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  fuzzywuzzy:
+    dependency: "direct main"
+    description:
+      name: fuzzywuzzy
+      sha256: "3004379ffd6e7f476a0c2091f38f16588dc45f67de7adf7c41aa85dec06b432c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   glob:
     dependency: transitive
     description:
@@ -658,14 +669,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-  hex:
-    dependency: transitive
-    description:
-      name: hex
-      sha256: "4e7cd54e4b59ba026432a6be2dd9d96e4c5205725194997193bf871703b82c4a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.0"
   html:
     dependency: transitive
     description:
@@ -1023,14 +1026,6 @@ packages:
     description:
       name: objectbox_flutter_libs
       sha256: "4f54ebbd7a3b72f1a5ef4fea76cb01cc36440a4cac1f63bfb6719afba400eedb"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.1.0"
-  objectbox_generator:
-    dependency: "direct dev"
-    description:
-      name: objectbox_generator
-      sha256: "777924e14daf18603a023b346333acac1c4fce9fe4a715b85d98cfcc723d9a1a"
       url: "https://pub.dev"
     source: hosted
     version: "4.1.0"
@@ -1427,10 +1422,10 @@ packages:
     dependency: transitive
     description:
       name: source_gen
-      sha256: "14658ba5f669685cd3d63701d01b31ea748310f7ab854e471962670abcf57832"
+      sha256: "35c8150ece9e8c8d263337a265153c3329667640850b9304861faea59fc98f6b"
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.0"
+    version: "2.0.0"
   source_span:
     dependency: transitive
     description:
@@ -1447,6 +1442,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.0"
+  sqlcipher_flutter_libs:
+    dependency: "direct main"
+    description:
+      name: sqlcipher_flutter_libs
+      sha256: "550a0758aa4bba6eab75035102809506d76f2d71b9fb0c0f6e9cc414db0fe064"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.7"
+  sqlite3:
+    dependency: "direct main"
+    description:
+      name: sqlite3
+      sha256: c0503c69b44d5714e6abbf4c1f51a3c3cc42b75ce785f44404765e4635481d38
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.7.6"
+  sqlparser:
+    dependency: transitive
+    description:
+      name: sqlparser
+      sha256: "7c859c803cf7e9a84d6db918bac824545045692bbe94a6386bd3a45132235d09"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.41.1"
   stack_trace:
     dependency: transitive
     description:
@@ -1527,6 +1546,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  tuple:
+    dependency: "direct main"
+    description:
+      name: tuple
+      sha256: a97ce2013f240b2f3807bcbaf218765b6f301c3eff91092bcfa23a039e7dd151
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.2"
   typed_data:
     dependency: transitive
     description:

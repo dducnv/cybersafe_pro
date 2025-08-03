@@ -1,3 +1,4 @@
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/theme_provider.dart';
@@ -71,7 +72,7 @@ class ThemeColorPicker extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         _getColorName(color),
-                        style: TextStyle(
+                        style: CustomTextStyle.regular(
                           fontSize: 12,
                           color: isDark ? Colors.white70 : Colors.black87,
                         ),

@@ -10,6 +10,7 @@ import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
@@ -65,7 +66,7 @@ class _TabletLayoutState extends State<TabletLayout> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text("Login with Master Password", style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+              Text("Login with Master Password", style: CustomTextStyle.regular(fontSize: 20.sp, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
 
               // Hiển thị thông báo khi tài khoản bị khóa
@@ -74,11 +75,11 @@ class _TabletLayoutState extends State<TabletLayout> {
                   padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
                   child: Column(
                     children: [
-                      Text("Tài khoản đã bị khóa do nhập sai mật khẩu nhiều lần", textAlign: TextAlign.center, style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                      Text("Tài khoản đã bị khóa do nhập sai mật khẩu nhiều lần", textAlign: TextAlign.center, style: CustomTextStyle.regular(color: Colors.red, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 10),
-                      Text("Vui lòng thử lại sau ${provider.formattedRemainingTime}", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w500)),
+                      Text("Vui lòng thử lại sau ${provider.formattedRemainingTime}", textAlign: TextAlign.center, style: CustomTextStyle.regular(fontWeight: FontWeight.w500)),
                       const SizedBox(height: 5),
-                      Text("Thời gian chờ sẽ tăng sau mỗi lần đăng nhập không thành công", textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic)),
+                      Text("Thời gian chờ sẽ tăng sau mỗi lần đăng nhập không thành công", textAlign: TextAlign.center, style: CustomTextStyle.regular(fontSize: 12, fontStyle: FontStyle.italic)),
                       // Timer để cập nhật đếm ngược
                       _buildCountdownTimer(provider),
                     ],
@@ -185,7 +186,7 @@ class _TabletLayoutState extends State<TabletLayout> {
           margin: const EdgeInsets.only(top: 10),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(color: Theme.of(context).colorScheme.errorContainer.withOpacity(0.3), borderRadius: BorderRadius.circular(20)),
-          child: Text(provider.formattedRemainingTime, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Theme.of(context).colorScheme.error)),
+          child: Text(provider.formattedRemainingTime, style: CustomTextStyle.regular(fontWeight: FontWeight.bold, fontSize: 18, color: Theme.of(context).colorScheme.error)),
         );
       },
     );

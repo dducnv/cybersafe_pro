@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:cybersafe_pro/utils/global_keys.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 
 class PasswordGenerateProvider extends ChangeNotifier {
@@ -60,29 +61,11 @@ class PasswordGenerateProvider extends ChangeNotifier {
     //if symbol is allowed add TextSpan color red
     for (int i = 0; i < result.length; i++) {
       if (special.contains(result[i])) {
-        passwordInline.add(
-          TextSpan(
-            text: result[i],
-            style: const TextStyle(color: Colors.redAccent),
-          ),
-        );
+        passwordInline.add(TextSpan(text: result[i], style: CustomTextStyle.regular(color: Colors.redAccent)));
       } else if (numbers.contains(result[i])) {
-        passwordInline.add(
-          TextSpan(
-            text: result[i],
-            style: const TextStyle(color: Colors.blueAccent),
-          ),
-        );
+        passwordInline.add(TextSpan(text: result[i], style: CustomTextStyle.regular(color: Colors.blueAccent)));
       } else {
-        passwordInline.add(
-          TextSpan(
-            text: result[i],
-            style: TextStyle(
-                color: Theme.of(GlobalKeys.appRootNavigatorKey.currentContext!)
-                    .colorScheme
-                    .onSecondaryContainer),
-          ),
-        );
+        passwordInline.add(TextSpan(text: result[i], style: CustomTextStyle.regular(color: Theme.of(GlobalKeys.appRootNavigatorKey.currentContext!).colorScheme.onSecondaryContainer)));
       }
     }
     notifyListeners();

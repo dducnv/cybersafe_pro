@@ -1,15 +1,11 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:cybersafe_pro/database/boxes/account_box.dart';
-import 'package:cybersafe_pro/database/models/account_ojb_model.dart';
 import 'package:cybersafe_pro/providers/account_form_provider.dart';
-import 'package:cybersafe_pro/providers/account_provider.dart';
+import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
+import 'package:cybersafe_pro/services/account/account_services.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../utils/device_type.dart';
-import 'layouts/desktop_layout.dart';
 import 'layouts/mobile_layout.dart';
-import 'layouts/tablet_layout.dart';
 
 class CreateAccountScreen extends StatefulWidget {
   final bool isUpdate;
@@ -37,10 +33,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     try {
       _resetForm();
       await _setLoadingState(true);
-
-      final accountOjbModel = await _loadAndDecryptAccount();
-      if (accountOjbModel != null && mounted) {
-        context.read<AccountFormProvider>().loadAccountToForm(accountOjbModel);
+      final account = await DriffDbManager.instance.accountAdapter.getById(widget.accountId!);
+      if (account == null) return;
+      final accountAggregate = await AccountServices.instance.decryptDetailAccount(account);
+      if (mounted) {
+        context.read<AccountFormProvider>().loadAccountToForm(accountAggregate);
       }
     } finally {
       if (mounted) {
@@ -59,16 +56,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() => isLoading = loading);
     });
-  }
-
-  Future<AccountOjbModel?> _loadAndDecryptAccount() async {
-    if (widget.accountId == null) return null;
-
-    final accountProvider = context.read<AccountProvider>();
-    final account = await AccountBox.getById(widget.accountId!);
-
-    if (account == null || !mounted) return null;
-    return accountProvider.decryptAccount(account);
   }
 
   @override

@@ -46,6 +46,8 @@ class HomeLocale extends BaseLocale {
   static const String copyPassword = 'copy_password';
   static const String deleteAccount = 'delete_account';
 
+  static const String migrationData = 'migration_data';
+
   @override
   Map<String, String> get vi => {
     home: 'Trang chủ',
@@ -76,6 +78,8 @@ class HomeLocale extends BaseLocale {
     copyUsername: 'Sao chép tên tài khoản',
     copyPassword: 'Sao chép mật khẩu',
     deleteAccount: 'Xoá tài khoản',
+
+    migrationData: "Đang nâng cấp mã hoá. Vui lòng chờ vài phút và không tắt ứng dụng.",
   };
 
   @override
@@ -107,6 +111,8 @@ class HomeLocale extends BaseLocale {
     copyUsername: 'Copy username',
     copyPassword: 'Copy password',
     deleteAccount: 'Delete account',
+
+    migrationData: "Migrating data. Please wait a few minutes and do not close the app.",
   };
 
   @override
@@ -139,6 +145,8 @@ class HomeLocale extends BaseLocale {
     copyUsername: 'Copy username',
     copyPassword: 'Copy password',
     deleteAccount: 'Delete account',
+
+    migrationData: "Migrating data. Please wait a few minutes and do not close the app.",
   };
   @override
   Map<String, String> get hi => {
@@ -170,6 +178,9 @@ class HomeLocale extends BaseLocale {
     copyUsername: 'खाता नाम कॉपी करें',
     copyPassword: 'पासवर्ड कॉपी करें',
     deleteAccount: 'खाता हटाएं',
+
+    migrationData:
+        "डेटा अपग्रेड हो रहा है। कृपया कुछ मिनट प्रतीक्षा करें और एप्लिकेशन को बंद न करें।",
   };
   @override
   Map<String, String> get ja => {
@@ -201,6 +212,8 @@ class HomeLocale extends BaseLocale {
     copyUsername: 'アカウント名をコピー',
     copyPassword: 'パスワードをコピー',
     deleteAccount: 'アカウント削除',
+
+    migrationData: "データのアップグレード中です。数分間お待ちください。",
   };
   @override
   Map<String, String> get ru => {
@@ -232,6 +245,9 @@ class HomeLocale extends BaseLocale {
     copyUsername: 'Копировать имя аккаунта',
     copyPassword: 'Копировать пароль',
     deleteAccount: 'Удалить аккаунт',
+
+    migrationData:
+        "Данные обновляются. Пожалуйста, подождите несколько минут и не закрывайте приложение.",
   };
   @override
   Map<String, String> get id => {
@@ -263,6 +279,8 @@ class HomeLocale extends BaseLocale {
     copyUsername: 'Salin nama akun',
     copyPassword: 'Salin kata sandi',
     deleteAccount: 'Hapus akun',
+
+    migrationData: "Sedang memigrasi data. Mohon tunggu beberapa menit dan jangan tutup aplikasi.",
   };
   @override
   Map<String, String> get pt_PT => {
@@ -294,6 +312,8 @@ class HomeLocale extends BaseLocale {
     copyUsername: 'Copiar nome de usuário',
     copyPassword: 'Copiar senha',
     deleteAccount: 'Deletar conta',
+
+    migrationData: "A migrar dados. Por favor, aguarde alguns minutos e não feche a aplicação.",
   };
   @override
   Map<String, String> get pt_BR => {
@@ -325,6 +345,8 @@ class HomeLocale extends BaseLocale {
     copyUsername: 'Copiar nome de usuário',
     copyPassword: 'Copiar senha',
     deleteAccount: 'Deletar conta',
+
+    migrationData: "Migrando dados. Por favor, aguarde alguns minutos e não feche o aplicativo.",
   };
 
   @override
@@ -357,6 +379,8 @@ class HomeLocale extends BaseLocale {
     copyUsername: 'Copy username',
     copyPassword: 'Copy password',
     deleteAccount: 'Delete account',
+
+    migrationData: "Migrating data. Please wait a few minutes and do not close the app.",
   };
 
   @override
@@ -389,6 +413,8 @@ class HomeLocale extends BaseLocale {
     copyUsername: 'Copiar nome de usuário',
     copyPassword: 'Copiar senha',
     deleteAccount: 'Deletar conta',
+
+    migrationData: "A migrar dados. Por favor, aguarde alguns minutos e não feche a aplicação.",
   };
 
   @override
@@ -421,8 +447,43 @@ class HomeLocale extends BaseLocale {
     copyUsername: 'Hesap Adını Kopyala',
     copyPassword: 'Parolayı Kopyala',
     deleteAccount: 'Hesabı Sil',
+
+    migrationData: "Veriler taşınıyor. Lütfen birkaç dakika bekleyin ve uygulamayı kapatmayın.",
   };
 
+  @override
+  // TODO: implement es
+  Map<String, String> get es => {
+    home: 'Inicio',
+    accounts: 'Cuentas',
+    categories: 'Categorías',
+    settings: 'Configuración',
+    search: 'Buscar',
+    addAccount: 'Agregar cuenta',
+    noAccounts: 'Aún no hay cuentas',
+    click: 'Haz clic',
+    toAddAccount: 'para agregar una cuenta',
+    seeMore: 'Ver más ({count} restantes)',
+    seeMore10: 'Ver 10 elementos más',
+    items: 'elementos',
+    searchNoResult: 'No se encontraron resultados',
+    searchTitle: 'Buscar cuentas',
+    searchHint: 'Introduce nombre de usuario, correo electrónico o nombre de la aplicación.',
+    passwordGenerator: 'Generador de contraseñas',
+    deleteAllAccount: 'Eliminar todas las cuentas seleccionadas',
+    delete: 'Eliminar',
+    changeCategory: 'Cambiar categoría',
+    copySuccess: 'Copiado con éxito',
+    selectAccount: 'Seleccionar cuenta',
+    unSelectAccount: 'Deseleccionar cuenta',
+    accountDetails: 'Detalles de la cuenta',
+    updateAccount: 'Actualizar cuenta',
+    copyUsername: 'Copiar nombre de usuario',
+    copyPassword: 'Copiar contraseña',
+    deleteAccount: 'Eliminar cuenta',
+
+    migrationData: "Migrando datos. Por favor, espera unos minutos y no cierres la aplicación.",
+  };
 }
 
 //key

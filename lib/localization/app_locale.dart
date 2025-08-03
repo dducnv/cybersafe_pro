@@ -4,20 +4,20 @@ import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'base_locale.dart';
+import 'log/error_locale.dart';
 import 'screens/auth/auth_locale.dart';
-import 'screens/home/home_locale.dart';
-import 'screens/settings/settings_locale.dart';
 import 'screens/category/category_locale.dart';
-import 'screens/sidebar/sidebar_locale.dart';
-import 'screens/password_generator/password_generator_locale.dart';
-import 'screens/statistic/statistic_locale.dart';
-import 'screens/otp/otp_locale.dart';
-import 'screens/onboarding/onboarding_locale.dart';
-import 'screens/login/login_locale.dart';
 import 'screens/create_account/create_account_locale.dart';
 import 'screens/details_account/details_account_locale.dart';
-import 'log/error_locale.dart';
-import 'base_locale.dart';
+import 'screens/home/home_locale.dart';
+import 'screens/login/login_locale.dart';
+import 'screens/onboarding/onboarding_locale.dart';
+import 'screens/otp/otp_locale.dart';
+import 'screens/password_generator/password_generator_locale.dart';
+import 'screens/settings/settings_locale.dart';
+import 'screens/sidebar/sidebar_locale.dart';
+import 'screens/statistic/statistic_locale.dart';
 
 class AppLocaleModel extends BaseLocale {
   @override
@@ -31,7 +31,13 @@ class AppLocaleModel extends BaseLocale {
   @override
   final String flagEmoji;
 
-  AppLocaleModel({required this.languageCode, required this.countryCode, required this.languageName, required this.languageNativeName, required this.flagEmoji});
+  AppLocaleModel({
+    required this.languageCode,
+    required this.countryCode,
+    required this.languageName,
+    required this.languageNativeName,
+    required this.flagEmoji,
+  });
 
   @override
   Map<String, String> get vi => {};
@@ -49,19 +55,90 @@ class AppLocaleModel extends BaseLocale {
   Map<String, String> get id => {};
   @override
   Map<String, String> get tr => {};
+
+  @override
+  // TODO: implement es
+  Map<String, String> get es => {};
 }
 
 final List<AppLocaleModel> appLocales = [
-  AppLocaleModel(languageCode: 'vi', countryCode: 'VN', languageName: 'Vietnamese', languageNativeName: 'Tiếng Việt', flagEmoji: '🇻🇳'),
-  AppLocaleModel(languageCode: 'ru', countryCode: 'RU', languageName: 'Russian', languageNativeName: 'Русский', flagEmoji: '🇷🇺'),
-  AppLocaleModel(languageCode: 'en', countryCode: 'US', languageName: 'English (US)', languageNativeName: 'English (US)', flagEmoji: '🇺🇸'),
-  AppLocaleModel(languageCode: 'en', countryCode: 'GB', languageName: 'English (UK)', languageNativeName: 'English (UK)', flagEmoji: '🇬🇧'),
-  AppLocaleModel(languageCode: 'pt', countryCode: 'PT', languageName: 'Portuguese (Portugal)', languageNativeName: 'Português (Portugal)', flagEmoji: '🇵🇹'),
-  AppLocaleModel(languageCode: 'pt', countryCode: 'BR', languageName: 'Portuguese (Brazil)', languageNativeName: 'Português (Brasil)', flagEmoji: '🇧🇷'),
-  AppLocaleModel(languageCode: 'hi', countryCode: 'IN', languageName: 'Hindi', languageNativeName: 'हिन्दी', flagEmoji: '🇮🇳'),
-  AppLocaleModel(languageCode: 'ja', countryCode: 'JP', languageName: 'Japanese', languageNativeName: '日本語', flagEmoji: '🇯🇵'),
-  AppLocaleModel(languageCode: 'id', countryCode: 'ID', languageName: 'Indonesian', languageNativeName: 'Bahasa Indonesia', flagEmoji: '🇮🇩'),
-  AppLocaleModel(languageCode: 'tr', countryCode: 'TR', languageName: 'Turkish', languageNativeName: 'Türkçe', flagEmoji: '🇹🇷'),
+  AppLocaleModel(
+    languageCode: 'vi',
+    countryCode: 'VN',
+    languageName: 'Vietnamese',
+    languageNativeName: 'Tiếng Việt',
+    flagEmoji: '🇻🇳',
+  ),
+  AppLocaleModel(
+    languageCode: 'ru',
+    countryCode: 'RU',
+    languageName: 'Russian',
+    languageNativeName: 'Русский',
+    flagEmoji: '🇷🇺',
+  ),
+  AppLocaleModel(
+    languageCode: 'en',
+    countryCode: 'US',
+    languageName: 'English (US)',
+    languageNativeName: 'English (US)',
+    flagEmoji: '🇺🇸',
+  ),
+  AppLocaleModel(
+    languageCode: 'en',
+    countryCode: 'GB',
+    languageName: 'English (UK)',
+    languageNativeName: 'English (UK)',
+    flagEmoji: '🇬🇧',
+  ),
+  AppLocaleModel(
+    languageCode: 'pt',
+    countryCode: 'PT',
+    languageName: 'Portuguese (Portugal)',
+    languageNativeName: 'Português (Portugal)',
+    flagEmoji: '🇵🇹',
+  ),
+  AppLocaleModel(
+    languageCode: 'pt',
+    countryCode: 'BR',
+    languageName: 'Portuguese (Brazil)',
+    languageNativeName: 'Português (Brasil)',
+    flagEmoji: '🇧🇷',
+  ),
+  AppLocaleModel(
+    languageCode: 'hi',
+    countryCode: 'IN',
+    languageName: 'Hindi',
+    languageNativeName: 'हिन्दी',
+    flagEmoji: '🇮🇳',
+  ),
+  AppLocaleModel(
+    languageCode: 'ja',
+    countryCode: 'JP',
+    languageName: 'Japanese',
+    languageNativeName: '日本語',
+    flagEmoji: '🇯🇵',
+  ),
+  AppLocaleModel(
+    languageCode: 'id',
+    countryCode: 'ID',
+    languageName: 'Indonesian',
+    languageNativeName: 'Bahasa Indonesia',
+    flagEmoji: '🇮🇩',
+  ),
+  AppLocaleModel(
+    languageCode: 'tr',
+    countryCode: 'TR',
+    languageName: 'Turkish',
+    languageNativeName: 'Türkçe',
+    flagEmoji: '🇹🇷',
+  ),
+  AppLocaleModel(
+    languageCode: 'es',
+    countryCode: 'ES',
+    languageName: 'Spanish',
+    languageNativeName: 'Español',
+    flagEmoji: '🇪🇸',
+  ),
 ];
 
 class AppLocale extends ChangeNotifier {
@@ -71,7 +148,10 @@ class AppLocale extends ChangeNotifier {
 
   void setLocale(Locale locale) {
     _locale = locale;
-    SecureStorage.instance.save(key: SecureStorageKey.appLang, value: '${locale.languageCode}_${locale.countryCode}');
+    SecureStorage.instance.save(
+      key: SecureStorageKey.appLang,
+      value: '${locale.languageCode}_${locale.countryCode}',
+    );
     notifyListeners();
   }
 
@@ -116,6 +196,7 @@ class AppLocale extends ChangeNotifier {
       'pt' => currentLocaleModel.pt,
       'en' => currentLocaleModel.en,
       'tr' => currentLocaleModel.tr,
+      'es' => currentLocaleModel.es,
       _ => currentLocaleModel.en, // fallback to English
     };
     return translations[key] ?? key;
@@ -123,6 +204,10 @@ class AppLocale extends ChangeNotifier {
 
   // Lấy AppLocaleModel hiện tại
   AppLocaleModel get currentLocaleModel {
-    return appLocales.firstWhere((locale) => locale.languageCode == _locale.languageCode && locale.countryCode == _locale.countryCode, orElse: () => appLocales.first);
+    return appLocales.firstWhere(
+      (locale) =>
+          locale.languageCode == _locale.languageCode && locale.countryCode == _locale.countryCode,
+      orElse: () => appLocales.first,
+    );
   }
 }

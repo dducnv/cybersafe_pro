@@ -1,6 +1,7 @@
 
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 
 class SecurityCheckItem extends StatelessWidget {
@@ -44,7 +45,7 @@ class SecurityCheckItem extends StatelessWidget {
                       Expanded(
                         child: Text(
                           title,
-                          style: TextStyle(
+                          style: CustomTextStyle.regular(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w500,
                           ),
@@ -60,7 +61,7 @@ class SecurityCheckItem extends StatelessWidget {
                   children: [
                     Text(
                       value.toString(),
-                      style: TextStyle(
+                      style: CustomTextStyle.regular(
                           fontWeight: FontWeight.bold, fontSize: 16.sp),
                     ),
                     subIcon != null

@@ -1,11 +1,15 @@
+import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/main.dart';
+import 'package:cybersafe_pro/providers/home_provider.dart';
 import 'package:cybersafe_pro/utils/deep_link_handler.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../../utils/device_type.dart';
-import 'layouts/mobile_layout.dart';
 import 'layouts/desktop_layout.dart';
+import 'layouts/mobile_layout.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,7 +24,16 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     reviewApp();
+    loadData();
     DeepLinkHandler().initialize();
+  }
+
+  loadData() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      showLoadingDialog(animationReverse: false);
+      await context.read<HomeProvider>().initData();
+      hideLoadingDialog();
+    });
   }
 
   reviewApp() async {

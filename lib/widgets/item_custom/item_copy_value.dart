@@ -1,7 +1,8 @@
-import 'package:cybersafe_pro/services/encrypt_app_data_service.dart';
+import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/decrypt_text/decrypt_text.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 
 class ItemCopyValue extends StatefulWidget {
@@ -35,16 +36,15 @@ class _ItemCopyValueState extends State<ItemCopyValue> {
   }
 
   Widget _buildTitle() {
-    return Text(widget.title, style: TextStyle(color: Colors.grey, overflow: TextOverflow.ellipsis, fontSize: 14.sp, fontWeight: FontWeight.w600));
+    return Text(widget.title, style: CustomTextStyle.regular(color: Colors.grey, overflow: TextOverflow.ellipsis, fontSize: 14.sp, fontWeight: FontWeight.w600));
   }
 
   Widget _buildValue() {
     if (widget.isPrivateValue && !_isShowValue) {
-      return Text("***********", style: TextStyle(fontSize: 14.sp, overflow: TextOverflow.ellipsis));
+      return Text("***********", style: CustomTextStyle.regular(fontSize: 14.sp, overflow: TextOverflow.ellipsis));
     }
-
     return DecryptText(
-      style: TextStyle(fontSize: 14.sp, overflow: TextOverflow.ellipsis),
+      style: CustomTextStyle.regular(fontSize: 14.sp, overflow: TextOverflow.ellipsis),
       value: widget.value,
       decryptTextType: widget.isPrivateValue ? DecryptTextType.password : DecryptTextType.info,
     );
@@ -64,8 +64,7 @@ class _ItemCopyValueState extends State<ItemCopyValue> {
   Widget _buildCopyButton() {
     return IconButton(
       onPressed: () async {
-        final decryptService = EncryptAppDataService.instance;
-        final decryptedValue = widget.isPrivateValue ? await decryptService.decryptPassword(widget.value) : await decryptService.decryptInfo(widget.value);
+        final decryptedValue = widget.isPrivateValue ? await DataSecureService.decryptPassword(widget.value) : await DataSecureService.decryptInfo(widget.value);
         if (decryptedValue.isNotEmpty && mounted) {
           clipboardCustom(context: context, text: decryptedValue);
         }

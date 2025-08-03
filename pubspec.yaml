@@ -1,7 +1,7 @@
 name: cybersafe_pro
 description: "A new Flutter project."
 publish_to: "none"
-version: 1.9.0+104
+version: 2.0.0+108
 
 environment:
   sdk: ^3.7.0
@@ -13,25 +13,30 @@ dependencies:
     sdk: flutter
   #provider
   path: ^1.9.1
+  tuple: ^2.0.2
   provider: ^6.1.2
   path_provider: ^2.1.5
   #database
   csv: ^6.0.0
   objectbox: ^4.1.0
   objectbox_flutter_libs: any
+
+  # Drift database với SQLCipher
+  drift: ^2.28.0
+  sqlite3: ^2.7.6
+  sqlcipher_flutter_libs: ^0.6.7
+
   #security
   crypto: ^3.0.6
   envied: ^1.1.1
   encrypt: ^5.0.3
   archive: ^4.0.4
   local_auth: ^2.3.0
-  cryptography: ^2.7.0
-  pointycastle: ^3.7.4
+  pointycastle: ^3.9.1
   url_launcher: ^6.3.1
   secure_application: ^4.1.0
   flutter_secure_storage: ^9.2.4
   local_auth_darwin: ^1.4.3
-  argon2: ^1.0.1
   #util
   intl: ^0.19.0
   logger: ^2.5.0
@@ -45,10 +50,10 @@ dependencies:
   flutter_svg: ^2.0.17
   file_picker: ^8.0.2
   app_links: ^6.4.0
+  fuzzywuzzy: ^1.2.0
   characters: ^1.4.0
   image_picker: ^1.1.2
   numberpicker: ^2.1.2
-  flutter_sharing_intent: ^1.1.1
   desktop_window: ^0.4.2
   in_app_review: ^2.0.10
   pin_code_fields: ^8.0.1
@@ -59,8 +64,9 @@ dependencies:
   permission_handler: ^11.4.0
   shared_preferences: ^2.5.2
   flutter_styled_toast: ^2.2.1
-  qr_code_scanner_plus: ^2.0.10+1
   flutter_native_splash: ^2.4.5
+  qr_code_scanner_plus: ^2.0.10+1
+  flutter_sharing_intent: ^1.1.1
   password_strength_checker: ^1.2.4
   flutter_staggered_animations: ^1.1.1
   appflowy_editor: ^5.2.0
@@ -70,14 +76,51 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   envied_generator: ^1.1.1
   build_runner: ^2.4.15
-  objectbox_generator: ^4.1.0
+  drift_dev: ^2.27.0
 
 flutter:
   uses-material-design: true
   assets:
     - assets/
+    - assets/fonts/
     - assets/images/
     - assets/animations/
     - assets/icons/
     - assets/icons/brand_icons/
     - assets/icons/brand_icons/banks/
+  fonts:
+    - family: IBMPlexSans
+      fonts:
+        - asset: assets/fonts/IBMPlexSans-Regular.ttf
+        - asset: assets/fonts/IBMPlexSans-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/IBMPlexSans-BoldItalic.ttf
+          weight: 700
+          style: italic
+        - asset: assets/fonts/IBMPlexSans-Italic.ttf
+          style: italic
+        - asset: assets/fonts/IBMPlexSans-Light.ttf
+          weight: 300
+        - asset: assets/fonts/IBMPlexSans-LightItalic.ttf
+          weight: 300
+          style: italic
+        - asset: assets/fonts/IBMPlexSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/IBMPlexSans-MediumItalic.ttf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/IBMPlexSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/IBMPlexSans-SemiBoldItalic.ttf
+          weight: 600
+          style: italic
+        - asset: assets/fonts/IBMPlexSans-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/IBMPlexSans-ExtraLightItalic.ttf
+          weight: 200
+          style: italic
+        - asset: assets/fonts/IBMPlexSans-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/IBMPlexSans-ThinItalic.ttf
+          weight: 100
+          style: italic

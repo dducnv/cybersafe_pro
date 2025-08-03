@@ -6,7 +6,8 @@ import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
-import 'package:cybersafe_pro/services/data_manager_service.dart';
+import 'package:cybersafe_pro/providers/home_provider.dart';
+import 'package:cybersafe_pro/services/old_encrypt_method/data_manager_service_old.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:flutter/cupertino.dart';
@@ -29,7 +30,7 @@ class DeepLinkHandler {
         _handleLink(uri.toString());
       },
       onError: (error) {
-        logError('Error handling deep link: $error');
+        logError('Error handling deep link: $error', functionName: "DeepLinkHandler.initialize");
       },
     );
     // // Handle links when app is already running
@@ -63,9 +64,8 @@ class DeepLinkHandler {
       ),
     );
     if (isConfirmed != true) return;
-    await DataManagerService.importTransferData();
-    await GlobalKeys.appRootNavigatorKey.currentContext!.read<CategoryProvider>().refresh();
-    GlobalKeys.appRootNavigatorKey.currentContext!.read<AccountProvider>().refreshAccounts(resetExpansion: true);
+    await DataManagerServiceOld.importTransferData();
+    if (context.mounted) GlobalKeys.appRootNavigatorKey.currentContext!.read<HomeProvider>().refreshData();
   }
 
   void dispose() {

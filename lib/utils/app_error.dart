@@ -14,11 +14,11 @@ class AppError {
   BuildContext? get _context => GlobalKeys.appRootNavigatorKey.currentContext;
 
   /// Log một lỗi và trả về thông báo lỗi đã được dịch
-  String logAndGetMessage(String errorKey, {Object? error}) {
+  String logAndGetMessage(String errorKey, {Object? error, String? functionName}) {
     if (error != null) {
-      logError('$errorKey: $error');
+      logError('$errorKey: $error', functionName: functionName);
     } else {
-      logError(errorKey);
+      logError(errorKey, functionName: functionName);
     }
     
     // Cố gắng lấy context và dịch thông báo lỗi
@@ -31,14 +31,14 @@ class AppError {
   }
 
   /// Tạo một Exception với thông báo đa ngôn ngữ
-  Exception createException(String errorKey, {Object? error}) {
-    return Exception(logAndGetMessage(errorKey, error: error));
+  Exception createException(String errorKey, {Object? error, String? functionName}) {
+    return Exception(logAndGetMessage(errorKey, error: error, functionName: functionName));
   }
 
   /// Hiển thị SnackBar với thông báo lỗi đa ngôn ngữ
   void showErrorSnackBar(BuildContext context, String errorKey, {Duration? duration}) {
     final message = context.trSafe(errorKey);
-    logError(message);
+    logError(message, functionName: "AppError.showErrorSnackBar");
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -76,14 +76,14 @@ class AppError {
   /// Kiểm tra điều kiện và ném exception nếu không thoả mãn
   void throwIfNot(bool condition, String errorKey, {Object? error}) {
     if (!condition) {
-      throw createException(errorKey, error: error);
+      throw createException(errorKey, error: error, functionName: "AppError.throwIfNot");
     }
   }
 
   /// Kiểm tra điều kiện và ném exception nếu thoả mãn
   void throwIf(bool condition, String errorKey, {Object? error}) {
     if (condition) {
-      throw createException(errorKey, error: error);
+      throw createException(errorKey, error: error, functionName: "AppError.throwIf");
     }
   }
 
@@ -99,8 +99,8 @@ class AppError {
 }
 
 // Một số helper function để sử dụng dễ dàng hơn
-void throwAppError(String errorKey, {Object? error}) {
-  throw AppError.instance.createException(errorKey, error: error);
+void throwAppError(String errorKey, {Object? error, String? functionName}) {
+  throw AppError.instance.createException(errorKey, error: error, functionName: functionName);
 }
 
 void showErrorSnackBar(BuildContext context, String errorKey, {Duration? duration}) {

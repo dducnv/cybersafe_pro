@@ -7,6 +7,7 @@ import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/toast_noti.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
@@ -45,7 +46,7 @@ class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(context.trCreatePinCode(LoginText.confirmPinCode), style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+          Text(context.trCreatePinCode(LoginText.confirmPinCode), style: CustomTextStyle.regular(fontSize: 20.sp, fontWeight: FontWeight.bold)),
           const SizedBox(height: 20),
           Container(
             constraints: const BoxConstraints(maxWidth: 300),

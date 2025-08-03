@@ -1,3 +1,4 @@
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -84,14 +85,7 @@ class AppColors extends ThemeExtension<AppColors> {
   @override
   ThemeExtension<AppColors> lerp(ThemeExtension<AppColors>? other, double t) {
     if (other is! AppColors) return this;
-    return AppColors(
-      colors: {
-        for (var entry in colors.entries)
-          entry.key: Color.lerp(
-              entry.value, other.colors[entry.key] ?? entry.value, t) ??
-              entry.value
-      },
-    );
+    return AppColors(colors: {for (var entry in colors.entries) entry.key: Color.lerp(entry.value, other.colors[entry.key] ?? entry.value, t) ?? entry.value});
   }
 }
 
@@ -101,43 +95,43 @@ Color getColor(BuildContext context, String colorName) {
 }
 
 // Tạo AppColors dựa trên brightness và accent color
-AppColors getAppColors({
-  required Brightness brightness,
-  required ThemeData themeData,
-  required Color accentColor,
-}) {
+AppColors getAppColors({required Brightness brightness, required ThemeData themeData, required Color accentColor}) {
   if (brightness == Brightness.light) {
-    return AppColors(colors: {
-      'accent': accentColor,
-      'lightDarkAccent': Colors.white,
-      'background': Colors.white,
-      'card': Colors.white,
-      'cardSelected': lightenPastel(accentColor, amount: 0.85),
-      'text': Colors.black,
-      'textSecondary': Colors.black54,
-      'border': Colors.black12,
-      'divider': Colors.black12,
-      'error': const Color(0xFFB00020),
-      'success': const Color(0xFF1B873D),
-      'warning': const Color(0xFFFF6B00),
-      'info': const Color(0xFF2D5BD3),
-    });
+    return AppColors(
+      colors: {
+        'accent': accentColor,
+        'lightDarkAccent': Colors.white,
+        'background': Colors.white,
+        'card': Colors.white,
+        'cardSelected': lightenPastel(accentColor, amount: 0.85),
+        'text': Colors.black,
+        'textSecondary': Colors.black54,
+        'border': Colors.black12,
+        'divider': Colors.black12,
+        'error': const Color(0xFFB00020),
+        'success': const Color(0xFF1B873D),
+        'warning': const Color(0xFFFF6B00),
+        'info': const Color(0xFF2D5BD3),
+      },
+    );
   } else {
-    return AppColors(colors: {
-      'accent': accentColor,
-      'lightDarkAccent': Colors.black,
-      'background': Colors.black,
-      'card': const Color(0xFF212121),
-      'cardSelected': darkenPastel(accentColor, amount: 0.85),
-      'text': Colors.white,
-      'textSecondary': Colors.white70,
-      'border': Colors.white24,
-      'divider': Colors.white24,
-      'error': const Color(0xFFCF6679),
-      'success': const Color(0xFF1B873D),
-      'warning': const Color(0xFFFF6B00),
-      'info': const Color(0xFF2D5BD3),
-    });
+    return AppColors(
+      colors: {
+        'accent': accentColor,
+        'lightDarkAccent': Colors.black,
+        'background': Colors.black,
+        'card': const Color(0xFF212121),
+        'cardSelected': darkenPastel(accentColor, amount: 0.85),
+        'text': Colors.white,
+        'textSecondary': Colors.white70,
+        'border': Colors.white24,
+        'divider': Colors.white24,
+        'error': const Color(0xFFCF6679),
+        'success': const Color(0xFF1B873D),
+        'warning': const Color(0xFFFF6B00),
+        'info': const Color(0xFF2D5BD3),
+      },
+    );
   }
 }
 
@@ -182,8 +176,7 @@ ColorScheme getColorScheme(Brightness brightness) {
 }
 
 // Tạo SystemUiOverlayStyle dựa trên theme
-SystemUiOverlayStyle getSystemUiOverlayStyle(
-    AppColors? colors, Brightness brightness) {
+SystemUiOverlayStyle getSystemUiOverlayStyle(AppColors? colors, Brightness brightness) {
   if (brightness == Brightness.light) {
     return SystemUiOverlayStyle(
       statusBarBrightness: Brightness.light,
@@ -206,23 +199,10 @@ SystemUiOverlayStyle getSystemUiOverlayStyle(
 }
 
 // Tạo ThemeData với AppColors extension
-ThemeData generateThemeDataWithExtension({
-  required ThemeData themeData,
-  required Brightness brightness,
-  required Color accentColor,
-}) {
-  AppColors colors = getAppColors(
-    accentColor: accentColor,
-    brightness: brightness,
-    themeData: themeData,
-  );
+ThemeData generateThemeDataWithExtension({required ThemeData themeData, required Brightness brightness, required Color accentColor}) {
+  AppColors colors = getAppColors(accentColor: accentColor, brightness: brightness, themeData: themeData);
 
-  return themeData.copyWith(
-    extensions: <ThemeExtension<dynamic>>[colors],
-    appBarTheme: AppBarTheme(
-      systemOverlayStyle: getSystemUiOverlayStyle(colors, brightness),
-    ),
-  );
+  return themeData.copyWith(extensions: <ThemeExtension<dynamic>>[colors], appBarTheme: AppBarTheme(systemOverlayStyle: getSystemUiOverlayStyle(colors, brightness)));
 }
 
 // Tạo light theme
@@ -239,11 +219,7 @@ ThemeData getLightTheme() {
     splashColor: Colors.transparent,
   );
 
-  return generateThemeDataWithExtension(
-    themeData: themeData,
-    brightness: brightness,
-    accentColor: accentColor,
-  );
+  return generateThemeDataWithExtension(themeData: themeData, brightness: brightness, accentColor: accentColor);
 }
 
 // Tạo dark theme
@@ -251,70 +227,55 @@ ThemeData getDarkTheme() {
   const brightness = Brightness.dark;
   const accentColor = Color(0xFF2D5BD3);
 
-  final themeData = ThemeData(
-    fontFamily: 'Inter',
-    colorScheme: getColorScheme(brightness),
-    useMaterial3: true,
-    typography: Typography.material2014(),
-    splashColor: Colors.transparent,
-  );
+  final themeData = ThemeData(fontFamily: 'Inter', colorScheme: getColorScheme(brightness), useMaterial3: true, typography: Typography.material2014(), splashColor: Colors.transparent);
 
-  return generateThemeDataWithExtension(
-    themeData: themeData,
-    brightness: brightness,
-    accentColor: accentColor,
-  );
+  return generateThemeDataWithExtension(themeData: themeData, brightness: brightness, accentColor: accentColor);
 }
 
 // Tạo AppColors cho Light theme
-AppColors getLightAppColors({
-  Color accentColor = defaultAccentColor,
-  Color backgroundColor = defaultLightBackground,
-}) {
-  return AppColors(colors: {
-    'accent': accentColor,
-    'lightDarkAccent': backgroundColor,
-    'background': backgroundColor,
-    'card': lightenPastel(backgroundColor, amount: 0.02),
-    'cardSelected': lightenPastel(accentColor, amount: 0.85),
-    'text': Colors.black,
-    'textSecondary': Colors.black54,
-    'border': Colors.black12,
-    'divider': Colors.black12,
-    'error': const Color(0xFFB00020),
-    'success': const Color(0xFF1B873D),
-    'warning': const Color(0xFFFF6B00),
-    'info': const Color(0xFF2D5BD3),
-  });
+AppColors getLightAppColors({Color accentColor = defaultAccentColor, Color backgroundColor = defaultLightBackground}) {
+  return AppColors(
+    colors: {
+      'accent': accentColor,
+      'lightDarkAccent': backgroundColor,
+      'background': backgroundColor,
+      'card': lightenPastel(backgroundColor, amount: 0.02),
+      'cardSelected': lightenPastel(accentColor, amount: 0.85),
+      'text': Colors.black,
+      'textSecondary': Colors.black54,
+      'border': Colors.black12,
+      'divider': Colors.black12,
+      'error': const Color(0xFFB00020),
+      'success': const Color(0xFF1B873D),
+      'warning': const Color(0xFFFF6B00),
+      'info': const Color(0xFF2D5BD3),
+    },
+  );
 }
 
 // Tạo AppColors cho Dark theme
-AppColors getDarkAppColors({
-  Color accentColor = defaultAccentColor,
-  Color backgroundColor = defaultDarkBackground,
-}) {
-  return AppColors(colors: {
-    'accent': accentColor,
-    'lightDarkAccent': backgroundColor,
-    'background': backgroundColor,
-    'card': darkenPastel(backgroundColor, amount: 0.02),
-    'cardSelected': darkenPastel(accentColor, amount: 0.85),
-    'text': Colors.white,
-    'textSecondary': Colors.white70,
-    'border': Colors.white24,
-    'divider': Colors.white24,
-    'error': const Color(0xFFCF6679),
-    'success': const Color(0xFF1B873D),
-    'warning': const Color(0xFFFF6B00),
-    'info': const Color(0xFF2D5BD3),
-  });
+AppColors getDarkAppColors({Color accentColor = defaultAccentColor, Color backgroundColor = defaultDarkBackground}) {
+  return AppColors(
+    colors: {
+      'accent': accentColor,
+      'lightDarkAccent': backgroundColor,
+      'background': backgroundColor,
+      'card': darkenPastel(backgroundColor, amount: 0.02),
+      'cardSelected': darkenPastel(accentColor, amount: 0.85),
+      'text': Colors.white,
+      'textSecondary': Colors.white70,
+      'border': Colors.white24,
+      'divider': Colors.white24,
+      'error': const Color(0xFFCF6679),
+      'success': const Color(0xFF1B873D),
+      'warning': const Color(0xFFFF6B00),
+      'info': const Color(0xFF2D5BD3),
+    },
+  );
 }
 
 // Tạo ColorScheme cho Light theme
-ColorScheme getLightColorScheme({
-  Color primary = defaultAccentColor,
-  Color background = defaultLightBackground,
-}) {
+ColorScheme getLightColorScheme({Color primary = defaultAccentColor, Color background = defaultLightBackground}) {
   return ColorScheme(
     brightness: Brightness.light,
     primary: primary,
@@ -337,10 +298,7 @@ ColorScheme getLightColorScheme({
 }
 
 // Tạo ColorScheme cho Dark theme
-ColorScheme getDarkColorScheme({
-  Color primary = defaultAccentColor,
-  Color background = defaultDarkBackground,
-}) {
+ColorScheme getDarkColorScheme({Color primary = defaultAccentColor, Color background = defaultDarkBackground}) {
   return ColorScheme(
     brightness: Brightness.dark,
     primary: primary,
@@ -366,22 +324,13 @@ ColorScheme getDarkColorScheme({
 class LightColors {
   final Color primary;
   final Color background;
-  
-  const LightColors({
-    required this.primary,
-    this.background = defaultLightBackground,
-  });
 
-  AppColors toColors() => getLightAppColors(
-    accentColor: primary,
-    backgroundColor: background,
-  );
+  const LightColors({required this.primary, this.background = defaultLightBackground});
+
+  AppColors toColors() => getLightAppColors(accentColor: primary, backgroundColor: background);
 
   ThemeData toThemeData() {
-    final colorScheme = getLightColorScheme(
-      primary: primary,
-      background: background,
-    );
+    final colorScheme = getLightColorScheme(primary: primary, background: background);
     final colors = toColors();
 
     return ThemeData(
@@ -394,25 +343,11 @@ class LightColors {
         elevation: 0,
         systemOverlayStyle: getSystemUiOverlayStyle(colors, Brightness.light),
         iconTheme: const IconThemeData(color: Colors.black),
-        titleTextStyle: const TextStyle(
-          color: Colors.black,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
+        titleTextStyle: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
       ),
-      drawerTheme: DrawerThemeData(
-        backgroundColor: background,
-      ),
-      cardTheme: CardTheme(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        color: colors.colors['card'],
-      ),
-      navigationRailTheme: NavigationRailThemeData(
-        backgroundColor: background,
-        selectedIconTheme: IconThemeData(color: primary),
-        unselectedIconTheme: const IconThemeData(color: Colors.black54),
-      ),
+      drawerTheme: DrawerThemeData(backgroundColor: background),
+      cardTheme: CardTheme(elevation: 2, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), color: colors.colors['card']),
+      navigationRailTheme: NavigationRailThemeData(backgroundColor: background, selectedIconTheme: IconThemeData(color: primary), unselectedIconTheme: const IconThemeData(color: Colors.black54)),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: background,
         selectedItemColor: primary,
@@ -429,21 +364,12 @@ class DarkColors {
   final Color primary;
   final Color background;
 
-  const DarkColors({
-    required this.primary,
-    this.background = defaultDarkBackground,
-  });
+  const DarkColors({required this.primary, this.background = defaultDarkBackground});
 
-  AppColors toColors() => getDarkAppColors(
-    accentColor: primary,
-    backgroundColor: background,
-  );
+  AppColors toColors() => getDarkAppColors(accentColor: primary, backgroundColor: background);
 
   ThemeData toThemeData() {
-    final colorScheme = getDarkColorScheme(
-      primary: primary,
-      background: background,
-    );
+    final colorScheme = getDarkColorScheme(primary: primary, background: background);
     final colors = toColors();
 
     return ThemeData(
@@ -456,25 +382,11 @@ class DarkColors {
         elevation: 0,
         systemOverlayStyle: getSystemUiOverlayStyle(colors, Brightness.dark),
         iconTheme: const IconThemeData(color: Colors.white),
-        titleTextStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
+        titleTextStyle: CustomTextStyle.regular(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
       ),
-      drawerTheme: DrawerThemeData(
-        backgroundColor: background,
-      ),
-      cardTheme: CardTheme(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        color: colors.colors['card'],
-      ),
-      navigationRailTheme: NavigationRailThemeData(
-        backgroundColor: background,
-        selectedIconTheme: IconThemeData(color: primary),
-        unselectedIconTheme: const IconThemeData(color: Colors.white70),
-      ),
+      drawerTheme: DrawerThemeData(backgroundColor: background),
+      cardTheme: CardTheme(elevation: 2, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), color: colors.colors['card']),
+      navigationRailTheme: NavigationRailThemeData(backgroundColor: background, selectedIconTheme: IconThemeData(color: primary), unselectedIconTheme: const IconThemeData(color: Colors.white70)),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: background,
         selectedItemColor: primary,
@@ -484,4 +396,4 @@ class DarkColors {
       ),
     );
   }
-} 
+}

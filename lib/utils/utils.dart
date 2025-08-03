@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
@@ -5,9 +7,11 @@ import 'package:cybersafe_pro/services/local_auth_service.dart';
 import 'package:cybersafe_pro/services/otp.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
+import 'package:intl/intl.dart';
 import 'package:timezone/timezone.dart' as timezone;
 import 'package:url_launcher/url_launcher.dart';
 
@@ -21,7 +25,7 @@ Future<void> clipboardCustom({required BuildContext context, required String tex
       context: context,
       animation: StyledToastAnimation.fade,
       backgroundColor: Theme.of(context).colorScheme.primary,
-      textStyle: const TextStyle(color: Colors.white),
+      textStyle: CustomTextStyle.regular(color: Colors.white),
       position: StyledToastPosition.center,
     );
   });
@@ -64,7 +68,7 @@ void openUrl(String link, {LaunchMode? mode, required BuildContext context, Func
   try {
     await launchUrl(Uri.parse(link), mode: mode ?? LaunchMode.externalApplication);
   } catch (e) {
-    logError(e.toString());
+    logError(e.toString(), functionName: "openUrl");
     if (context.mounted) {
       showToast("Could not launch link", context: context, backgroundColor: Theme.of(context).colorScheme.primary, textStyle: const TextStyle(color: Colors.white));
     }
@@ -77,7 +81,12 @@ Future<bool> checkAppInstalled(String packageName) async {
     final bool installed = await platform.invokeMethod('isAppInstalled', {"packageName": packageName});
     return installed;
   } catch (e) {
-    logError(e.toString());
+    logError(e.toString(), functionName: "checkAppInstalled");
     return false;
   }
+}
+
+String formatDateTime(DateTime? dateTime) {
+  if (dateTime == null) return '';
+  return "${DateFormat.yMMMd(Platform.localeName).format(dateTime)} ${DateFormat.Hm(Platform.localeName).format(dateTime)}";
 }

@@ -1,12 +1,11 @@
 import 'package:cybersafe_pro/providers/local_auth_provider.dart';
-import 'package:cybersafe_pro/providers/theme_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/screens/settings/widgets/change_lang_widget.dart';
 import 'package:cybersafe_pro/screens/settings/widgets/set_theme_color.dart';
 import 'package:cybersafe_pro/screens/settings/widgets/set_theme_mode_widget.dart';
 import 'package:cybersafe_pro/screens/settings/widgets/use_biometric_login.dart';
-import 'package:cybersafe_pro/services/local_auth_service.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -35,8 +34,8 @@ class SettingsTabletLayout extends StatelessWidget {
                     children: [
                       ListTile(
                         leading: Icon(Icons.password, color: Theme.of(context).colorScheme.primary, size: 24.sp),
-                        title: Text('Thay đổi mật khẩu chính', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500)),
-                        subtitle: Text('Cập nhật mật khẩu chính của bạn', style: TextStyle(fontSize: 13.sp)),
+                        title: Text('Thay đổi mật khẩu chính', style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w500)),
+                        subtitle: Text('Cập nhật mật khẩu chính của bạn', style: CustomTextStyle.regular(fontSize: 13.sp)),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                         onTap: () {
                           AppRoutes.navigateTo(context, AppRoutes.registerMasterPin, arguments: {"isChangePin": true});
@@ -76,7 +75,7 @@ class SettingsTabletLayout extends StatelessWidget {
                     children: [
                       ListTile(
                         leading: Icon(Icons.privacy_tip_outlined, color: Theme.of(context).colorScheme.primary, size: 24.sp),
-                        title: Text('Chính sách bảo mật', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500)),
+                        title: Text('Chính sách bảo mật', style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w500)),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                         onTap: () {
                           // Mở trang chính sách bảo mật
@@ -85,7 +84,7 @@ class SettingsTabletLayout extends StatelessWidget {
                       const Divider(height: 1),
                       ListTile(
                         leading: Icon(Icons.description_outlined, color: Theme.of(context).colorScheme.primary, size: 24.sp),
-                        title: Text('Điều khoản sử dụng', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500)),
+                        title: Text('Điều khoản sử dụng', style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w500)),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                         onTap: () {
                           // Mở trang điều khoản sử dụng
@@ -94,7 +93,7 @@ class SettingsTabletLayout extends StatelessWidget {
                       const Divider(height: 1),
                       ListTile(
                         leading: Icon(Icons.star_outline, color: Theme.of(context).colorScheme.primary, size: 24.sp),
-                        title: Text('Đánh giá ứng dụng', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500)),
+                        title: Text('Đánh giá ứng dụng', style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w500)),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                         onTap: () {
                           // Mở trang đánh giá ứng dụng
@@ -109,10 +108,10 @@ class SettingsTabletLayout extends StatelessWidget {
                         applicationLegalese: '© 2023 CyberSafe Pro',
                         aboutBoxChildren: [
                           const SizedBox(height: 12),
-                          Text('CyberSafe Pro là ứng dụng quản lý mật khẩu an toàn, giúp bạn lưu trữ và bảo vệ thông tin đăng nhập quan trọng.', style: TextStyle(fontSize: 14.sp)),
+                          Text('CyberSafe Pro là ứng dụng quản lý mật khẩu an toàn, giúp bạn lưu trữ và bảo vệ thông tin đăng nhập quan trọng.', style: CustomTextStyle.regular(fontSize: 14.sp)),
                         ],
                         dense: false,
-                        child: Text('Phiên bản', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500)),
+                        child: Text('Phiên bản', style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w500)),
                       ),
                     ],
                   ),
@@ -128,8 +127,8 @@ class SettingsTabletLayout extends StatelessWidget {
                     children: [
                       ListTile(
                         leading: Icon(Icons.delete_forever, color: Colors.red, size: 24.sp),
-                        title: Text('Xóa tất cả dữ liệu', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500, color: Colors.red)),
-                        subtitle: Text('Xóa toàn bộ dữ liệu trong ứng dụng (không thể khôi phục)', style: TextStyle(fontSize: 13.sp)),
+                        title: Text('Xóa tất cả dữ liệu', style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w500, color: Colors.red)),
+                        subtitle: Text('Xóa toàn bộ dữ liệu trong ứng dụng (không thể khôi phục)', style: CustomTextStyle.regular(fontSize: 13.sp)),
                         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                         onTap: () => _showDeleteConfirmationDialog(context),
                       ),
@@ -151,7 +150,7 @@ class SettingsTabletLayout extends StatelessWidget {
         children: [
           Icon(icon, size: 18.sp, color: color ?? Theme.of(context).colorScheme.primary),
           SizedBox(width: 8.w),
-          Text(title, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: color ?? Theme.of(context).colorScheme.onSurface)),
+          Text(title, style: CustomTextStyle.regular(fontSize: 18.sp, fontWeight: FontWeight.bold, color: color ?? Theme.of(context).colorScheme.onSurface)),
         ],
       ),
     );
@@ -169,7 +168,7 @@ class SettingsTabletLayout extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Bạn có chắc chắn muốn xóa tất cả dữ liệu? Hành động này không thể hoàn tác.', style: TextStyle(fontSize: 14.sp)),
+                  Text('Bạn có chắc chắn muốn xóa tất cả dữ liệu? Hành động này không thể hoàn tác.', style: CustomTextStyle.regular(fontSize: 14.sp)),
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -178,7 +177,7 @@ class SettingsTabletLayout extends StatelessWidget {
                       children: [
                         const Icon(Icons.warning_amber, color: Colors.red),
                         const SizedBox(width: 8),
-                        Expanded(child: Text('Tất cả tài khoản, mật khẩu và dữ liệu khác sẽ bị xóa vĩnh viễn.', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500, fontSize: 13.sp))),
+                        Expanded(child: Text('Tất cả tài khoản, mật khẩu và dữ liệu khác sẽ bị xóa vĩnh viễn.', style: CustomTextStyle.regular(color: Colors.red, fontWeight: FontWeight.w500, fontSize: 13.sp))),
                       ],
                     ),
                   ),
@@ -186,7 +185,7 @@ class SettingsTabletLayout extends StatelessWidget {
               ),
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: Text('Hủy', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14.sp))),
+              TextButton(onPressed: () => Navigator.pop(context), child: Text('Hủy', style: CustomTextStyle.regular(fontWeight: FontWeight.w500, fontSize: 14.sp))),
               TextButton(
                 onPressed: () async {
                   // Đóng dialog
@@ -199,7 +198,7 @@ class SettingsTabletLayout extends StatelessWidget {
                   // Hiển thị snackbar thông báo
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vui lòng xác thực để xóa tất cả dữ liệu')));
                 },
-                child: Text('Xóa tất cả', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500, fontSize: 14.sp)),
+                child: Text('Xóa tất cả', style: CustomTextStyle.regular(color: Colors.red, fontWeight: FontWeight.w500, fontSize: 14.sp)),
               ),
             ],
           ),
