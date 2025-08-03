@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/database/boxes/account_box.dart';
 import 'package:cybersafe_pro/database/boxes/account_custom_field_box.dart';
@@ -16,19 +17,23 @@ import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
+import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
 class MigrateFromOldData {
-  static Future<bool> startMigrate() async {
+  static Future<bool> startMigrate(BuildContext context) async {
     try {
-      // if (await SecureStorage.instance.read(key: SecureStorageKey.isMigrateOldData) == "true") {
-      //   return false;
-      // }
+      if (await SecureStorage.instance.read(key: SecureStorageKey.isMigrateOldData) == "true") {
+        return false;
+      }
+      showLoadingDialog(loadingText: ValueNotifier<String>('Đang di chuyển dữ liệu...'));
       final stopwatch = Stopwatch()..start();
       final docsDir = await getApplicationDocumentsDirectory();
       final dbPath = path.join(docsDir.path, "cyber_safe");
-      if (!await File(dbPath).exists()) {
+      logInfo("dbPath: $dbPath");
+      logInfo("dbPath exists: ${await Directory(dbPath).exists()}");
+      if (!await Directory(dbPath).exists()) {
         return false;
       }
       await _migratePinCode();
@@ -49,6 +54,7 @@ class MigrateFromOldData {
       return false;
     } finally {
       await SecureStorage.instance.save(key: SecureStorageKey.isMigrateOldData, value: "true");
+      hideLoadingDialog();
     }
   }
 

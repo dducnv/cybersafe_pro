@@ -1,4 +1,3 @@
-import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/migrate_data/migrate_from_old_data.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/local_auth_provider.dart';
@@ -92,12 +91,7 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
   }
 
   Future<void> _handleMigrateData() async {
-    try {
-      showLoadingDialog(loadingText: ValueNotifier<String>('Đang di chuyển dữ liệu...'));
-      await MigrateFromOldData.startMigrate();
-    } finally {
-      hideLoadingDialog();
-    }
+    await MigrateFromOldData.startMigrate(context);
   }
 
   @override
