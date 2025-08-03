@@ -22,9 +22,9 @@ import 'package:path_provider/path_provider.dart';
 class MigrateFromOldData {
   static Future<bool> startMigrate() async {
     try {
-      if (await SecureStorage.instance.read(key: SecureStorageKey.isMigrateOldData) == "true") {
-        return false;
-      }
+      // if (await SecureStorage.instance.read(key: SecureStorageKey.isMigrateOldData) == "true") {
+      //   return false;
+      // }
       final stopwatch = Stopwatch()..start();
       final docsDir = await getApplicationDocumentsDirectory();
       final dbPath = path.join(docsDir.path, "cyber_safe");
@@ -41,8 +41,8 @@ class MigrateFromOldData {
       logInfo("Convert old data to account aggregates: ${stopwatch.elapsed}ms");
       log(accountAggregates.map((e) => e.toString()).toString());
       await AccountServices.instance.saveAccountsFromAccountAggregates(accountAggregates);
-      deleteData();
-      EncryptAppDataService.instance.clearAllKey();
+      // deleteData();
+      // EncryptAppDataService.instance.clearAllKey();
       return true;
     } catch (e) {
       logError('Error migrating data: $e');

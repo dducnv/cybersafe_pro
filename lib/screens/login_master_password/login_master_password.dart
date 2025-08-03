@@ -60,34 +60,44 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
 
     if (!_mounted) return;
     FlutterNativeSplash.remove();
-    await _handleMigrateData();
-    try {
-      // Sử dụng provider có sẵn thay vì tạo mới
-      final authProvider = Provider.of<LocalAuthProvider>(context, listen: false);
-      // if (SecureApplicationUtil.instance.secureApplicationController != null) SecureApplicationUtil.instance.secureApplicationController?.open();
-      await authProvider.init(
-        widget.showBiometric && !widget.isFromBackup && !widget.isFromRestore,
-        () {
-          if (widget.secureApplicationController != null)
-            widget.secureApplicationController?.authSuccess(unlock: true);
-          widget.callBackLoginCallback?.call(isLoginSuccess: true);
-          SecureApplicationUtil.instance.setSecureState(SecureAppState.secured);
-        },
-        isNavigateToHome: widget.secureApplicationController == null,
-      );
-      // Dừng timer
-      if (_mounted && mounted) {
-        context.read<AppProvider>().stopTimer();
+
+    // Sử dụng Future.microtask để tránh lỗi dependOnInheritedWidgetOfExactType
+    Future.microtask(() async {
+      await _handleMigrateData();
+
+      if (!_mounted) return;
+
+      try {
+        // Sử dụng provider có sẵn thay vì tạo mới
+        final authProvider = Provider.of<LocalAuthProvider>(context, listen: false);
+        // if (SecureApplicationUtil.instance.secureApplicationController != null) SecureApplicationUtil.instance.secureApplicationController?.open();
+        await authProvider.init(
+          widget.showBiometric && !widget.isFromBackup && !widget.isFromRestore,
+          () {
+            if (widget.secureApplicationController != null)
+              widget.secureApplicationController?.authSuccess(unlock: true);
+            widget.callBackLoginCallback?.call(isLoginSuccess: true);
+            SecureApplicationUtil.instance.setSecureState(SecureAppState.secured);
+          },
+          isNavigateToHome: widget.secureApplicationController == null,
+        );
+        // Dừng timer
+        if (_mounted && mounted) {
+          context.read<AppProvider>().stopTimer();
+        }
+      } catch (e) {
+        logError('Error initializing login screen: $e');
       }
-    } catch (e) {
-      logError('Error initializing login screen: $e');
-    }
+    });
   }
 
   Future<void> _handleMigrateData() async {
-    showLoadingDialog(loadingText: ValueNotifier<String>('Migrating data...'));
-    await MigrateFromOldData.startMigrate();
-    hideLoadingDialog();
+    try {
+      showLoadingDialog(loadingText: ValueNotifier<String>('Đang di chuyển dữ liệu...'));
+      await MigrateFromOldData.startMigrate();
+    } finally {
+      hideLoadingDialog();
+    }
   }
 
   @override
