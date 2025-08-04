@@ -3,6 +3,7 @@ import 'package:cybersafe_pro/repositories/adapters/account_custom_text_fied_ada
 import 'package:cybersafe_pro/repositories/adapters/category_adapter.dart';
 import 'package:cybersafe_pro/repositories/adapters/icon_custom_adapter.dart';
 import 'package:cybersafe_pro/repositories/adapters/password_history_adapter.dart';
+import 'package:cybersafe_pro/repositories/adapters/text_notes_adapter.dart';
 import 'package:cybersafe_pro/repositories/adapters/totp_adapter.dart';
 import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/services/data_secure_service.dart';
@@ -21,6 +22,7 @@ class DriffDbManager {
   late final IconCustomAdapter iconCustomAdapter;
   late final PasswordHistoryAdapter passwordHistoryAdapter;
   late final TOTPAdapter totpAdapter;
+  late final TextNotesAdapter textNotesAdapter;
   DriftSqliteDatabase? _database;
 
   Future<void> init() async {
@@ -33,6 +35,7 @@ class DriffDbManager {
     iconCustomAdapter = IconCustomAdapter(_database!);
     passwordHistoryAdapter = PasswordHistoryAdapter(_database!);
     totpAdapter = TOTPAdapter(_database!);
+    textNotesAdapter = TextNotesAdapter(_database!);
   }
 
   Future<T> transaction<T>(Future<T> Function() action) {
@@ -45,7 +48,9 @@ class DriffDbManager {
   // ================= ACCOUNT =================
   Future<List<AccountDriftModelData>> getAllAccountDecryptedBaseInfo() async {
     final accounts = await accountAdapter.getAllBasicInfo();
-    final decryptedAccounts = await Future.wait(accounts.map((account) => _getDecryptedBasicInfo(account)));
+    final decryptedAccounts = await Future.wait(
+      accounts.map((account) => _getDecryptedBasicInfo(account)),
+    );
     return decryptedAccounts;
   }
 
@@ -78,7 +83,12 @@ class DriffDbManager {
     final id = await accountAdapter.insertAccount(account);
 
     if (customFields != null && customFields.isNotEmpty) {
-      await Future.wait(customFields.map((customField) => createAccountCustomFieldWithEncriptData(customField: customField, accountId: id)));
+      await Future.wait(
+        customFields.map(
+          (customField) =>
+              createAccountCustomFieldWithEncriptData(customField: customField, accountId: id),
+        ),
+      );
     }
 
     if (totp != null) {
@@ -87,14 +97,21 @@ class DriffDbManager {
     }
 
     if (passwordHistories != null && passwordHistories.isNotEmpty) {
-      await Future.wait(passwordHistories.map((passwordHistory) => passwordHistoryAdapter.insertPasswordHistory(id, passwordHistory.password.value)));
+      await Future.wait(
+        passwordHistories.map(
+          (passwordHistory) =>
+              passwordHistoryAdapter.insertPasswordHistory(id, passwordHistory.password.value),
+        ),
+      );
     }
 
     return await accountAdapter.getById(id);
   }
 
   // Batch create accounts - tối ưu cho migrate
-  Future<List<AccountDriftModelData>> batchCreateAccountsWithEncryptData(List<Map<String, dynamic>> accountsData) async {
+  Future<List<AccountDriftModelData>> batchCreateAccountsWithEncryptData(
+    List<Map<String, dynamic>> accountsData,
+  ) async {
     if (accountsData.isEmpty) return [];
 
     final stopwatch = Stopwatch()..start();
@@ -109,14 +126,17 @@ class DriffDbManager {
 
       final results = <AccountDriftModelData>[];
       const batchSize = 20;
-      
+
       for (int i = 0; i < encryptedAccountsData.length; i += batchSize) {
-        final end = (i + batchSize < encryptedAccountsData.length) ? i + batchSize : encryptedAccountsData.length;
+        final end =
+            (i + batchSize < encryptedAccountsData.length)
+                ? i + batchSize
+                : encryptedAccountsData.length;
         final batch = encryptedAccountsData.sublist(i, end);
-        
+
         final batchResults = await transaction(() async {
           final batchAccountResults = <AccountDriftModelData>[];
-          
+
           for (final accountData in batch) {
             try {
               final account = AccountDriftModelCompanion.insert(
@@ -134,7 +154,8 @@ class DriffDbManager {
               final accountId = await accountAdapter.insertAccount(account);
 
               // Insert custom fields
-              if (accountData['customFields'] != null && (accountData['customFields'] as List).isNotEmpty) {
+              if (accountData['customFields'] != null &&
+                  (accountData['customFields'] as List).isNotEmpty) {
                 for (final fieldData in accountData['customFields'] as List) {
                   final customField = AccountCustomFieldDriftModelCompanion.insert(
                     accountId: accountId,
@@ -151,16 +172,20 @@ class DriffDbManager {
               if (accountData['totp'] != null) {
                 final totpData = accountData['totp'] as Map<String, dynamic>;
                 await totpAdapter.insertOrUpdateTOTP(
-                  accountId, 
-                  totpData['secretKey'], 
-                  totpData['isShowToHome'] ?? false
+                  accountId,
+                  totpData['secretKey'],
+                  totpData['isShowToHome'] ?? false,
                 );
               }
 
               // Insert password histories
-              if (accountData['passwordHistories'] != null && (accountData['passwordHistories'] as List).isNotEmpty) {
+              if (accountData['passwordHistories'] != null &&
+                  (accountData['passwordHistories'] as List).isNotEmpty) {
                 for (final historyData in accountData['passwordHistories'] as List) {
-                  await passwordHistoryAdapter.insertPasswordHistory(accountId, historyData['password']);
+                  await passwordHistoryAdapter.insertPasswordHistory(
+                    accountId,
+                    historyData['password'],
+                  );
                 }
               }
 
@@ -172,14 +197,16 @@ class DriffDbManager {
               logError('Error creating account in batch: $e');
             }
           }
-          
+
           return batchAccountResults;
         });
-        
+
         results.addAll(batchResults);
-        
+
         // Progress log
-        logInfo("Batch ${(i ~/ batchSize) + 1}/${(encryptedAccountsData.length / batchSize).ceil()} completed: ${stopwatch.elapsed}");
+        logInfo(
+          "Batch ${(i ~/ batchSize) + 1}/${(encryptedAccountsData.length / batchSize).ceil()} completed: ${stopwatch.elapsed}",
+        );
       }
 
       logInfo("Batch create completed: ${stopwatch.elapsed}, created ${results.length} accounts");
@@ -193,9 +220,7 @@ class DriffDbManager {
   // Pre-warm encryption keys để tránh tạo keys nhiều lần
   Future<void> _preWarmEncryptionKeys() async {
     try {
-      await Future.wait([
-        DataSecureService.preWarmKeys(),
-      ]);
+      await Future.wait([DataSecureService.preWarmKeys()]);
     } catch (e) {
       logError('Error pre-warming keys: $e');
     }
@@ -222,8 +247,13 @@ class DriffDbManager {
     );
     if (newPassword.isNotEmpty) {
       final currentAccount = await accountAdapter.getById(account.id.value);
-      if (currentAccount != null && currentAccount.password != null && currentAccount.password!.isNotEmpty) {
-        await passwordHistoryAdapter.insertPasswordHistory(account.id.value, await DataSecureService.encryptPassword(currentAccount.password!));
+      if (currentAccount != null &&
+          currentAccount.password != null &&
+          currentAccount.password!.isNotEmpty) {
+        await passwordHistoryAdapter.insertPasswordHistory(
+          account.id.value,
+          await DataSecureService.encryptPassword(currentAccount.password!),
+        );
         logInfo('Password history saved for account ${account.id.value}');
       } else {
         logInfo('No current password found for account ${account.id.value}');
@@ -242,12 +272,23 @@ class DriffDbManager {
 
     // Create new custom fields if provided
     if (customFields != null && customFields.isNotEmpty) {
-      await Future.wait(customFields.map((customField) => createAccountCustomFieldWithEncriptData(customField: customField, accountId: account.id.value)));
+      await Future.wait(
+        customFields.map(
+          (customField) => createAccountCustomFieldWithEncriptData(
+            customField: customField,
+            accountId: account.id.value,
+          ),
+        ),
+      );
     }
 
     if (totp != null && totp.secretKey.value.isNotEmpty) {
       final encryptedSecretKey = await DataSecureService.encryptTOTPKey(totp.secretKey.value);
-      await totpAdapter.insertOrUpdateTOTP(account.id.value, encryptedSecretKey, totp.isShowToHome.value);
+      await totpAdapter.insertOrUpdateTOTP(
+        account.id.value,
+        encryptedSecretKey,
+        totp.isShowToHome.value,
+      );
     } else {
       await totpAdapter.deleteTOTP(account.id.value);
     }
@@ -257,7 +298,10 @@ class DriffDbManager {
 
   // ================= ACCOUNT CUSTOM FIELD =================
 
-  Future<void> createAccountCustomFieldWithEncriptData({required AccountCustomFieldDriftModelCompanion customField, required int accountId}) async {
+  Future<void> createAccountCustomFieldWithEncriptData({
+    required AccountCustomFieldDriftModelCompanion customField,
+    required int accountId,
+  }) async {
     bool isEncrypted = DataSecureService.isValueEncrypted(customField.value.value);
     final encryptedValue =
         isEncrypted

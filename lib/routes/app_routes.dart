@@ -3,9 +3,12 @@ import 'dart:io';
 import 'package:cybersafe_pro/screens/about_app/about_app_screen.dart';
 import 'package:cybersafe_pro/screens/category_manager/category_manager_screen.dart';
 import 'package:cybersafe_pro/screens/create_account/create_account_screen.dart';
-import 'package:cybersafe_pro/screens/details_account/details_account_screen.dart' show DetailsAccountScreen;
+import 'package:cybersafe_pro/screens/details_account/details_account_screen.dart'
+    show DetailsAccountScreen;
 import 'package:cybersafe_pro/screens/home/home_screen.dart';
 import 'package:cybersafe_pro/screens/login_master_password/login_master_password.dart';
+import 'package:cybersafe_pro/screens/note_editor/note_editor.dart';
+import 'package:cybersafe_pro/screens/note_list/note_list.dart';
 import 'package:cybersafe_pro/screens/onboarding/onboarding_screen.dart';
 import 'package:cybersafe_pro/screens/otp/otp_list_screen.dart';
 import 'package:cybersafe_pro/screens/password_generator/password_generate_screen.dart';
@@ -15,9 +18,8 @@ import 'package:cybersafe_pro/screens/statistic/statistic_screen.dart';
 import 'package:cybersafe_pro/screens/statistic/sub_sceens/account_password_weak.dart';
 import 'package:cybersafe_pro/screens/statistic/sub_sceens/same_passwords_view.dart';
 import 'package:cybersafe_pro/utils/device_type.dart';
-import 'package:cybersafe_pro/utils/secure_application_util.dart';
-import 'package:cybersafe_pro/utils/secure_app_state.dart';
-import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart' show AppPinCodeFieldsState;
+import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart'
+    show AppPinCodeFieldsState;
 import 'package:cybersafe_pro/widgets/modal_side_sheet/modal_side_sheet.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -40,6 +42,8 @@ class AppRoutes {
   static const String accountPasswordWeak = '/account_password_weak';
   static const String accountSamePassword = '/account_same_password';
   static const String aboutApp = '/about_app';
+  static const String notes = '/notes';
+  static const String noteEditor = "/note_editor";
 
   // Danh sách các màn hình sẽ hiển thị dưới dạng ModalSideSheet khi ở desktop
   static const List<String> modalSideSheetRoutes = [
@@ -69,7 +73,11 @@ class AppRoutes {
     return Navigator.pushNamed<T>(context, routeName, arguments: arguments);
   }
 
-  static Future<T?> navigateToReplacement<T>(BuildContext context, String routeName, {Object? arguments}) {
+  static Future<T?> navigateToReplacement<T>(
+    BuildContext context,
+    String routeName, {
+    Object? arguments,
+  }) {
     // Cập nhật màn hình hiện tại để desktop mode có thể xử lý
     DeviceInfo.currentScreen.value = routeName;
     final deviceType = DeviceInfo.getDeviceType(context);
@@ -81,7 +89,11 @@ class AppRoutes {
     return Navigator.pushReplacementNamed<T, dynamic>(context, routeName, arguments: arguments);
   }
 
-  static Future<T?> navigateAndRemoveUntil<T>(BuildContext context, String routeName, {Object? arguments}) {
+  static Future<T?> navigateAndRemoveUntil<T>(
+    BuildContext context,
+    String routeName, {
+    Object? arguments,
+  }) {
     // Cập nhật màn hình hiện tại để desktop mode có thể xử lý
     DeviceInfo.currentScreen.value = routeName;
     final deviceType = DeviceInfo.getDeviceType(context);
@@ -140,6 +152,12 @@ class AppRoutes {
         return const LoginMasterPassword();
       case aboutApp:
         return const AboutAppScreen();
+      case notes:
+        return NoteList();
+      case noteEditor:
+        final args = arguments is Map<String, dynamic> ? arguments : {};
+        final noteId = args["noteId"];
+        return NoteEditor(noteId: noteId);
       default:
         return const LoginMasterPassword();
     }
@@ -156,7 +174,9 @@ class AppRoutes {
       screen = SecureGate(
         blurr: 30,
         opacity: 0.9,
-        lockedBuilder: (context, secureApplicationController) => _buildUnlockScreen(context, secureApplicationController),
+        lockedBuilder:
+            (context, secureApplicationController) =>
+                _buildUnlockScreen(context, secureApplicationController),
         child: screen,
       );
     }
@@ -173,7 +193,11 @@ class AppRoutes {
       showBiometric: true,
       fromSecureGate: true,
       secureApplicationController: controller,
-      callBackLoginCallback: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) {
+      callBackLoginCallback: ({
+        bool? isLoginSuccess,
+        String? pin,
+        GlobalKey<AppPinCodeFieldsState>? appPinCodeKey,
+      }) {
         if (isLoginSuccess == true && controller != null) {
           // Unlock ứng dụng khi đăng nhập thành công
           controller.authSuccess(unlock: true);

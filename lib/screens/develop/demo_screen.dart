@@ -1,4 +1,4 @@
-import 'package:cybersafe_pro/screens/develop/test_text_note.dart';
+import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 
 class DemoScreen extends StatelessWidget {
@@ -13,7 +13,7 @@ class DemoScreen extends StatelessWidget {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => TestTextNote()));
+                  AppRoutes.navigateTo(context, AppRoutes.noteEditor);
                 },
                 child: Text("TextNote"),
               ),

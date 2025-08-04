@@ -86,6 +86,14 @@ Future<bool> checkAppInstalled(String packageName) async {
   }
 }
 
+String getMonthName(int month) {
+  return DateFormat.MMMM(Platform.localeName).format(DateTime(0, month));
+}
+
+String getWeekdayName(DateTime date) {
+  return DateFormat.E(Platform.localeName).format(date);
+}
+
 String formatDateTime(DateTime? dateTime) {
   if (dateTime == null) return '';
   return "${DateFormat.yMMMd(Platform.localeName).format(dateTime)} ${DateFormat.Hm(Platform.localeName).format(dateTime)}";
