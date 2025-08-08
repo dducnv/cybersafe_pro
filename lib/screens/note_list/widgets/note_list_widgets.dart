@@ -17,11 +17,30 @@ class YearMonthHeader extends StatelessWidget {
       padding: const EdgeInsets.only(top: 12, bottom: 4, left: 16),
       child: RichText(
         text: TextSpan(
-          style: CustomTextStyle.regular(fontSize: 16, color: Theme.of(context).colorScheme.onSurface),
+          style: CustomTextStyle.regular(
+            fontSize: 16,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           children: [
-            TextSpan(text: '$year', style: CustomTextStyle.regular(fontSize: 42.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary, letterSpacing: 2.7)),
+            TextSpan(
+              text: '$year',
+              style: CustomTextStyle.regular(
+                fontSize: 42.sp,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+                letterSpacing: 2.7,
+              ),
+            ),
             const TextSpan(text: ' '),
-            TextSpan(text: getMonthName(month), style: CustomTextStyle.regular(fontSize: 24.sp, fontWeight: FontWeight.bold, letterSpacing: 1.36, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7))),
+            TextSpan(
+              text: getMonthName(month),
+              style: CustomTextStyle.regular(
+                fontSize: 24.sp,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.36,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
+            ),
           ],
         ),
       ),
@@ -32,7 +51,13 @@ class YearMonthHeader extends StatelessWidget {
 class NoteCard extends StatefulWidget {
   final NoteCardData note;
   final NoteProvider noteProvider;
-  const NoteCard({super.key, required this.note, required this.noteProvider});
+  final Function(NoteCardData) onLongPress;
+  const NoteCard({
+    super.key,
+    required this.note,
+    required this.noteProvider,
+    required this.onLongPress,
+  });
 
   @override
   State<NoteCard> createState() => _NoteCardState();
@@ -47,7 +72,10 @@ class _NoteCardState extends State<NoteCard> with SingleTickerProviderStateMixin
   void initState() {
     super.initState();
     _controller = AnimationController(duration: const Duration(milliseconds: 150), vsync: this);
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.95,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -79,8 +107,13 @@ class _NoteCardState extends State<NoteCard> with SingleTickerProviderStateMixin
       onTapDown: _handleTapDown,
       onTapUp: _handleTapUp,
       onTapCancel: _handleTapCancel,
+      onLongPress: () => widget.onLongPress(widget.note),
       onTap: () async {
-        await AppRoutes.navigateTo(context, AppRoutes.noteEditor, arguments: {"noteId": widget.note.id});
+        await AppRoutes.navigateTo(
+          context,
+          AppRoutes.noteEditor,
+          arguments: {"noteId": widget.note.id},
+        );
       },
       child: AnimatedBuilder(
         animation: _scaleAnimation,
@@ -89,10 +122,22 @@ class _NoteCardState extends State<NoteCard> with SingleTickerProviderStateMixin
               scale: _scaleAnimation.value,
               child: CardCustomWidget(
                 border: Border(
-                  left: BorderSide(color: Theme.of(context).colorScheme.surfaceContainerHighest, width: 6),
-                  right: BorderSide(color: Theme.of(context).colorScheme.surfaceContainerHighest, width: 1.4),
-                  bottom: BorderSide(color: Theme.of(context).colorScheme.surfaceContainerHighest, width: 1.4),
-                  top: BorderSide(color: Theme.of(context).colorScheme.surfaceContainerHighest, width: 1.4),
+                  left: BorderSide(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    width: 6,
+                  ),
+                  right: BorderSide(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    width: 1.4,
+                  ),
+                  bottom: BorderSide(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    width: 1.4,
+                  ),
+                  top: BorderSide(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    width: 1.4,
+                  ),
                 ),
                 borderRadius: 12,
                 child: Column(
@@ -100,14 +145,32 @@ class _NoteCardState extends State<NoteCard> with SingleTickerProviderStateMixin
                   children: [
                     Row(
                       children: [
+                        if (widget.note.color != null)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: CircleAvatar(radius: 4, backgroundColor: widget.note.color),
+                          ),
                         Expanded(
                           child: Text(
                             widget.note.title,
-                            style: CustomTextStyle.regular(fontWeight: FontWeight.w600, fontSize: 18, color: Theme.of(context).colorScheme.onSurface, letterSpacing: -0.3),
+                            style: CustomTextStyle.regular(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18,
+                              color: Theme.of(context).colorScheme.onSurface,
+                              letterSpacing: -0.3,
+                            ),
                           ),
                         ),
                         SizedBox(width: 8),
-                        Text(widget.note.time, style: CustomTextStyle.regular(fontWeight: FontWeight.w600, fontSize: 14, color: Theme.of(context).colorScheme.primary, letterSpacing: -0.3)),
+                        Text(
+                          widget.note.time,
+                          style: CustomTextStyle.regular(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: Theme.of(context).colorScheme.primary,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -116,7 +179,11 @@ class _NoteCardState extends State<NoteCard> with SingleTickerProviderStateMixin
                         Expanded(
                           child: Text(
                             widget.noteProvider.getPlainText(widget.note.content),
-                            style: CustomTextStyle.regular(fontSize: 14, height: 1.3, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .8)),
+                            style: CustomTextStyle.regular(
+                              fontSize: 14,
+                              height: 1.3,
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .8),
+                            ),
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                           ),

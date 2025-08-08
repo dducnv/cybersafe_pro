@@ -75,4 +75,15 @@ class TextNotesAdapter {
       return null;
     }
   }
+
+  Future<void> updateColor(int id, String? color) async {
+    final note = await getById(id);
+    if (note == null) return;
+    await update(note.copyWith(color: Value(color)));
+  }
+
+  Future<int> delete(int id) async {
+    return await (_database.delete(_database.textNotesDriftModel)
+      ..where((tbl) => tbl.id.equals(id))).go();
+  }
 }

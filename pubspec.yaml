@@ -1,7 +1,7 @@
 name: cybersafe_pro
 description: "A new Flutter project."
 publish_to: "none"
-version: 2.1.0+110
+version: 2.1.0+112
 
 environment:
   sdk: ^3.7.0
@@ -49,7 +49,7 @@ dependencies:
   share_plus: ^10.1.4
   flutter_svg: ^2.0.17
   file_picker: ^8.0.2
-  app_links: ^6.4.0
+  # app_links: ^6.4.0
   fuzzywuzzy: ^1.2.0
   characters: ^1.4.0
   image_picker: ^1.1.2
@@ -69,7 +69,8 @@ dependencies:
   flutter_sharing_intent: ^1.1.1
   password_strength_checker: ^1.2.4
   flutter_staggered_animations: ^1.1.1
-  appflowy_editor: ^5.2.0
+  flutter_quill: ^11.4.2
+  flutter_colorpicker: ^1.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

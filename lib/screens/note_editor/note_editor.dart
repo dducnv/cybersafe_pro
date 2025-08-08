@@ -1,13 +1,8 @@
-import 'dart:async';
 import 'dart:convert';
 
-import 'package:appflowy_editor/appflowy_editor.dart';
-import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/providers/note_provider.dart';
-import 'package:cybersafe_pro/screens/note_editor/widgets/fixed_toolbar.dart';
-import 'package:cybersafe_pro/utils/scale_utils.dart';
-import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:provider/provider.dart';
 
 class NoteEditor extends StatefulWidget {
@@ -19,171 +14,119 @@ class NoteEditor extends StatefulWidget {
 }
 
 class _NoteEditorState extends State<NoteEditor> {
-  late final Future<EditorState> editorState;
-  bool showTitleInputEdit = false;
-  final FocusNode focusNode = FocusNode();
-  final TextEditingController textEditingController = TextEditingController();
-
-  StreamSubscription? _editorSubscription;
+  QuillController? _quillController;
+  final TextEditingController _titleController = TextEditingController();
+  final FocusNode _editorFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
-    editorState = _initEditorState();
-
-    editorState.then((state) {
-      _editorSubscription = state.transactionStream.listen((event) {
-        final content = jsonEncode(state.document.toJson());
-        context.read<NoteProvider>().onContentChanged(title: textEditingController.text, content: content);
-      });
-    });
+    _initNote();
   }
 
-  Future<EditorState> _initEditorState() async {
+  Future<void> _initNote() async {
     final noteProvider = context.read<NoteProvider>();
-
+    QuillController controller;
     if (widget.noteId == null) {
-      textEditingController.text = "";
+      _titleController.text = "";
       noteProvider.clearValue();
-
-      // Provide a default document with one paragraph node
-      return EditorState.blank();
+      controller = QuillController.basic(config: QuillControllerConfig());
     } else {
       final note = await noteProvider.findById(widget.noteId!);
       if (note != null) {
-        final title = await noteProvider.decryptTitle(note.title);
+        _titleController.text = await noteProvider.decryptTitle(note.title);
         final content = await noteProvider.decryptContent(note.content);
-        textEditingController.text = title;
         if (content.isNotEmpty) {
-          return EditorState(document: Document.fromJson(jsonDecode(content)));
+          controller = QuillController(
+            document: Document.fromJson(jsonDecode(content)),
+            selection: const TextSelection.collapsed(offset: 0),
+          );
+        } else {
+          controller = QuillController.basic();
         }
+      } else {
+        _titleController.text = "";
+        controller = QuillController.basic();
       }
-      textEditingController.text = "";
-      return EditorState.blank();
     }
+    controller.addListener(_saveNote);
+    setState(() {
+      _quillController = controller;
+    });
   }
 
-  void handleShowInputEditTitle() {
-    setState(() {
-      showTitleInputEdit = !showTitleInputEdit;
-      if (showTitleInputEdit) {
-        focusNode.requestFocus();
-      } else {
-        focusNode.unfocus();
-      }
-    });
+  void _saveNote() {
+    if (_quillController == null) return;
+    context.read<NoteProvider>().onContentChanged(
+      title: _titleController.text,
+      content: jsonEncode(_quillController!.document.toDelta().toJson()),
+    );
   }
 
   @override
   void dispose() {
-    focusNode.dispose();
-    textEditingController.dispose();
-    _editorSubscription?.cancel();
+    _quillController?.dispose();
+    _titleController.dispose();
+    _editorFocusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
-        title: GestureDetector(
-          onTap: handleShowInputEditTitle,
-          child: AnimatedOpacity(
-            duration: const Duration(milliseconds: 500),
-            opacity: showTitleInputEdit ? 0 : 1,
-            child: Text(textEditingController.text.isNotEmpty ? textEditingController.text : "Tiêu đề"),
-          ),
+        title: TextField(
+          controller: _titleController,
+          style: theme.textTheme.titleLarge,
+          decoration: const InputDecoration(hintText: "Tiêu đề", border: InputBorder.none),
+          onChanged: (_) => _saveNote(),
         ),
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading:
-            showTitleInputEdit
-                ? IconButton(
-                  icon: const Icon(Icons.arrow_upward),
-                  onPressed: () {
-                    handleShowInputEditTitle();
-                  },
-                )
-                : IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
         backgroundColor: theme.colorScheme.surface,
+        elevation: 0,
       ),
       body: SafeArea(
-        child: FutureBuilder<EditorState>(
-          future: editorState,
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            final editor = snapshot.data!;
-
-            return Column(
-              children: [
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  alignment: Alignment.centerLeft,
-                  child: ConstrainedBox(
-                    constraints: showTitleInputEdit ? const BoxConstraints(minHeight: 50) : const BoxConstraints(maxHeight: 0),
-                    child: AnimatedOpacity(
-                      opacity: showTitleInputEdit ? 1.0 : 0.0,
-                      duration: const Duration(milliseconds: 200),
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  focusNode: focusNode,
-                                  autofocus: showTitleInputEdit,
-                                  controller: textEditingController,
-                                  style: CustomTextStyle.regular(fontSize: 24, fontWeight: FontWeight.w500),
-                                  onSubmitted: (value) {
-                                    handleShowInputEditTitle();
-                                    final noteProvider = context.read<NoteProvider>();
-                                    noteProvider.onContentChanged(title: textEditingController.text, content: jsonEncode(snapshot.data!.document.toJson()));
-                                  },
-                                  decoration: InputDecoration(contentPadding: EdgeInsets.symmetric(horizontal: 16)),
-                                ),
-                              ),
-                            ],
-                          ),
+        child: Column(
+          children: [
+            Expanded(
+              child:
+                  _quillController == null
+                      ? Center(child: CircularProgressIndicator())
+                      : QuillEditor(
+                        controller: _quillController!,
+                        focusNode: _editorFocusNode,
+                        config: QuillEditorConfig(
+                          autoFocus: widget.noteId == null,
+                          padding: EdgeInsets.symmetric(horizontal: 8),
                         ),
+                        scrollController: ScrollController(),
                       ),
+            ),
+            if (_quillController != null)
+              QuillSimpleToolbar(
+                controller: _quillController!,
+                config: QuillSimpleToolbarConfig(
+                  multiRowsDisplay: false,
+                  showAlignmentButtons: true,
+                  buttonOptions: QuillSimpleToolbarButtonOptions(
+                    fontSize: QuillToolbarFontSizeButtonOptions(
+                      afterButtonPressed: () {
+                        _editorFocusNode.unfocus();
+                      },
+                      labelOverflow: TextOverflow.fade,
+                    ),
+                    linkStyle: QuillToolbarLinkStyleButtonOptions(
+                      validateLink: (link) {
+                        // Treats all links as valid. When launching the URL,
+                        // `https://` is prefixed if the link is incomplete (e.g., `google.com` → `https://google.com`)
+                        // however this happens only within the editor.
+                        return true;
+                      },
                     ),
                   ),
                 ),
-
-                Expanded(
-                  child: AppFlowyEditor(
-                    editorState: editor,
-                    editorStyle:
-                        context.darkMode
-                            ? EditorStyle.mobile().copyWith(
-                              dragHandleColor: Theme.of(context).colorScheme.outline,
-                              selectionColor: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                              textStyleConfiguration: const TextStyleConfiguration(),
-                              cursorColor: Theme.of(context).colorScheme.primary,
-                            )
-                            : EditorStyle.mobile().copyWith(
-                              cursorColor: Theme.of(context).colorScheme.primary,
-                            ),
-                  ),
-                ),
-
-                SizedBox(height: 50.w, child: FixedToolbar(editorState: editor)),
-              ],
-            );
-          },
+              ),
+          ],
         ),
       ),
     );

@@ -2538,6 +2538,15 @@ class $TextNotesDriftModelTable extends TextNotesDriftModel
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _colorMeta = const VerificationMeta('color');
+  @override
+  late final GeneratedColumn<String> color = GeneratedColumn<String>(
+    'color',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _isFavoriteMeta = const VerificationMeta(
     'isFavorite',
   );
@@ -2609,6 +2618,7 @@ class $TextNotesDriftModelTable extends TextNotesDriftModel
     id,
     title,
     content,
+    color,
     isFavorite,
     isPinned,
     indexPos,
@@ -2642,6 +2652,12 @@ class $TextNotesDriftModelTable extends TextNotesDriftModel
       context.handle(
         _contentMeta,
         content.isAcceptableOrUnknown(data['content']!, _contentMeta),
+      );
+    }
+    if (data.containsKey('color')) {
+      context.handle(
+        _colorMeta,
+        color.isAcceptableOrUnknown(data['color']!, _colorMeta),
       );
     }
     if (data.containsKey('is_favorite')) {
@@ -2700,6 +2716,10 @@ class $TextNotesDriftModelTable extends TextNotesDriftModel
         DriftSqlType.string,
         data['${effectivePrefix}content'],
       ),
+      color: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}color'],
+      ),
       isFavorite:
           attachedDatabase.typeMapping.read(
             DriftSqlType.bool,
@@ -2739,6 +2759,7 @@ class TextNotesDriftModelData extends DataClass
   final int id;
   final String title;
   final String? content;
+  final String? color;
   final bool isFavorite;
   final bool isPinned;
   final int indexPos;
@@ -2748,6 +2769,7 @@ class TextNotesDriftModelData extends DataClass
     required this.id,
     required this.title,
     this.content,
+    this.color,
     required this.isFavorite,
     required this.isPinned,
     required this.indexPos,
@@ -2761,6 +2783,9 @@ class TextNotesDriftModelData extends DataClass
     map['title'] = Variable<String>(title);
     if (!nullToAbsent || content != null) {
       map['content'] = Variable<String>(content);
+    }
+    if (!nullToAbsent || color != null) {
+      map['color'] = Variable<String>(color);
     }
     map['is_favorite'] = Variable<bool>(isFavorite);
     map['is_pinned'] = Variable<bool>(isPinned);
@@ -2778,6 +2803,8 @@ class TextNotesDriftModelData extends DataClass
           content == null && nullToAbsent
               ? const Value.absent()
               : Value(content),
+      color:
+          color == null && nullToAbsent ? const Value.absent() : Value(color),
       isFavorite: Value(isFavorite),
       isPinned: Value(isPinned),
       indexPos: Value(indexPos),
@@ -2795,6 +2822,7 @@ class TextNotesDriftModelData extends DataClass
       id: serializer.fromJson<int>(json['id']),
       title: serializer.fromJson<String>(json['title']),
       content: serializer.fromJson<String?>(json['content']),
+      color: serializer.fromJson<String?>(json['color']),
       isFavorite: serializer.fromJson<bool>(json['isFavorite']),
       isPinned: serializer.fromJson<bool>(json['isPinned']),
       indexPos: serializer.fromJson<int>(json['indexPos']),
@@ -2809,6 +2837,7 @@ class TextNotesDriftModelData extends DataClass
       'id': serializer.toJson<int>(id),
       'title': serializer.toJson<String>(title),
       'content': serializer.toJson<String?>(content),
+      'color': serializer.toJson<String?>(color),
       'isFavorite': serializer.toJson<bool>(isFavorite),
       'isPinned': serializer.toJson<bool>(isPinned),
       'indexPos': serializer.toJson<int>(indexPos),
@@ -2821,6 +2850,7 @@ class TextNotesDriftModelData extends DataClass
     int? id,
     String? title,
     Value<String?> content = const Value.absent(),
+    Value<String?> color = const Value.absent(),
     bool? isFavorite,
     bool? isPinned,
     int? indexPos,
@@ -2830,6 +2860,7 @@ class TextNotesDriftModelData extends DataClass
     id: id ?? this.id,
     title: title ?? this.title,
     content: content.present ? content.value : this.content,
+    color: color.present ? color.value : this.color,
     isFavorite: isFavorite ?? this.isFavorite,
     isPinned: isPinned ?? this.isPinned,
     indexPos: indexPos ?? this.indexPos,
@@ -2841,6 +2872,7 @@ class TextNotesDriftModelData extends DataClass
       id: data.id.present ? data.id.value : this.id,
       title: data.title.present ? data.title.value : this.title,
       content: data.content.present ? data.content.value : this.content,
+      color: data.color.present ? data.color.value : this.color,
       isFavorite:
           data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
       isPinned: data.isPinned.present ? data.isPinned.value : this.isPinned,
@@ -2856,6 +2888,7 @@ class TextNotesDriftModelData extends DataClass
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('content: $content, ')
+          ..write('color: $color, ')
           ..write('isFavorite: $isFavorite, ')
           ..write('isPinned: $isPinned, ')
           ..write('indexPos: $indexPos, ')
@@ -2870,6 +2903,7 @@ class TextNotesDriftModelData extends DataClass
     id,
     title,
     content,
+    color,
     isFavorite,
     isPinned,
     indexPos,
@@ -2883,6 +2917,7 @@ class TextNotesDriftModelData extends DataClass
           other.id == this.id &&
           other.title == this.title &&
           other.content == this.content &&
+          other.color == this.color &&
           other.isFavorite == this.isFavorite &&
           other.isPinned == this.isPinned &&
           other.indexPos == this.indexPos &&
@@ -2895,6 +2930,7 @@ class TextNotesDriftModelCompanion
   final Value<int> id;
   final Value<String> title;
   final Value<String?> content;
+  final Value<String?> color;
   final Value<bool> isFavorite;
   final Value<bool> isPinned;
   final Value<int> indexPos;
@@ -2904,6 +2940,7 @@ class TextNotesDriftModelCompanion
     this.id = const Value.absent(),
     this.title = const Value.absent(),
     this.content = const Value.absent(),
+    this.color = const Value.absent(),
     this.isFavorite = const Value.absent(),
     this.isPinned = const Value.absent(),
     this.indexPos = const Value.absent(),
@@ -2914,6 +2951,7 @@ class TextNotesDriftModelCompanion
     this.id = const Value.absent(),
     required String title,
     this.content = const Value.absent(),
+    this.color = const Value.absent(),
     this.isFavorite = const Value.absent(),
     this.isPinned = const Value.absent(),
     this.indexPos = const Value.absent(),
@@ -2924,6 +2962,7 @@ class TextNotesDriftModelCompanion
     Expression<int>? id,
     Expression<String>? title,
     Expression<String>? content,
+    Expression<String>? color,
     Expression<bool>? isFavorite,
     Expression<bool>? isPinned,
     Expression<int>? indexPos,
@@ -2934,6 +2973,7 @@ class TextNotesDriftModelCompanion
       if (id != null) 'id': id,
       if (title != null) 'title': title,
       if (content != null) 'content': content,
+      if (color != null) 'color': color,
       if (isFavorite != null) 'is_favorite': isFavorite,
       if (isPinned != null) 'is_pinned': isPinned,
       if (indexPos != null) 'index_pos': indexPos,
@@ -2946,6 +2986,7 @@ class TextNotesDriftModelCompanion
     Value<int>? id,
     Value<String>? title,
     Value<String?>? content,
+    Value<String?>? color,
     Value<bool>? isFavorite,
     Value<bool>? isPinned,
     Value<int>? indexPos,
@@ -2956,6 +2997,7 @@ class TextNotesDriftModelCompanion
       id: id ?? this.id,
       title: title ?? this.title,
       content: content ?? this.content,
+      color: color ?? this.color,
       isFavorite: isFavorite ?? this.isFavorite,
       isPinned: isPinned ?? this.isPinned,
       indexPos: indexPos ?? this.indexPos,
@@ -2975,6 +3017,9 @@ class TextNotesDriftModelCompanion
     }
     if (content.present) {
       map['content'] = Variable<String>(content.value);
+    }
+    if (color.present) {
+      map['color'] = Variable<String>(color.value);
     }
     if (isFavorite.present) {
       map['is_favorite'] = Variable<bool>(isFavorite.value);
@@ -3000,6 +3045,7 @@ class TextNotesDriftModelCompanion
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('content: $content, ')
+          ..write('color: $color, ')
           ..write('isFavorite: $isFavorite, ')
           ..write('isPinned: $isPinned, ')
           ..write('indexPos: $indexPos, ')
@@ -5633,6 +5679,7 @@ typedef $$TextNotesDriftModelTableCreateCompanionBuilder =
       Value<int> id,
       required String title,
       Value<String?> content,
+      Value<String?> color,
       Value<bool> isFavorite,
       Value<bool> isPinned,
       Value<int> indexPos,
@@ -5644,6 +5691,7 @@ typedef $$TextNotesDriftModelTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> title,
       Value<String?> content,
+      Value<String?> color,
       Value<bool> isFavorite,
       Value<bool> isPinned,
       Value<int> indexPos,
@@ -5672,6 +5720,11 @@ class $$TextNotesDriftModelTableFilterComposer
 
   ColumnFilters<String> get content => $composableBuilder(
     column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get color => $composableBuilder(
+    column: $table.color,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5725,6 +5778,11 @@ class $$TextNotesDriftModelTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isFavorite => $composableBuilder(
     column: $table.isFavorite,
     builder: (column) => ColumnOrderings(column),
@@ -5768,6 +5826,9 @@ class $$TextNotesDriftModelTableAnnotationComposer
 
   GeneratedColumn<String> get content =>
       $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<String> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
 
   GeneratedColumn<bool> get isFavorite => $composableBuilder(
     column: $table.isFavorite,
@@ -5836,6 +5897,7 @@ class $$TextNotesDriftModelTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> title = const Value.absent(),
                 Value<String?> content = const Value.absent(),
+                Value<String?> color = const Value.absent(),
                 Value<bool> isFavorite = const Value.absent(),
                 Value<bool> isPinned = const Value.absent(),
                 Value<int> indexPos = const Value.absent(),
@@ -5845,6 +5907,7 @@ class $$TextNotesDriftModelTableTableManager
                 id: id,
                 title: title,
                 content: content,
+                color: color,
                 isFavorite: isFavorite,
                 isPinned: isPinned,
                 indexPos: indexPos,
@@ -5856,6 +5919,7 @@ class $$TextNotesDriftModelTableTableManager
                 Value<int> id = const Value.absent(),
                 required String title,
                 Value<String?> content = const Value.absent(),
+                Value<String?> color = const Value.absent(),
                 Value<bool> isFavorite = const Value.absent(),
                 Value<bool> isPinned = const Value.absent(),
                 Value<int> indexPos = const Value.absent(),
@@ -5865,6 +5929,7 @@ class $$TextNotesDriftModelTableTableManager
                 id: id,
                 title: title,
                 content: content,
+                color: color,
                 isFavorite: isFavorite,
                 isPinned: isPinned,
                 indexPos: indexPos,

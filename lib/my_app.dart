@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/app_locale.dart';
@@ -14,11 +15,12 @@ import 'package:cybersafe_pro/screens/register_master_pin/register_master_pin.da
 import 'package:cybersafe_pro/utils/device_type.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
-import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:cybersafe_pro/utils/secure_application_util.dart';
+import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:provider/provider.dart';
 import 'package:secure_application/secure_application.dart';
 
@@ -88,15 +90,25 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     if (savedLang != null) {
       final languageCode = savedLang.split('_').first;
       final countryCode = savedLang.split('_').last;
-      final savedLocale = appLocales.firstWhere((locale) => locale.languageCode == languageCode && locale.countryCode == countryCode, orElse: () => appLocales.first);
-      context.read<AppLocale>().setLocale(Locale(savedLocale.languageCode, savedLocale.countryCode));
+      final savedLocale = appLocales.firstWhere(
+        (locale) => locale.languageCode == languageCode && locale.countryCode == countryCode,
+        orElse: () => appLocales.first,
+      );
+      context.read<AppLocale>().setLocale(
+        Locale(savedLocale.languageCode, savedLocale.countryCode),
+      );
       setState(() {});
     } else {
       final String defaultLocale = Platform.localeName;
       final languageCode = defaultLocale.split('_').first;
       final countryCode = defaultLocale.split('_').last;
-      final savedLocale = appLocales.firstWhere((locale) => locale.languageCode == languageCode && locale.countryCode == countryCode, orElse: () => appLocales.first);
-      context.read<AppLocale>().setLocale(Locale(savedLocale.languageCode, savedLocale.countryCode));
+      final savedLocale = appLocales.firstWhere(
+        (locale) => locale.languageCode == languageCode && locale.countryCode == countryCode,
+        orElse: () => appLocales.first,
+      );
+      context.read<AppLocale>().setLocale(
+        Locale(savedLocale.languageCode, savedLocale.countryCode),
+      );
       setState(() {});
     }
   }
@@ -105,7 +117,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     try {
       await SecureApplicationUtil.instance.init();
     } catch (e) {
-      logError('Failed to initialize SecureApplication: $e', functionName: "_initSecureApplication");
+      logError(
+        'Failed to initialize SecureApplication: $e',
+        functionName: "_initSecureApplication",
+      );
     }
   }
 
@@ -119,10 +134,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           locale: appLocale.locale,
           supportedLocales: appLocales.map((e) => Locale(e.languageCode, e.countryCode)).toList(),
           navigatorKey: GlobalKeys.appRootNavigatorKey,
-          localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
+          localizationsDelegates: [
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            FlutterQuillLocalizations.delegate,
+          ],
           themeMode: themeProvider.themeMode,
           theme: themeProvider.lightTheme,
           darkTheme: themeProvider.darkTheme,
+
           home: _buildInitialScreen(),
           onGenerateRoute: AppRoutes.onGenerateRoute,
           builder: (context, child) {
@@ -137,10 +158,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       value: SystemUiOverlayStyle(
                         statusBarColor: Theme.of(context).colorScheme.surface,
                         statusBarBrightness: !context.darkMode ? Brightness.light : Brightness.dark,
-                        statusBarIconBrightness: !context.darkMode ? Brightness.dark : Brightness.light,
+                        statusBarIconBrightness:
+                            !context.darkMode ? Brightness.dark : Brightness.light,
                         systemNavigationBarColor: Theme.of(context).colorScheme.surface,
                         systemNavigationBarDividerColor: Theme.of(context).colorScheme.surface,
-                        systemNavigationBarIconBrightness: !context.darkMode ? Brightness.dark : Brightness.light,
+                        systemNavigationBarIconBrightness:
+                            !context.darkMode ? Brightness.dark : Brightness.light,
                       ),
                       child: _buildSecureApplication(child),
                     ),
@@ -173,10 +196,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   Widget _buildSecureApplication(Widget? child) {
     // Luôn bọc app bằng SecureApplication để chặn screenshot
-    if (!SecureApplicationUtil.instance.isInitialized || SecureApplicationUtil.instance.secureApplicationController == null) {
+    if (!SecureApplicationUtil.instance.isInitialized ||
+        SecureApplicationUtil.instance.secureApplicationController == null) {
       return _buildListenerWidget(child);
     }
-    return SecureApplication(nativeRemoveDelay: 200, secureApplicationController: SecureApplicationUtil.instance.secureApplicationController, child: _buildListenerWidget(child));
+    return SecureApplication(
+      nativeRemoveDelay: 200,
+      secureApplicationController: SecureApplicationUtil.instance.secureApplicationController,
+      child: _buildListenerWidget(child),
+    );
   }
 
   Widget _buildListenerWidget(Widget? child) {

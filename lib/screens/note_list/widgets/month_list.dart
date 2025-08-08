@@ -1,6 +1,7 @@
 import 'package:cybersafe_pro/providers/note_provider.dart';
 import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class MonthList extends StatefulWidget {
@@ -55,18 +56,18 @@ class _MonthListState extends State<MonthList> {
             itemBuilder: (context, index) {
               final isSelected = currentFilterMonth == index + 1;
               return TweenAnimationBuilder<double>(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutQuint,
                 tween: Tween<double>(begin: 0, end: isSelected ? 1.0 : 0.0),
                 builder: (context, value, child) {
                   return AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    width: itemWidth + (value * 4), // subtle width change
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOutQuint,
+                    width: itemWidth + (value * 6), // Tăng độ rộng khi được chọn
                     decoration: BoxDecoration(
                       color: Color.lerp(
                         Theme.of(context).colorScheme.surfaceContainer,
-                        Theme.of(context).colorScheme.primary.withOpacity(0.9),
+                        Theme.of(context).colorScheme.primary,
                         value,
                       ),
                       borderRadius: BorderRadius.circular(20),
@@ -75,17 +76,17 @@ class _MonthListState extends State<MonthList> {
                             Color.lerp(
                               Theme.of(context).colorScheme.surfaceContainerHighest,
                               Theme.of(context).colorScheme.primary,
-                              value,
+                              value * 0.8, // Giảm độ tương phản
                             )!,
                         width: 1.2,
                       ),
                       boxShadow: [
-                        if (value > 0)
-                          BoxShadow(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.15 * value),
-                            blurRadius: 6 * value,
-                            offset: Offset(0, 2 * value),
-                          ),
+                        BoxShadow(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.2 * value),
+                          blurRadius: 4 * value,
+                          spreadRadius: value * 0.5,
+                          offset: Offset(0, 1 * value),
+                        ),
                       ],
                     ),
                     child: Material(
@@ -94,8 +95,13 @@ class _MonthListState extends State<MonthList> {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(20),
                         onTap: () {
+                          // Thêm phản hồi xúc giác nhẹ
+                          HapticFeedback.selectionClick();
+
+                          // Cập nhật tháng được chọn
                           context.read<NoteProvider>().setFilter(month: index + 1);
 
+                          // Tính toán vị trí cuộn
                           final screenWidth = MediaQuery.of(context).size.width;
                           final targetOffset =
                               (index * (itemWidth + separatorWidth)) -
@@ -106,18 +112,20 @@ class _MonthListState extends State<MonthList> {
                             _scrollController.position.maxScrollExtent,
                           );
 
+                          // Cuộn đến vị trí mới với animation nhanh hơn
                           _scrollController.animateTo(
                             safeOffset,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeOutQuint,
                           );
                         },
                         child: Center(
                           child: AnimatedDefaultTextStyle(
-                            duration: const Duration(milliseconds: 300),
+                            duration: const Duration(milliseconds: 200),
                             style: CustomTextStyle.regular(
-                              fontSize: 18 + (value * 2),
-                              fontWeight: FontWeight.w600,
+                              fontSize: 18 + (value * 3), // Tăng kích thước chữ khi được chọn
+                              fontWeight:
+                                  value > 0.5 ? FontWeight.w700 : FontWeight.w600, // Tăng độ đậm
                               color:
                                   Color.lerp(
                                     Theme.of(context).colorScheme.onSurface,

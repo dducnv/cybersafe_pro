@@ -2,7 +2,6 @@ import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/main.dart';
 import 'package:cybersafe_pro/providers/home_provider.dart';
-import 'package:cybersafe_pro/utils/deep_link_handler.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     reviewApp();
     loadData();
-    DeepLinkHandler().initialize();
+    // DeepLinkHandler().initialize();
   }
 
   loadData() async {
