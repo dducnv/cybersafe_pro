@@ -1,5 +1,6 @@
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/sidebar_text.dart';
+import 'package:cybersafe_pro/localization/keys/statistic_text.dart';
 import 'package:cybersafe_pro/main.dart';
 import 'package:cybersafe_pro/resources/app_config.dart';
 import 'package:cybersafe_pro/resources/size_text_icon.dart';
@@ -45,6 +46,18 @@ class Sidebar extends StatelessWidget {
             AppRoutes.pop(context);
             AppRoutes.navigateTo(context, AppRoutes.categoryManager);
           },
+        ),
+        ListTile(
+          leading: Icon(Icons.bar_chart_rounded, size: 24),
+          title: Text(context.trStatistic(StatisticText.title), style: drawerTitleStyle),
+          onTap: () {
+            AppRoutes.pop(context);
+            AppRoutes.navigateTo(context, AppRoutes.statistic);
+          },
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Divider(color: Theme.of(context).colorScheme.outline),
         ),
         ListTile(
           leading: Icon(Icons.star, size: 24),

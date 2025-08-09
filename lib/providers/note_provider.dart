@@ -28,7 +28,7 @@ class NoteProvider extends ChangeNotifier {
   int get currentFilterMonth => _currentFilterMonth;
 
   TextNotesDriftModelData? textNotesDriftModelData;
-  final String titleDefault = "Note ${formatDateTime(DateTime.now())}";
+  final String titleDefault = formatDateTime(DateTime.now());
 
   final Map<int, List<TextNotesDriftModelData>> _groupedByDay = {};
   Map<int, List<TextNotesDriftModelData>> get groupedByDay => Map.unmodifiable(_groupedByDay);
@@ -37,6 +37,9 @@ class NoteProvider extends ChangeNotifier {
   final Map<int, String> _decryptedPreviewCache = {};
   static const int _maxCacheSize = 20;
   final List<int> _recentlyAccessedNotes = [];
+
+  final List<int> _selectedNotes = [];
+  List<int> get selectedNotes => _selectedNotes;
 
   void _setLoading(bool value) {
     _isLoading = value;
@@ -121,6 +124,7 @@ class NoteProvider extends ChangeNotifier {
   // Phương thức refresh dữ liệu với hiệu ứng loading
   Future<void> refreshData() async {
     if (_isRefreshing) return;
+    clearAllCache();
     await init(isRefresh: true);
   }
 
@@ -317,16 +321,132 @@ class NoteProvider extends ChangeNotifier {
     return note;
   }
 
+  Future<void> updateColor(int id, String? color) async {
+    try {
+      // Cập nhật màu trong database
+      await DriffDbManager.instance.textNotesAdapter.updateColor(id, color);
+
+      // Cập nhật cache nếu có
+      if (_groupedByDay.isNotEmpty) {
+        for (final dayNotes in _groupedByDay.values) {
+          final noteIndex = dayNotes.indexWhere((note) => note.id == id);
+          if (noteIndex != -1) {
+            dayNotes[noteIndex] = dayNotes[noteIndex].copyWith(color: Value(color));
+            break;
+          }
+        }
+      }
+
+      // Xóa cache của note này để force rebuild NoteCard
+      clearNoteCache(id);
+
+      // Thông báo UI cập nhật
+      notifyListeners();
+
+      debugPrint('Updated color for note $id to $color');
+    } catch (e) {
+      debugPrint('Error updating note color: $e');
+      rethrow;
+    }
+  }
+
+  void addSelectedNote(int id) {
+    if (_selectedNotes.contains(id)) {
+      _selectedNotes.remove(id);
+    } else {
+      _selectedNotes.add(id);
+    }
+    notifyListeners();
+  }
+
+  void clearSelectedNotes() {
+    _selectedNotes.clear();
+    notifyListeners();
+  }
+
+  void selectAllNotes() {
+    _selectedNotes.clear();
+    for (final dayNotes in _groupedByDay.values) {
+      for (final note in dayNotes) {
+        _selectedNotes.add(note.id);
+      }
+    }
+    notifyListeners();
+  }
+
+  /// Xóa tất cả ghi chú đã chọn
+  Future<bool> deleteSelectedNotes() async {
+    if (_selectedNotes.isEmpty) return false;
+
+    try {
+      final selectedIds = List<int>.from(_selectedNotes);
+      int deletedCount = 0;
+
+      for (final id in selectedIds) {
+        final result = await DriffDbManager.instance.textNotesAdapter.delete(id);
+        if (result > 0) {
+          deletedCount++;
+          clearNoteCache(id);
+        }
+      }
+
+      // Clear selection
+      _selectedNotes.clear();
+
+      // Refresh data if any notes were deleted
+      if (deletedCount > 0) {
+        await init();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Error deleting selected notes: $e');
+      return false;
+    }
+  }
+
+  /// Cập nhật màu cho tất cả ghi chú đã chọn
+  Future<void> updateColorForSelectedNotes(String? color) async {
+    if (_selectedNotes.isEmpty) return;
+
+    try {
+      final selectedIds = List<int>.from(_selectedNotes);
+
+      for (final id in selectedIds) {
+        await DriffDbManager.instance.textNotesAdapter.updateColor(id, color);
+
+        // Cập nhật cache
+        for (final dayNotes in _groupedByDay.values) {
+          final noteIndex = dayNotes.indexWhere((note) => note.id == id);
+          if (noteIndex != -1) {
+            dayNotes[noteIndex] = dayNotes[noteIndex].copyWith(color: Value(color));
+            break;
+          }
+        }
+
+        // Xóa cache của note này để force rebuild NoteCard
+        clearNoteCache(id);
+      }
+
+      // Clear selection sau khi cập nhật
+      _selectedNotes.clear();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error updating colors for selected notes: $e');
+      rethrow;
+    }
+  }
+
   void clearValue() {
     noteId = null;
     textNotesDriftModelData = null;
   }
 
   void clearAllCache() {
+    _selectedNotes.clear();
     _decryptedTitleCache.clear();
     _decryptedPreviewCache.clear();
     _recentlyAccessedNotes.clear();
-    debugPrint('Cache đã được xóa hoàn toàn');
   }
 
   /// Xóa ghi chú theo ID
@@ -350,7 +470,6 @@ class NoteProvider extends ChangeNotifier {
     }
   }
 
-  /// Xóa cache của một ghi chú cụ thể
   void clearNoteCache(int noteId) {
     _decryptedTitleCache.remove(noteId);
     _decryptedPreviewCache.remove(noteId);

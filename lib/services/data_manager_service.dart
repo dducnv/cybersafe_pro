@@ -15,7 +15,6 @@ import 'package:cybersafe_pro/services/account/account_services.dart';
 import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/utils/file_picker_utils.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
-import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -130,8 +129,6 @@ class DataManagerService {
       return true;
     } catch (e) {
       throw Exception(e);
-    } finally {
-      SecureApplicationUtil.instance.unlock();
     }
   }
 
@@ -235,8 +232,6 @@ class DataManagerService {
     } catch (e) {
       logError('Error backing up data: $e', functionName: 'DataManagerServiceNew.backupData');
       return false;
-    } finally {
-      SecureApplicationUtil.instance.unlock();
     }
   }
 
@@ -267,7 +262,7 @@ class DataManagerService {
 
   static Future<bool> importDataFromBrowser() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePickerUtils.pickFile(
         type: FileType.custom,
         allowedExtensions: ['csv'],
         allowMultiple: false,
@@ -433,8 +428,6 @@ class DataManagerService {
     } catch (e) {
       logError(e.toString());
       return false;
-    } finally {
-      SecureApplicationUtil.instance.unlock();
     }
   }
 

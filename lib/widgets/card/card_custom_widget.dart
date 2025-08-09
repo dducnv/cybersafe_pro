@@ -5,6 +5,7 @@ class CardCustomWidget extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final double? borderRadius;
   final BoxBorder? border;
+  final Color? backgroundColor;
 
   const CardCustomWidget({
     super.key,
@@ -12,6 +13,7 @@ class CardCustomWidget extends StatelessWidget {
     this.padding,
     this.borderRadius,
     this.border,
+    this.backgroundColor,
   });
 
   @override
@@ -23,7 +25,7 @@ class CardCustomWidget extends StatelessWidget {
       child: Container(
         padding: padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainer,
+          color: backgroundColor ?? Theme.of(context).colorScheme.surfaceContainer,
           border:
               border ??
               Border.all(color: Theme.of(context).colorScheme.surfaceContainerHighest, width: 1.4),

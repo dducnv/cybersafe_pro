@@ -1,10 +1,13 @@
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/note_text.dart';
 import 'package:cybersafe_pro/models/note_models.dart';
 import 'package:cybersafe_pro/providers/note_provider.dart';
 import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
-import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/screens/note_list/widgets/month_list.dart';
+import 'package:cybersafe_pro/screens/note_list/widgets/note_appbar.dart';
 import 'package:cybersafe_pro/screens/note_list/widgets/note_list_widgets.dart';
+import 'package:cybersafe_pro/screens/note_list/widgets/year_month_header.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
@@ -32,12 +35,7 @@ class _NoteListState extends State<NoteList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Ghi chú"),
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-      ),
+      appBar: NoteAppbar(),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           await AppRoutes.navigateTo(context, AppRoutes.noteEditor);
@@ -99,96 +97,12 @@ class _NoteListState extends State<NoteList> {
                                             : DateTime.now().month;
                                     final year = DateTime.now().year;
 
-                                    return FutureBuilder(
-                                      future: context.read<NoteProvider>().getDecryptedNoteCards(
-                                        notes,
-                                      ),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState == ConnectionState.waiting) {
-                                          return const SizedBox.shrink();
-                                        }
-                                        final noteCards = snapshot.data ?? [];
-                                        return IntrinsicHeight(
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(vertical: 8),
-                                            child: Row(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                SizedBox(
-                                                  width: 46,
-                                                  child: Padding(
-                                                    padding: EdgeInsets.all(
-                                                      4,
-                                                    ).copyWith(right: 8, top: 8),
-                                                    child: Column(
-                                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                                      children: [
-                                                        Column(
-                                                          children: [
-                                                            Text(
-                                                              getWeekdayName(
-                                                                DateTime(year, month, day),
-                                                              ),
-                                                              style: CustomTextStyle.regular(
-                                                                fontWeight: FontWeight.w600,
-                                                                fontSize: 14,
-                                                                color:
-                                                                    Theme.of(
-                                                                      context,
-                                                                    ).colorScheme.onSurface,
-                                                              ),
-                                                            ),
-                                                            Text(
-                                                              "$day",
-                                                              style: CustomTextStyle.regular(
-                                                                fontWeight: FontWeight.w600,
-                                                                fontSize: 24,
-                                                                color:
-                                                                    Theme.of(
-                                                                      context,
-                                                                    ).colorScheme.onSurface,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        if (notes.length > 1)
-                                                          Expanded(
-                                                            child: Container(
-                                                              margin: const EdgeInsets.only(top: 4),
-                                                              width: 2,
-                                                              color:
-                                                                  Theme.of(context)
-                                                                      .colorScheme
-                                                                      .surfaceContainerHighest,
-                                                            ),
-                                                          ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                                Expanded(
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      for (final note in noteCards) ...[
-                                                        NoteCard(
-                                                          note: note,
-                                                          onLongPress: (note) {
-                                                            bottomSheetOptionItem(note: note);
-                                                          },
-                                                          noteProvider:
-                                                              context.read<NoteProvider>(),
-                                                        ),
-                                                        const SizedBox(height: 8),
-                                                      ],
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
+                                    return _NoteDayGroup(
+                                      day: day,
+                                      month: month,
+                                      year: year,
+                                      notes: notes,
+                                      onLongPress: bottomSheetOptionItem,
                                     );
                                   }).toList(),
                             ),
@@ -229,7 +143,7 @@ class _NoteListState extends State<NoteList> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Màu ghi chú",
+                          context.trNote(NoteText.choseNoteColor),
                           style: CustomTextStyle.regular(
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
@@ -275,16 +189,27 @@ class _NoteListState extends State<NoteList> {
                   SizedBox(height: 16),
                   Divider(),
                   ListTile(
+                    leading: Icon(Icons.check_circle_outline, size: 24.sp),
+                    title: Text(
+                      context.trNote(NoteText.selectNote),
+                      style: CustomTextStyle.regular(fontWeight: FontWeight.w500),
+                    ),
+                    onTap: () async {
+                      // Đóng bottom sheet
+                      Navigator.of(context).pop();
+                      context.read<NoteProvider>().addSelectedNote(note.id);
+                    },
+                  ),
+                  ListTile(
                     leading: Icon(Icons.delete_outline, size: 24.sp, color: Colors.red),
                     title: Text(
-                      "Xóa ghi chú",
+                      context.trNote(NoteText.deleteTitle),
                       style: CustomTextStyle.regular(
                         fontWeight: FontWeight.w500,
                         color: Colors.red,
                       ),
                     ),
                     onTap: () async {
-                      // Đóng bottom sheet
                       Navigator.of(context).pop();
                       await context.read<NoteProvider>().deleteNote(note.id);
                     },
@@ -300,40 +225,153 @@ class _NoteListState extends State<NoteList> {
 
   Widget _buildColorOption(BuildContext context, String? colorHex, NoteCardData note) {
     final Color color = getColorFromHex(colorHex) ?? Theme.of(context).colorScheme.surface;
-    final bool isSelected = note.color == colorHex;
 
     return GestureDetector(
       onTap: () async {
         Navigator.of(context).pop();
-        // Cập nhật màu cho ghi chú
-        await DriffDbManager.instance.textNotesAdapter.updateColor(note.id, colorHex);
-        if (mounted) {
-          // Cập nhật lại danh sách ghi chú
-          context.read<NoteProvider>().init();
-        }
+        // Cập nhật màu cho ghi chú thông qua provider
+        await context.read<NoteProvider>().updateColor(note.id, colorHex);
       },
-      child: Container(
-        width: 40,
-        height: 40,
-        margin: EdgeInsets.only(right: 12),
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color:
-                isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.outline,
-            width: isSelected ? 2 : 1,
-          ),
+      child:
+          //icon có đấu gạch tréo hình tròn
+          colorHex == null || colorHex.isEmpty
+              ? Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Icon(Icons.cancel_outlined, size: 40.sp, color: Colors.redAccent),
+              )
+              : Container(
+                width: 40,
+                height: 40,
+                margin: EdgeInsets.only(right: 12),
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+              ),
+    );
+  }
+}
+
+class _NoteDayGroup extends StatefulWidget {
+  final int day;
+  final int month;
+  final int year;
+  final List<TextNotesDriftModelData> notes;
+  final Future<void> Function({required NoteCardData note}) onLongPress;
+
+  const _NoteDayGroup({
+    required this.day,
+    required this.month,
+    required this.year,
+    required this.notes,
+    required this.onLongPress,
+  });
+
+  @override
+  State<_NoteDayGroup> createState() => _NoteDayGroupState();
+}
+
+class _NoteDayGroupState extends State<_NoteDayGroup> {
+  List<NoteCardData>? _cachedNoteCards;
+  String? _cacheKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<NoteProvider, List<TextNotesDriftModelData>>(
+      selector: (context, noteProvider) {
+        return noteProvider.groupedByDay[widget.day] ?? widget.notes;
+      },
+      shouldRebuild: (previous, next) {
+        if (previous.length != next.length) return true;
+
+        for (int i = 0; i < previous.length; i++) {
+          if (previous[i].id != next[i].id ||
+              previous[i].updatedAt != next[i].updatedAt ||
+              previous[i].color != next[i].color) {
+            return true;
+          }
+        }
+        return false;
+      },
+      builder: (context, selectedNotes, child) {
+        final currentCacheKey = selectedNotes
+            .map((note) => '${note.id}_${note.updatedAt}_${note.color}')
+            .join('|');
+
+        if (_cacheKey != currentCacheKey || _cachedNoteCards == null) {
+          _cacheKey = currentCacheKey;
+          return FutureBuilder<List<NoteCardData>>(
+            future: context.read<NoteProvider>().getDecryptedNoteCards(selectedNotes),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              _cachedNoteCards = snapshot.data ?? [];
+              return _buildDayGroup(_cachedNoteCards!);
+            },
+          );
+        }
+        return _buildDayGroup(_cachedNoteCards!);
+      },
+    );
+  }
+
+  Widget _buildDayGroup(List<NoteCardData> noteCards) {
+    return IntrinsicHeight(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 46,
+              child: Padding(
+                padding: const EdgeInsets.all(4).copyWith(right: 8, top: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
+                      children: [
+                        Text(
+                          getWeekdayName(DateTime(widget.year, widget.month, widget.day)),
+                          style: CustomTextStyle.regular(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                        Text(
+                          "${widget.day}",
+                          style: CustomTextStyle.regular(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 24,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (widget.notes.length > 1)
+                      Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.only(top: 4),
+                          width: 2,
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final note in noteCards) ...[
+                    NoteCard(note: note, onLongPress: (note) => widget.onLongPress(note: note)),
+                    const SizedBox(height: 8),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ),
-        child:
-            isSelected
-                ? Icon(
-                  Icons.check,
-                  color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white,
-                )
-                : null,
       ),
     );
   }

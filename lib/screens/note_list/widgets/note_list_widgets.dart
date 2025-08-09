@@ -1,63 +1,15 @@
 import 'package:cybersafe_pro/models/note_models.dart';
 import 'package:cybersafe_pro/providers/note_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
-import 'package:cybersafe_pro/utils/scale_utils.dart';
-import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
 import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
-
-class YearMonthHeader extends StatelessWidget {
-  final int year;
-  final int month;
-  const YearMonthHeader({super.key, required this.year, required this.month});
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 12, bottom: 4, left: 16),
-      child: RichText(
-        text: TextSpan(
-          style: CustomTextStyle.regular(
-            fontSize: 16,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          children: [
-            TextSpan(
-              text: '$year',
-              style: CustomTextStyle.regular(
-                fontSize: 42.sp,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-                letterSpacing: 2.7,
-              ),
-            ),
-            const TextSpan(text: ' '),
-            TextSpan(
-              text: getMonthName(month),
-              style: CustomTextStyle.regular(
-                fontSize: 24.sp,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.36,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+import 'package:provider/provider.dart';
 
 class NoteCard extends StatefulWidget {
   final NoteCardData note;
-  final NoteProvider noteProvider;
   final Function(NoteCardData) onLongPress;
-  const NoteCard({
-    super.key,
-    required this.note,
-    required this.noteProvider,
-    required this.onLongPress,
-  });
+  const NoteCard({super.key, required this.note, required this.onLongPress});
 
   @override
   State<NoteCard> createState() => _NoteCardState();
@@ -109,11 +61,15 @@ class _NoteCardState extends State<NoteCard> with SingleTickerProviderStateMixin
       onTapCancel: _handleTapCancel,
       onLongPress: () => widget.onLongPress(widget.note),
       onTap: () async {
-        await AppRoutes.navigateTo(
-          context,
-          AppRoutes.noteEditor,
-          arguments: {"noteId": widget.note.id},
-        );
+        if (context.read<NoteProvider>().selectedNotes.isNotEmpty) {
+          context.read<NoteProvider>().addSelectedNote(widget.note.id);
+        } else {
+          await AppRoutes.navigateTo(
+            context,
+            AppRoutes.noteEditor,
+            arguments: {"noteId": widget.note.id},
+          );
+        }
       },
       child: AnimatedBuilder(
         animation: _scaleAnimation,
@@ -145,11 +101,8 @@ class _NoteCardState extends State<NoteCard> with SingleTickerProviderStateMixin
                   children: [
                     Row(
                       children: [
-                        if (widget.note.color != null)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 6),
-                            child: CircleAvatar(radius: 4, backgroundColor: widget.note.color),
-                          ),
+                        _buildSelectedNote(context),
+
                         Expanded(
                           child: Text(
                             widget.note.title,
@@ -177,15 +130,20 @@ class _NoteCardState extends State<NoteCard> with SingleTickerProviderStateMixin
                     Row(
                       children: [
                         Expanded(
-                          child: Text(
-                            widget.noteProvider.getPlainText(widget.note.content),
-                            style: CustomTextStyle.regular(
-                              fontSize: 14,
-                              height: 1.3,
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .8),
-                            ),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
+                          child: Consumer<NoteProvider>(
+                            builder:
+                                (context, noteProvider, child) => Text(
+                                  noteProvider.getPlainText(widget.note.content),
+                                  style: CustomTextStyle.regular(
+                                    fontSize: 14,
+                                    height: 1.3,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface.withValues(alpha: .8),
+                                  ),
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                           ),
                         ),
                       ],
@@ -195,6 +153,59 @@ class _NoteCardState extends State<NoteCard> with SingleTickerProviderStateMixin
               ),
             ),
       ),
+    );
+  }
+
+  Widget _buildSelectedNote(BuildContext context) {
+    return Selector<NoteProvider, bool>(
+      selector: (context, noteProvider) => noteProvider.selectedNotes.contains(widget.note.id),
+      builder: (context, isSelected, child) {
+        return Selector<NoteProvider, bool>(
+          selector: (context, noteProvider) => noteProvider.selectedNotes.isNotEmpty,
+          builder: (context, isSelectionMode, child) {
+            if (isSelected) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(
+                    Icons.check_circle,
+                    key: const ValueKey('selected'),
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              );
+            } else if (isSelectionMode) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(
+                    Icons.circle_outlined,
+                    key: const ValueKey('unselected'),
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              );
+            } else if (widget.note.color != null) {
+              return Consumer<NoteProvider>(
+                builder: (context, noteProvider, child) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: AnimatedScale(
+                      scale: isSelectionMode ? 0.0 : 1.0,
+                      duration: const Duration(milliseconds: 200),
+                      child: CircleAvatar(radius: 4, backgroundColor: widget.note.color),
+                    ),
+                  );
+                },
+              );
+            } else {
+              return const SizedBox.shrink();
+            }
+          },
+        );
+      },
     );
   }
 }

@@ -71,7 +71,12 @@ class _StatisticMobileLayoutState extends State<StatisticMobileLayout> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(context.trStatistic(StatisticText.title))),
+      appBar: AppBar(
+        title: Text(
+          context.trStatistic(StatisticText.title),
+          style: CustomTextStyle.regular(fontSize: 18.sp),
+        ),
+      ),
       body: Consumer<StatisticProvider>(
         builder: (context, statisticProvider, child) {
           // Cập nhật thống kê mỗi khi provider thay đổi
@@ -96,22 +101,38 @@ class _StatisticMobileLayoutState extends State<StatisticMobileLayout> {
                             animationDuration: const Duration(milliseconds: 800),
                             chartLegendSpacing: 32.h,
                             chartRadius: 170.h,
-                            colorList: const [Colors.blueAccent, Colors.redAccent, Colors.yellowAccent],
+                            colorList: const [
+                              Colors.blueAccent,
+                              Colors.redAccent,
+                              Colors.yellowAccent,
+                            ],
                             initialAngleInDegree: 0,
                             chartType: ChartType.ring,
                             ringStrokeWidth: 40,
                             centerWidget: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text("$score", style: CustomTextStyle.regular(fontSize: 35.sp, fontWeight: FontWeight.bold)),
-                                Text(context.trStatistic(StatisticText.securityScore), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold)),
+                                Text(
+                                  "$score",
+                                  style: CustomTextStyle.regular(
+                                    fontSize: 35.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  context.trStatistic(StatisticText.securityScore),
+                                  style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold),
+                                ),
                               ],
                             ),
                             legendOptions: LegendOptions(
                               showLegendsInRow: true,
                               legendPosition: LegendPosition.bottom,
                               showLegends: true,
-                              legendTextStyle: CustomTextStyle.regular(fontWeight: FontWeight.w500, fontSize: 16.sp),
+                              legendTextStyle: CustomTextStyle.regular(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16.sp,
+                              ),
                             ),
                             chartValuesOptions: const ChartValuesOptions(
                               showChartValueBackground: false,
@@ -135,9 +156,17 @@ class _StatisticMobileLayoutState extends State<StatisticMobileLayout> {
                       child: SingleChildScrollView(
                         child: Column(
                           children: [
-                            SecurityCheckItem(title: context.trStatistic(StatisticText.totalAccount), value: statisticProvider.totalAccount, icon: Icons.lock),
+                            SecurityCheckItem(
+                              title: context.trStatistic(StatisticText.totalAccount),
+                              value: statisticProvider.totalAccount,
+                              icon: Icons.lock,
+                            ),
                             const SizedBox(height: 10),
-                            SecurityCheckItem(title: context.trStatistic(StatisticText.totalAccountPasswordStrong), value: statisticProvider.totalAccountPasswordStrong, icon: Icons.security_outlined),
+                            SecurityCheckItem(
+                              title: context.trStatistic(StatisticText.totalAccountPasswordStrong),
+                              value: statisticProvider.totalAccountPasswordStrong,
+                              icon: Icons.security_outlined,
+                            ),
                             const SizedBox(height: 10),
                             SecurityCheckItem(
                               title: context.trStatistic(StatisticText.totalAccountPasswordWeak),

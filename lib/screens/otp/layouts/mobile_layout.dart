@@ -63,7 +63,7 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.trOtp(OtpText.title)),
+        title: Text(context.trOtp(OtpText.title), style: CustomTextStyle.regular(fontSize: 18.sp)),
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: Theme.of(context).colorScheme.surface,
@@ -91,14 +91,14 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
                           child: FadeInAnimation(
                             child: TotpItem(
                               account: account.key,
-                              secretKey: account.value.secretKey ?? '',
+                              secretKey: account.value.secretKey,
                               iconCustom: IconCustomModel(name: '', imageBase64: ''),
                               title: account.key.title,
                               email: account.key.username ?? '',
                               icon: account.key.icon ?? '',
                               onTap: () async {
                                 // Giải mã trước khi mở bottom sheet
-                                final secretKeyEncrypted = account.value.secretKey ?? '';
+                                final secretKeyEncrypted = account.value.secretKey;
                                 if (secretKeyEncrypted.isEmpty) {
                                   seeDetailTOTPBottomSheet(context, account.key, account.value, '');
                                   return;

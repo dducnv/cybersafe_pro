@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:csv/csv.dart';
 import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/database/boxes/account_box.dart';
-import 'package:cybersafe_pro/database/boxes/account_custom_field_box.dart' show AccountCustomFieldBox;
+import 'package:cybersafe_pro/database/boxes/account_custom_field_box.dart'
+    show AccountCustomFieldBox;
 import 'package:cybersafe_pro/database/boxes/category_box.dart';
 import 'package:cybersafe_pro/database/boxes/icon_custom_box.dart';
 import 'package:cybersafe_pro/database/boxes/password_history_box.dart';
@@ -26,14 +28,13 @@ import 'package:cybersafe_pro/services/permission_service.dart';
 import 'package:cybersafe_pro/utils/file_picker_utils.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
-import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:cybersafe_pro/utils/toast_noti.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:downloadsfolder/downloadsfolder.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -104,7 +105,9 @@ class DataManagerServiceOld {
 
       // Kiểm tra xem có đủ các cột cần thiết không
       if (!requiredColumns.every((col) => header.contains(col))) {
-        throw Exception("File CSV is not in the correct format. Need columns: name, url, username, password, note");
+        throw Exception(
+          "File CSV is not in the correct format. Need columns: name, url, username, password, note",
+        );
       }
 
       // Lấy index của các cột
@@ -137,7 +140,13 @@ class DataManagerServiceOld {
       });
       final futures = mappedRows.map((row) async {
         try {
-          final account = AccountOjbModel(title: row['title'], email: row['email'], password: row['password'], notes: row['notes'], categoryOjbModel: newCategory);
+          final account = AccountOjbModel(
+            title: row['title'],
+            email: row['email'],
+            password: row['password'],
+            notes: row['notes'],
+            categoryOjbModel: newCategory,
+          );
           // await accountProvider.createOrUpdateAccount(account);
           return true;
         } catch (e) {
@@ -153,14 +162,21 @@ class DataManagerServiceOld {
       if (context.mounted) {
         context.read<CategoryProvider>().getCategories();
         hideLoadingDialog();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Import successfully $successCount accounts'), backgroundColor: Colors.green));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Import successfully $successCount accounts'),
+            backgroundColor: Colors.green,
+          ),
+        );
       }
       canLockApp = true;
     } catch (e) {
       canLockApp = true;
       if (context.mounted) {
         hideLoadingDialog();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}'), backgroundColor: Colors.red),
+        );
       }
     }
   }
@@ -193,7 +209,10 @@ class DataManagerServiceOld {
       final backup = await backupService.createBackup(pin, backupName);
       // --- Sử dụng compute để mã hóa dữ liệu backup (utf8.encode) ---
       final backupJsonBytes = await compute(_encodeBackupInIsolate, backup);
-      final encryptedData = EncryptService.instance.encryptDataBytes(data: backupJsonBytes, key: Env.backupFileEncryptKey);
+      final encryptedData = EncryptService.instance.encryptDataBytes(
+        data: backupJsonBytes,
+        key: Env.backupFileEncryptKey,
+      );
 
       // Get backup directory
       final downloadDir = await getDownloadDirectory();
@@ -205,7 +224,12 @@ class DataManagerServiceOld {
       }
 
       // Save file using FilePicker
-      final filePath = await FilePicker.platform.saveFile(dialogTitle: 'Save Backup File', fileName: fileName, initialDirectory: backupDir.path, bytes: Uint8List.fromList(encryptedData));
+      final filePath = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save Backup File',
+        fileName: fileName,
+        initialDirectory: backupDir.path,
+        bytes: Uint8List.fromList(encryptedData),
+      );
 
       if (filePath == null) {
         throw Exception('Backup cancelled by user');
@@ -216,16 +240,26 @@ class DataManagerServiceOld {
       hideLoadingDialog();
       await Future.delayed(const Duration(milliseconds: 100));
       if (safeContext.mounted) {
-        SecureApplicationUtil.instance.unlock();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Backup data successful'), backgroundColor: Colors.green, duration: const Duration(seconds: 3)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Backup data successful'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 3),
+          ),
+        );
       }
       return true;
     } catch (e) {
       hideLoadingDialog();
-      SecureApplicationUtil.instance.unlock();
       logError('Backup failed: $e');
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Backup failed: ${e.toString()}'), backgroundColor: Colors.red, duration: const Duration(seconds: 3)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Backup failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
       }
       return false;
     }
@@ -265,7 +299,10 @@ class DataManagerServiceOld {
       // Bước 3: Giải mã dữ liệu file
       List<int> dataBackup;
       try {
-        dataBackup = EncryptService.instance.decryptDataBytes(encryptedData: encryptedBytes, key: Env.backupFileEncryptKey);
+        dataBackup = EncryptService.instance.decryptDataBytes(
+          encryptedData: encryptedBytes,
+          key: Env.backupFileEncryptKey,
+        );
       } catch (e) {
         throw Exception('Backup data is not valid or corrupted');
       }
@@ -290,12 +327,23 @@ class DataManagerServiceOld {
             return LoginMasterPassword(
               showBiometric: false,
               isFromRestore: true,
-              callBackLoginCallback: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
-                if (isLoginSuccess == true && pin != null && GlobalKeys.appRootNavigatorKey.currentContext != null) {
+              callBackLoginCallback: ({
+                bool? isLoginSuccess,
+                String? pin,
+                GlobalKey<AppPinCodeFieldsState>? appPinCodeKey,
+              }) async {
+                if (isLoginSuccess == true &&
+                    pin != null &&
+                    GlobalKeys.appRootNavigatorKey.currentContext != null) {
                   try {
                     ValueNotifier<double>? loadingProgress = ValueNotifier<double>(0.0);
-                    showLoadingDialog(context: GlobalKeys.appRootNavigatorKey.currentContext!, loadingProgress: loadingProgress);
-                    await Future.delayed(const Duration(milliseconds: 50)); // Cho UI kịp render loading
+                    showLoadingDialog(
+                      context: GlobalKeys.appRootNavigatorKey.currentContext!,
+                      loadingProgress: loadingProgress,
+                    );
+                    await Future.delayed(
+                      const Duration(milliseconds: 50),
+                    ); // Cho UI kịp render loading
                     // Bước 6: Kiểm tra PIN và khôi phục dữ liệu
                     final result = await EncryptAppDataService.instance.restoreBackup(
                       jsonString,
@@ -306,7 +354,8 @@ class DataManagerServiceOld {
                         }
                       },
                       onRestoreProgress: (progress) {
-                        final contextRoot = GlobalKeys.appRootNavigatorKey.currentContext ?? context;
+                        final contextRoot =
+                            GlobalKeys.appRootNavigatorKey.currentContext ?? context;
                         if (contextRoot.mounted) {
                           loadingProgress.value = progress;
                         }
@@ -316,7 +365,6 @@ class DataManagerServiceOld {
                     if (result) {
                       loadingProgress.dispose();
                       hideLoadingDialog();
-                      SecureApplicationUtil.instance.unlock();
                       Navigator.of(context).pop(true);
                     } else {
                       loadingProgress.dispose();
@@ -326,12 +374,24 @@ class DataManagerServiceOld {
                   } catch (e) {
                     logError('Restore data failed in catch: $e');
                     if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.trSafe(ErrorText.restoreFailed)), backgroundColor: Colors.red, duration: const Duration(seconds: 3)));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(context.trSafe(ErrorText.restoreFailed)),
+                        backgroundColor: Colors.red,
+                        duration: const Duration(seconds: 3),
+                      ),
+                    );
                   }
                 } else {
                   // Trường hợp không nhập PIN hoặc hủy
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Data restore canceled'), backgroundColor: Colors.orange, duration: Duration(seconds: 2)));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Data restore canceled'),
+                        backgroundColor: Colors.orange,
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
                   }
                 }
               },
@@ -346,7 +406,13 @@ class DataManagerServiceOld {
       canLockApp = true;
       hideLoadingDialog();
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}'), backgroundColor: Colors.red, duration: const Duration(seconds: 3)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
       }
       logError('Restore data failed: $e');
       return false;
@@ -437,7 +503,11 @@ class DataManagerServiceOld {
               (context) => LoginMasterPassword(
                 showBiometric: false,
                 isFromDeleteData: true,
-                callBackLoginCallback: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
+                callBackLoginCallback: ({
+                  bool? isLoginSuccess,
+                  String? pin,
+                  GlobalKey<AppPinCodeFieldsState>? appPinCodeKey,
+                }) async {
                   if (isLoginSuccess == true && pin != null) {
                     try {
                       final success = await deleteData();
@@ -478,16 +548,29 @@ class DataManagerServiceOld {
       if (!await PermissionService.instance.requestStoragePermission()) {
         return false;
       }
-      logInfo('requestStoragePermission: ${await PermissionService.instance.requestStoragePermission()}');
+      logInfo(
+        'requestStoragePermission: ${await PermissionService.instance.requestStoragePermission()}',
+      );
       showLoadingDialog();
       final backupService = EncryptAppDataService.instance;
-      final backup = await backupService.createBackup(Env.transferFileEncryptKey, "cyber_safe_transfer", isTransfer: true);
+      final backup = await backupService.createBackup(
+        Env.transferFileEncryptKey,
+        "cyber_safe_transfer",
+        isTransfer: true,
+      );
 
       final backupJson = jsonEncode(backup);
-      final codeEncrypted = EncryptService.instance.encryptDataBytes(data: utf8.encode(backupJson), key: Env.backupFileEncryptKey);
+      final codeEncrypted = EncryptService.instance.encryptDataBytes(
+        data: utf8.encode(backupJson),
+        key: Env.backupFileEncryptKey,
+      );
       final transferFileName = "transferFile_${DateTime.now().millisecondsSinceEpoch}.enc";
       // Save file using FilePicker
-      await FilePicker.platform.saveFile(dialogTitle: 'Save Backup File', fileName: transferFileName, bytes: Uint8List.fromList(codeEncrypted));
+      await FilePicker.platform.saveFile(
+        dialogTitle: 'Save Backup File',
+        fileName: transferFileName,
+        bytes: Uint8List.fromList(codeEncrypted),
+      );
       launchProApp(context);
       return true;
     } catch (e) {
@@ -548,7 +631,10 @@ class DataManagerServiceOld {
       showLoadingDialog(loadingProgress: loadingProgress);
 
       // 4. Giải mã và xử lý dữ liệu
-      List<int> dataBackup = EncryptService.instance.decryptDataBytes(encryptedData: fileBytes, key: Env.backupFileEncryptKey);
+      List<int> dataBackup = EncryptService.instance.decryptDataBytes(
+        encryptedData: fileBytes,
+        key: Env.backupFileEncryptKey,
+      );
 
       if (dataBackup.isEmpty) {
         throw Exception("Decrypted data is empty");
@@ -692,7 +778,14 @@ List<Map<String, dynamic>> _mapCsvRowsInIsolate(Map<String, dynamic> args) {
     final note = row[noteIndex].toString().trim();
     if (title.isEmpty || username.isEmpty || password.isEmpty) continue;
     final importNote = note.isEmpty ? url : note;
-    result.add({'title': title, 'email': username, 'password': password, 'notes': importNote, 'categoryName': categoryName, 'categoryId': categoryId});
+    result.add({
+      'title': title,
+      'email': username,
+      'password': password,
+      'notes': importNote,
+      'categoryName': categoryName,
+      'categoryId': categoryId,
+    });
   }
   return result;
 }

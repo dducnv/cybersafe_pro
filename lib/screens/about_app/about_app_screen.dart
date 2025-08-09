@@ -14,7 +14,10 @@ class AboutAppScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        title: Text(context.trAbout(GeneralText.aboutAppTitle)),
+        title: Text(
+          context.trAbout(GeneralText.aboutAppTitle),
+          style: CustomTextStyle.regular(fontSize: 18.sp),
+        ),
         elevation: 0,
         scrolledUnderElevation: 0,
       ),

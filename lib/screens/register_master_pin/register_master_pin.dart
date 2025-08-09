@@ -2,6 +2,7 @@ import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+
 import 'layouts/mobile_layout.dart';
 
 class RegisterMasterPin extends StatefulWidget {
@@ -21,8 +22,8 @@ class _RegisterMasterPinState extends State<RegisterMasterPin> {
   @override
   void initState() {
     super.initState();
-    SecureApplicationUtil.instance.unlock();
     FlutterNativeSplash.remove();
+    SecureApplicationUtil.instance.pause();
   }
 
   @override

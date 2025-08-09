@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/note_text.dart';
 import 'package:cybersafe_pro/providers/note_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -75,11 +77,15 @@ class _NoteEditorState extends State<NoteEditor> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: TextField(
           controller: _titleController,
           style: theme.textTheme.titleLarge,
-          decoration: const InputDecoration(hintText: "Tiêu đề", border: InputBorder.none),
+          decoration: InputDecoration(
+            hintText: context.trNote(NoteText.title),
+            border: InputBorder.none,
+          ),
           onChanged: (_) => _saveNote(),
         ),
         backgroundColor: theme.colorScheme.surface,
@@ -103,25 +109,25 @@ class _NoteEditorState extends State<NoteEditor> {
                       ),
             ),
             if (_quillController != null)
-              QuillSimpleToolbar(
-                controller: _quillController!,
-                config: QuillSimpleToolbarConfig(
-                  multiRowsDisplay: false,
-                  showAlignmentButtons: true,
-                  buttonOptions: QuillSimpleToolbarButtonOptions(
-                    fontSize: QuillToolbarFontSizeButtonOptions(
-                      afterButtonPressed: () {
-                        _editorFocusNode.unfocus();
-                      },
-                      labelOverflow: TextOverflow.fade,
-                    ),
-                    linkStyle: QuillToolbarLinkStyleButtonOptions(
-                      validateLink: (link) {
-                        // Treats all links as valid. When launching the URL,
-                        // `https://` is prefixed if the link is incomplete (e.g., `google.com` → `https://google.com`)
-                        // however this happens only within the editor.
-                        return true;
-                      },
+              SafeArea(
+                child: QuillSimpleToolbar(
+                  controller: _quillController!,
+                  config: QuillSimpleToolbarConfig(
+                    multiRowsDisplay: false,
+                    showAlignmentButtons: true,
+                    buttonOptions: QuillSimpleToolbarButtonOptions(
+                      selectHeaderStyleDropdownButton:
+                          QuillToolbarSelectHeaderStyleDropdownButtonOptions(
+                            afterButtonPressed: () {
+                              _editorFocusNode.unfocus();
+                            },
+                          ),
+                      fontSize: QuillToolbarFontSizeButtonOptions(
+                        afterButtonPressed: () {
+                          _editorFocusNode.unfocus();
+                        },
+                        labelOverflow: TextOverflow.fade,
+                      ),
                     ),
                   ),
                 ),

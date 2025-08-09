@@ -1,28 +1,28 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:croppy/croppy.dart';
 import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
+import 'package:cybersafe_pro/providers/account_form_provider.dart';
+import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/resources/brand_logo.dart';
+import 'package:cybersafe_pro/screens/create_account/components/account_form_fields.dart';
+import 'package:cybersafe_pro/screens/create_account/components/add_field_bottom_sheet.dart';
+import 'package:cybersafe_pro/screens/create_account/components/icon_picker.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/request_pro/request_pro.dart';
 import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
 import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:cybersafe_pro/providers/account_form_provider.dart';
-import 'package:cybersafe_pro/providers/account_provider.dart';
-import 'package:cybersafe_pro/screens/create_account/components/icon_picker.dart';
-import 'package:cybersafe_pro/screens/create_account/components/account_form_fields.dart';
-import 'package:cybersafe_pro/screens/create_account/components/add_field_bottom_sheet.dart';
-import 'dart:ui' as ui;
-import 'package:image/image.dart' as img;
 
 class CreateAccountMobileLayout extends StatefulWidget {
   const CreateAccountMobileLayout({super.key});
@@ -31,7 +31,8 @@ class CreateAccountMobileLayout extends StatefulWidget {
   State<CreateAccountMobileLayout> createState() => _CreateAccountMobileLayoutState();
 }
 
-class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> with SingleTickerProviderStateMixin {
+class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout>
+    with SingleTickerProviderStateMixin {
   late TabController tabController;
   @override
   void initState() {
@@ -43,7 +44,11 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
   Widget build(BuildContext context) {
     return Consumer2<AccountFormProvider, AccountProvider>(
       builder: (context, formProvider, accountProvider, _) {
-        return Scaffold(floatingActionButton: _buildSubmitButton(context, formProvider, accountProvider), appBar: _buildAppBar(context), body: _buildBody(context, formProvider));
+        return Scaffold(
+          floatingActionButton: _buildSubmitButton(context, formProvider, accountProvider),
+          appBar: _buildAppBar(context),
+          body: _buildBody(context, formProvider),
+        );
       },
     );
   }
@@ -57,7 +62,10 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
           children: [
             IconPicker(onTap: () => _showIconPicker(context, formProvider)),
             const SizedBox(height: 10),
-            AccountFormFields(formProvider: formProvider, onAddField: () => _showAddFieldBottomSheet(context)),
+            AccountFormFields(
+              formProvider: formProvider,
+              onAddField: () => _showAddFieldBottomSheet(context),
+            ),
             const SizedBox(height: 90),
           ],
         ),
@@ -66,14 +74,30 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return AppBar(elevation: 0, scrolledUnderElevation: 0, shadowColor: Colors.transparent, backgroundColor: Theme.of(context).colorScheme.surface);
+    return AppBar(
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      shadowColor: Colors.transparent,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+    );
   }
 
-  Widget _buildSubmitButton(BuildContext context, AccountFormProvider formProvider, AccountProvider accountProvider) {
-    return FloatingActionButton(onPressed: () => _handleSubmit(context, formProvider, accountProvider), child: const Icon(Icons.check));
+  Widget _buildSubmitButton(
+    BuildContext context,
+    AccountFormProvider formProvider,
+    AccountProvider accountProvider,
+  ) {
+    return FloatingActionButton(
+      onPressed: () => _handleSubmit(context, formProvider, accountProvider),
+      child: const Icon(Icons.check),
+    );
   }
 
-  Future<void> _handleSubmit(BuildContext context, AccountFormProvider formProvider, AccountProvider accountProvider) async {
+  Future<void> _handleSubmit(
+    BuildContext context,
+    AccountFormProvider formProvider,
+    AccountProvider accountProvider,
+  ) async {
     showLoadingDialog(context: context);
     final success = await accountProvider.createAccountFromForm(formProvider);
     hideLoadingDialog();
@@ -102,7 +126,15 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(context.appLocale.createAccountLocale.getText(CreateAccountText.chooseIcon), style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w600)),
+                        Text(
+                          context.appLocale.createAccountLocale.getText(
+                            CreateAccountText.chooseIcon,
+                          ),
+                          style: CustomTextStyle.regular(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         IconButton(
                           onPressed: () {
                             _pickImageFromGallery(context, formProvider, tabController);
@@ -120,20 +152,37 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
                       Navigator.pop(context);
                     },
                     leading: Icon(Icons.cancel_outlined, color: Colors.blueAccent, size: 30.sp),
-                    title: Text(context.appLocale.createAccountLocale.getText(CreateAccountText.noSelect), style: CustomTextStyle.regular(fontSize: 16.sp)),
+                    title: Text(
+                      context.appLocale.createAccountLocale.getText(CreateAccountText.noSelect),
+                      style: CustomTextStyle.regular(fontSize: 16.sp),
+                    ),
                   ),
                   const SizedBox(height: 10),
 
                   TabBar(
                     dividerColor: Colors.grey[500],
                     controller: tabController,
-                    tabs: [Tab(text: context.appLocale.createAccountLocale.getText(CreateAccountText.iconApp)), Tab(text: context.appLocale.createAccountLocale.getText(CreateAccountText.iconCustom))],
+                    tabs: [
+                      Tab(
+                        text: context.appLocale.createAccountLocale.getText(
+                          CreateAccountText.iconApp,
+                        ),
+                      ),
+                      Tab(
+                        text: context.appLocale.createAccountLocale.getText(
+                          CreateAccountText.iconCustom,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 10),
                   Expanded(
                     child: TabBarView(
                       controller: tabController,
-                      children: [_buildListIconsDefaultApp(context: context, formProvider: formProvider), _buildListIconsCustom(context: context, formProvider: formProvider)],
+                      children: [
+                        _buildListIconsDefaultApp(context: context, formProvider: formProvider),
+                        _buildListIconsCustom(context: context, formProvider: formProvider),
+                      ],
                     ),
                   ),
                 ],
@@ -160,7 +209,10 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
     );
   }
 
-  Widget _buildListIconsDefaultApp({required BuildContext context, required AccountFormProvider formProvider}) {
+  Widget _buildListIconsDefaultApp({
+    required BuildContext context,
+    required AccountFormProvider formProvider,
+  }) {
     return ListView.builder(
       itemCount: branchLogoCategories.length,
       shrinkWrap: true,
@@ -169,7 +221,10 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(branchLogoCategories[index].categoryName, style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w600)),
+              child: Text(
+                branchLogoCategories[index].categoryName,
+                style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w600),
+              ),
             ),
             const SizedBox(height: 10),
             Column(
@@ -179,11 +234,26 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
                         (e) => ListTile(
                           selected: formProvider.branchLogoSelected == e,
                           onTap: () {
-                            formProvider.pickIcon(isCustomIcon: false, iconCustomModel: null, branchLogo: e);
+                            formProvider.pickIcon(
+                              isCustomIcon: false,
+                              iconCustomModel: null,
+                              branchLogo: e,
+                            );
                             Navigator.pop(context);
                           },
-                          leading: SizedBox(width: 40.h, height: 40.h, child: SvgPicture.asset(context.darkMode ? e.branchLogoPathDarkMode! : e.branchLogoPathLightMode!)),
-                          title: Text(e.branchName ?? "", style: CustomTextStyle.regular(fontSize: 16.sp)),
+                          leading: SizedBox(
+                            width: 40.h,
+                            height: 40.h,
+                            child: SvgPicture.asset(
+                              context.darkMode
+                                  ? e.branchLogoPathDarkMode!
+                                  : e.branchLogoPathLightMode!,
+                            ),
+                          ),
+                          title: Text(
+                            e.branchName ?? "",
+                            style: CustomTextStyle.regular(fontSize: 16.sp),
+                          ),
                         ),
                       )
                       .toList(),
@@ -195,12 +265,17 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
     );
   }
 
-  Widget _buildListIconsCustom({required BuildContext context, required AccountFormProvider formProvider}) {
+  Widget _buildListIconsCustom({
+    required BuildContext context,
+    required AccountFormProvider formProvider,
+  }) {
     return Selector<AccountFormProvider, List<IconCustomDriftModelData>>(
       selector: (context, formProvider) => formProvider.listIconsCustom,
       builder: (context, listIconsCustom, child) {
         return listIconsCustom.isEmpty
-            ? Center(child: Image.asset("assets/images/exclamation-mark.png", width: 60.w, height: 60.h))
+            ? Center(
+              child: Image.asset("assets/images/exclamation-mark.png", width: 60.w, height: 60.h),
+            )
             : ListView.builder(
               itemCount: listIconsCustom.length,
               shrinkWrap: true,
@@ -208,19 +283,33 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
                 return RequestPro(
                   child: ListTile(
                     onTap: () {
-                      formProvider.pickIcon(isCustomIcon: true, iconCustomModel: formProvider.listIconsCustom[index]);
+                      formProvider.pickIcon(
+                        isCustomIcon: true,
+                        iconCustomModel: formProvider.listIconsCustom[index],
+                      );
                       Navigator.pop(context);
                     },
                     leading: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.memory(base64Decode(formProvider.listIconsCustom[index].imageBase64), width: 40.h, height: 40.h, fit: BoxFit.contain),
+                      child: Image.memory(
+                        base64Decode(formProvider.listIconsCustom[index].imageBase64),
+                        width: 40.h,
+                        height: 40.h,
+                        fit: BoxFit.contain,
+                      ),
                     ),
-                    title: Text(formProvider.listIconsCustom[index].name, style: CustomTextStyle.regular(fontSize: 16.sp)),
+                    title: Text(
+                      formProvider.listIconsCustom[index].name,
+                      style: CustomTextStyle.regular(fontSize: 16.sp),
+                    ),
                     trailing: IconButton(
                       onPressed: () {
                         formProvider.deleteIconCustom(formProvider.listIconsCustom[index]);
                       },
-                      icon: IgnorePointer(ignoring: false, child: Icon(Icons.close, color: Colors.redAccent, size: 24.sp)),
+                      icon: IgnorePointer(
+                        ignoring: false,
+                        child: Icon(Icons.close, color: Colors.redAccent, size: 24.sp),
+                      ),
                     ),
                   ),
                 );
@@ -231,15 +320,27 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
   }
 
   //pick image from gallery
-  Future<void> _pickImageFromGallery(BuildContext context, AccountFormProvider formProvider, TabController tabController) async {
+  Future<void> _pickImageFromGallery(
+    BuildContext context,
+    AccountFormProvider formProvider,
+    TabController tabController,
+  ) async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
     if (image == null) return;
     if (!mounted) return;
     final result =
         Platform.isAndroid
-            ? await showMaterialImageCropper(context, imageProvider: FileImage(File(image.path)), allowedAspectRatios: [CropAspectRatio(width: 1, height: 1)])
-            : await showCupertinoImageCropper(context, imageProvider: FileImage(File(image.path)), allowedAspectRatios: [CropAspectRatio(width: 1, height: 1)]);
+            ? await showMaterialImageCropper(
+              context,
+              imageProvider: FileImage(File(image.path)),
+              allowedAspectRatios: [CropAspectRatio(width: 1, height: 1)],
+            )
+            : await showCupertinoImageCropper(
+              context,
+              imageProvider: FileImage(File(image.path)),
+              allowedAspectRatios: [CropAspectRatio(width: 1, height: 1)],
+            );
 
     if (result == null) {
       return;
@@ -247,7 +348,10 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
 
     ui.Image imageCropped = result.uiImage;
     // Convert ui.Image to img.Image
-    final img.Image originalImage = img.decodeImage((await imageCropped.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List())!;
+    final img.Image originalImage =
+        img.decodeImage(
+          (await imageCropped.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List(),
+        )!;
 
     // Resize the image to higher quality - 512x512 for better quality
     final img.Image resizedImage = img.copyResize(
@@ -270,7 +374,12 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout> w
     );
   }
 
-  Future<bool?> _showDialogCreateCustomIcon({required BuildContext context, required String base64Image, required AccountFormProvider formProvider, required TabController tabController}) async {
+  Future<bool?> _showDialogCreateCustomIcon({
+    required BuildContext context,
+    required String base64Image,
+    required AccountFormProvider formProvider,
+    required TabController tabController,
+  }) async {
     return await showAppCustomDialog(
       context,
       AppCustomDialog(
