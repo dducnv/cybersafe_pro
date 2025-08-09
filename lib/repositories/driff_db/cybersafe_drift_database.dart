@@ -1,23 +1,35 @@
 import 'dart:ffi';
 import 'dart:io';
-import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
-import 'package:sqlite3/open.dart';
-import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
+
 import 'package:cybersafe_pro/encrypt/key_manager.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
+import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
+import 'package:sqlite3/open.dart';
+
 import 'models/models.dart';
 
 part 'cybersafe_drift_database.g.dart';
 
-@DriftDatabase(tables: [AccountDriftModel, CategoryDriftModel, TOTPDriftModel, PasswordHistoryDriftModel, AccountCustomFieldDriftModel, IconCustomDriftModel, TextNotesDriftModel])
+@DriftDatabase(
+  tables: [
+    AccountDriftModel,
+    CategoryDriftModel,
+    TOTPDriftModel,
+    PasswordHistoryDriftModel,
+    AccountCustomFieldDriftModel,
+    IconCustomDriftModel,
+    TextNotesDriftModel,
+  ],
+)
 class DriftSqliteDatabase extends _$DriftSqliteDatabase {
   DriftSqliteDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   /// Mở kết nối với SQLCipher encryption
   static QueryExecutor _openConnection() {
@@ -71,5 +83,15 @@ class DriftSqliteDatabase extends _$DriftSqliteDatabase {
     });
   }
 
-  /// Test database connection
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (Migrator m) async {
+      await m.createAll();
+    },
+    onUpgrade: (Migrator m, int from, int to) async {
+      if (from == 1) {
+        await m.addColumn(textNotesDriftModel, textNotesDriftModel.color);
+      }
+    },
+  );
 }

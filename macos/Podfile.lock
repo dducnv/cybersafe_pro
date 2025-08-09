@@ -1,6 +1,4 @@
 PODS:
-  - app_links (1.0.0):
-    - FlutterMacOS
   - croppy (0.0.1):
     - FlutterMacOS
   - desktop_window (0.0.1):
@@ -30,16 +28,25 @@ PODS:
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - quill_native_bridge_macos (0.0.1):
+    - FlutterMacOS
   - share_plus (0.0.1):
     - FlutterMacOS
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - SQLCipher (4.9.0):
+    - SQLCipher/standard (= 4.9.0)
+  - SQLCipher/common (4.9.0)
+  - SQLCipher/standard (4.9.0):
+    - SQLCipher/common
+  - sqlcipher_flutter_libs (0.0.1):
+    - FlutterMacOS
+    - SQLCipher (~> 4.9.0)
   - url_launcher_macos (0.0.1):
     - FlutterMacOS
 
 DEPENDENCIES:
-  - app_links (from `Flutter/ephemeral/.symlinks/plugins/app_links/macos`)
   - croppy (from `Flutter/ephemeral/.symlinks/plugins/croppy/macos`)
   - desktop_window (from `Flutter/ephemeral/.symlinks/plugins/desktop_window/macos`)
   - device_info_plus (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos`)
@@ -53,17 +60,18 @@ DEPENDENCIES:
   - objectbox_flutter_libs (from `Flutter/ephemeral/.symlinks/plugins/objectbox_flutter_libs/macos`)
   - package_info_plus (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos`)
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
+  - quill_native_bridge_macos (from `Flutter/ephemeral/.symlinks/plugins/quill_native_bridge_macos/macos`)
   - share_plus (from `Flutter/ephemeral/.symlinks/plugins/share_plus/macos`)
   - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - sqlcipher_flutter_libs (from `Flutter/ephemeral/.symlinks/plugins/sqlcipher_flutter_libs/macos`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
 
 SPEC REPOS:
   trunk:
     - ObjectBox
+    - SQLCipher
 
 EXTERNAL SOURCES:
-  app_links:
-    :path: Flutter/ephemeral/.symlinks/plugins/app_links/macos
   croppy:
     :path: Flutter/ephemeral/.symlinks/plugins/croppy/macos
   desktop_window:
@@ -90,15 +98,18 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos
   path_provider_foundation:
     :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin
+  quill_native_bridge_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/quill_native_bridge_macos/macos
   share_plus:
     :path: Flutter/ephemeral/.symlinks/plugins/share_plus/macos
   shared_preferences_foundation:
     :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin
+  sqlcipher_flutter_libs:
+    :path: Flutter/ephemeral/.symlinks/plugins/sqlcipher_flutter_libs/macos
   url_launcher_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
 
 SPEC CHECKSUMS:
-  app_links: afe860c55c7ef176cea7fb630a2b7d7736de591d
   croppy: d9bfc8c02f3cd1851f669a421df298a474b78f43
   desktop_window: de6acd6053564bdccd9f4b9473d25bf4f2ad9bdf
   device_info_plus: 4fb280989f669696856f8b129e4a5e3cd6c48f76
@@ -113,10 +124,13 @@ SPEC CHECKSUMS:
   objectbox_flutter_libs: 947b3a4e371d88c3c5b59f6a2e95e108cc072e6b
   package_info_plus: f0052d280d17aa382b932f399edf32507174e870
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
+  quill_native_bridge_macos: 2b005cb56902bb740e0cd9620aa399dfac6b4882
   share_plus: 510bf0af1a42cd602274b4629920c9649c52f4cc
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
+  SQLCipher: 31878d8ebd27e5c96db0b7cb695c96e9f8ad77da
+  sqlcipher_flutter_libs: df4c20ce574779df9ffa0dceb33e751b068e81c4
   url_launcher_macos: 0fba8ddabfc33ce0a9afe7c5fef5aab3d8d2d673
 
-PODFILE CHECKSUM: 27de7cd3148d8469ce6b8ae5e45d482f4fefa7c1
+PODFILE CHECKSUM: 035a0569238cda0513b2e8d6407f80b1a20f510c
 
 COCOAPODS: 1.16.2

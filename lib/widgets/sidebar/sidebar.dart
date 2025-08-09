@@ -1,9 +1,11 @@
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/sidebar_text.dart';
+import 'package:cybersafe_pro/localization/keys/statistic_text.dart';
 import 'package:cybersafe_pro/main.dart';
 import 'package:cybersafe_pro/resources/app_config.dart';
 import 'package:cybersafe_pro/resources/size_text_icon.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
+import 'package:cybersafe_pro/screens/develop/demo_screen.dart';
 import 'package:cybersafe_pro/screens/developer/developer_screen.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
@@ -25,7 +27,14 @@ class Sidebar extends StatelessWidget {
           child: Column(
             children: [
               Image.asset('assets/images/app_icon_trans.png', width: 100.w, height: 100.h),
-              Text("CyberSafe", style: CustomTextStyle.regular(color: Colors.white, fontSize: 25.sp, fontWeight: FontWeight.bold)),
+              Text(
+                "CyberSafe",
+                style: CustomTextStyle.regular(
+                  color: Colors.white,
+                  fontSize: 25.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ), //UserAccountDrawerHeader
         ),
@@ -37,6 +46,18 @@ class Sidebar extends StatelessWidget {
             AppRoutes.pop(context);
             AppRoutes.navigateTo(context, AppRoutes.categoryManager);
           },
+        ),
+        ListTile(
+          leading: Icon(Icons.bar_chart_rounded, size: 24),
+          title: Text(context.trStatistic(StatisticText.title), style: drawerTitleStyle),
+          onTap: () {
+            AppRoutes.pop(context);
+            AppRoutes.navigateTo(context, AppRoutes.statistic);
+          },
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Divider(color: Theme.of(context).colorScheme.outline),
         ),
         ListTile(
           leading: Icon(Icons.star, size: 24),
@@ -68,7 +89,10 @@ class Sidebar extends StatelessWidget {
           leading: Icon(Icons.mail_rounded, size: 24),
           title: Text(context.trSidebar(SidebarText.featureRequest), style: drawerTitleStyle),
           onTap: () {
-            openUrl("mailto:contact.ducnv@gmail.com?subject=[CyberSafe] Feature Request", context: context);
+            openUrl(
+              "mailto:contact.ducnv@gmail.com?subject=[CyberSafe] Feature Request",
+              context: context,
+            );
           },
         ),
 
@@ -77,21 +101,30 @@ class Sidebar extends StatelessWidget {
           leading: Icon(Icons.translate_rounded, size: 24),
           title: Text(context.trSidebar(SidebarText.requestLanguage), style: drawerTitleStyle),
           onTap: () {
-            openUrl("mailto:contact.ducnv@gmail.com?subject=[CyberSafe] Request Language", context: context);
+            openUrl(
+              "mailto:contact.ducnv@gmail.com?subject=[CyberSafe] Request Language",
+              context: context,
+            );
           },
         ),
         ListTile(
           leading: Icon(Icons.privacy_tip, size: 24),
           title: Text(context.trSidebar(SidebarText.privacyPolicy), style: drawerTitleStyle),
           onTap: () {
-            AppConfig.showDialogRedirectLink(context, url: AppConfig.privacyPolicyUrl(context.localeRead.languageCode));
+            AppConfig.showDialogRedirectLink(
+              context,
+              url: AppConfig.privacyPolicyUrl(context.localeRead.languageCode),
+            );
           },
         ),
         ListTile(
           leading: Icon(Icons.article, size: 24),
           title: Text(context.trSidebar(SidebarText.termsOfService), style: drawerTitleStyle),
           onTap: () {
-            AppConfig.showDialogRedirectLink(context, url: AppConfig.termsOfServiceUrl(context.localeRead.languageCode));
+            AppConfig.showDialogRedirectLink(
+              context,
+              url: AppConfig.termsOfServiceUrl(context.localeRead.languageCode),
+            );
           },
         ),
         ListTile(
@@ -101,14 +134,25 @@ class Sidebar extends StatelessWidget {
             AppRoutes.navigateTo(context, AppRoutes.aboutApp);
           },
         ),
-        if(kDebugMode)
-        ListTile(
-          leading: Icon(Icons.developer_board_rounded, size: 24),
-          title: Text("Developer", style: drawerTitleStyle),
-          onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => const DeveloperScreen()));
-          },
-        ),
+        if (kDebugMode)
+          ListTile(
+            leading: Icon(Icons.info_rounded, size: 24),
+            title: Text("Demo", style: drawerTitleStyle),
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => DemoScreen()));
+            },
+          ),
+        if (kDebugMode)
+          ListTile(
+            leading: Icon(Icons.developer_board_rounded, size: 24),
+            title: Text("Developer", style: drawerTitleStyle),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DeveloperScreen()),
+              );
+            },
+          ),
       ],
     );
   }

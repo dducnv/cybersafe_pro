@@ -2,7 +2,6 @@ import 'package:cybersafe_pro/migrate_data/migrate_from_old_data.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/local_auth_provider.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
-import 'package:cybersafe_pro/utils/secure_app_state.dart';
 import 'package:cybersafe_pro/utils/secure_application_util.dart';
 // import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
@@ -44,8 +43,6 @@ class LoginMasterPassword extends StatefulWidget {
 }
 
 class _LoginMasterPasswordState extends State<LoginMasterPassword> {
-  bool _mounted = true;
-
   @override
   void initState() {
     super.initState();
@@ -53,35 +50,21 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
   }
 
   Future<void> _initialize() async {
-    if (!widget.fromSecureGate) {
-      SecureApplicationUtil.instance.unlock();
-    }
-
-    if (!_mounted) return;
+    SecureApplicationUtil.instance.pause();
     FlutterNativeSplash.remove();
-
-    // Sử dụng Future.microtask để tránh lỗi dependOnInheritedWidgetOfExactType
     Future.microtask(() async {
       await _handleMigrateData();
 
-      if (!_mounted) return;
+      if (!mounted) return;
 
       try {
-        // Sử dụng provider có sẵn thay vì tạo mới
         final authProvider = Provider.of<LocalAuthProvider>(context, listen: false);
-        // if (SecureApplicationUtil.instance.secureApplicationController != null) SecureApplicationUtil.instance.secureApplicationController?.open();
         await authProvider.init(
           widget.showBiometric && !widget.isFromBackup && !widget.isFromRestore,
-          () {
-            if (widget.secureApplicationController != null)
-              widget.secureApplicationController?.authSuccess(unlock: true);
-            widget.callBackLoginCallback?.call(isLoginSuccess: true);
-            SecureApplicationUtil.instance.setSecureState(SecureAppState.secured);
-          },
+          () {},
           isNavigateToHome: widget.secureApplicationController == null,
         );
-        // Dừng timer
-        if (_mounted && mounted) {
+        if (mounted) {
           context.read<AppProvider>().stopTimer();
         }
       } catch (e) {
@@ -96,7 +79,6 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
 
   @override
   void dispose() {
-    _mounted = false;
     super.dispose();
   }
 

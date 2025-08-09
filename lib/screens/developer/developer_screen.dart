@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/providers/home_provider.dart';
-import 'package:cybersafe_pro/screens/pin_code_widget/pin_code_widget.dart';
+import 'package:cybersafe_pro/screens/login/login_screen.dart';
 import 'package:cybersafe_pro/services/data_manager_service.dart';
 import 'package:cybersafe_pro/utils/toast_noti.dart';
 import 'package:cybersafe_pro/widgets/encrypt_animation/example_usage.dart';
@@ -72,10 +72,7 @@ class DeveloperScreen extends StatelessWidget {
 
               ElevatedButton(
                 onPressed: () async {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => PinCodeWidget(hintText: "Nhập mã pin")),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
                 },
                 child: const Text("Pincode"),
               ),

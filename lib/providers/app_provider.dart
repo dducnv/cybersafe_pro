@@ -41,8 +41,12 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> checkRotateKey() async {
-    final keyCreationTime = await _secureStorage.read(key: SecureStorageKey.encryptionKeyCreationTime);
-    if (keyCreationTime == null || DateTime.now().difference(DateTime.parse(keyCreationTime)) > Duration(days: _durationRotateKey)) {
+    final keyCreationTime = await _secureStorage.read(
+      key: SecureStorageKey.encryptionKeyCreationTime,
+    );
+    if (keyCreationTime == null ||
+        DateTime.now().difference(DateTime.parse(keyCreationTime)) >
+            Duration(days: _durationRotateKey)) {
       isShowRequestRotateKey = true;
     }
   }
@@ -51,7 +55,8 @@ class AppProvider extends ChangeNotifier {
     stopTimer();
     final autoLock = await SecureStorage.instance.readBool(SecureStorageKey.isAutoLock);
     final timeAutoLock = await SecureStorage.instance.readInt(SecureStorageKey.timeAutoLock) ?? 5;
-    final lockOnBackground = await SecureStorage.instance.readBool(SecureStorageKey.lockOnBackground) ?? false;
+    final lockOnBackground =
+        await SecureStorage.instance.readBool(SecureStorageKey.lockOnBackground) ?? false;
     _timeAutoLock = timeAutoLock;
     _lockOnBackground = lockOnBackground;
     if (autoLock == null || !autoLock) {
@@ -78,7 +83,10 @@ class AppProvider extends ChangeNotifier {
 
   void logOutUser() {
     stopTimer();
-    AppRoutes.navigateAndRemoveUntil(GlobalKeys.appRootNavigatorKey.currentContext!, AppRoutes.loginMasterPin);
+    AppRoutes.navigateAndRemoveUntil(
+      GlobalKeys.appRootNavigatorKey.currentContext!,
+      AppRoutes.loginMasterPin,
+    );
   }
 
   void handleUserInteraction([_]) {
@@ -111,7 +119,6 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> handleAppResume(BuildContext context) async {
-    logInfo("APP RESUME");
     context.read<AppProvider>().initializeTimer();
     await context.read<HomeProvider>().initData();
   }

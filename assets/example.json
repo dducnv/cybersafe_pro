@@ -1,0 +1,17 @@
+{
+  "document": {
+    "type": "page",
+    "children": [
+      {
+        "type": "paragraph",
+        "data": {
+          "delta": [
+            {
+              "insert": ""
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

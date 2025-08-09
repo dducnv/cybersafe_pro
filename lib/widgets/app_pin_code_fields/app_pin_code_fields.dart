@@ -44,8 +44,10 @@ class AppPinCodeFieldsState extends State<AppPinCodeFields> {
   void initState() {
     errorController = StreamController<ErrorAnimationType>();
     super.initState();
-    widget.textEditingController?.clear();
-    HardwareKeyboard.instance.addHandler((event) => _keyboardCallback(event));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.textEditingController?.clear();
+      HardwareKeyboard.instance.addHandler((event) => _keyboardCallback(event));
+    });
   }
 
   bool _keyboardCallback(KeyEvent event) {
@@ -71,7 +73,10 @@ class AppPinCodeFieldsState extends State<AppPinCodeFields> {
         errorController.add(ErrorAnimationType.shake);
       }
     } catch (e) {
-      logError('Error triggering animation: $e', functionName: "AppPinCodeFieldsState.triggerErrorAnimation");
+      logError(
+        'Error triggering animation: $e',
+        functionName: "AppPinCodeFieldsState.triggerErrorAnimation",
+      );
     }
   }
 
@@ -86,7 +91,10 @@ class AppPinCodeFieldsState extends State<AppPinCodeFields> {
       child: PinCodeTextField(
         appContext: context,
         focusNode: widget.focusNode,
-        pastedTextStyle: CustomTextStyle.regular(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold),
+        pastedTextStyle: CustomTextStyle.regular(
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.bold,
+        ),
         length: 6,
         autoFocus: widget.autoFocus ?? false,
         obscureText: true,

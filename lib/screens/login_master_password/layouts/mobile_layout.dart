@@ -11,7 +11,6 @@ import 'package:cybersafe_pro/services/local_auth_service.dart';
 import 'package:cybersafe_pro/utils/device_type.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
-import 'package:cybersafe_pro/utils/secure_app_state.dart';
 import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:cybersafe_pro/utils/toast_noti.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
@@ -293,10 +292,9 @@ class _MobileLayoutState extends State<MobileLayout> {
             appPinCodeKey: _pinCodeKey,
           );
         }
-        widget.secureApplicationController?.authSuccess(unlock: true);
-        SecureApplicationUtil.instance.setSecureState(SecureAppState.secured);
+        SecureApplicationUtil.instance.authSuccess();
       } else {
-        widget.secureApplicationController?.authFailed(unlock: false);
+        SecureApplicationUtil.instance.authFailed();
       }
       return;
     }
@@ -304,9 +302,10 @@ class _MobileLayoutState extends State<MobileLayout> {
       if (widget.callBackLoginCallback != null) {
         widget.callBackLoginCallback!(
           isLoginSuccess: true,
-          pin: provider.textEditingController.text ?? '',
+          pin: provider.textEditingController.text,
           appPinCodeKey: _pinCodeKey,
         );
+        SecureApplicationUtil.instance.unpause();
       }
       return;
     }
@@ -314,7 +313,6 @@ class _MobileLayoutState extends State<MobileLayout> {
     bool isLoginSuccess = await provider.handleLogin();
 
     if (isLoginSuccess && mounted) {
-      SecureApplicationUtil.instance.setSecureState(SecureAppState.secured);
       if (widget.callBackLoginCallback != null) {
         widget.callBackLoginCallback!(
           isLoginSuccess: true,
@@ -333,6 +331,8 @@ class _MobileLayoutState extends State<MobileLayout> {
         }
       } catch (e) {
         logError('Error navigating after login: $e');
+      } finally {
+        SecureApplicationUtil.instance.unpause();
       }
     } else {
       if (!mounted) return;

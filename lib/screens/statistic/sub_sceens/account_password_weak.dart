@@ -6,6 +6,7 @@ import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dar
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/account_list_tile_widgets.dart';
 import 'package:cybersafe_pro/widgets/card_item.dart';
+import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -16,7 +17,10 @@ class AccountPasswordWeak extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.trStatistic(StatisticText.totalAccountPasswordWeak)),
+        title: Text(
+          context.trStatistic(StatisticText.totalAccountPasswordWeak),
+          style: CustomTextStyle.regular(fontSize: 18.sp),
+        ),
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: Theme.of(context).colorScheme.surface,

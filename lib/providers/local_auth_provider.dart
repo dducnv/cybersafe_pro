@@ -1,21 +1,19 @@
+import 'dart:async';
+
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/services/data_secure_service.dart';
-import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
-import 'package:cybersafe_pro/services/local_auth_service.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
+import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
-
 import 'package:provider/provider.dart';
 
 class LocalAuthProvider extends ChangeNotifier {
-
   // Controllers
   late FocusNode focusNode;
   late TextEditingController textEditingController;
@@ -46,31 +44,38 @@ class LocalAuthProvider extends ChangeNotifier {
     formKey = GlobalKey<FormState>();
   }
 
-  Future<void> init(bool canUseBiometric, Function() biometricLoginCallBack, {bool isNavigateToHome = true}) async {
+  Future<void> init(
+    bool canUseBiometric,
+    Function() biometricLoginCallBack, {
+    bool isNavigateToHome = true,
+  }) async {
     await _checkLockStatus();
     await checkAndUpdateLockStatus();
-    if (_shouldUseBiometric(canUseBiometric)) {
-      await _handleBiometricAuth(biometricLoginCallBack, isNavigateToHome: isNavigateToHome);
-    } else {
-      await _focusPinInput();
-    }
+
+    await _focusPinInput();
+    // }
   }
 
-  bool _shouldUseBiometric(bool canUseBiometric) {
-    return LocalAuthConfig.instance.isAvailableBiometrics && LocalAuthConfig.instance.isOpenUseBiometric && canUseBiometric;
-  }
+  // bool _shouldUseBiometric(bool canUseBiometric) {
+  //   return LocalAuthConfig.instance.isAvailableBiometrics &&
+  //       LocalAuthConfig.instance.isOpenUseBiometric &&
+  //       canUseBiometric;
+  // }
 
-  Future<void> _handleBiometricAuth(Function() biometricLoginCallBack, {bool isNavigateToHome = true}) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    bool isAuth = await checkLocalAuth();
+  // Future<void> _handleBiometricAuth(
+  //   Function() biometricLoginCallBack, {
+  //   bool isNavigateToHome = true,
+  // }) async {
+  //   await Future.delayed(const Duration(milliseconds: 500));
+  //   bool isAuth = await checkLocalAuth();
 
-    if (isAuth) {
-      if (isNavigateToHome) navigatorToHome();
-      biometricLoginCallBack.call();
-    } else {
-      await _focusPinInput();
-    }
-  }
+  //   if (isAuth) {
+  //     if (isNavigateToHome) navigatorToHome();
+  //     biometricLoginCallBack.call();
+  //   } else {
+  //     await _focusPinInput();
+  //   }
+  // }
 
   Future<void> _focusPinInput() async {
     await Future.delayed(const Duration(milliseconds: 250));
@@ -213,6 +218,14 @@ class LocalAuthProvider extends ChangeNotifier {
   void onBiometric() async {
     try {
       bool isAuth = await checkLocalAuth();
+      if (SecureApplicationUtil.instance.secureApplicationController?.locked == true) {
+        if (isAuth) {
+          SecureApplicationUtil.instance.authSuccess();
+        } else {
+          SecureApplicationUtil.instance.authFailed();
+        }
+        return;
+      }
       if (isAuth) {
         navigatorToHome();
       }
@@ -223,7 +236,9 @@ class LocalAuthProvider extends ChangeNotifier {
 
   Future<bool> verifyLoginPinCode(String pinCode) async {
     try {
-      String? pinCodeEncryptedFromStorage = await SecureStorage.instance.read(key: SecureStorageKey.pinCode);
+      String? pinCodeEncryptedFromStorage = await SecureStorage.instance.read(
+        key: SecureStorageKey.pinCode,
+      );
       if (pinCodeEncryptedFromStorage == null) return false;
       String pinCodeEncrypted = await DataSecureService.decryptPinCode(pinCodeEncryptedFromStorage);
       return pinCodeEncrypted == pinCode;
@@ -250,7 +265,9 @@ class LocalAuthProvider extends ChangeNotifier {
     try {
       final lockUntilStr = await SecureStorage.instance.read(key: SecureStorageKey.lockUntil);
       final failCount = await SecureStorage.instance.read(key: SecureStorageKey.loginFailCount);
-      final multiplierStr = await SecureStorage.instance.read(key: SecureStorageKey.lockDurationMultiplier);
+      final multiplierStr = await SecureStorage.instance.read(
+        key: SecureStorageKey.lockDurationMultiplier,
+      );
 
       if (lockUntilStr != null) {
         final lockUntil = DateTime.parse(lockUntilStr);
@@ -306,9 +323,18 @@ class LocalAuthProvider extends ChangeNotifier {
     _lockUntil = DateTime.now().add(Duration(minutes: lockDurationMinutes));
 
     // Lưu thông tin khóa vào bộ nhớ
-    await SecureStorage.instance.save(key: SecureStorageKey.lockUntil, value: _lockUntil!.toIso8601String());
-    await SecureStorage.instance.save(key: SecureStorageKey.loginFailCount, value: _loginFailCount.toString());
-    await SecureStorage.instance.save(key: SecureStorageKey.lockDurationMultiplier, value: _lockDurationMultiplier.toString());
+    await SecureStorage.instance.save(
+      key: SecureStorageKey.lockUntil,
+      value: _lockUntil!.toIso8601String(),
+    );
+    await SecureStorage.instance.save(
+      key: SecureStorageKey.loginFailCount,
+      value: _loginFailCount.toString(),
+    );
+    await SecureStorage.instance.save(
+      key: SecureStorageKey.lockDurationMultiplier,
+      value: _lockDurationMultiplier.toString(),
+    );
 
     _startLockTimer();
     notifyListeners();
@@ -317,7 +343,10 @@ class LocalAuthProvider extends ChangeNotifier {
   // Tăng số lần đăng nhập thất bại
   Future<void> _incrementFailCount() async {
     _loginFailCount++;
-    await SecureStorage.instance.save(key: SecureStorageKey.loginFailCount, value: _loginFailCount.toString());
+    await SecureStorage.instance.save(
+      key: SecureStorageKey.loginFailCount,
+      value: _loginFailCount.toString(),
+    );
 
     // Nếu vượt quá số lần thử tối đa, khóa tài khoản
     if (_loginFailCount >= _maxLoginAttempts) {
@@ -325,7 +354,10 @@ class LocalAuthProvider extends ChangeNotifier {
       _lockDurationMultiplier *= 2;
 
       // Lưu hệ số mới
-      await SecureStorage.instance.save(key: SecureStorageKey.lockDurationMultiplier, value: _lockDurationMultiplier.toString());
+      await SecureStorage.instance.save(
+        key: SecureStorageKey.lockDurationMultiplier,
+        value: _lockDurationMultiplier.toString(),
+      );
 
       await _lockAccount();
       _loginFailCount = 0; // Reset lại đếm số lần đăng nhập sai

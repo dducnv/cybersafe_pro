@@ -34,7 +34,10 @@ class SettingMobileLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.appLocale.settingsLocale.getText(SettingsLocale.settings)),
+        title: Text(
+          context.appLocale.settingsLocale.getText(SettingsLocale.settings),
+          style: CustomTextStyle.regular(fontSize: 18.sp),
+        ),
         backgroundColor: Theme.of(context).colorScheme.surface,
         scrolledUnderElevation: 0,
         elevation: 0,
@@ -363,8 +366,7 @@ class SettingMobileLayout extends StatelessWidget {
                     showToastSuccess("Data restore successfully", context: context);
                     context.read<HomeProvider>().refreshData();
                   }
-                } catch (e, s) {
-                  print("e: $e\n$s");
+                } catch (e) {
                   if (!context.mounted) return;
                   if (e.toString().contains("KEY_INVALID")) {
                     showToastError("Data restore failed, pin is incorrect", context: context);

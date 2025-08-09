@@ -42,11 +42,13 @@ class IconPicker extends StatelessWidget {
                       filterQuality: FilterQuality.high,
                       gaplessPlayback: true,
                     )
-                    : formProvider.branchLogoSelected != null
+                    : formProvider.branchLogoSelected != null &&
+                        formProvider.branchLogoSelected!.branchLogoPathLightMode != null &&
+                        formProvider.branchLogoSelected!.branchLogoPathDarkMode != null
                     ? SvgPicture.asset(
                       context.darkMode
-                          ? formProvider.branchLogoSelected!.branchLogoPathDarkMode!
-                          : formProvider.branchLogoSelected!.branchLogoPathLightMode!,
+                          ? formProvider.branchLogoSelected!.branchLogoPathDarkMode ?? ""
+                          : formProvider.branchLogoSelected!.branchLogoPathLightMode ?? "",
                       width: 60,
                       height: 60,
                       fit: BoxFit.contain,

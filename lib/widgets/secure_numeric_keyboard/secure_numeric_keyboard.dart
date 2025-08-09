@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
@@ -7,8 +5,7 @@ import 'package:flutter/material.dart';
 class SecureNumericKeyboard extends StatefulWidget {
   final TextEditingController controller;
   final ScrollController scrollController;
-  final bool shuffleNumbers;
-  final VoidCallback? onDonePressed;
+  final Function(String value)? onDonePressed;
   final Color backgroundColor;
   final Color buttonColor;
   final Color textColor;
@@ -16,12 +13,12 @@ class SecureNumericKeyboard extends StatefulWidget {
   final double buttonSize;
   final double buttonSpacing;
   final double buttonRadius;
+  final Widget? centerButton;
 
   const SecureNumericKeyboard({
     super.key,
     required this.controller,
     required this.scrollController,
-    this.shuffleNumbers = true,
     this.onDonePressed,
     this.backgroundColor = const Color(0xFFF5F5F5),
     this.buttonColor = const Color(0xFFFFFFFF),
@@ -30,6 +27,7 @@ class SecureNumericKeyboard extends StatefulWidget {
     this.buttonSize = 65.0,
     this.buttonSpacing = 10.0,
     this.buttonRadius = 10.0,
+    this.centerButton,
   });
 
   @override
@@ -37,19 +35,9 @@ class SecureNumericKeyboard extends StatefulWidget {
 }
 
 class _SecureNumericKeyboardState extends State<SecureNumericKeyboard> {
-  late List<int> _numbers;
-
   @override
   void initState() {
     super.initState();
-    _shuffleNumbers();
-  }
-
-  void _shuffleNumbers() {
-    _numbers = List.generate(10, (index) => index);
-    if (widget.shuffleNumbers) {
-      _numbers.shuffle(Random());
-    }
   }
 
   void _onKeyPressed(String value) {
@@ -65,10 +53,6 @@ class _SecureNumericKeyboardState extends State<SecureNumericKeyboard> {
     widget.controller.selection = TextSelection.fromPosition(
       TextPosition(offset: widget.controller.text.length),
     );
-
-    setState(() {
-      _shuffleNumbers();
-    });
   }
 
   void _onBackspacePressed() {
@@ -79,16 +63,12 @@ class _SecureNumericKeyboardState extends State<SecureNumericKeyboard> {
       widget.controller.selection = TextSelection.fromPosition(
         TextPosition(offset: widget.controller.text.length),
       );
-
-      setState(() {
-        _shuffleNumbers();
-      });
     }
   }
 
   void _onDonePressed() {
     if (widget.onDonePressed != null) {
-      widget.onDonePressed!();
+      widget.onDonePressed!(widget.controller.text);
     }
   }
 
@@ -100,18 +80,15 @@ class _SecureNumericKeyboardState extends State<SecureNumericKeyboard> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildKeyboardRow([_numbers[1], _numbers[2], _numbers[3]]),
+          _buildKeyboardRow([1, 2, 3]),
           SizedBox(height: widget.buttonSpacing),
-          _buildKeyboardRow([_numbers[4], _numbers[5], _numbers[6]]),
+          _buildKeyboardRow([4, 5, 6]),
           SizedBox(height: widget.buttonSpacing),
-          _buildKeyboardRow([_numbers[7], _numbers[8], _numbers[9]]),
+          _buildKeyboardRow([7, 8, 9]),
           SizedBox(height: widget.buttonSpacing),
-          _buildKeyboardRow([
-            -1, // Placeholder for empty button
-            _numbers[0],
-            -2, // Placeholder for backspace button
-          ]),
+          _buildKeyboardRow([-1, 0, -2]),
           SizedBox(height: widget.buttonSpacing),
+          if (widget.centerButton != null) widget.centerButton!,
         ],
       ),
     );
@@ -136,6 +113,8 @@ class _SecureNumericKeyboardState extends State<SecureNumericKeyboard> {
                 bgColor: Colors.transparent,
                 onPressed: _onDonePressed,
               );
+            } else if (value == -3) {
+              return SizedBox(width: widget.buttonSize);
             } else {
               // Number button
               return _buildButton(

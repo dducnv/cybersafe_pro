@@ -3,10 +3,6 @@
 <plist version="1.0">
 <dict>
 	<key>com.apple.security.app-sandbox</key>
-	<false/>
-	<key>keychain-access-groups</key>
-	<array>
-		<string>$(AppIdentifierPrefix)com.example.cybersafePro</string>
-	</array>
+	<true/>
 </dict>
 </plist>

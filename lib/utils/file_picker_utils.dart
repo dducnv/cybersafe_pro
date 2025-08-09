@@ -1,11 +1,14 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:cybersafe_pro/utils/secure_application_util.dart';
-import 'package:cybersafe_pro/utils/secure_app_state.dart';
+import 'package:file_picker/file_picker.dart';
 
 class FilePickerUtils {
-  static Future<FilePickerResult?> pickFile({FileType type = FileType.any, List<String>? allowedExtensions, bool allowMultiple = false, bool withData = false}) async {
-    // Tạm thời vô hiệu hóa bảo mật
-    SecureApplicationUtil.instance.setSecureState(SecureAppState.partial);
+  static Future<FilePickerResult?> pickFile({
+    FileType type = FileType.any,
+    List<String>? allowedExtensions,
+    bool allowMultiple = false,
+    bool withData = false,
+  }) async {
+    SecureApplicationUtil.instance.pause();
     try {
       final result = await FilePicker.platform.pickFiles(
         type: type,
@@ -19,7 +22,7 @@ class FilePickerUtils {
 
       return result;
     } finally {
-      SecureApplicationUtil.instance.unlock();
+      SecureApplicationUtil.instance.unpause();
     }
   }
 }
