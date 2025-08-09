@@ -4,7 +4,13 @@ class BranchLogo {
   final String? branchLogoPathLightMode;
   final String? branchLogoPathDarkMode;
   final List<String>? keyWords;
-  BranchLogo(this.keyWords, this.branchLogoSlug, {this.branchName, this.branchLogoPathLightMode, this.branchLogoPathDarkMode});
+  BranchLogo(
+    this.keyWords,
+    this.branchLogoSlug, {
+    this.branchName,
+    this.branchLogoPathLightMode,
+    this.branchLogoPathDarkMode,
+  });
 }
 
 class BranchLogoCategory {
@@ -60,6 +66,7 @@ List<BranchLogoCategory> branchLogoCategories = [
       coursera,
     },
   ),
+  BranchLogoCategory(categoryName: 'Government', branchLogos: {vneid, mAadhaar}),
   BranchLogoCategory(categoryName: 'E-commerce', branchLogos: {amazon, shopee, tiki}),
   BranchLogoCategory(
     categoryName: 'Bank & Payment',
@@ -114,6 +121,8 @@ List<BranchLogo> allBranchLogos = [
   github,
   slack,
   heroku,
+  vneid,
+  mAadhaar,
   qq,
   reddit,
   skype,
@@ -157,6 +166,23 @@ List<BranchLogo> allBranchLogos = [
   shopee,
 ];
 
+//Government
+BranchLogo vneid = BranchLogo(
+  ['vneid'],
+  'vneid',
+  branchName: 'VNeID',
+  branchLogoPathLightMode: 'assets/icons/brand_icons/VNeID_logo.svg',
+  branchLogoPathDarkMode: 'assets/icons/brand_icons/VNeID_logo.svg',
+);
+
+BranchLogo mAadhaar = BranchLogo(
+  ['mAadhaar'],
+  'mAadhaar',
+  branchName: 'mAadhaar',
+  branchLogoPathLightMode: 'assets/icons/brand_icons/mAadhaar.svg',
+  branchLogoPathDarkMode: 'assets/icons/brand_icons/mAadhaar.svg',
+);
+
 BranchLogo gitlab = BranchLogo(
   ['gitlab'],
   'gitlab',
@@ -188,7 +214,13 @@ BranchLogo instagram = BranchLogo(
   branchLogoPathDarkMode: 'assets/icons/brand_icons/instagram_icon.svg',
 );
 
-BranchLogo x = BranchLogo(['x'], 'x', branchName: 'X', branchLogoPathLightMode: 'assets/icons/brand_icons/x_icon_black.svg', branchLogoPathDarkMode: 'assets/icons/brand_icons/x_icon_white.svg');
+BranchLogo x = BranchLogo(
+  ['x'],
+  'x',
+  branchName: 'X',
+  branchLogoPathLightMode: 'assets/icons/brand_icons/x_icon_black.svg',
+  branchLogoPathDarkMode: 'assets/icons/brand_icons/x_icon_white.svg',
+);
 BranchLogo twitter = BranchLogo(
   ['twitter', 'twt'],
   'twitter',
@@ -246,7 +278,18 @@ BranchLogo microsoft = BranchLogo(
   branchLogoPathDarkMode: 'assets/icons/brand_icons/microsoft_icon.svg',
 );
 BranchLogo apple = BranchLogo(
-  ['apple', "icloud", "macbook", "iphone", "ipad", "watch", "airpod", "i cloud", "apple id", "appleid"],
+  [
+    'apple',
+    "icloud",
+    "macbook",
+    "iphone",
+    "ipad",
+    "watch",
+    "airpod",
+    "i cloud",
+    "apple id",
+    "appleid",
+  ],
   'apple',
   branchName: 'Apple',
   branchLogoPathLightMode: 'assets/icons/brand_icons/apple_icon-black.svg',
@@ -315,7 +358,13 @@ BranchLogo paypal = BranchLogo(
   branchLogoPathLightMode: 'assets/icons/brand_icons/paypal_icon.svg',
   branchLogoPathDarkMode: 'assets/icons/brand_icons/paypal_icon.svg',
 );
-BranchLogo qq = BranchLogo(['qq'], 'qq', branchName: 'QQ', branchLogoPathLightMode: 'assets/icons/brand_icons/qq_icon.svg', branchLogoPathDarkMode: 'assets/icons/brand_icons/qq_icon.svg');
+BranchLogo qq = BranchLogo(
+  ['qq'],
+  'qq',
+  branchName: 'QQ',
+  branchLogoPathLightMode: 'assets/icons/brand_icons/qq_icon.svg',
+  branchLogoPathDarkMode: 'assets/icons/brand_icons/qq_icon.svg',
+);
 BranchLogo reddit = BranchLogo(
   ['reddit'],
   'reddit',

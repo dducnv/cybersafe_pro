@@ -30,7 +30,6 @@ dependencies:
   crypto: ^3.0.6
   envied: ^1.1.1
   encrypt: ^5.0.3
-  archive: ^4.0.4
   local_auth: ^2.3.0
   pointycastle: ^3.9.1
   url_launcher: ^6.3.1
@@ -66,7 +65,6 @@ dependencies:
   flutter_styled_toast: ^2.2.1
   flutter_native_splash: ^2.4.5
   qr_code_scanner_plus: ^2.0.10+1
-  flutter_sharing_intent: ^1.1.1
   password_strength_checker: ^1.2.4
   flutter_staggered_animations: ^1.1.1
   flutter_quill: ^11.4.2
