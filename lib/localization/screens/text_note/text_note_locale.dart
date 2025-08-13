@@ -30,7 +30,7 @@ class TextNoteLocale extends BaseLocale {
     NoteText.deleteConfirmation: "Are you sure you want to delete this note?",
     NoteText.deleteManyConfirmation: "Are you sure you want to delete [number] notes?",
     NoteText.selectNote: "Select Note",
-    NoteText.choseNoteColor: "Chose Note Color",
+    NoteText.choseNoteColor: "Chose note color",
   };
 
   @override
@@ -44,8 +44,8 @@ class TextNoteLocale extends BaseLocale {
     NoteText.cancelDelete: "Cancelar",
     NoteText.deleteConfirmation: "¿Estás seguro de querer eliminar esta nota?",
     NoteText.deleteManyConfirmation: "¿Estás seguro de querer eliminar [number] notas?",
-    NoteText.selectNote: "Seleccionar Nota",
-    NoteText.choseNoteColor: "Elegir Color de Nota",
+    NoteText.selectNote: "Seleccionar nota",
+    NoteText.choseNoteColor: "Elegir color de nota",
   };
 
   @override
@@ -74,8 +74,8 @@ class TextNoteLocale extends BaseLocale {
     NoteText.cancelDelete: "Batal",
     NoteText.deleteConfirmation: "Apakah Anda yakin ingin menghapus catatan ini?",
     NoteText.deleteManyConfirmation: "Apakah Anda yakin ingin menghapus [number] catatan?",
-    NoteText.selectNote: "Pilih Catatan",
-    NoteText.choseNoteColor: "Pilih Warna Catatan",
+    NoteText.selectNote: "Pilih catatan",
+    NoteText.choseNoteColor: "Pilih warna catatan",
   };
 
   @override
@@ -104,8 +104,8 @@ class TextNoteLocale extends BaseLocale {
     NoteText.cancelDelete: "Cancelar",
     NoteText.deleteConfirmation: "Tem certeza que deseja excluir esta nota?",
     NoteText.deleteManyConfirmation: "Tem certeza que deseja excluir [number] notas?",
-    NoteText.selectNote: "Selecionar Nota",
-    NoteText.choseNoteColor: "Escolher Cor da Nota",
+    NoteText.selectNote: "Selecionar nota",
+    NoteText.choseNoteColor: "Escolher cor da Nota",
   };
 
   @override
@@ -134,8 +134,8 @@ class TextNoteLocale extends BaseLocale {
     NoteText.cancelDelete: "İptal",
     NoteText.deleteConfirmation: "Bu notu silmek istediğinize emin misiniz?",
     NoteText.deleteManyConfirmation: "[number] notları silmek istediğinize emin misiniz?",
-    NoteText.selectNote: "Not Seç",
-    NoteText.choseNoteColor: "Not Rengini Seç",
+    NoteText.selectNote: "Not seç",
+    NoteText.choseNoteColor: "Not rengini seç",
   };
 
   @override
@@ -149,7 +149,7 @@ class TextNoteLocale extends BaseLocale {
     NoteText.cancelDelete: "Hủy",
     NoteText.deleteConfirmation: "Bạn có chắc chắn muốn xóa ghi chú này không?",
     NoteText.deleteManyConfirmation: "Bạn có chắc chắn muốn xóa [number] ghi chú không?",
-    NoteText.selectNote: "Chọn Ghi chú",
-    NoteText.choseNoteColor: "Chọn Màu Ghi chú",
+    NoteText.selectNote: "Chọn ghi chú",
+    NoteText.choseNoteColor: "Chọn màu ghi chú",
   };
 }

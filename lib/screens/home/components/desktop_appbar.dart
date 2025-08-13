@@ -4,12 +4,10 @@ import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
-import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/providers/desktop_home_provider.dart';
 import 'package:cybersafe_pro/providers/home_provider.dart';
 import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/screens/create_account/layouts/mobile_layout.dart';
-import 'package:cybersafe_pro/screens/details_account/layouts/mobile_layout.dart';
 import 'package:cybersafe_pro/screens/settings/layouts/mobile_layout.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
@@ -39,10 +37,14 @@ class _DesktopAppbarState extends State<DesktopAppbar> {
           elevation: 0,
           scrolledUnderElevation: 0,
           automaticallyImplyLeading: false,
-          backgroundColor: isHasAccountSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surface,
+          backgroundColor:
+              isHasAccountSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.surface,
           title: AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
-            transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+            transitionBuilder:
+                (child, animation) => FadeTransition(opacity: animation, child: child),
             child:
                 isHasAccountSelected
                     ? Row(
@@ -63,7 +65,10 @@ class _DesktopAppbarState extends State<DesktopAppbar> {
                                   context,
                                   onSelected: (CategoryDriftModelData category) {
                                     final homeProvider = context.read<HomeProvider>();
-                                    context.read<AccountProvider>().handleChangeCategory(accountSelected: homeProvider.accountSelected, category: category);
+                                    context.read<AccountProvider>().handleChangeCategory(
+                                      accountSelected: homeProvider.accountSelected,
+                                      category: category,
+                                    );
                                   },
                                   isFromChangeCategory: true,
                                 );
@@ -86,9 +91,15 @@ class _DesktopAppbarState extends State<DesktopAppbar> {
                                     onConfirm: () async {
                                       Navigator.pop(context);
                                       final homeProvider = context.read<HomeProvider>();
-                                      await context.read<AccountProvider>().handleDeleteAllSelectedAccounts(accountSelected: homeProvider.accountSelected);
+                                      await context
+                                          .read<AccountProvider>()
+                                          .handleDeleteAllSelectedAccounts(
+                                            accountSelected: homeProvider.accountSelected,
+                                          );
                                       if (context.mounted) {
-                                        context.read<DesktopHomeProvider>().handleClearAccountsSelected();
+                                        context
+                                            .read<DesktopHomeProvider>()
+                                            .handleClearAccountsSelected();
                                         context.read<HomeProvider>().refreshData();
                                       }
                                     },
@@ -99,7 +110,14 @@ class _DesktopAppbarState extends State<DesktopAppbar> {
                                 children: [
                                   Icon(Icons.delete_rounded, color: Colors.redAccent, size: 24.sp),
                                   const SizedBox(width: 5),
-                                  Text(accountSelected.length.toString(), style: CustomTextStyle.regular(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 18.sp)),
+                                  Text(
+                                    accountSelected.length.toString(),
+                                    style: CustomTextStyle.regular(
+                                      color: Colors.redAccent,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18.sp,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -117,7 +135,13 @@ class _DesktopAppbarState extends State<DesktopAppbar> {
                           width: 50,
                           height: 50,
                           onPressed: () {
-                            showModalSideSheet(context: context, ignoreAppBar: true, barrierDismissible: true, withCloseControll: false, body: CreateAccountMobileLayout());
+                            showModalSideSheet(
+                              context: context,
+                              ignoreAppBar: true,
+                              barrierDismissible: true,
+                              withCloseControll: false,
+                              body: CreateAccountMobileLayout(),
+                            );
                           },
                           text: "",
                           child: Icon(Icons.add, color: Colors.white, size: 22),
@@ -149,10 +173,20 @@ class _DesktopAppbarState extends State<DesktopAppbar> {
                           width: 50,
                           height: 50,
                           onPressed: () {
-                            showModalSideSheet(context: context, ignoreAppBar: true, barrierDismissible: true, withCloseControll: false, body: SettingMobileLayout());
+                            showModalSideSheet(
+                              context: context,
+                              ignoreAppBar: true,
+                              barrierDismissible: true,
+                              withCloseControll: false,
+                              body: SettingMobileLayout(),
+                            );
                           },
                           text: "",
-                          child: Icon(Icons.settings, size: 22, color: context.darkMode ? Colors.white : Colors.grey[700]),
+                          child: Icon(
+                            Icons.settings,
+                            size: 22,
+                            color: context.darkMode ? Colors.white : Colors.grey[700],
+                          ),
                         ),
                       ],
                     ),

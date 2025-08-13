@@ -301,7 +301,7 @@ class _NoteDayGroupState extends State<_NoteDayGroup> {
             future: context.read<NoteProvider>().getDecryptedNoteCards(selectedNotes),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
+                return const SizedBox.shrink();
               }
               _cachedNoteCards = snapshot.data ?? [];
               return _buildDayGroup(_cachedNoteCards!);

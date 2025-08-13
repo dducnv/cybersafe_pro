@@ -53,7 +53,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused) {
       context.read<AppProvider>().handleAppBackground(context);
-      final currentRoute = ModalRoute.of(context)?.settings.name;
     } else if (state == AppLifecycleState.resumed) {
       context.read<AppProvider>().handleAppResume(context);
       await DriffDbManager.instance.init();

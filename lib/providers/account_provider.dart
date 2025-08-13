@@ -1,16 +1,17 @@
+import 'dart:math' as math;
+
 import 'package:cybersafe_pro/providers/account_form_provider.dart';
-import 'package:cybersafe_pro/repositories/driff_db/models/account_aggregate.dart';
 import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
+import 'package:cybersafe_pro/repositories/driff_db/models/account_aggregate.dart';
 import 'package:cybersafe_pro/resources/brand_logo.dart';
 import 'package:cybersafe_pro/services/account/account_services.dart';
 import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/services/otp.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
-import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
+import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 
 class AccountProvider extends ChangeNotifier {
   final Map<int, AccountDriftModelData> _accounts = {};
@@ -20,21 +21,34 @@ class AccountProvider extends ChangeNotifier {
 
   Map<int, AccountDriftModelData> get accounts => Map.unmodifiable(_accounts);
   List<AccountDriftModelData> get accountList => _accounts.values.toList();
-  Map<int, List<AccountDriftModelData>> get groupedAccountsByCategoryId => Map.unmodifiable(_groupedCategoryIdAccounts);
+  Map<int, List<AccountDriftModelData>> get groupedAccountsByCategoryId =>
+      Map.unmodifiable(_groupedCategoryIdAccounts);
   List<IconCustomDriftModelData> listIconsCustom = [];
 
-  Future<void> getLimitAccountsByCategory({required Map<int, CategoryDriftModelData> mapCategories, required int limit}) async {
+  Future<void> getLimitAccountsByCategory({
+    required Map<int, CategoryDriftModelData> mapCategories,
+    required int limit,
+  }) async {
     clearData();
     if (mapCategories.isEmpty) return;
     final categories = mapCategories.values.toList();
     await getTotalAccountsByCategory(categoryIds: categories.map((e) => e.id).toList());
-    final accountsByCategory = await DriffDbManager.instance.accountAdapter.getByCategoriesWithLimit(categories, limit);
+    final accountsByCategory = await DriffDbManager.instance.accountAdapter
+        .getByCategoriesWithLimit(categories, limit);
     await _processAccountsByCategory(accountsByCategory: accountsByCategory);
   }
 
-  Future<List<AccountDriftModelData>> loadMoreAccountsForCategory({required int categoryId, required int limit, required int offset}) async {
+  Future<List<AccountDriftModelData>> loadMoreAccountsForCategory({
+    required int categoryId,
+    required int limit,
+    required int offset,
+  }) async {
     // Load more accounts using the provided offset
-    final moreAccounts = await DriffDbManager.instance.accountAdapter.getBasicByCategoryWithLimit(categoryId: categoryId, limit: limit, offset: offset);
+    final moreAccounts = await DriffDbManager.instance.accountAdapter.getBasicByCategoryWithLimit(
+      categoryId: categoryId,
+      limit: limit,
+      offset: offset,
+    );
 
     if (moreAccounts.isEmpty) {
       return [];
@@ -56,7 +70,9 @@ class AccountProvider extends ChangeNotifier {
   }
 
   Future<void> getTotalAccountsByCategory({required List<int> categoryIds}) async {
-    final accountCounts = await DriffDbManager.instance.accountAdapter.countByCategories(categoryIds);
+    final accountCounts = await DriffDbManager.instance.accountAdapter.countByCategories(
+      categoryIds,
+    );
     mapCategoryIdTotalAccount.addAll(accountCounts);
   }
 
@@ -67,7 +83,9 @@ class AccountProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _processAccountsByCategory({required Map<int, List<AccountDriftModelData>> accountsByCategory}) async {
+  Future<void> _processAccountsByCategory({
+    required Map<int, List<AccountDriftModelData>> accountsByCategory,
+  }) async {
     for (var categoryId in accountsByCategory.keys) {
       final accounts = accountsByCategory[categoryId] ?? [];
 
@@ -118,7 +136,14 @@ class AccountProvider extends ChangeNotifier {
           }).toList(),
       totp:
           form.otpController.text.isNotEmpty
-              ? TOTPDriftModelData(id: 0, accountId: form.accountId, secretKey: form.otpController.text.toUpperCase().trim(), isShowToHome: false, createdAt: now, updatedAt: now)
+              ? TOTPDriftModelData(
+                id: 0,
+                accountId: form.accountId,
+                secretKey: form.otpController.text.toUpperCase().trim(),
+                isShowToHome: false,
+                createdAt: now,
+                updatedAt: now,
+              )
               : null,
     );
 
@@ -129,7 +154,10 @@ class AccountProvider extends ChangeNotifier {
     return result;
   }
 
-  Future<bool> createOrUpdateAccount(AccountAggregate accountDaoModel, {bool isUpdate = false}) async {
+  Future<bool> createOrUpdateAccount(
+    AccountAggregate accountDaoModel, {
+    bool isUpdate = false,
+  }) async {
     final stopwatch = Stopwatch()..start();
 
     if (accountDaoModel.account.title.trim().isEmpty) {
@@ -138,11 +166,16 @@ class AccountProvider extends ChangeNotifier {
 
     AccountDriftModelData? accountToSave;
     if (isUpdate) {
-      AccountDriftModelData? currentAccount = accountDaoModel.account.id != 0 ? await DriffDbManager.instance.accountAdapter.getById(accountDaoModel.account.id) : null;
+      AccountDriftModelData? currentAccount =
+          accountDaoModel.account.id != 0
+              ? await DriffDbManager.instance.accountAdapter.getById(accountDaoModel.account.id)
+              : null;
       if (currentAccount == null) throw Exception('Account not found');
 
       String? newPassword;
-      final currentPassword = await DataSecureService.decryptPassword(currentAccount.password ?? '');
+      final currentPassword = await DataSecureService.decryptPassword(
+        currentAccount.password ?? '',
+      );
       final newPasswordFromForm = accountDaoModel.account.password ?? '';
 
       if (currentPassword != newPasswordFromForm && newPasswordFromForm.isNotEmpty) {
@@ -166,7 +199,9 @@ class AccountProvider extends ChangeNotifier {
       accountToSave = accountCreated;
     }
     final elapsedTime = stopwatch.elapsed;
-    logInfo('${isUpdate ? "updateAccount" : "createAccount"}: _encryptAccount completed in: ${elapsedTime.inMilliseconds}ms');
+    logInfo(
+      '${isUpdate ? "updateAccount" : "createAccount"}: _encryptAccount completed in: ${elapsedTime.inMilliseconds}ms',
+    );
 
     // Update local cache
     _accounts[accountToSave!.id] = accountToSave;
@@ -175,11 +210,17 @@ class AccountProvider extends ChangeNotifier {
     // Update grouped accounts by category
     await _updateGroupedAccountsAfterModification(accountToSave, isUpdate);
 
-    logInfo('${isUpdate ? "updateAccount" : "createAccount"}: Operation completed in: ${elapsedTime.inMilliseconds}ms');
+    logInfo(
+      '${isUpdate ? "updateAccount" : "createAccount"}: Operation completed in: ${elapsedTime.inMilliseconds}ms',
+    );
     return true;
   }
 
-  Future<bool> createAccountOnlyOtp({required String secretKey, required String appName, required String accountName}) async {
+  Future<bool> createAccountOnlyOtp({
+    required String secretKey,
+    required String appName,
+    required String accountName,
+  }) async {
     if (!OTP.isKeyValid(secretKey)) {
       return false;
     }
@@ -203,7 +244,10 @@ class AccountProvider extends ChangeNotifier {
           createdAt: Value(now),
           updatedAt: Value(now),
         ),
-        totp: TOTPDriftModelCompanion(secretKey: Value(normalizedSecretKey), isShowToHome: const Value(true)),
+        totp: TOTPDriftModelCompanion(
+          secretKey: Value(normalizedSecretKey),
+          isShowToHome: const Value(true),
+        ),
       );
 
       return newAccount != null;
@@ -255,7 +299,9 @@ class AccountProvider extends ChangeNotifier {
   }
 
   /// Delete multiple selected accounts (parallel)
-  Future<bool> handleDeleteAllSelectedAccounts({required List<AccountDriftModelData> accountSelected}) async {
+  Future<bool> handleDeleteAllSelectedAccounts({
+    required List<AccountDriftModelData> accountSelected,
+  }) async {
     try {
       final listIds = accountSelected.map((e) => e.id).toList();
       final deletedCount = await DriffDbManager.instance.accountAdapter.deleteMany(listIds);
@@ -347,7 +393,8 @@ class AccountProvider extends ChangeNotifier {
 
     // Use grouped accounts if available (already loaded)
     if (_groupedCategoryIdAccounts.isNotEmpty) {
-      final groupedAccounts = _groupedCategoryIdAccounts.values.expand((accounts) => accounts).toList();
+      final groupedAccounts =
+          _groupedCategoryIdAccounts.values.expand((accounts) => accounts).toList();
 
       // Cache the grouped accounts for search
       _allAccountsCache = groupedAccounts;
@@ -379,7 +426,11 @@ class AccountProvider extends ChangeNotifier {
   }
 
   /// Search accounts with pagination for large result sets
-  Future<List<AccountDriftModelData>> searchAccountsWithPagination(String query, {int limit = 20, int offset = 0}) async {
+  Future<List<AccountDriftModelData>> searchAccountsWithPagination(
+    String query, {
+    int limit = 20,
+    int offset = 0,
+  }) async {
     if (query.isEmpty) return <AccountDriftModelData>[];
 
     final queryLower = query.toLowerCase().trim();
@@ -391,7 +442,11 @@ class AccountProvider extends ChangeNotifier {
     }
 
     // Use database search with pagination
-    final searchResults = await _performDatabaseSearchWithPagination(queryLower, limit: limit, offset: offset);
+    final searchResults = await _performDatabaseSearchWithPagination(
+      queryLower,
+      limit: limit,
+      offset: offset,
+    );
 
     // Cache the results
     if (_searchCache.length >= _maxSearchCacheSize) {
@@ -406,7 +461,11 @@ class AccountProvider extends ChangeNotifier {
   }
 
   /// Perform database search with pagination
-  Future<List<AccountDriftModelData>> _performDatabaseSearchWithPagination(String query, {int limit = 20, int offset = 0}) async {
+  Future<List<AccountDriftModelData>> _performDatabaseSearchWithPagination(
+    String query, {
+    int limit = 20,
+    int offset = 0,
+  }) async {
     // Get all accounts first (for now, can be optimized later with database-level pagination)
     final allAccounts = await DriffDbManager.instance.accountAdapter.getAllBasicInfo();
 
@@ -421,7 +480,8 @@ class AccountProvider extends ChangeNotifier {
     final filteredAccounts =
         decryptedAccounts.where((account) {
           final titleMatch = _smartFuzzyMatch(account.title, query);
-          final usernameMatch = account.username != null ? _smartFuzzyMatch(account.username!, query) : false;
+          final usernameMatch =
+              account.username != null ? _smartFuzzyMatch(account.username!, query) : false;
           return titleMatch || usernameMatch;
         }).toList();
 
@@ -454,9 +514,18 @@ class AccountProvider extends ChangeNotifier {
     return score >= threshold;
   }
 
-  Future<void> handleChangeCategory({required List<AccountDriftModelData> accountSelected, required CategoryDriftModelData category}) async {
-    final futures = accountSelected.map((account) => DriffDbManager.instance.accountAdapter.updateAccount(account.id, AccountDriftModelCompanion(categoryId: Value(category.id))));
-    final updatedAccounts = (await Future.wait(futures)).whereType<AccountDriftModelData>().toList();
+  Future<void> handleChangeCategory({
+    required List<AccountDriftModelData> accountSelected,
+    required CategoryDriftModelData category,
+  }) async {
+    final futures = accountSelected.map(
+      (account) => DriffDbManager.instance.accountAdapter.updateAccount(
+        account.id,
+        AccountDriftModelCompanion(categoryId: Value(category.id)),
+      ),
+    );
+    final updatedAccounts =
+        (await Future.wait(futures)).whereType<AccountDriftModelData>().toList();
     await DriffDbManager.instance.accountAdapter.putMany(updatedAccounts);
 
     // Update local cache and grouped accounts
@@ -475,7 +544,10 @@ class AccountProvider extends ChangeNotifier {
   }
 
   /// Process new accounts (parallel)
-  Future<List<AccountDriftModelData>> _processNewAccounts(int categoryId, List<AccountDriftModelData> newAccounts) async {
+  Future<List<AccountDriftModelData>> _processNewAccounts(
+    int categoryId,
+    List<AccountDriftModelData> newAccounts,
+  ) async {
     final decryptedAccounts = await _getDecryptedBasicInfoMany(newAccounts);
 
     // Update cache (parallel)
@@ -497,7 +569,9 @@ class AccountProvider extends ChangeNotifier {
     return decryptedAccounts;
   }
 
-  Future<List<AccountDriftModelData>> _getDecryptedBasicInfoMany(List<AccountDriftModelData> accounts) async {
+  Future<List<AccountDriftModelData>> _getDecryptedBasicInfoMany(
+    List<AccountDriftModelData> accounts,
+  ) async {
     final futures = accounts.map((account) => getDecryptedBasicInfo(account)).toList();
     return await Future.wait(futures);
   }
@@ -525,7 +599,10 @@ class AccountProvider extends ChangeNotifier {
   }
 
   /// Update grouped accounts after creating or updating an account
-  Future<void> _updateGroupedAccountsAfterModification(AccountDriftModelData account, bool isUpdate) async {
+  Future<void> _updateGroupedAccountsAfterModification(
+    AccountDriftModelData account,
+    bool isUpdate,
+  ) async {
     final categoryId = account.categoryId;
 
     if (isUpdate) {
@@ -579,7 +656,10 @@ class AccountProvider extends ChangeNotifier {
   }
 
   /// Update grouped accounts after category change
-  Future<void> _updateGroupedAccountsAfterCategoryChange(List<AccountDriftModelData> accounts, int newCategoryId) async {
+  Future<void> _updateGroupedAccountsAfterCategoryChange(
+    List<AccountDriftModelData> accounts,
+    int newCategoryId,
+  ) async {
     // Remove accounts from all categories first
     for (final account in accounts) {
       _removeAccountFromAllCategories(account.id);
@@ -592,14 +672,18 @@ class AccountProvider extends ChangeNotifier {
     }
 
     // Update category total counts - get actual counts from database
-    final newCategoryCount = await DriffDbManager.instance.accountAdapter.countByCategory(newCategoryId);
+    final newCategoryCount = await DriffDbManager.instance.accountAdapter.countByCategory(
+      newCategoryId,
+    );
     mapCategoryIdTotalAccount[newCategoryId] = newCategoryCount;
 
     // Also update counts for old categories if needed
     final oldCategoryIds = accounts.map((a) => a.categoryId).toSet();
     for (final oldCategoryId in oldCategoryIds) {
       if (oldCategoryId != newCategoryId) {
-        final oldCategoryCount = await DriffDbManager.instance.accountAdapter.countByCategory(oldCategoryId);
+        final oldCategoryCount = await DriffDbManager.instance.accountAdapter.countByCategory(
+          oldCategoryId,
+        );
         mapCategoryIdTotalAccount[oldCategoryId] = oldCategoryCount;
       }
     }

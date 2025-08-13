@@ -1,6 +1,4 @@
 PODS:
-  - app_links (0.0.2):
-    - Flutter
   - croppy (0.0.1):
     - Flutter
   - device_info_plus (0.0.1):
@@ -42,17 +40,15 @@ PODS:
     - DKImagePickerController/PhotoGallery
     - Flutter
   - Flutter (1.0.0)
+  - flutter_keyboard_visibility_temp_fork (0.0.1):
+    - Flutter
   - flutter_native_splash (2.4.3):
     - Flutter
   - flutter_secure_storage (6.0.0):
     - Flutter
-  - flutter_sharing_intent (0.0.1):
-    - Flutter
   - image_picker_ios (0.0.1):
     - Flutter
   - in_app_review (2.0.0):
-    - Flutter
-  - keyboard_height_plugin (0.0.1):
     - Flutter
   - local_auth_darwin (0.0.1):
     - Flutter
@@ -72,6 +68,8 @@ PODS:
   - qr_code_scanner_plus (0.2.6):
     - Flutter
     - MTBBarcodeScanner
+  - quill_native_bridge_ios (0.0.1):
+    - Flutter
   - SDWebImage (5.21.1):
     - SDWebImage/Core (= 5.21.1)
   - SDWebImage/Core (5.21.1)
@@ -95,24 +93,23 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
-  - app_links (from `.symlinks/plugins/app_links/ios`)
   - croppy (from `.symlinks/plugins/croppy/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - downloadsfolder (from `.symlinks/plugins/downloadsfolder/ios`)
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - Flutter (from `Flutter`)
+  - flutter_keyboard_visibility_temp_fork (from `.symlinks/plugins/flutter_keyboard_visibility_temp_fork/ios`)
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
-  - flutter_sharing_intent (from `.symlinks/plugins/flutter_sharing_intent/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - in_app_review (from `.symlinks/plugins/in_app_review/ios`)
-  - keyboard_height_plugin (from `.symlinks/plugins/keyboard_height_plugin/ios`)
   - local_auth_darwin (from `.symlinks/plugins/local_auth_darwin/darwin`)
   - objectbox_flutter_libs (from `.symlinks/plugins/objectbox_flutter_libs/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - qr_code_scanner_plus (from `.symlinks/plugins/qr_code_scanner_plus/ios`)
+  - quill_native_bridge_ios (from `.symlinks/plugins/quill_native_bridge_ios/ios`)
   - secure_application (from `.symlinks/plugins/secure_application/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
@@ -130,8 +127,6 @@ SPEC REPOS:
     - SwiftyGif
 
 EXTERNAL SOURCES:
-  app_links:
-    :path: ".symlinks/plugins/app_links/ios"
   croppy:
     :path: ".symlinks/plugins/croppy/ios"
   device_info_plus:
@@ -142,18 +137,16 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/file_picker/ios"
   Flutter:
     :path: Flutter
+  flutter_keyboard_visibility_temp_fork:
+    :path: ".symlinks/plugins/flutter_keyboard_visibility_temp_fork/ios"
   flutter_native_splash:
     :path: ".symlinks/plugins/flutter_native_splash/ios"
   flutter_secure_storage:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
-  flutter_sharing_intent:
-    :path: ".symlinks/plugins/flutter_sharing_intent/ios"
   image_picker_ios:
     :path: ".symlinks/plugins/image_picker_ios/ios"
   in_app_review:
     :path: ".symlinks/plugins/in_app_review/ios"
-  keyboard_height_plugin:
-    :path: ".symlinks/plugins/keyboard_height_plugin/ios"
   local_auth_darwin:
     :path: ".symlinks/plugins/local_auth_darwin/darwin"
   objectbox_flutter_libs:
@@ -166,6 +159,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
   qr_code_scanner_plus:
     :path: ".symlinks/plugins/qr_code_scanner_plus/ios"
+  quill_native_bridge_ios:
+    :path: ".symlinks/plugins/quill_native_bridge_ios/ios"
   secure_application:
     :path: ".symlinks/plugins/secure_application/ios"
   share_plus:
@@ -178,7 +173,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
-  app_links: 76b66b60cc809390ca1ad69bfd66b998d2387ac7
   croppy: 979e8ddc254f4642bffe7d52dc7193354b27ba30
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
@@ -186,12 +180,11 @@ SPEC CHECKSUMS:
   downloadsfolder: 7d5c7b5d23e3c4dded522ff2a2ef14a56846378a
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  flutter_keyboard_visibility_temp_fork: 95b2d534bacf6ac62e7fcbe5c2a9e2c2a17ce06f
   flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf
   flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
-  flutter_sharing_intent: afdc98985814d2c01d8c0956a177d6b6dfbdc373
   image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
   in_app_review: 5596fe56fab799e8edb3561c03d053363ab13457
-  keyboard_height_plugin: ef70a8181b29f27670e9e2450814ca6b6dc05b05
   local_auth_darwin: 553ce4f9b16d3fdfeafce9cf042e7c9f77c1c391
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
   ObjectBox: bf3d4b51075d52868422d5d1f2f2141b1d630d30
@@ -200,6 +193,7 @@ SPEC CHECKSUMS:
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   qr_code_scanner_plus: 7e087021bc69873140e0754750eb87d867bed755
+  quill_native_bridge_ios: f47af4b14e7757968486641656c5d23250cee521
   SDWebImage: f29024626962457f3470184232766516dee8dfea
   secure_application: 1b94e9be54ff82c3a2598e75e4ba559d5e14e2d3
   share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a

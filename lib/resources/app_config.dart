@@ -12,7 +12,8 @@ class AppConfig {
 
   static bool isProApp = true;
   static String proPackageId = "com.duc_app_lab_ind.cyber_safe";
-  static String proPlayStoreUrl = "https://play.google.com/store/apps/details?id=com.duc_app_lab_ind.cyber_safe";
+  static String proPlayStoreUrl =
+      "https://play.google.com/store/apps/details?id=com.duc_app_lab_ind.cyber_safe";
   static String proUriSchemeTransfer = "cybersafepro://";
 
   static String privacyPolicyUrl(String languageCode) {
@@ -50,7 +51,15 @@ class AppConfig {
             const SizedBox(height: 5),
             ExpansionTile(
               title: Text(context.trSafe(OnboardingText.showLink)),
-              children: [Padding(padding: const EdgeInsets.all(8.0), child: Text(url, style: CustomTextStyle.regular(color: Theme.of(context).colorScheme.primary)))],
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    url,
+                    style: CustomTextStyle.regular(color: Theme.of(context).colorScheme.primary),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

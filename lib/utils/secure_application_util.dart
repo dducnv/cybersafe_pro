@@ -191,7 +191,6 @@ class SecureApplicationUtil {
   void authSuccess({bool unlock = true}) {
     secureApplicationController?.authSuccess(unlock: unlock);
     secureApplicationController?.unpause();
-    secureApplicationController?.resumed();
   }
 
   void authFailed({bool unlock = false}) {

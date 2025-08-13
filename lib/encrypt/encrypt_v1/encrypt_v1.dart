@@ -8,9 +8,9 @@ import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:encrypt/encrypt.dart' as enc;
 import 'package:pointycastle/export.dart' as pc;
 
-class SecureAes256 {
-  static final instance = SecureAes256._();
-  SecureAes256._();
+class EncryptV1 {
+  static final instance = EncryptV1._();
+  EncryptV1._();
 
   // Use standardized configuration from EncryptionConfig
   static const int _ivLength = config.EncryptionConfig.IV_LENGTH_GCM;
@@ -177,7 +177,7 @@ class SecureAes256 {
 
       return json.encode(package);
     } catch (e, stackTrace) {
-      logError("AES256 encryption error: $e\n$stackTrace", functionName: "SecureAes256.encrypt");
+      logError("AES256 encryption error: $e\n$stackTrace", functionName: "EncryptV1.encrypt");
       throw Exception('AES256 encryption failed: $e');
     }
   }
@@ -237,7 +237,7 @@ class SecureAes256 {
         final expectedHmac = package['hmac'];
 
         if (!_verifyHMAC(dataForHmac, expectedHmac, hmacKey)) {
-          logError("AES256 HMAC integrity check failed", functionName: "SecureAes256.decrypt");
+          logError("AES256 HMAC integrity check failed", functionName: "EncryptV1.decrypt");
           throw Exception("AES256 HMAC integrity check failed");
         }
       }
@@ -247,7 +247,7 @@ class SecureAes256 {
 
       return decrypted;
     } catch (e, stackTrace) {
-      logError("AES256 decryption error: $e\n$stackTrace", functionName: "SecureAes256.decrypt");
+      logError("AES256 decryption error: $e\n$stackTrace", functionName: "EncryptV1.decrypt");
       throw Exception('AES256 decryption failed: $e');
     }
   }
@@ -320,7 +320,7 @@ class SecureAes256 {
     } catch (e, stackTrace) {
       logError(
         "Lỗi mã hóa dữ liệu bytes: $e\n$stackTrace",
-        functionName: "SecureAes256.encryptDataBytes",
+        functionName: "EncryptV1.encryptDataBytes",
       );
       throw Exception("Lỗi mã hóa dữ liệu bytes: $e");
     }
@@ -352,7 +352,7 @@ class SecureAes256 {
     } catch (e, stackTrace) {
       logError(
         "Lỗi giải mã dữ liệu bytes: $e\n$stackTrace",
-        functionName: "SecureAes256.decryptDataBytes",
+        functionName: "EncryptV1.decryptDataBytes",
       );
       throw Exception("KEY_INVALID");
     }

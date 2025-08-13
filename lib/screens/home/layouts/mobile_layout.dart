@@ -133,7 +133,7 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
             // Nút cuộn lên đầu trang
             Expanded(
               child: _buildNavItem(
-                icon: Icons.note_add_outlined,
+                icon: Icons.sticky_note_2_outlined,
                 onTap: () {
                   AppRoutes.navigateTo(context, AppRoutes.notes);
                 },

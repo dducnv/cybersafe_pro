@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:cybersafe_pro/encrypt/aes_256/secure_aes256.dart';
-import 'package:cybersafe_pro/encrypt/argon2/secure_argon2.dart';
+import 'package:cybersafe_pro/encrypt/encrypt_v1/encrypt_v1.dart';
+import 'package:cybersafe_pro/encrypt/encrypt_v2/encrypt_v2.dart';
 import 'package:cybersafe_pro/encrypt/key_manager.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 
@@ -11,7 +11,7 @@ class DataSecureService {
     if (isValueEncrypted(value)) return value;
     try {
       final key = await KeyManager.getKey(KeyType.info);
-      return SecureAes256.encrypt(value: value, key: key);
+      return EncryptV1.encrypt(value: value, key: key);
     } catch (e) {
       throw Exception('Failed to encrypt info: $e');
     }
@@ -22,7 +22,7 @@ class DataSecureService {
     if (!isValueEncrypted(value)) return "";
     try {
       final key = await KeyManager.getKey(KeyType.info);
-      return SecureAes256.decrypt(encryptedData: value, key: key);
+      return EncryptV1.decrypt(encryptedData: value, key: key);
     } catch (e) {
       throw Exception('Failed to decrypt info: $e');
     }
@@ -33,7 +33,7 @@ class DataSecureService {
     if (isValueEncrypted(value)) return value;
     try {
       final key = await KeyManager.getKey(KeyType.note);
-      return SecureAes256.encrypt(value: value, key: key);
+      return EncryptV1.encrypt(value: value, key: key);
     } catch (e) {
       throw Exception('Failed to encrypt note: $e');
     }
@@ -44,7 +44,7 @@ class DataSecureService {
     if (!isValueEncrypted(value)) return "";
     try {
       final key = await KeyManager.getKey(KeyType.note);
-      return SecureAes256.decrypt(encryptedData: value, key: key);
+      return EncryptV1.decrypt(encryptedData: value, key: key);
     } catch (e) {
       throw Exception('Failed to decrypt note: $e');
     }
@@ -54,7 +54,7 @@ class DataSecureService {
     if (value.isEmpty) return "";
     if (isValueEncrypted(value)) return value;
     try {
-      return await SecureArgon2.encrypt(plainText: value, keyType: KeyType.password);
+      return await EncryptV2.encrypt(plainText: value, keyType: KeyType.password);
     } catch (e) {
       throw Exception('Failed to encrypt password: $e');
     }
@@ -64,7 +64,7 @@ class DataSecureService {
     if (value.isEmpty) return "";
     if (!isValueEncrypted(value)) return "";
     try {
-      return await SecureArgon2.decrypt(value: value, keyType: KeyType.password);
+      return await EncryptV2.decrypt(value: value, keyType: KeyType.password);
     } catch (e) {
       throw Exception('Failed to decrypt password: $e');
     }
@@ -74,7 +74,7 @@ class DataSecureService {
     if (value.isEmpty) return "";
     if (isValueEncrypted(value)) return value;
     try {
-      return await SecureArgon2.encrypt(plainText: value, keyType: KeyType.totp);
+      return await EncryptV2.encrypt(plainText: value, keyType: KeyType.totp);
     } catch (e) {
       throw Exception('Failed to encrypt TOTP key: $e');
     }
@@ -84,7 +84,7 @@ class DataSecureService {
     if (value.isEmpty) return "";
     if (!isValueEncrypted(value)) return "";
     try {
-      return await SecureArgon2.decrypt(value: value, keyType: KeyType.totp);
+      return await EncryptV2.decrypt(value: value, keyType: KeyType.totp);
     } catch (e) {
       throw Exception('Failed to decrypt TOTP key: $e');
     }
@@ -94,7 +94,7 @@ class DataSecureService {
     if (value.isEmpty) return "";
     if (isValueEncrypted(value)) return value;
     try {
-      return await SecureArgon2.encrypt(plainText: value, keyType: KeyType.pinCode);
+      return await EncryptV2.encrypt(plainText: value, keyType: KeyType.pinCode);
     } catch (e) {
       throw Exception('Failed to encrypt PIN code: $e');
     }
@@ -104,7 +104,7 @@ class DataSecureService {
     if (value.isEmpty) return "";
     if (!isValueEncrypted(value)) return "";
     try {
-      return await SecureArgon2.decrypt(value: value, keyType: KeyType.pinCode);
+      return await EncryptV2.decrypt(value: value, keyType: KeyType.pinCode);
     } catch (e) {
       throw Exception('Failed to decrypt PIN code: $e');
     }
@@ -192,8 +192,6 @@ class DataSecureService {
     if (accountsData.isEmpty) return [];
 
     try {
-      // Không sử dụng compute() vì SecureArgon2 cần KeyManager trong main isolate
-      // Thay vào đó xử lý batch trong main isolate với Future.wait()
       await preWarmKeys();
 
       const batchSize = 20;
@@ -322,7 +320,7 @@ class DataSecureService {
   static String encryptData({required String value, required String key}) {
     if (value.isEmpty || key.isEmpty) return "";
     try {
-      final encryptedData = SecureAes256.encrypt(value: value, key: key);
+      final encryptedData = EncryptV1.encrypt(value: value, key: key);
       return encryptedData;
     } catch (e) {
       throw Exception('Failed to encrypt data: $e');
@@ -332,7 +330,7 @@ class DataSecureService {
   static String decryptData({required String value, required String key}) {
     if (value.isEmpty || key.isEmpty) return "";
     try {
-      final decryptedData = SecureAes256.decrypt(encryptedData: value, key: key);
+      final decryptedData = EncryptV1.decrypt(encryptedData: value, key: key);
       return decryptedData;
     } catch (e) {
       throw Exception('Failed to decrypt data: $e');

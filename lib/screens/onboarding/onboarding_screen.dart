@@ -178,16 +178,18 @@ class OnboardingScreenState extends State<OnboardingScreen> {
       onTap: () {
         showLanguageBottomSheet(context);
       },
-      child: Selector<AppLocale, (Locale, String)>(
-        selector:
-            (_, provider) => (provider.locale, provider.currentLocaleModel.languageNativeName),
-        shouldRebuild: (prev, next) => prev.$1 != next.$1,
+      child: Selector<AppLocale, AppLocaleModel>(
+        selector: (_, provider) => provider.currentLocaleModel,
+        shouldRebuild: (prev, next) => prev.languageCode != next.languageCode,
         builder: (context, data, child) {
-          final (locale, nativeName) = data;
+          final nativeName = data.languageNativeName;
           return Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(nativeName, style: theme.textTheme.titleSmall),
+              Text(
+                nativeName,
+                style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w400),
+              ),
               const Icon(Icons.arrow_drop_down_rounded),
             ],
           );

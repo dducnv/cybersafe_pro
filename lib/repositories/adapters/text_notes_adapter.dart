@@ -28,6 +28,23 @@ class TextNotesAdapter {
     }
   }
 
+  Future<void> insertAll(List<TextNotesDriftModelData> textNotes) async {
+    await _database.batch((b) {
+      for (var textNote in textNotes) {
+        final note = TextNotesDriftModelCompanion.insert(
+          title: textNote.title,
+          content: Value(textNote.content),
+          isFavorite: Value(textNote.isFavorite),
+          isPinned: Value(textNote.isPinned),
+          indexPos: Value(textNote.indexPos),
+          createdAt: Value(textNote.createdAt),
+          updatedAt: Value(textNote.updatedAt),
+        );
+        b.insert(_database.textNotesDriftModel, note);
+      }
+    });
+  }
+
   Future<int> insertNote(TextNotesDriftModelCompanion data) async {
     final indexPos = await _getNextIndexPos();
 
@@ -85,5 +102,9 @@ class TextNotesAdapter {
   Future<int> delete(int id) async {
     return await (_database.delete(_database.textNotesDriftModel)
       ..where((tbl) => tbl.id.equals(id))).go();
+  }
+
+  Future<void> deleteAll() async {
+    await _database.delete(_database.textNotesDriftModel).go();
   }
 }

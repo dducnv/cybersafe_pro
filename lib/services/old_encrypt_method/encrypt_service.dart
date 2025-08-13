@@ -1,9 +1,10 @@
 import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
-import 'package:pointycastle/export.dart' as pc;
 import 'package:flutter/foundation.dart';
-import 'package:crypto/crypto.dart';
+import 'package:pointycastle/export.dart' as pc;
 
 class EncryptService {
   static final instance = EncryptService._internal();
@@ -58,7 +59,6 @@ class EncryptService {
     return _encrypterCache[keyString]!;
   }
 
-  // Mã hóa dữ liệu với Argon2 (dùng cho dữ liệu mới)
   static Future<String> encryptData({required String value, required String key}) async {
     final stopwatch = Stopwatch()..start();
     try {
@@ -67,45 +67,8 @@ class EncryptService {
       // Sử dụng phương thức nhanh cho chuỗi ngắn
 
       return _encryptDataFast(value: value, key: key);
-
-      // Tạo salt và IV
-      // final salt = encrypt.IV.fromSecureRandom(_keyLength).bytes;
-      // final iv = encrypt.IV.fromSecureRandom(_ivLength);
-
-      // final iterations = 2;
-      // final memoryPowerOf2 = 14;
-      // final lanes = 1;
-      // final version = 19; // Argon2 version 19
-
-      // // Dẫn xuất key bằng Argon2id
-      // final argon2 = Argon2BytesGenerator();
-      // final argon2Params = Argon2Parameters(
-      //   Argon2Parameters.ARGON2_id,
-      //   salt,
-      //   version: Argon2Parameters.ARGON2_VERSION_13,
-      //   iterations: iterations, // Có thể điều chỉnh cho mobile
-      //   memoryPowerOf2: memoryPowerOf2, // 64MB
-      //   lanes: lanes,
-      // );
-      // argon2.init(argon2Params);
-      // final keyBytes = Uint8List(_keyLength);
-      // argon2.generateBytes(Uint8List.fromList(utf8.encode(key)), keyBytes, 0, _keyLength);
-      // final derivedKey = encrypt.Key(keyBytes);
-      // final encrypter = encrypt.Encrypter(encrypt.AES(derivedKey, mode: encrypt.AESMode.gcm));
-      // final encrypted = encrypter.encrypt(value, iv: iv);
-      // final package = {
-      //   'salt': base64.encode(salt),
-      //   'iv': base64.encode(iv.bytes),
-      //   'data': encrypted.base64,
-      //   'kdf': 'argon2id',
-      //   'argon2': {'iterations': iterations, 'memoryPowerOfTwo': memoryPowerOf2, 'lanes': lanes, 'version': version},
-      // };
-      // final result = json.encode(package);
-      // final elapsedTime = stopwatch.elapsed;
-      // logInfo('encryptFernet (Argon2): [32m${value.length} chars - Thao tác hoàn thành trong: ${elapsedTime.inMilliseconds}ms[0m');
-      // return result;
     } catch (e) {
-      logError("Encryption error (Argon2): $e");
+      logError("Encryption error: $e");
       return value;
     }
   }
@@ -178,7 +141,9 @@ class EncryptService {
         return result;
       }
 
-      if (!package.containsKey('salt') || !package.containsKey('iv') || !package.containsKey('data')) {
+      if (!package.containsKey('salt') ||
+          !package.containsKey('iv') ||
+          !package.containsKey('data')) {
         return value;
       }
 
@@ -214,7 +179,6 @@ class EncryptService {
     }
   }
 
-
   List<int> encryptDataBytes({required List<int> data, required String key}) {
     try {
       if (data.isEmpty) return [];
@@ -248,7 +212,10 @@ class EncryptService {
       final derivedKey = _deriveKey(key, salt);
       final encrypter = _getEncrypter(derivedKey);
 
-      return encrypter.decryptBytes(encrypt.Encrypted(Uint8List.fromList(encrypted)), iv: encrypt.IV(Uint8List.fromList(iv)));
+      return encrypter.decryptBytes(
+        encrypt.Encrypted(Uint8List.fromList(encrypted)),
+        iv: encrypt.IV(Uint8List.fromList(iv)),
+      );
     } catch (e) {
       throw Exception("Lỗi giải mã dữ liệu bytes: $e");
     }
@@ -278,7 +245,8 @@ class EncryptService {
     }
 
     if (_decryptionResultCache.length > maxSize) {
-      final keysToRemove = _decryptionResultCache.keys.take(_decryptionResultCache.length - maxSize).toList();
+      final keysToRemove =
+          _decryptionResultCache.keys.take(_decryptionResultCache.length - maxSize).toList();
       for (var key in keysToRemove) {
         _decryptionResultCache.remove(key);
       }
@@ -326,7 +294,10 @@ class EncryptService {
   // Tạo và lưu trữ key trước khi sử dụng
   Future<void> precomputeKeys(String masterKey) async {
     // Tạo trước một số salt cố định
-    final commonSalts = List.generate(5, (index) => Uint8List.fromList(utf8.encode('common_salt_$index')));
+    final commonSalts = List.generate(
+      5,
+      (index) => Uint8List.fromList(utf8.encode('common_salt_$index')),
+    );
 
     // Tính toán và lưu trữ các key trước
     for (var salt in commonSalts) {

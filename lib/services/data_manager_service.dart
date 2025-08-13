@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:csv/csv.dart';
-import 'package:cybersafe_pro/encrypt/aes_256/secure_aes256.dart';
+import 'package:cybersafe_pro/encrypt/encrypt_v1/encrypt_v1.dart';
 import 'package:cybersafe_pro/env/env.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/error_text.dart';
@@ -13,6 +13,7 @@ import 'package:cybersafe_pro/repositories/driff_db/models/account_aggregate.dar
 import 'package:cybersafe_pro/resources/brand_logo.dart';
 import 'package:cybersafe_pro/services/account/account_services.dart';
 import 'package:cybersafe_pro/services/data_secure_service.dart';
+import 'package:cybersafe_pro/services/text_note/text_note_service.dart';
 import 'package:cybersafe_pro/utils/file_picker_utils.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:drift/drift.dart';
@@ -36,6 +37,7 @@ class DataManagerService {
     try {
       await DriffDbManager.instance.categoryAdapter.deleteAll();
       await DriffDbManager.instance.iconCustomAdapter.deleteAll();
+      await DriffDbManager.instance.textNotesAdapter.deleteAll();
       return true;
     } catch (e) {
       return false;
@@ -80,7 +82,7 @@ class DataManagerService {
       final keyEncryptFile = await _generateBackupKey(Env.backupFileEncryptKey);
       final keyEncryptData = await _generateBackupKey(pin);
 
-      final decryptedData = SecureAes256.decryptDataBytes(
+      final decryptedData = EncryptV1.decryptDataBytes(
         encryptedData: encryptedBytes,
         key: keyEncryptFile,
       );
@@ -101,33 +103,48 @@ class DataManagerService {
       if (decryptedDataJson == null) {
         throw Exception('Data is null');
       }
+      logWarning('isHasMetaData: ${decryptedDataJson is List}');
 
-      if (decryptedDataJson is! List) {
-        throw Exception('Data is not a list');
-      }
+      final bool decryptedDataJsonIsList = decryptedDataJson is List;
+      final accountDecripted =
+          !decryptedDataJsonIsList
+              ? (decryptedDataJson['accounts'] as List<dynamic>)
+              : decryptedDataJson;
 
       final List<AccountAggregate> accountAggregates = [];
-      log(decryptedDataJson.toString());
+      final List<TextNotesDriftModelData> textNotes = [];
+      // log(decryptedDataJson.toString());
 
-      for (var item in decryptedDataJson) {
+      for (var item in accountDecripted) {
         if (item != null && item is Map<String, dynamic>) {
           try {
+            logWarning('item: ${item.toString()}');
             accountAggregates.add(AccountAggregate.fromBackupJson(item));
           } catch (e) {
             logError(
               'Error restoring backup: $e',
-              functionName: 'DataManagerServiceNew.restoreBackup',
+              functionName: 'DataManagerServiceNew.accountDecripted',
             );
           }
         }
       }
 
-      if (accountAggregates.isEmpty) {
-        throw Exception('No data to restore');
+      if (!decryptedDataJsonIsList &&
+          decryptedDataJson['textNotes'] != null &&
+          decryptedDataJson['textNotes'] is List<dynamic>) {
+        final textNotesDecripted = decryptedDataJson['textNotes'] as List<dynamic>;
+        textNotes.addAll(await TextNoteService.instance.toEncryptedList(textNotesDecripted));
       }
-      await AccountServices.instance.saveAccountsFromAccountAggregates(accountAggregates);
+
+      log(decryptedDataJson.toString());
+
+      await DriffDbManager.instance.transaction(() async {
+        await AccountServices.instance.saveAccountsFromAccountAggregates(accountAggregates);
+        await TextNoteService.instance.saveTextNotesFromTextNotes(textNotes);
+      });
       return true;
     } catch (e) {
+      logError('Error restoring backup: $e', functionName: 'DataManagerServiceNew.restoreBackup');
       throw Exception(e);
     }
   }
@@ -135,7 +152,7 @@ class DataManagerService {
   static Future<bool> backupData(BuildContext context, String pin) async {
     try {
       final db = DriffDbManager.instance;
-
+      final textNotes = await db.textNotesAdapter.getAll();
       final listAccountAggregates = await db.transaction(() async {
         final accounts = await db.accountAdapter.getAll();
         if (accounts.isEmpty) {
@@ -192,6 +209,7 @@ class DataManagerService {
       final accountAggregates = await AccountServices.instance.toDataDecryptedList(
         listAccountAggregates,
       );
+      final textNotesEncrypted = await TextNoteService.instance.toDataDecryptedListJson(textNotes);
 
       final backupData = {
         'metadata': {
@@ -199,7 +217,8 @@ class DataManagerService {
           'timestamp': DateTime.now().toIso8601String(),
           'count': accountAggregates.length,
         },
-        'data': accountAggregates,
+        'accounts': accountAggregates,
+        'textNotes': textNotesEncrypted,
       };
 
       final keyEncryptFile = await _generateBackupKey(Env.backupFileEncryptKey);
@@ -207,7 +226,7 @@ class DataManagerService {
 
       // Mã hóa dữ liệu
       final encryptedData = DataSecureService.encryptData(
-        value: jsonEncode(backupData['data']),
+        value: jsonEncode(backupData),
         key: keyEncryptData,
       );
 
@@ -215,7 +234,8 @@ class DataManagerService {
         _encodeBackupInIsolate,
         encryptedData,
       );
-      List<int> encryptedDataBytes = SecureAes256.encryptDataBytes(
+
+      List<int> encryptedDataBytes = EncryptV1.encryptDataBytes(
         data: backupJsonBytes,
         key: keyEncryptFile,
       );
@@ -223,7 +243,7 @@ class DataManagerService {
       final dateTime = DateTime.now().toString().replaceAll(RegExp(r'[:\s]'), '-');
       final backupName = 'cybersafe_backup_$dateTime';
       final fileName = "$backupName.enc";
-      final filePath = await FilePicker.platform.saveFile(
+      final filePath = await FilePickerUtils.saveFileBackup(
         dialogTitle: 'Save Backup File',
         fileName: fileName,
         bytes: Uint8List.fromList(encryptedDataBytes),
