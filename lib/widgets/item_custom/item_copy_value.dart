@@ -11,7 +11,13 @@ class ItemCopyValue extends StatefulWidget {
   final String value;
   final bool isPrivateValue;
 
-  const ItemCopyValue({super.key, this.isLastItem = false, required this.title, required this.value, this.isPrivateValue = false});
+  const ItemCopyValue({
+    super.key,
+    this.isLastItem = false,
+    required this.title,
+    required this.value,
+    this.isPrivateValue = false,
+  });
 
   @override
   State<ItemCopyValue> createState() => _ItemCopyValueState();
@@ -19,8 +25,10 @@ class ItemCopyValue extends StatefulWidget {
 
 class _ItemCopyValueState extends State<ItemCopyValue> {
   bool _isShowValue = false;
+  bool _copyLoading = false;
 
-  BoxDecoration _buildDecoration(BuildContext context) => BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainer);
+  BoxDecoration _buildDecoration(BuildContext context) =>
+      BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainer);
 
   void _toggleValueVisibility() {
     setState(() => _isShowValue = !_isShowValue);
@@ -28,20 +36,40 @@ class _ItemCopyValueState extends State<ItemCopyValue> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(decoration: _buildDecoration(context), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Expanded(child: _buildContent()), _buildActions(context)]));
+    return Container(
+      decoration: _buildDecoration(context),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [Expanded(child: _buildContent()), _buildActions(context)],
+      ),
+    );
   }
 
   Widget _buildContent() {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildTitle(), const SizedBox(height: 5), _buildValue()]);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [_buildTitle(), const SizedBox(height: 5), _buildValue()],
+    );
   }
 
   Widget _buildTitle() {
-    return Text(widget.title, style: CustomTextStyle.regular(color: Colors.grey, overflow: TextOverflow.ellipsis, fontSize: 14.sp, fontWeight: FontWeight.w600));
+    return Text(
+      widget.title,
+      style: CustomTextStyle.regular(
+        color: Colors.grey,
+        overflow: TextOverflow.ellipsis,
+        fontSize: 14.sp,
+        fontWeight: FontWeight.w600,
+      ),
+    );
   }
 
   Widget _buildValue() {
     if (widget.isPrivateValue && !_isShowValue) {
-      return Text("***********", style: CustomTextStyle.regular(fontSize: 14.sp, overflow: TextOverflow.ellipsis));
+      return Text(
+        "***********",
+        style: CustomTextStyle.regular(fontSize: 14.sp, overflow: TextOverflow.ellipsis),
+      );
     }
     return DecryptText(
       style: CustomTextStyle.regular(fontSize: 14.sp, overflow: TextOverflow.ellipsis),
@@ -51,25 +79,47 @@ class _ItemCopyValueState extends State<ItemCopyValue> {
   }
 
   Widget _buildActions(BuildContext context) {
-    return Row(children: [if (widget.isPrivateValue) _buildVisibilityToggle(context), if (widget.value.isNotEmpty) _buildCopyButton()]);
+    return Row(
+      children: [
+        if (widget.isPrivateValue) _buildVisibilityToggle(context),
+        if (widget.value.isNotEmpty) _buildCopyButton(),
+      ],
+    );
   }
 
   Widget _buildVisibilityToggle(BuildContext context) {
     return IconButton(
       onPressed: _toggleValueVisibility,
-      icon: Icon(_isShowValue ? Icons.visibility_off : Icons.visibility, size: _isShowValue ? 20.sp : 24.sp, color: _isShowValue ? Theme.of(context).colorScheme.primary : null),
+      icon: Icon(
+        _isShowValue ? Icons.visibility_off : Icons.visibility,
+        size: _isShowValue ? 20.sp : 24.sp,
+        color: _isShowValue ? Theme.of(context).colorScheme.primary : null,
+      ),
     );
   }
 
   Widget _buildCopyButton() {
     return IconButton(
       onPressed: () async {
-        final decryptedValue = widget.isPrivateValue ? await DataSecureService.decryptPassword(widget.value) : await DataSecureService.decryptInfo(widget.value);
+        if (_copyLoading) return;
+        setState(() => _copyLoading = true);
+        final decryptedValue =
+            widget.isPrivateValue
+                ? await DataSecureService.decryptPassword(widget.value)
+                : await DataSecureService.decryptInfo(widget.value);
         if (decryptedValue.isNotEmpty && mounted) {
           clipboardCustom(context: context, text: decryptedValue);
         }
+        setState(() => _copyLoading = false);
       },
-      icon: Icon(Icons.copy, size: 20.sp),
+      icon:
+          _copyLoading
+              ? SizedBox(
+                width: 12.sp,
+                height: 12.sp,
+                child: const CircularProgressIndicator(strokeWidth: 2),
+              )
+              : Icon(Icons.copy, size: 20.sp),
     );
   }
 }

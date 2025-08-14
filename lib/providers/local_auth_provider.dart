@@ -172,7 +172,7 @@ class LocalAuthProvider extends ChangeNotifier {
       }
 
       String pinCode = textEditingController.text;
-      if (pinCode.length == 6) {
+      if (pinCode.length >= 6) {
         bool verify = await verifyLoginPinCode(pinCode);
         if (!verify) {
           await _handleLoginFailure();
@@ -378,6 +378,12 @@ class LocalAuthProvider extends ChangeNotifier {
     if (_isLocked && _lockUntil != null && DateTime.now().isAfter(_lockUntil!)) {
       // Thời gian khóa đã hết, reset trạng thái
       await _resetLockStatus();
+    }
+  }
+
+  void restartLockTimer() {
+    if (_isLocked && _lockUntil != null) {
+      _startLockTimer();
     }
   }
 

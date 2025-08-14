@@ -106,7 +106,8 @@ class DataSecureService {
     try {
       return await EncryptV2.decrypt(value: value, keyType: KeyType.pinCode);
     } catch (e) {
-      throw Exception('Failed to decrypt PIN code: $e');
+      logError('Failed to decrypt PIN code: $e', functionName: 'DataSecureService.decryptPinCode');
+      return "";
     }
   }
 
@@ -192,6 +193,8 @@ class DataSecureService {
     if (accountsData.isEmpty) return [];
 
     try {
+      // Không sử dụng compute() vì SecureArgon2 cần KeyManager trong main isolate
+      // Thay vào đó xử lý batch trong main isolate với Future.wait()
       await preWarmKeys();
 
       const batchSize = 20;

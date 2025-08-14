@@ -351,7 +351,10 @@ class SettingMobileLayout extends StatelessWidget {
                   pin != null &&
                   GlobalKeys.appRootNavigatorKey.currentContext != null) {
                 try {
-                  showLoadingDialog(context: GlobalKeys.appRootNavigatorKey.currentContext!);
+                  showLoadingDialog(
+                    context: GlobalKeys.appRootNavigatorKey.currentContext!,
+                    loadingText: ValueNotifier(context.trSafe(SettingsLocale.waitingNotification)),
+                  );
                   await Future.delayed(const Duration(milliseconds: 50));
                   if (!context.mounted) return;
                   final result = await DataManagerService.restoreBackup(
@@ -418,7 +421,10 @@ class SettingMobileLayout extends StatelessWidget {
 
   Future<void> _onBackUp(BuildContext context, String pin) async {
     try {
-      showLoadingDialog();
+      showLoadingDialog(
+        context: GlobalKeys.appRootNavigatorKey.currentContext!,
+        loadingText: ValueNotifier(context.trSafe(SettingsLocale.waitingNotification)),
+      );
       final result = await DataManagerService.backupData(
         GlobalKeys.appRootNavigatorKey.currentContext!,
         pin,
@@ -438,7 +444,12 @@ class SettingMobileLayout extends StatelessWidget {
 
   void _importDataFromBrowser(BuildContext context) async {
     try {
+      showLoadingDialog(
+        context: GlobalKeys.appRootNavigatorKey.currentContext!,
+        loadingText: ValueNotifier(context.trSafe(SettingsLocale.waitingNotification)),
+      );
       final result = await DataManagerService.importDataFromBrowser();
+      if (context.mounted) hideLoadingDialog();
       if (!context.mounted) return;
       if (result) {
         showToastSuccess("Import data from browser success", context: context);

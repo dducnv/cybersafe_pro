@@ -60,8 +60,12 @@ class _MobileLayoutState extends State<MobileLayout> {
   void initState() {
     super.initState();
     _setupLockStatusCheck();
-
-    //Listen ENTER KEYBOARD
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final provider = context.read<LocalAuthProvider>();
+        provider.restartLockTimer();
+      }
+    });
   }
 
   void _setupLockStatusCheck() {

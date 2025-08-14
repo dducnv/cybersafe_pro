@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+
 import 'package:crypto/crypto.dart';
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/encrypt/cache_key.dart';
@@ -36,7 +37,12 @@ class KeyManager {
   DateTime? _lockoutUntil;
 
   // HKDF implementation for key derivation
-  static Uint8List _hkdf({required Uint8List inputKeyMaterial, required Uint8List salt, required Uint8List info, required int length}) {
+  static Uint8List _hkdf({
+    required Uint8List inputKeyMaterial,
+    required Uint8List salt,
+    required Uint8List info,
+    required int length,
+  }) {
     if (length > 255 * 32) {
       throw ArgumentError('Output length too large for HKDF');
     }
@@ -62,7 +68,11 @@ class KeyManager {
   }
 
   // NEW: Get derived keys for specific purpose and context
-  Future<Map<String, String>> getDerivedKeys(KeyType type, String context, {List<String> purposes = const ['aes', 'hmac']}) async {
+  Future<Map<String, String>> getDerivedKeys(
+    KeyType type,
+    String context, {
+    List<String> purposes = const ['aes', 'hmac'],
+  }) async {
     final masterKey = await _getEncryptionKey(type);
     final derivedKeys = <String, String>{};
 
@@ -87,7 +97,12 @@ class KeyManager {
   }
 
   // PRIVATE: Derive key from existing master key (no duplicate calls)
-  Future<String> _getDerivedKeyFromMaster(String masterKey, KeyType type, String context, String purpose) async {
+  Future<String> _getDerivedKeyFromMaster(
+    String masterKey,
+    KeyType type,
+    String context,
+    String purpose,
+  ) async {
     final cacheKey = '${type.name}_${context}_$purpose';
 
     // Check cache first
@@ -101,10 +116,17 @@ class KeyManager {
     final salt = _generateHkdfSalt(type, context);
 
     // Generate info for HKDF
-    final info = utf8.encode('${config.EncryptionConfig.KEY_PURPOSES[purpose] ?? purpose}_$context');
+    final info = utf8.encode(
+      '${config.EncryptionConfig.KEY_PURPOSES[purpose] ?? purpose}_$context',
+    );
 
     // Derive key using HKDF
-    final derivedKeyBytes = _hkdf(inputKeyMaterial: masterKeyBytes, salt: salt, info: Uint8List.fromList(info), length: config.EncryptionConfig.KEY_SIZE_BYTES);
+    final derivedKeyBytes = _hkdf(
+      inputKeyMaterial: masterKeyBytes,
+      salt: salt,
+      info: Uint8List.fromList(info),
+      length: config.EncryptionConfig.KEY_SIZE_BYTES,
+    );
 
     final derivedKey = base64.encode(derivedKeyBytes);
 
@@ -140,13 +162,16 @@ class KeyManager {
   Future<void> clearDerivedKeyCache([String? specificContext]) async {
     if (specificContext != null) {
       // Clear only specific context
-      final keysToRemove = _derivedKeyCache.keys.where((key) => key.contains('_${specificContext}_')).toList();
+      final keysToRemove =
+          _derivedKeyCache.keys.where((key) => key.contains('_${specificContext}_')).toList();
       _derivedKeyCache.removeWhere((key, value) => keysToRemove.contains(key));
     } else {
       _derivedKeyCache.clear();
     }
 
-    logInfo('Derived key cache cleared${specificContext != null ? ' for context: $specificContext' : ''}');
+    logInfo(
+      'Derived key cache cleared${specificContext != null ? ' for context: $specificContext' : ''}',
+    );
   }
 
   // Monitor derived key cache
@@ -157,7 +182,9 @@ class KeyManager {
   }
 
   void _clearOldestDerivedCacheItems() {
-    final sortedEntries = _derivedKeyCache.entries.toList()..sort((a, b) => a.value.expiresAt.compareTo(b.value.expiresAt));
+    final sortedEntries =
+        _derivedKeyCache.entries.toList()
+          ..sort((a, b) => a.value.expiresAt.compareTo(b.value.expiresAt));
 
     while (_derivedKeyCache.length > MAX_CACHE_ITEMS) {
       final oldest = sortedEntries.removeAt(0);
@@ -184,30 +211,41 @@ class KeyManager {
 
       final storageKey = _getStorageKeyForType(type);
       final savedKey = await _secureStorage.read(key: storageKey);
-
       if (savedKey != null) {
+        // Legacy users (PBKDF2) or already existing Argon2 key
         _keyCache[cacheKey] = CachedKey(savedKey);
         _monitorCache();
         return savedKey;
       }
 
-      // Generate new key
+      // NEW USERS: Generate master key using Argon2id
       final deviceKey = await _getDeviceKey();
-      final salt = _generateConsistentSalt(deviceKey, type);
 
-      final key = await compute(_generateKeyInIsolate, {
-        'salt': base64.encode(salt),
+      // Prepare per-type salt storage for Argon2
+      final argon2SaltKey = _getArgon2SaltStorageKey(type);
+      String? argon2SaltB64 = await _secureStorage.read(key: argon2SaltKey);
+      Uint8List argon2Salt;
+      if (argon2SaltB64 == null) {
+        argon2Salt = _generateSecureRandomBytes(16);
+        await _secureStorage.save(key: argon2SaltKey, value: base64.encode(argon2Salt));
+      } else {
+        argon2Salt = base64.decode(argon2SaltB64);
+      }
+
+      // Chạy Argon2id trong isolate để tránh block UI thread
+      final key = await compute<Map<String, dynamic>, String>(_generateKeyWithArgon2InIsolate, {
         'deviceKey': deviceKey,
-        'type': type.name,
-        'iterations': config.EncryptionConfig.pbkdf2Iterations,
-        'keySize': config.EncryptionConfig.KEY_SIZE_BYTES,
+        'typeName': type.name,
+        'salt': base64.encode(argon2Salt),
+        'devicePerformance': config.EncryptionConfig.devicePerformance.index,
       });
 
       _keyCache[cacheKey] = CachedKey(key);
       await _secureStorage.save(key: storageKey, value: key);
+      await _secureStorage.save(key: _getKdfMetaStorageKey(type), value: 'argon2id');
       await _setKeyCreationTime(type);
 
-      _secureWipe(salt);
+      _secureWipe(argon2Salt);
       _monitorCache();
       _failedAttempts = 0; // Reset on success
       return key;
@@ -224,13 +262,18 @@ class KeyManager {
     if (_failedAttempts >= config.EncryptionConfig.MAX_FAILED_ATTEMPTS) {
       _lockoutUntil = DateTime.now().add(config.EncryptionConfig.LOCKOUT_DURATION);
       _failedAttempts = 0;
-      throw Exception('Too many failed attempts. Locked out for ${config.EncryptionConfig.LOCKOUT_DURATION.inMinutes} minutes');
+      throw Exception(
+        'Too many failed attempts. Locked out for ${config.EncryptionConfig.LOCKOUT_DURATION.inMinutes} minutes',
+      );
     }
   }
 
   Future<void> _setKeyCreationTime(KeyType type) async {
     final storageKey = _getStorageKeyForType(type);
-    await _secureStorage.save(key: '${storageKey}_creation_time', value: DateTime.now().toIso8601String());
+    await _secureStorage.save(
+      key: '${storageKey}_creation_time',
+      value: DateTime.now().toIso8601String(),
+    );
   }
 
   Future<String> _getDeviceKey() async {
@@ -264,23 +307,6 @@ class KeyManager {
     }, functionName: "_generateDeviceKey");
   }
 
-  // Generate consistent salt for each key type
-  Uint8List _generateConsistentSalt(String deviceKey, KeyType type) {
-    final input = '$deviceKey:${type.name}:${config.EncryptionConfig.KEY_PURPOSES[type.name] ?? 'default'}';
-    final hash = sha256.convert(utf8.encode(input)).bytes;
-
-    // Extend to required salt length if needed
-    if (hash.length < SALT_LENGTH) {
-      final extendedSalt = <int>[];
-      while (extendedSalt.length < SALT_LENGTH) {
-        extendedSalt.addAll(hash);
-      }
-      return Uint8List.fromList(extendedSalt.take(SALT_LENGTH).toList());
-    }
-
-    return Uint8List.fromList(hash.take(SALT_LENGTH).toList());
-  }
-
   // Cache Management
   void _monitorCache() {
     if (_keyCache.length > MAX_CACHE_ITEMS) {
@@ -289,7 +315,8 @@ class KeyManager {
   }
 
   void _clearOldestCacheItems() {
-    final sortedEntries = _keyCache.entries.toList()..sort((a, b) => a.value.expiresAt.compareTo(b.value.expiresAt));
+    final sortedEntries =
+        _keyCache.entries.toList()..sort((a, b) => a.value.expiresAt.compareTo(b.value.expiresAt));
 
     while (_keyCache.length > MAX_CACHE_ITEMS) {
       final oldest = sortedEntries.removeAt(0);
@@ -304,14 +331,22 @@ class KeyManager {
 
   void _clearExpiredCache() {
     // Clear expired master keys
-    final expiredKeys = _keyCache.entries.where((entry) => entry.value.isExpired).map((entry) => entry.key).toList();
+    final expiredKeys =
+        _keyCache.entries
+            .where((entry) => entry.value.isExpired)
+            .map((entry) => entry.key)
+            .toList();
 
     for (final key in expiredKeys) {
       _keyCache.remove(key);
     }
 
     // Clear expired derived keys
-    final expiredDerivedKeys = _derivedKeyCache.entries.where((entry) => entry.value.isExpired).map((entry) => entry.key).toList();
+    final expiredDerivedKeys =
+        _derivedKeyCache.entries
+            .where((entry) => entry.value.isExpired)
+            .map((entry) => entry.key)
+            .toList();
 
     for (final key in expiredDerivedKeys) {
       _derivedKeyCache.remove(key);
@@ -375,19 +410,6 @@ class KeyManager {
     logInfo('KeyManager disposed');
   }
 
-  // Utilities
-  static String _generateKeyInIsolate(Map<String, dynamic> params) {
-    try {
-      final generator = pc.PBKDF2KeyDerivator(pc.HMac(pc.SHA256Digest(), 64));
-      generator.init(pc.Pbkdf2Parameters(Uint8List.fromList(base64.decode(params['salt'])), params['iterations'], params['keySize']));
-
-      final input = '${params['deviceKey']}_${params['type']}';
-      return base64.encode(generator.process(Uint8List.fromList(utf8.encode(input))));
-    } catch (e) {
-      throw Exception('Key generation failed: $e');
-    }
-  }
-
   void _logError(String message, Object error) {
     logError('[KeyManager] ERROR: $message: $error');
     _failedAttempts++;
@@ -402,6 +424,14 @@ class KeyManager {
       KeyType.database => SecureStorageKey.secureDatabaseKey,
       KeyType.note => SecureStorageKey.secureNoteKey,
     };
+  }
+
+  String _getArgon2SaltStorageKey(KeyType type) {
+    return '${_getStorageKeyForType(type)}_argon2_salt';
+  }
+
+  String _getKdfMetaStorageKey(KeyType type) {
+    return '${_getStorageKeyForType(type)}_kdf';
   }
 
   Future<T> _withRetry<T>(Future<T> Function() operation, {required String functionName}) async {
@@ -419,5 +449,51 @@ class KeyManager {
       }
     }
     throw AppError.instance.createException(ErrorText.tooManyRetries, functionName: functionName);
+  }
+
+  static String _generateKeyWithArgon2InIsolate(Map<String, dynamic> inputParams) {
+    try {
+      final deviceKey = inputParams['deviceKey'] as String;
+      final typeName = inputParams['typeName'] as String;
+      final salt = base64.decode(inputParams['salt'] as String);
+      final devicePerformanceIndex = inputParams['devicePerformance'] as int;
+
+      int memoryPowerOf2;
+      int iterations;
+
+      final devicePerformance = config.DevicePerformance.values[devicePerformanceIndex];
+      switch (devicePerformance) {
+        case config.DevicePerformance.high:
+          memoryPowerOf2 = 17; // 128 MiB
+          iterations = 3;
+          break;
+        case config.DevicePerformance.mobile:
+          memoryPowerOf2 = 16; // 64 MiB
+          iterations = 3;
+          break;
+        case config.DevicePerformance.lowEnd:
+          memoryPowerOf2 = 15; // 32 MiB
+          iterations = 2;
+          break;
+      }
+
+      final argon2Params = pc.Argon2Parameters(
+        pc.Argon2Parameters.ARGON2_id,
+        salt,
+        iterations: iterations,
+        memoryPowerOf2: memoryPowerOf2,
+        desiredKeyLength: config.EncryptionConfig.KEY_SIZE_BYTES,
+      );
+
+      final generator = pc.Argon2BytesGenerator();
+      generator.init(argon2Params);
+
+      final passwordBytes = Uint8List.fromList(utf8.encode('${deviceKey}_$typeName'));
+
+      final derivedKey = generator.process(passwordBytes);
+      return base64.encode(derivedKey);
+    } catch (e) {
+      throw Exception('Failed to generate key with Argon2id in isolate: $e');
+    }
   }
 }

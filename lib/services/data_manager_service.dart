@@ -429,7 +429,7 @@ class DataManagerService {
         return false;
       }
 
-      int successCount = 0;
+      int successCount = 1;
       await DriffDbManager.instance.transaction(() async {
         for (var account in accountCompanions) {
           try {

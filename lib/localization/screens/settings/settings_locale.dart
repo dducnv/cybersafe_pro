@@ -51,6 +51,9 @@ class SettingsLocale extends BaseLocale {
   static const String receiveData = 'receive_data';
   static const String receiveDataMessage = 'receive_data_message';
 
+  static const String waitingNotification = 'waiting_notification';
+  static const String decryptingData = 'decrypting_data';
+
   @override
   Map<String, String> get vi => {
     settings: 'Cài đặt',
@@ -84,6 +87,9 @@ class SettingsLocale extends BaseLocale {
     receiveData: 'Nhận dữ liệu',
     receiveDataMessage:
         'Để tiếp tục nhận dữ liệu từ bản Lite, vui lòng chọn file để thêm dữ liệu vào bản Pro!',
+
+    waitingNotification: "Vui lòng đợi, quá trình có thể mất vài phút",
+    decryptingData: "Đang giải mã dữ liệu...",
   };
 
   @override
@@ -119,6 +125,8 @@ class SettingsLocale extends BaseLocale {
     receiveData: 'Receive data',
     receiveDataMessage:
         'To continue receiving data from the Lite version, please select a file to add data to the Pro version!',
+    waitingNotification: "Please wait, the process may take a few minutes",
+    decryptingData: "Decrypting data...",
   };
 
   @override
@@ -154,6 +162,8 @@ class SettingsLocale extends BaseLocale {
     receiveData: 'Receive data',
     receiveDataMessage:
         'To continue receiving data from the Lite version, please select a file to add data to the Pro version!',
+    waitingNotification: "Please wait, the process may take a few minutes",
+    decryptingData: "Decrypting data...",
   };
 
   // Thêm các bản dịch cho các ngôn ngữ khác tương tự
@@ -190,6 +200,8 @@ class SettingsLocale extends BaseLocale {
     receiveData: 'Receber dados',
     receiveDataMessage:
         'Para continuar recebendo dados da versão Lite, por favor selecione um arquivo para adicionar dados à versão Pro!',
+    waitingNotification: "Por favor, aguarde, o processo pode levar alguns minutos",
+    decryptingData: "Descriptografando dados...",
   };
   @override
   Map<String, String> get pt_BR => {
@@ -224,6 +236,8 @@ class SettingsLocale extends BaseLocale {
     receiveData: 'Receber dados',
     receiveDataMessage:
         'Para continuar recebendo dados da versão Lite, por favor selecione um arquivo para adicionar dados à versão Pro!',
+    waitingNotification: "Por favor, aguarde, o processo pode levar alguns minutos",
+    decryptingData: "Descriptografando dados...",
   };
   @override
   Map<String, String> get hi => {
@@ -257,6 +271,8 @@ class SettingsLocale extends BaseLocale {
     receiveData: 'डेटा प्राप्त करें',
     receiveDataMessage:
         'Lite से डेटा प्राप्त करने के लिए, कृपया Pro में जोड़ने के लिए एक फ़ाइल चुनें!',
+    waitingNotification: "कृपया प्रतीक्षा करें, प्रक्रिया कुछ मिनट ले सकती है",
+    decryptingData: "डेटा डिक्रिप्ट कर रहा है...",
   };
   @override
   Map<String, String> get ja => {
@@ -289,6 +305,9 @@ class SettingsLocale extends BaseLocale {
     transferDataMessage: 'LiteからProにデータを転送しますか？',
     receiveData: 'データを受信',
     receiveDataMessage: 'Liteからデータを受信し続けるには、Proに追加するファイルを選択してください！',
+
+    waitingNotification: "Please wait, the process may take a few minutes",
+    decryptingData: "Decrypting data...",
   };
   @override
   Map<String, String> get ru => {
@@ -322,6 +341,8 @@ class SettingsLocale extends BaseLocale {
     receiveData: 'Получить данные',
     receiveDataMessage:
         'Чтобы продолжить получение данных из Lite, выберите файл для добавления данных в Pro!',
+    waitingNotification: "Пожалуйста, подождите, процесс может занять несколько минут",
+    decryptingData: "Расшифровка данных...",
   };
   @override
   Map<String, String> get id => {
@@ -355,6 +376,9 @@ class SettingsLocale extends BaseLocale {
     receiveData: 'Terima data',
     receiveDataMessage:
         'Untuk terus menerima data dari Lite, silakan pilih file untuk menambahkan data ke Pro!',
+
+    waitingNotification: "Silakan tunggu, proses mungkin memakan beberapa menit",
+    decryptingData: "Menguraikan data...",
   };
 
   @override
@@ -389,6 +413,9 @@ class SettingsLocale extends BaseLocale {
     receiveData: 'Receive data',
     receiveDataMessage:
         'To continue receiving data from Lite, please select a file to add data to Pro!',
+
+    waitingNotification: "Please wait, the process may take a few minutes",
+    decryptingData: "Decrypting data...",
   };
 
   @override
@@ -423,6 +450,9 @@ class SettingsLocale extends BaseLocale {
     receiveData: 'Receber dados',
     receiveDataMessage:
         'Para continuar recebendo dados do Lite, selecione um arquivo para adicionar dados ao Pro!',
+
+    waitingNotification: "Please wait, the process may take a few minutes",
+    decryptingData: "Decrypting data...",
   };
 
   @override
@@ -457,6 +487,9 @@ class SettingsLocale extends BaseLocale {
     receiveData: 'Veri al',
     receiveDataMessage:
         "Lite'dan veri almaya devam etmek için lütfen Pro'ya eklemek üzere bir dosya seçin!",
+
+    waitingNotification: "Please wait, the process may take a few minutes",
+    decryptingData: "Decrypting data...",
   };
 
   @override
@@ -493,5 +526,8 @@ class SettingsLocale extends BaseLocale {
     receiveData: 'Recibir datos',
     receiveDataMessage:
         'Para continuar recibiendo datos desde la versión Lite, ¡por favor selecciona un archivo para agregar los datos a la versión Pro!',
+
+    waitingNotification: "Por favor, espere, el proceso puede tomar unos minutos",
+    decryptingData: "Descifrando datos...",
   };
 }
