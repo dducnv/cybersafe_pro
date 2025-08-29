@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
+import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 import 'package:cybersafe_pro/secure/encrypt/encryption_config.dart';
 import 'package:cybersafe_pro/services/local_auth_service.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
@@ -62,6 +63,7 @@ class SecureAppManager {
       }
 
       logInfo('Người dùng đã được xác thực thành công');
+      await DriffDbManager.instance.init();
       return true;
     } catch (e, stackTrace) {
       logError(
