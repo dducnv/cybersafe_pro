@@ -29,6 +29,9 @@ class LocalAuthProvider extends ChangeNotifier {
   DateTime? _lockUntil;
   int _lockDurationMultiplier = 1;
 
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
   // Configuration
   static const int _maxLoginAttempts = 3;
   static const int _baseLockDurationMinutes = 1;
@@ -132,6 +135,12 @@ class LocalAuthProvider extends ChangeNotifier {
     return true;
   }
 
+  Future<bool> changePinCode(String oldPin) async {
+    if (oldPin.isEmpty) return false;
+    await SecureAppManager.changePIN(oldPin, _pinCodeConfirm);
+    return true;
+  }
+
   bool verifyRegisterPinCode(String pinCode) {
     if (_pinCodeConfirm.isEmpty) return false;
     return _pinCodeConfirm == pinCode;
@@ -150,17 +159,26 @@ class LocalAuthProvider extends ChangeNotifier {
 
       String pinCode = textEditingController.text;
       if (pinCode.length >= 6) {
-        bool verify = await verifyLoginPinCode(pinCode);
-        if (!verify) {
-          await _handleLoginFailure();
-          return false;
+        // Set loading state
+        _setLoading(true);
+
+        try {
+          bool verify = await verifyLoginPinCode(pinCode);
+          if (!verify) {
+            await _handleLoginFailure();
+            return false;
+          }
+          await _resetLockStatus();
+          return true;
+        } finally {
+          // Clear loading state
+          _setLoading(false);
         }
-        await _resetLockStatus();
-        return true;
       }
       _triggerErrorAnimation();
     } catch (e) {
       logError('Error handling login: $e');
+      _setLoading(false);
     }
     return false;
   }
@@ -192,8 +210,10 @@ class LocalAuthProvider extends ChangeNotifier {
     }
   }
 
-  void onBiometric() async {
+  Future<bool> onBiometric() async {
     try {
+      _setLoading(true);
+
       bool isAuth = await SecureAppManager.authenticateUser();
       if (SecureApplicationUtil.instance.secureApplicationController?.locked == true) {
         if (isAuth) {
@@ -201,13 +221,17 @@ class LocalAuthProvider extends ChangeNotifier {
         } else {
           SecureApplicationUtil.instance.authFailed();
         }
-        return;
+        return isAuth;
       }
       if (isAuth) {
         navigatorToHome();
       }
+      return isAuth;
     } catch (e) {
       logError('Error using biometric: $e');
+      return false;
+    } finally {
+      _setLoading(false);
     }
   }
 
@@ -370,6 +394,13 @@ class LocalAuthProvider extends ChangeNotifier {
       }
       notifyListeners();
     });
+  }
+
+  void _setLoading(bool loading) {
+    if (_isLoading != loading) {
+      _isLoading = loading;
+      notifyListeners();
+    }
   }
 
   @override

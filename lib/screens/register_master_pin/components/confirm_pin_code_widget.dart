@@ -25,12 +25,14 @@ class ConfirmPinCodeWidget extends StatefulWidget {
   final GlobalKey<FormState> formConfirmKey;
   final PageController pageController;
   final bool isChangePin;
+  final String? oldPin;
   const ConfirmPinCodeWidget({
     super.key,
     required this.appPinCodeConfirmKey,
     required this.formConfirmKey,
     required this.pageController,
     this.isChangePin = false,
+    this.oldPin,
   });
 
   @override
@@ -111,17 +113,29 @@ class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
       listen: false,
     ).verifyRegisterPinCode(pinCodeController.text);
     if (isVerified && pinCodeController.text.isNotEmpty && context.mounted) {
-      Provider.of<LocalAuthProvider>(context, listen: false).savePinCode();
-      context.read<AppProvider>().initializeTimer();
+      showLoadingDialog(
+        loadingText:
+            !widget.isChangePin ? ValueNotifier(context.trSafe(OnboardingText.initDatabase)) : null,
+      );
+      if (!widget.isChangePin) {
+        await Provider.of<LocalAuthProvider>(context, listen: false).savePinCode();
+      } else {
+        await Provider.of<LocalAuthProvider>(
+          context,
+          listen: false,
+        ).changePinCode(widget.oldPin ?? "");
+      }
+
       SecureApplicationUtil.instance.unpause();
-      showLoadingDialog(loadingText: ValueNotifier(context.trSafe(OnboardingText.initDatabase)));
-      await DriffDbManager.instance.init();
-      if (mounted) {
-        await context.read<CategoryProvider>().initDataCategory(context);
+
+      if (!widget.isChangePin) {
+        await DriffDbManager.instance.init();
+        if (mounted) await context.read<CategoryProvider>().initDataCategory(context);
         await SecureStorage.instance.save(key: SecureStorageKey.firstOpenApp, value: "false");
       }
       hideLoadingDialog();
       if (mounted) {
+        context.read<AppProvider>().initializeTimer();
         AppRoutes.navigateAndRemoveUntil(context, AppRoutes.home);
       }
     } else {

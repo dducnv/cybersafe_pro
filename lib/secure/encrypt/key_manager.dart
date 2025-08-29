@@ -96,7 +96,7 @@ class KeyManager {
       _keyCache[cacheKey] = CachedKey(key);
       _monitorCache();
       _failedAttempts = 0;
-
+      logInfo('✅ Đã lấy key thành công: $key');
       return key;
     }, functionName: "_getEncryptionKey");
   }
@@ -109,15 +109,12 @@ class KeyManager {
       if (existingKey != null) {
         return existingKey;
       }
-
       final newKey = _generateSecureRandomBytes(32);
-
       await _saveEncryptionKey(keyId, newKey, rootMasterKey);
-
       return newKey;
     } catch (e, stackTrace) {
       logError(
-        'Lỗi tạo/lấy encryption key: $e\n$stackTrace',
+        '❌ Lỗi tạo/lấy encryption key: $e\n$stackTrace',
         functionName: 'KeyManager._createOrGetEncryptionKey',
       );
       return null;
@@ -127,6 +124,8 @@ class KeyManager {
   Future<Uint8List?> _getStoredEncryptionKey(String keyId, Uint8List rootMasterKey) async {
     try {
       final wrappedKeyData = await _secureStorage.read(key: keyId);
+
+      logInfo('wrappedKeyData $keyId ========= $wrappedKeyData');
       if (wrappedKeyData == null) {
         return null;
       }
@@ -150,7 +149,7 @@ class KeyManager {
       await _secureStorage.save(key: keyId, value: wrappedKey);
     } catch (e, stackTrace) {
       logError(
-        'Lỗi lưu encryption key: $e\n$stackTrace',
+        '❌ Lỗi lưu encryption key: $e\n$stackTrace',
         functionName: 'KeyManager._saveEncryptionKey',
       );
     }

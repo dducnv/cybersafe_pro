@@ -55,6 +55,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     } else if (state == AppLifecycleState.resumed) {
       context.read<AppProvider>().handleAppResume(context);
       final deviceType = DeviceInfo.getDeviceType(context);
+      SecureApplicationUtil.instance.unpause();
       if (deviceType == DeviceType.desktop) {
         final currentRoute = ModalRoute.of(context)?.settings.name;
         if (currentRoute != null && currentRoute != AppRoutes.home) {

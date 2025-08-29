@@ -6,8 +6,8 @@ import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/home_provider.dart';
 import 'package:cybersafe_pro/resources/size_text_icon.dart';
+import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/screens/login_master_password/login_master_password.dart';
-import 'package:cybersafe_pro/screens/register_master_pin/register_master_pin.dart';
 import 'package:cybersafe_pro/screens/settings/widgets/change_lang_widget.dart';
 import 'package:cybersafe_pro/screens/settings/widgets/set_theme_color.dart';
 import 'package:cybersafe_pro/screens/settings/widgets/set_theme_mode_widget.dart';
@@ -79,11 +79,26 @@ class SettingMobileLayout extends StatelessWidget {
                   title: context.appLocale.settingsLocale.getText(SettingsLocale.changePin),
                   icon: Icons.pin,
                   onTap: () {
-                    Navigator.of(context).push(
+                    Navigator.of(GlobalKeys.appRootNavigatorKey.currentContext!).push(
                       MaterialPageRoute(
-                        builder: (context) {
-                          return const RegisterMasterPin(isChangePin: true);
-                        },
+                        builder:
+                            (context) => LoginMasterPassword(
+                              showBiometric: false,
+                              isFromDeleteData: true,
+                              callBackLoginCallback: ({
+                                bool? isLoginSuccess,
+                                String? pin,
+                                GlobalKey<AppPinCodeFieldsState>? appPinCodeKey,
+                              }) async {
+                                if (isLoginSuccess == true && pin != null) {
+                                  AppRoutes.navigateToReplacement(
+                                    context,
+                                    AppRoutes.registerMasterPin,
+                                    arguments: {"isChangePin": true, "oldPin": pin},
+                                  );
+                                }
+                              },
+                            ),
                       ),
                     );
                   },

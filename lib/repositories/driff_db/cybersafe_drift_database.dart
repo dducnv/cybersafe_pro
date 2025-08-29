@@ -33,6 +33,7 @@ class DriftSqliteDatabase extends _$DriftSqliteDatabase {
 
   /// Mở kết nối với SQLCipher encryption
   static QueryExecutor _openConnection() {
+    print("openConnection");
     return LazyDatabase(() async {
       try {
         final dbFolder = await getApplicationDocumentsDirectory();
