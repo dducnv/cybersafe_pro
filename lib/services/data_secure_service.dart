@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:cybersafe_pro/encrypt/encrypt_v1/encrypt_v1.dart';
-import 'package:cybersafe_pro/encrypt/encrypt_v2/encrypt_v2.dart';
-import 'package:cybersafe_pro/encrypt/key_manager.dart';
+import 'package:cybersafe_pro/secure/encrypt/encrypt_v1/encrypt_v1.dart';
+import 'package:cybersafe_pro/secure/encrypt/encrypt_v2/encrypt_v2.dart';
+import 'package:cybersafe_pro/secure/encrypt/key_manager.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 
 class DataSecureService {

@@ -1,17 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/localization/keys/error_text.dart';
 import 'package:cybersafe_pro/secure/encrypt/cache_key.dart';
 import 'package:cybersafe_pro/secure/encrypt/encryption_config.dart' as config;
+import 'package:cybersafe_pro/secure/secure_app_manager.dart';
 import 'package:cybersafe_pro/utils/app_error.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
+import 'package:encrypt/encrypt.dart' as enc;
 import 'package:flutter/foundation.dart';
-import 'package:pointycastle/export.dart' as pc;
 
 enum KeyType { info, password, totp, note, pinCode, database }
 
@@ -23,20 +25,229 @@ class KeyManager {
 
   // Constants
   static const MAX_CACHE_DURATION = config.EncryptionConfig.KEY_CACHE_DURATION;
-  static const MAX_CACHE_ITEMS = 20; // Increased for derived keys
+  static const MAX_CACHE_ITEMS = 20;
   static const CLEANUP_INTERVAL = Duration(minutes: 4);
   static const DEVICE_KEY_LENGTH = config.EncryptionConfig.KEY_SIZE_BYTES;
   static const SALT_LENGTH = config.EncryptionConfig.SALT_SIZE_BYTES;
-  static const DERIVED_KEY_CACHE_DURATION = Duration(minutes: 5); // Shorter for derived keys
+  static const DERIVED_KEY_CACHE_DURATION = Duration(minutes: 5);
 
   final _secureStorage = SecureStorage.instance;
   final Map<String, CachedKey> _keyCache = {};
-  final Map<String, CachedKey> _derivedKeyCache = {}; // New cache for derived keys
+  final Map<String, CachedKey> _derivedKeyCache = {};
   Timer? _cacheCleanupTimer;
   int _failedAttempts = 0;
   DateTime? _lockoutUntil;
 
-  // HKDF implementation for key derivation
+  static Future<String> getKey(KeyType type) async {
+    ArgumentError.checkNotNull(type, 'type');
+    return await instance._getEncryptionKey(type);
+  }
+
+  static Future<String> getDerivedKey(KeyType type, String context, String purpose) async {
+    return await instance._getDerivedKey(type, context, purpose);
+  }
+
+  static Future<Map<String, String>> getDerivedKeys(
+    KeyType type,
+    String context, {
+    List<String> purposes = const ['aes', 'hmac'],
+  }) async {
+    return await instance._getDerivedKeys(type, context, purposes);
+  }
+
+  static Future<void> clearDerivedKeyCache([String? specificContext]) async {
+    await instance._clearDerivedKeyCache(specificContext);
+  }
+
+  static void onAppBackground() {
+    instance._clearAllCache();
+    logInfo('All caches cleared on app background');
+  }
+
+  static void dispose() {
+    instance._dispose();
+  }
+
+  Future<String> _getEncryptionKey(KeyType type) async {
+    return await _withRetry(() async {
+      await _checkRateLimit();
+
+      final cacheKey = '${type.name}_key';
+
+      if (_keyCache.containsKey(cacheKey) && !_keyCache[cacheKey]!.isExpired) {
+        return _keyCache[cacheKey]!.value;
+      }
+
+      if (!SecureAppManager.isSessionValid()) {
+        throw Exception('Session không hợp lệ, cần xác thực lại');
+      }
+
+      final rootMasterKey = await SecureAppManager.getRootMasterKey();
+      if (rootMasterKey == null) {
+        throw Exception('Không thể lấy Root Master Key');
+      }
+
+      final encryptionKey = await _createOrGetEncryptionKey(type, rootMasterKey);
+      if (encryptionKey == null) {
+        throw Exception('Không thể tạo encryption key');
+      }
+
+      final key = base64.encode(encryptionKey);
+      _keyCache[cacheKey] = CachedKey(key);
+      _monitorCache();
+      _failedAttempts = 0;
+
+      return key;
+    }, functionName: "_getEncryptionKey");
+  }
+
+  Future<Uint8List?> _createOrGetEncryptionKey(KeyType type, Uint8List rootMasterKey) async {
+    try {
+      final keyId = _getStorageKeyForType(type);
+
+      final existingKey = await _getStoredEncryptionKey(keyId, rootMasterKey);
+      if (existingKey != null) {
+        return existingKey;
+      }
+
+      final newKey = _generateSecureRandomBytes(32);
+
+      await _saveEncryptionKey(keyId, newKey, rootMasterKey);
+
+      return newKey;
+    } catch (e, stackTrace) {
+      logError(
+        'Lỗi tạo/lấy encryption key: $e\n$stackTrace',
+        functionName: 'KeyManager._createOrGetEncryptionKey',
+      );
+      return null;
+    }
+  }
+
+  Future<Uint8List?> _getStoredEncryptionKey(String keyId, Uint8List rootMasterKey) async {
+    try {
+      final wrappedKeyData = await _secureStorage.read(key: keyId);
+      if (wrappedKeyData == null) {
+        return null;
+      }
+      if (_isWrappedKey(wrappedKeyData)) {
+        return await _unwrapKey(wrappedKeyData, rootMasterKey);
+      } else {
+        return base64.decode(wrappedKeyData);
+      }
+    } catch (e) {
+      logError(
+        'Lỗi lấy stored encryption key: $e',
+        functionName: 'KeyManager._getStoredEncryptionKey',
+      );
+      return null;
+    }
+  }
+
+  Future<void> _saveEncryptionKey(String keyId, Uint8List key, Uint8List rootMasterKey) async {
+    try {
+      final wrappedKey = await _wrapKey(key, rootMasterKey);
+      await _secureStorage.save(key: keyId, value: wrappedKey);
+    } catch (e, stackTrace) {
+      logError(
+        'Lỗi lưu encryption key: $e\n$stackTrace',
+        functionName: 'KeyManager._saveEncryptionKey',
+      );
+    }
+  }
+
+  bool _isWrappedKey(String keyData) {
+    try {
+      final package = json.decode(keyData) as Map<String, dynamic>;
+
+      final hasRequiredFields =
+          package.containsKey('iv') &&
+          package.containsKey('data') &&
+          package.containsKey('algorithm') &&
+          package.containsKey('version') &&
+          package.containsKey('type');
+
+      if (!hasRequiredFields) {
+        return false;
+      }
+      final type = package['type'] as String?;
+      if (type != 'WRAP') {
+        return false;
+      }
+      final version = package['version'] as String?;
+      if (version != '2.0') {
+        return false;
+      }
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<String> _getDerivedKey(KeyType type, String context, String purpose) async {
+    final cacheKey = '${type.name}_${context}_$purpose';
+
+    if (_derivedKeyCache.containsKey(cacheKey) && !_derivedKeyCache[cacheKey]!.isExpired) {
+      return _derivedKeyCache[cacheKey]!.value;
+    }
+
+    final masterKey = await _getEncryptionKey(type);
+    return await _getDerivedKeyFromMaster(masterKey, type, context, purpose);
+  }
+
+  /// Lấy nhiều derived keys
+  Future<Map<String, String>> _getDerivedKeys(
+    KeyType type,
+    String context,
+    List<String> purposes,
+  ) async {
+    final masterKey = await _getEncryptionKey(type);
+    final derivedKeys = <String, String>{};
+
+    for (final purpose in purposes) {
+      derivedKeys[purpose] = await _getDerivedKeyFromMaster(masterKey, type, context, purpose);
+    }
+
+    return derivedKeys;
+  }
+
+  Future<String> _getDerivedKeyFromMaster(
+    String masterKey,
+    KeyType type,
+    String context,
+    String purpose,
+  ) async {
+    final cacheKey = '${type.name}_${context}_$purpose';
+
+    if (_derivedKeyCache.containsKey(cacheKey) && !_derivedKeyCache[cacheKey]!.isExpired) {
+      return _derivedKeyCache[cacheKey]!.value;
+    }
+
+    final masterKeyBytes = base64.decode(masterKey);
+    final salt = _generateHkdfSalt(type, context);
+    final info = utf8.encode(
+      '${config.EncryptionConfig.KEY_PURPOSES[purpose] ?? purpose}_$context',
+    );
+
+    final derivedKeyBytes = _hkdf(
+      inputKeyMaterial: masterKeyBytes,
+      salt: salt,
+      info: Uint8List.fromList(info),
+      length: config.EncryptionConfig.KEY_SIZE_BYTES,
+    );
+
+    final derivedKey = base64.encode(derivedKeyBytes);
+    _derivedKeyCache[cacheKey] = CachedKey(derivedKey, customDuration: DERIVED_KEY_CACHE_DURATION);
+    _monitorDerivedKeyCache();
+
+    _secureWipe(masterKeyBytes);
+    _secureWipe(derivedKeyBytes);
+
+    return derivedKey;
+  }
+
+  /// HKDF implementation
   static Uint8List _hkdf({
     required Uint8List inputKeyMaterial,
     required Uint8List salt,
@@ -47,11 +258,9 @@ class KeyManager {
       throw ArgumentError('Output length too large for HKDF');
     }
 
-    // Extract phase: HKDF-Extract(salt, IKM) = HMAC-Hash(salt, IKM)
     final hmac = Hmac(sha256, salt);
     final prk = hmac.convert(inputKeyMaterial).bytes;
 
-    // Expand phase: HKDF-Expand(PRK, info, L)
     final okm = <int>[];
     final hmacExpand = Hmac(sha256, prk);
     var counter = 1;
@@ -67,86 +276,11 @@ class KeyManager {
     return Uint8List.fromList(okm.take(length).toList());
   }
 
-  // NEW: Get derived keys for specific purpose and context
-  Future<Map<String, String>> getDerivedKeys(
-    KeyType type,
-    String context, {
-    List<String> purposes = const ['aes', 'hmac'],
-  }) async {
-    final masterKey = await _getEncryptionKey(type);
-    final derivedKeys = <String, String>{};
-
-    for (final purpose in purposes) {
-      derivedKeys[purpose] = await _getDerivedKeyFromMaster(masterKey, type, context, purpose);
-    }
-
-    return derivedKeys;
-  }
-
-  // NEW: Get single derived key for specific purpose
-  Future<String> getDerivedKey(KeyType type, String context, String purpose) async {
-    final cacheKey = '${type.name}_${context}_$purpose';
-
-    // Check cache first
-    if (_derivedKeyCache.containsKey(cacheKey) && !_derivedKeyCache[cacheKey]!.isExpired) {
-      return _derivedKeyCache[cacheKey]!.value;
-    }
-
-    final masterKey = await _getEncryptionKey(type);
-    return await _getDerivedKeyFromMaster(masterKey, type, context, purpose);
-  }
-
-  // PRIVATE: Derive key from existing master key (no duplicate calls)
-  Future<String> _getDerivedKeyFromMaster(
-    String masterKey,
-    KeyType type,
-    String context,
-    String purpose,
-  ) async {
-    final cacheKey = '${type.name}_${context}_$purpose';
-
-    // Check cache first
-    if (_derivedKeyCache.containsKey(cacheKey) && !_derivedKeyCache[cacheKey]!.isExpired) {
-      return _derivedKeyCache[cacheKey]!.value;
-    }
-
-    final masterKeyBytes = base64.decode(masterKey);
-
-    // Generate salt for HKDF
-    final salt = _generateHkdfSalt(type, context);
-
-    // Generate info for HKDF
-    final info = utf8.encode(
-      '${config.EncryptionConfig.KEY_PURPOSES[purpose] ?? purpose}_$context',
-    );
-
-    // Derive key using HKDF
-    final derivedKeyBytes = _hkdf(
-      inputKeyMaterial: masterKeyBytes,
-      salt: salt,
-      info: Uint8List.fromList(info),
-      length: config.EncryptionConfig.KEY_SIZE_BYTES,
-    );
-
-    final derivedKey = base64.encode(derivedKeyBytes);
-
-    // Cache the derived key
-    _derivedKeyCache[cacheKey] = CachedKey(derivedKey, customDuration: DERIVED_KEY_CACHE_DURATION);
-    _monitorDerivedKeyCache();
-
-    // Clear sensitive data
-    _secureWipe(masterKeyBytes);
-    _secureWipe(derivedKeyBytes);
-
-    return derivedKey;
-  }
-
-  // Generate consistent salt for HKDF
+  /// Tạo salt cho HKDF
   Uint8List _generateHkdfSalt(KeyType type, String context) {
     final input = '${type.name}:$context:hkdf_salt';
     final hash = sha256.convert(utf8.encode(input)).bytes;
 
-    // Extend to required salt length if needed
     if (hash.length < SALT_LENGTH) {
       final extendedSalt = <int>[];
       while (extendedSalt.length < SALT_LENGTH) {
@@ -158,10 +292,9 @@ class KeyManager {
     return Uint8List.fromList(hash.take(SALT_LENGTH).toList());
   }
 
-  // NEW: Clear derived key cache
-  Future<void> clearDerivedKeyCache([String? specificContext]) async {
+  /// Xóa derived key cache
+  Future<void> _clearDerivedKeyCache([String? specificContext]) async {
     if (specificContext != null) {
-      // Clear only specific context
       final keysToRemove =
           _derivedKeyCache.keys.where((key) => key.contains('_${specificContext}_')).toList();
       _derivedKeyCache.removeWhere((key, value) => keysToRemove.contains(key));
@@ -174,85 +307,47 @@ class KeyManager {
     );
   }
 
-  // Monitor derived key cache
-  void _monitorDerivedKeyCache() {
-    if (_derivedKeyCache.length > MAX_CACHE_ITEMS) {
-      _clearOldestDerivedCacheItems();
+  /// Wrap key
+  Future<String> _wrapKey(Uint8List keyToWrap, Uint8List wrappingKey) async {
+    try {
+      final iv = _generateSecureRandomBytes(12);
+      final encrypter = enc.Encrypter(enc.AES(enc.Key(wrappingKey), mode: enc.AESMode.gcm));
+
+      final encrypted = encrypter.encrypt(String.fromCharCodes(keyToWrap), iv: enc.IV(iv));
+
+      final package = {
+        'iv': base64.encode(iv),
+        'data': encrypted.base64,
+        'algorithm': 'AES-256-GCM',
+        'version': '2.0',
+        'type': "WRAP",
+        'timestamp': DateTime.now().toIso8601String(),
+      };
+
+      return json.encode(package);
+    } catch (e) {
+      throw Exception('Lỗi wrap key: $e');
     }
   }
 
-  void _clearOldestDerivedCacheItems() {
-    final sortedEntries =
-        _derivedKeyCache.entries.toList()
-          ..sort((a, b) => a.value.expiresAt.compareTo(b.value.expiresAt));
+  /// Unwrap key
+  Future<Uint8List?> _unwrapKey(String wrappedKeyData, Uint8List wrappingKey) async {
+    try {
+      final package = json.decode(wrappedKeyData) as Map<String, dynamic>;
+      final iv = base64.decode(package['iv']);
+      final encryptedData = enc.Encrypted.fromBase64(package['data']);
 
-    while (_derivedKeyCache.length > MAX_CACHE_ITEMS) {
-      final oldest = sortedEntries.removeAt(0);
-      _derivedKeyCache.remove(oldest.key);
+      final encrypter = enc.Encrypter(enc.AES(enc.Key(wrappingKey), mode: enc.AESMode.gcm));
+
+      final decrypted = encrypter.decrypt(encryptedData, iv: enc.IV(iv));
+      return Uint8List.fromList(decrypted.codeUnits);
+    } catch (e) {
+      logError('Lỗi unwrap key: $e', functionName: 'KeyManager._unwrapKey');
+      return null;
     }
   }
 
-  // Core key generation & management
-  static Future<String> getKey(KeyType type) async {
-    ArgumentError.checkNotNull(type, 'type');
-    return await instance._getEncryptionKey(type);
-  }
-
-  // Renamed from _generateEncryptionKey to _getEncryptionKey for clarity
-  Future<String> _getEncryptionKey(KeyType type) async {
-    return await _withRetry(() async {
-      await _checkRateLimit();
-
-      final cacheKey = '${type.name}_key';
-
-      if (_keyCache.containsKey(cacheKey) && !_keyCache[cacheKey]!.isExpired) {
-        return _keyCache[cacheKey]!.value;
-      }
-
-      final storageKey = _getStorageKeyForType(type);
-      final savedKey = await _secureStorage.read(key: storageKey);
-      if (savedKey != null) {
-        // Legacy users (PBKDF2) or already existing Argon2 key
-        _keyCache[cacheKey] = CachedKey(savedKey);
-        _monitorCache();
-        return savedKey;
-      }
-
-      // NEW USERS: Generate master key using Argon2id
-      final deviceKey = await _getDeviceKey();
-
-      // Prepare per-type salt storage for Argon2
-      final argon2SaltKey = _getArgon2SaltStorageKey(type);
-      String? argon2SaltB64 = await _secureStorage.read(key: argon2SaltKey);
-      Uint8List argon2Salt;
-      if (argon2SaltB64 == null) {
-        argon2Salt = generateSecureRandomBytes(16);
-        await _secureStorage.save(key: argon2SaltKey, value: base64.encode(argon2Salt));
-      } else {
-        argon2Salt = base64.decode(argon2SaltB64);
-      }
-
-      // Chạy Argon2id trong isolate để tránh block UI thread
-      final key = await compute<Map<String, dynamic>, String>(_generateKeyWithArgon2InIsolate, {
-        'deviceKey': deviceKey,
-        'typeName': type.name,
-        'salt': base64.encode(argon2Salt),
-        'devicePerformance': config.EncryptionConfig.devicePerformance.index,
-      });
-
-      _keyCache[cacheKey] = CachedKey(key);
-      await _secureStorage.save(key: storageKey, value: key);
-      await _secureStorage.save(key: _getKdfMetaStorageKey(type), value: 'argon2id');
-      await _setKeyCreationTime(type);
-
-      _secureWipe(argon2Salt);
-      _monitorCache();
-      _failedAttempts = 0; // Reset on success
-      return key;
-    }, functionName: "_getEncryptionKey");
-  }
-
-  // Check for rate limiting
+  /// Kiểm tra rate limit
   Future<void> _checkRateLimit() async {
     if (_lockoutUntil != null && DateTime.now().isBefore(_lockoutUntil!)) {
       final remaining = _lockoutUntil!.difference(DateTime.now());
@@ -268,59 +363,35 @@ class KeyManager {
     }
   }
 
-  Future<void> _setKeyCreationTime(KeyType type) async {
-    final storageKey = _getStorageKeyForType(type);
-    await _secureStorage.save(
-      key: '${storageKey}_creation_time',
-      value: DateTime.now().toIso8601String(),
-    );
-  }
-
-  Future<String> _getDeviceKey() async {
-    return await _withRetry(() async {
-      final cacheKey = 'device_key';
-      if (_keyCache.containsKey(cacheKey) && !_keyCache[cacheKey]!.isExpired) {
-        return _keyCache[cacheKey]!.value;
-      }
-
-      final key = await _secureStorage.read(key: SecureStorageKey.secureDeviceKey);
-      if (key == null) {
-        await _generateDeviceKey();
-        return await _getDeviceKey();
-      }
-
-      _keyCache[cacheKey] = CachedKey(key);
-      _monitorCache();
-      return key;
-    }, functionName: "_getDeviceKey");
-  }
-
-  Future<void> _generateDeviceKey() async {
-    return await _withRetry(() async {
-      final keyBytes = generateSecureRandomBytes(DEVICE_KEY_LENGTH);
-      final key = base64.encode(keyBytes);
-
-      await _secureStorage.save(key: SecureStorageKey.secureDeviceKey, value: key);
-
-      _secureWipe(keyBytes);
-      logInfo('Device key generated securely');
-    }, functionName: "_generateDeviceKey");
-  }
-
-  // Cache Management
+  /// Cache management
   void _monitorCache() {
     if (_keyCache.length > MAX_CACHE_ITEMS) {
       _clearOldestCacheItems();
     }
   }
 
+  void _monitorDerivedKeyCache() {
+    if (_derivedKeyCache.length > MAX_CACHE_ITEMS) {
+      _clearOldestDerivedCacheItems();
+    }
+  }
+
   void _clearOldestCacheItems() {
     final sortedEntries =
         _keyCache.entries.toList()..sort((a, b) => a.value.expiresAt.compareTo(b.value.expiresAt));
-
     while (_keyCache.length > MAX_CACHE_ITEMS) {
       final oldest = sortedEntries.removeAt(0);
       _keyCache.remove(oldest.key);
+    }
+  }
+
+  void _clearOldestDerivedCacheItems() {
+    final sortedEntries =
+        _derivedKeyCache.entries.toList()
+          ..sort((a, b) => a.value.expiresAt.compareTo(b.value.expiresAt));
+    while (_derivedKeyCache.length > MAX_CACHE_ITEMS) {
+      final oldest = sortedEntries.removeAt(0);
+      _derivedKeyCache.remove(oldest.key);
     }
   }
 
@@ -330,24 +401,20 @@ class KeyManager {
   }
 
   void _clearExpiredCache() {
-    // Clear expired master keys
     final expiredKeys =
         _keyCache.entries
             .where((entry) => entry.value.isExpired)
             .map((entry) => entry.key)
             .toList();
-
     for (final key in expiredKeys) {
       _keyCache.remove(key);
     }
 
-    // Clear expired derived keys
     final expiredDerivedKeys =
         _derivedKeyCache.entries
             .where((entry) => entry.value.isExpired)
             .map((entry) => entry.key)
             .toList();
-
     for (final key in expiredDerivedKeys) {
       _derivedKeyCache.remove(key);
     }
@@ -358,28 +425,29 @@ class KeyManager {
     _derivedKeyCache.clear();
   }
 
-  // Security Operations
-  Uint8List generateSecureRandomBytes(int length) {
-    // Use multiple entropy sources
+  void _dispose() {
+    _cacheCleanupTimer?.cancel();
+    _cacheCleanupTimer = null;
+    _clearAllCache();
+    logInfo('KeyManager disposed');
+  }
+
+  /// Security operations
+  Uint8List _generateSecureRandomBytes(int length) {
     final entropy = <int>[];
     entropy.addAll(utf8.encode(DateTime.now().toIso8601String()));
     entropy.addAll(utf8.encode(DateTime.now().microsecondsSinceEpoch.toString()));
     entropy.addAll(utf8.encode(hashCode.toString()));
 
-    // Add system entropy
     final systemRandom = Random.secure();
     for (int i = 0; i < config.EncryptionConfig.SECURE_RANDOM_SEED_LENGTH; i++) {
       entropy.add(systemRandom.nextInt(256));
     }
 
-    // Ensure entropy is exactly 32 bytes (256 bits)
     final entropyBytes = Uint8List.fromList(sha256.convert(Uint8List.fromList(entropy)).bytes);
-
-    // Use entropyBytes to seed our random generation
     final result = Uint8List(length);
     final random = Random.secure();
 
-    // Mix entropy with secure random
     for (int i = 0; i < length; i++) {
       result[i] = (random.nextInt(256) ^ entropyBytes[i % entropyBytes.length]);
     }
@@ -397,24 +465,6 @@ class KeyManager {
     data.fillRange(0, data.length, 0);
   }
 
-  // Lifecycle
-  void onAppBackground() {
-    _clearAllCache();
-    logInfo('All caches cleared on app background');
-  }
-
-  void dispose() {
-    _cacheCleanupTimer?.cancel();
-    _cacheCleanupTimer = null;
-    _clearAllCache();
-    logInfo('KeyManager disposed');
-  }
-
-  void _logError(String message, Object error) {
-    logError('[KeyManager] ERROR: $message: $error');
-    _failedAttempts++;
-  }
-
   String _getStorageKeyForType(KeyType type) {
     return switch (type) {
       KeyType.info => SecureStorageKey.secureInfoKey,
@@ -426,12 +476,10 @@ class KeyManager {
     };
   }
 
-  String _getArgon2SaltStorageKey(KeyType type) {
-    return '${_getStorageKeyForType(type)}_argon2_salt';
-  }
-
-  String _getKdfMetaStorageKey(KeyType type) {
-    return '${_getStorageKeyForType(type)}_kdf';
+  /// Error handling
+  void _logError(String message, Object error) {
+    logError('[KeyManager] ERROR: $message: $error');
+    _failedAttempts++;
   }
 
   Future<T> _withRetry<T>(Future<T> Function() operation, {required String functionName}) async {
@@ -449,51 +497,5 @@ class KeyManager {
       }
     }
     throw AppError.instance.createException(ErrorText.tooManyRetries, functionName: functionName);
-  }
-
-  static String _generateKeyWithArgon2InIsolate(Map<String, dynamic> inputParams) {
-    try {
-      final deviceKey = inputParams['deviceKey'] as String;
-      final typeName = inputParams['typeName'] as String;
-      final salt = base64.decode(inputParams['salt'] as String);
-      final devicePerformanceIndex = inputParams['devicePerformance'] as int;
-
-      int memoryPowerOf2;
-      int iterations;
-
-      final devicePerformance = config.DevicePerformance.values[devicePerformanceIndex];
-      switch (devicePerformance) {
-        case config.DevicePerformance.high:
-          memoryPowerOf2 = 17; // 128 MiB
-          iterations = 3;
-          break;
-        case config.DevicePerformance.mobile:
-          memoryPowerOf2 = 16; // 64 MiB
-          iterations = 3;
-          break;
-        case config.DevicePerformance.lowEnd:
-          memoryPowerOf2 = 15; // 32 MiB
-          iterations = 2;
-          break;
-      }
-
-      final argon2Params = pc.Argon2Parameters(
-        pc.Argon2Parameters.ARGON2_id,
-        salt,
-        iterations: iterations,
-        memoryPowerOf2: memoryPowerOf2,
-        desiredKeyLength: config.EncryptionConfig.KEY_SIZE_BYTES,
-      );
-
-      final generator = pc.Argon2BytesGenerator();
-      generator.init(argon2Params);
-
-      final passwordBytes = Uint8List.fromList(utf8.encode('${deviceKey}_$typeName'));
-
-      final derivedKey = generator.process(passwordBytes);
-      return base64.encode(derivedKey);
-    } catch (e) {
-      throw Exception('Failed to generate key with Argon2id in isolate: $e');
-    }
   }
 }

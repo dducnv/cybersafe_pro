@@ -157,7 +157,7 @@ class EncryptV2 {
       } else {
         // Backward-compatible flow (old): KeyManager-derived AES/HMAC
         final stopwatch = Stopwatch()..start();
-        final derivedKeys = await KeyManager.instance.getDerivedKeys(
+        final derivedKeys = await KeyManager.getDerivedKeys(
           keyType,
           _encryptionContext,
           purposes: ['aes', 'hmac'],

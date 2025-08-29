@@ -7,6 +7,7 @@ import 'package:cybersafe_pro/secure/encrypt/encryption_config.dart';
 import 'package:cybersafe_pro/services/local_auth_service.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
+import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:encrypt/encrypt.dart' as enc;
 import 'package:flutter/foundation.dart';
 import 'package:pointycastle/export.dart' as pc;
@@ -437,7 +438,7 @@ class SecureAppManager {
 
   Future<bool> _authenticateWithBiometric() async {
     try {
-      return await LocalAuthConfig.instance.authenticate();
+      return await checkLocalAuth();
     } catch (e) {
       logError(
         'Lỗi xác thực biometric: $e',

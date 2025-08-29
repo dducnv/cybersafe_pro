@@ -6,6 +6,7 @@ import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/login_text.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/local_auth_provider.dart';
+import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/services/local_auth_service.dart';
 import 'package:cybersafe_pro/utils/device_type.dart';
@@ -296,6 +297,7 @@ class _MobileLayoutState extends State<MobileLayout> {
             appPinCodeKey: _pinCodeKey,
           );
         }
+        await DriffDbManager.instance.init();
         SecureApplicationUtil.instance.authSuccess();
       } else {
         SecureApplicationUtil.instance.authFailed();

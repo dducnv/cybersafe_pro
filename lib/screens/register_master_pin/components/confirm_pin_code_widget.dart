@@ -1,10 +1,16 @@
+import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
+import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/login_text.dart';
+import 'package:cybersafe_pro/localization/keys/onboarding_text.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
+import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/providers/local_auth_provider.dart';
+import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/secure_application_util.dart';
+import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:cybersafe_pro/utils/toast_noti.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
@@ -98,7 +104,7 @@ class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
     );
   }
 
-  _handleSubmit() {
+  _handleSubmit() async {
     widget.formConfirmKey.currentState!.validate();
     bool isVerified = Provider.of<LocalAuthProvider>(
       context,
@@ -108,7 +114,16 @@ class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
       Provider.of<LocalAuthProvider>(context, listen: false).savePinCode();
       context.read<AppProvider>().initializeTimer();
       SecureApplicationUtil.instance.unpause();
-      AppRoutes.navigateAndRemoveUntil(context, AppRoutes.home);
+      showLoadingDialog(loadingText: ValueNotifier(context.trSafe(OnboardingText.initDatabase)));
+      await DriffDbManager.instance.init();
+      if (mounted) {
+        await context.read<CategoryProvider>().initDataCategory(context);
+        await SecureStorage.instance.save(key: SecureStorageKey.firstOpenApp, value: "false");
+      }
+      hideLoadingDialog();
+      if (mounted) {
+        AppRoutes.navigateAndRemoveUntil(context, AppRoutes.home);
+      }
     } else {
       timeCorrect++;
       widget.appPinCodeConfirmKey.currentState!.triggerErrorAnimation();

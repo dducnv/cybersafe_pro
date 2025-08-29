@@ -4,12 +4,10 @@ import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/secure/secure_app_manager.dart';
-import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
-import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -56,27 +54,6 @@ class LocalAuthProvider extends ChangeNotifier {
     await _focusPinInput();
     // }
   }
-
-  // bool _shouldUseBiometric(bool canUseBiometric) {
-  //   return LocalAuthConfig.instance.isAvailableBiometrics &&
-  //       LocalAuthConfig.instance.isOpenUseBiometric &&
-  //       canUseBiometric;
-  // }
-
-  // Future<void> _handleBiometricAuth(
-  //   Function() biometricLoginCallBack, {
-  //   bool isNavigateToHome = true,
-  // }) async {
-  //   await Future.delayed(const Duration(milliseconds: 500));
-  //   bool isAuth = await checkLocalAuth();
-
-  //   if (isAuth) {
-  //     if (isNavigateToHome) navigatorToHome();
-  //     biometricLoginCallBack.call();
-  //   } else {
-  //     await _focusPinInput();
-  //   }
-  // }
 
   Future<void> _focusPinInput() async {
     await Future.delayed(const Duration(milliseconds: 250));
@@ -217,7 +194,7 @@ class LocalAuthProvider extends ChangeNotifier {
 
   void onBiometric() async {
     try {
-      bool isAuth = await checkLocalAuth();
+      bool isAuth = await SecureAppManager.authenticateUser();
       if (SecureApplicationUtil.instance.secureApplicationController?.locked == true) {
         if (isAuth) {
           SecureApplicationUtil.instance.authSuccess();
@@ -236,18 +213,7 @@ class LocalAuthProvider extends ChangeNotifier {
 
   Future<bool> verifyLoginPinCode(String pinCode) async {
     try {
-      String? pinCodeEncryptedFromStorage = await SecureStorage.instance.read(
-        key: SecureStorageKey.pinCode,
-      );
-      if (pinCodeEncryptedFromStorage == null) return false;
-      String pinCodeEncrypted = await DataSecureService.decryptPinCode(pinCodeEncryptedFromStorage);
-
-      if (pinCodeEncrypted == pinCode) {
-        await SecureAppManager.initializeNewUser(pinCode);
-        return true;
-      }
-
-      return pinCodeEncrypted == pinCode;
+      return SecureAppManager.authenticateUser(pinCode);
     } catch (e) {
       logError('Error verifying pin code: $e');
       return false;
