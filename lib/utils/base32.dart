@@ -1,13 +1,13 @@
+import 'dart:typed_data';
+
 import 'package:cybersafe_pro/utils/encodings_base32.dart';
-import 'package:flutter/services.dart';
 
 // ignore: camel_case_types
 class base32 {
-  /// Takes in a [byteList] converts it to a Uint8List so that I can run
+  /// Takes in a [Uint8List] converts it to a Uint8List so that I can run
   /// bit operations on it, then outputs a [String] representation of the
   /// base32.
-  static String encode(Uint8List bytesList,
-      {Encoding encoding = Encoding.standardRFC4648}) {
+  static String encode(Uint8List bytesList, {Encoding encoding = Encoding.standardRFC4648}) {
     var base32Chars = EncodingUtils.getChars(encoding);
     var i = 0;
     var count = (bytesList.length ~/ 5) * 5;
@@ -19,7 +19,8 @@ class base32 {
       var v4 = bytesList[i++];
       var v5 = bytesList[i++];
 
-      base32str += base32Chars[v1 >> 3] +
+      base32str +=
+          base32Chars[v1 >> 3] +
           base32Chars[(v1 << 2 | v2 >> 6) & 31] +
           base32Chars[(v2 >> 1) & 31] +
           base32Chars[(v2 << 4 | v3 >> 4) & 31] +
@@ -39,7 +40,8 @@ class base32 {
     } else if (remain == 2) {
       var v1 = bytesList[i++];
       var v2 = bytesList[i];
-      base32str += base32Chars[v1 >> 3] +
+      base32str +=
+          base32Chars[v1 >> 3] +
           base32Chars[(v1 << 2 | v2 >> 6) & 31] +
           base32Chars[(v2 >> 1) & 31] +
           base32Chars[(v2 << 4) & 31];
@@ -50,7 +52,8 @@ class base32 {
       var v1 = bytesList[i++];
       var v2 = bytesList[i++];
       var v3 = bytesList[i];
-      base32str += base32Chars[v1 >> 3] +
+      base32str +=
+          base32Chars[v1 >> 3] +
           base32Chars[(v1 << 2 | v2 >> 6) & 31] +
           base32Chars[(v2 >> 1) & 31] +
           base32Chars[(v2 << 4 | v3 >> 4) & 31] +
@@ -63,7 +66,8 @@ class base32 {
       var v2 = bytesList[i++];
       var v3 = bytesList[i++];
       var v4 = bytesList[i];
-      base32str += base32Chars[v1 >> 3] +
+      base32str +=
+          base32Chars[v1 >> 3] +
           base32Chars[(v1 << 2 | v2 >> 6) & 31] +
           base32Chars[(v2 >> 1) & 31] +
           base32Chars[(v2 << 4 | v3 >> 4) & 31] +
@@ -78,58 +82,50 @@ class base32 {
   }
 
   static Uint8List _hexDecode(final String input) => Uint8List.fromList([
-        for (int i = 0; i < input.length; i += 2)
-          int.parse(input.substring(i, i + 2), radix: 16),
-      ]);
+    for (int i = 0; i < input.length; i += 2) int.parse(input.substring(i, i + 2), radix: 16),
+  ]);
 
-  static String _hexEncode(final Uint8List input) => [
-        for (int i = 0; i < input.length; i++)
-          input[i].toRadixString(16).padLeft(2, '0')
-      ].join();
+  static String _hexEncode(final Uint8List input) =>
+      [for (int i = 0; i < input.length; i++) input[i].toRadixString(16).padLeft(2, '0')].join();
 
-  /// Takes in a [hex] string, converts the string to a byte list
+  /// Takes in a hex [String], converts the string to a byte list
   /// and runs a normal encode() on it. Returning a [String] representation
   /// of the base32.
-  static String encodeHexString(String b32hex,
-      {Encoding encoding = Encoding.standardRFC4648}) {
+  static String encodeHexString(String b32hex, {Encoding encoding = Encoding.standardRFC4648}) {
     return encode(_hexDecode(b32hex), encoding: encoding);
   }
 
   /// Takes in a [utf8string], converts the string to a byte list
   /// and runs a normal encode() on it. Returning a [String] representation
   /// of the base32.
-  static String encodeString(String utf8string,
-      {Encoding encoding = Encoding.standardRFC4648}) {
+  static String encodeString(String utf8string, {Encoding encoding = Encoding.standardRFC4648}) {
     return encode(Uint8List.fromList(utf8string.codeUnits), encoding: encoding);
   }
 
   /// Takes in a [base32] string and decodes it back to a [String] in hex format.
-  static String decodeAsHexString(String base32,
-      {Encoding encoding = Encoding.standardRFC4648}) {
+  static String decodeAsHexString(String base32, {Encoding encoding = Encoding.standardRFC4648}) {
     return _hexEncode(decode(base32, encoding: encoding));
   }
 
   /// Takes in a [base32] string and decodes it back to a [String].
-  static String decodeAsString(String base32,
-      {Encoding encoding = Encoding.standardRFC4648}) {
-    return decode(base32, encoding: encoding)
-        .toList()
-        .map((charCode) => String.fromCharCode(charCode))
-        .join();
+  static String decodeAsString(String base32, {Encoding encoding = Encoding.standardRFC4648}) {
+    return decode(
+      base32,
+      encoding: encoding,
+    ).toList().map((charCode) => String.fromCharCode(charCode)).join();
   }
 
   /// Takes in a [base32] string and decodes it back to a [Uint8List] that can be
   /// converted to a hex string using hexEncode
-  static Uint8List decode(String base32,
-      {Encoding encoding = Encoding.standardRFC4648}) {
+  static Uint8List decode(String base32, {Encoding encoding = Encoding.standardRFC4648}) {
     if (base32.isEmpty) {
       return Uint8List(0);
     }
 
     base32 = _pad(base32, encoding: encoding);
 
-    if (!_isValid(base32, encoding: encoding)) {
-      throw const FormatException('Invalid Base32 characters');
+    if (!isValid(base32, encoding: encoding)) {
+      throw FormatException('Invalid Base32 characters');
     }
 
     if (encoding == Encoding.crockford) {
@@ -198,17 +194,21 @@ class base32 {
     return Uint8List.fromList(bytes);
   }
 
-  static bool _isValid(String b32str,
-      {Encoding encoding = Encoding.standardRFC4648}) {
+  /// Validates a Base32 string based on the encoding type.
+  /// Returns true if the string is valid, false otherwise.
+  static bool isValid(String b32str, {Encoding encoding = Encoding.standardRFC4648}) {
     var regex = EncodingUtils.getRegex(encoding);
-    if (b32str.length % 2 != 0 || !regex.hasMatch(b32str)) {
+    // Only check even length for encodings that use padding
+    if (EncodingUtils.getPadded(encoding) && b32str.length % 2 != 0) {
+      return false;
+    }
+    if (!regex.hasMatch(b32str)) {
       return false;
     }
     return true;
   }
 
-  static String _pad(String base32,
-      {Encoding encoding = Encoding.standardRFC4648}) {
+  static String _pad(String base32, {Encoding encoding = Encoding.standardRFC4648}) {
     if (EncodingUtils.getPadded(encoding)) {
       int neededPadding = (8 - base32.length % 8) % 8;
       return base32.padRight(base32.length + neededPadding, '=');

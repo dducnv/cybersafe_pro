@@ -75,6 +75,7 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
 
   Future<void> _handleMigrateData() async {
     await MigrateFromOldData.startMigrate(context);
+    await MigrateFromOldData.migratePinCodeV2();
   }
 
   @override

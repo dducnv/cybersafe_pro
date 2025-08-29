@@ -3,7 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
-import 'package:cybersafe_pro/encrypt/encryption_config.dart' as config;
+import 'package:cybersafe_pro/secure/encrypt/encryption_config.dart' as config;
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:encrypt/encrypt.dart' as enc;
 import 'package:pointycastle/export.dart' as pc;

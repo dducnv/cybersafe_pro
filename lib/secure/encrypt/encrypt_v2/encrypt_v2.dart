@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
-import 'package:cybersafe_pro/encrypt/encryption_config.dart' as config;
-import 'package:cybersafe_pro/encrypt/key_manager.dart';
+import 'package:cybersafe_pro/secure/encrypt/encryption_config.dart' as config;
+import 'package:cybersafe_pro/secure/encrypt/key_manager.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:encrypt/encrypt.dart' as enc;
 import 'package:flutter/foundation.dart';
@@ -155,7 +155,6 @@ class EncryptV2 {
           'associatedData': associatedData,
         });
       } else {
-        print('kdf: $kdf');
         // Backward-compatible flow (old): KeyManager-derived AES/HMAC
         final stopwatch = Stopwatch()..start();
         final derivedKeys = await KeyManager.instance.getDerivedKeys(

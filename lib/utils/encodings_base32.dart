@@ -33,7 +33,7 @@ class EncodingUtils {
     Encoding.base32Hex: RegExp(r'^[0-9A-V=]+$'),
     Encoding.crockford: RegExp(r'^[0123456789ABCDEFGHJKMNPQRSTVWXYZ-]+$'),
     Encoding.zbase32: RegExp(r'^[ybndrfg8ejkmcpqxot1uwisza345h769]+$'),
-    Encoding.geohash: RegExp(r'^[0123456789bcdefghjkmnpqrstuvwxyz=]+$')
+    Encoding.geohash: RegExp(r'^[0123456789bcdefghjkmnpqrstuvwxyz=]+$'),
   };
   static final _encodeMap = {
     Encoding.standardRFC4648: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567',
@@ -41,7 +41,7 @@ class EncodingUtils {
     Encoding.base32Hex: '0123456789ABCDEFGHIJKLMNOPQRSTUV',
     Encoding.crockford: '0123456789ABCDEFGHJKMNPQRSTVWXYZ',
     Encoding.zbase32: 'ybndrfg8ejkmcpqxot1uwisza345h769',
-    Encoding.geohash: '0123456789bcdefghjkmnpqrstuvwxyz'
+    Encoding.geohash: '0123456789bcdefghjkmnpqrstuvwxyz',
   };
 
   static final Map<Encoding, Map<String, int>> _decodeMap = {};
@@ -52,15 +52,8 @@ class EncodingUtils {
     Encoding.base32Hex: true,
     Encoding.crockford: false,
     Encoding.zbase32: false,
-    Encoding.geohash: true
+    Encoding.geohash: true,
   };
 }
 
-enum Encoding {
-  standardRFC4648,
-  base32Hex,
-  crockford,
-  zbase32,
-  geohash,
-  nonStandardRFC4648Lower
-}
+enum Encoding { standardRFC4648, base32Hex, crockford, zbase32, geohash, nonStandardRFC4648Lower }

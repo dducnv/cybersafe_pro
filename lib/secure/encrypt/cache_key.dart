@@ -1,10 +1,9 @@
-
 // Enhanced cached key with memory encryption
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:cybersafe_pro/encrypt/key_manager.dart';
+import 'package:cybersafe_pro/secure/encrypt/key_manager.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 
 class CachedKey {
@@ -12,7 +11,7 @@ class CachedKey {
   final DateTime expiresAt;
   static const int _keySize = 32; // 256 bits
 
-  CachedKey(String value, {Duration? customDuration}) 
+  CachedKey(String value, {Duration? customDuration})
     : expiresAt = DateTime.now().add(customDuration ?? KeyManager.MAX_CACHE_DURATION),
       _encryptedValue = _encryptValue(value);
 
@@ -70,11 +69,11 @@ class CachedKey {
     try {
       // Decode from base64
       final combined = base64.decode(encryptedValue);
-      
+
       // Extract temp key and encrypted value
       final tempKey = Uint8List(_keySize);
       final encrypted = Uint8List(combined.length - tempKey.length);
-      
+
       for (int i = 0; i < tempKey.length; i++) {
         tempKey[i] = combined[i];
       }

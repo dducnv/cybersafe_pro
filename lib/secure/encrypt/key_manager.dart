@@ -4,9 +4,9 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
-import 'package:cybersafe_pro/encrypt/cache_key.dart';
-import 'package:cybersafe_pro/encrypt/encryption_config.dart' as config;
 import 'package:cybersafe_pro/localization/keys/error_text.dart';
+import 'package:cybersafe_pro/secure/encrypt/cache_key.dart';
+import 'package:cybersafe_pro/secure/encrypt/encryption_config.dart' as config;
 import 'package:cybersafe_pro/utils/app_error.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
@@ -226,7 +226,7 @@ class KeyManager {
       String? argon2SaltB64 = await _secureStorage.read(key: argon2SaltKey);
       Uint8List argon2Salt;
       if (argon2SaltB64 == null) {
-        argon2Salt = _generateSecureRandomBytes(16);
+        argon2Salt = generateSecureRandomBytes(16);
         await _secureStorage.save(key: argon2SaltKey, value: base64.encode(argon2Salt));
       } else {
         argon2Salt = base64.decode(argon2SaltB64);
@@ -297,7 +297,7 @@ class KeyManager {
 
   Future<void> _generateDeviceKey() async {
     return await _withRetry(() async {
-      final keyBytes = _generateSecureRandomBytes(DEVICE_KEY_LENGTH);
+      final keyBytes = generateSecureRandomBytes(DEVICE_KEY_LENGTH);
       final key = base64.encode(keyBytes);
 
       await _secureStorage.save(key: SecureStorageKey.secureDeviceKey, value: key);
@@ -359,7 +359,7 @@ class KeyManager {
   }
 
   // Security Operations
-  Uint8List _generateSecureRandomBytes(int length) {
+  Uint8List generateSecureRandomBytes(int length) {
     // Use multiple entropy sources
     final entropy = <int>[];
     entropy.addAll(utf8.encode(DateTime.now().toIso8601String()));

@@ -1,7 +1,9 @@
 import 'dart:io';
+
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
+import 'package:cybersafe_pro/secure/secure_app_manager.dart';
 import 'package:cybersafe_pro/services/local_auth_service.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
@@ -35,9 +37,9 @@ class _UseBiometricLoginState extends State<UseBiometricLogin> {
         setState(() {
           isOpenUseBiometric = false;
         });
-        SecureStorage.instance.saveBool(SecureStorageKey.isEnableLocalAuth, false);
+        await SecureAppManager.disableBiometric();
       } else {
-        await SecureStorage.instance.saveBool(SecureStorageKey.isEnableLocalAuth, true);
+        await SecureAppManager.enableBiometric();
         setState(() {
           isOpenUseBiometric = true;
         });
@@ -48,7 +50,9 @@ class _UseBiometricLoginState extends State<UseBiometricLogin> {
   }
 
   void checkBiometric() async {
-    bool? enableLocalAuth = await SecureStorage.instance.readBool(SecureStorageKey.isEnableLocalAuth);
+    bool? enableLocalAuth = await SecureStorage.instance.readBool(
+      SecureStorageKey.isEnableLocalAuth,
+    );
 
     setState(() {
       isOpenUseBiometric = enableLocalAuth ?? false;
@@ -73,8 +77,9 @@ class _UseBiometricLoginState extends State<UseBiometricLogin> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.biometric), 
-                      style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w500)
+                    child: Text(
+                      context.appLocale.settingsLocale.getText(SettingsLocale.biometric),
+                      style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w500),
                     ),
                   ),
                   Row(
@@ -87,8 +92,19 @@ class _UseBiometricLoginState extends State<UseBiometricLogin> {
                         },
                       ),
                       const SizedBox(width: 5),
-                      if (Platform.isIOS) SvgPicture.asset('assets/icons/face_id.svg', width: 20.w, height: 20.h, color: Theme.of(context).colorScheme.primary),
-                      if (Platform.isAndroid) Icon(Icons.fingerprint_rounded, color: Theme.of(context).colorScheme.primary, size: 24.sp),
+                      if (Platform.isIOS)
+                        SvgPicture.asset(
+                          'assets/icons/face_id.svg',
+                          width: 20.w,
+                          height: 20.h,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      if (Platform.isAndroid)
+                        Icon(
+                          Icons.fingerprint_rounded,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 24.sp,
+                        ),
                     ],
                   ),
                 ],

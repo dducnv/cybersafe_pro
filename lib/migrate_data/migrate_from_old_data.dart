@@ -14,6 +14,7 @@ import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/migrate_data/old_data_decrypt.dart';
 import 'package:cybersafe_pro/repositories/driff_db/models/account_aggregate.dart';
+import 'package:cybersafe_pro/secure/secure_app_manager.dart';
 import 'package:cybersafe_pro/services/account/account_services.dart';
 import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
@@ -61,6 +62,22 @@ class MigrateFromOldData {
       return false;
     } finally {
       hideLoadingDialog();
+    }
+  }
+
+  static Future<void> migratePinCodeV2() async {
+    final pinCode = await SecureStorage.instance.read(key: SecureStorageKey.pinCode);
+    final isEnableLocalAuth = await SecureStorage.instance.readBool(
+      SecureStorageKey.isEnableLocalAuth,
+    );
+
+    if (pinCode != null) {
+      String pinCodeEncrypted = await DataSecureService.decryptPinCode(pinCode);
+      await SecureAppManager.initializeNewUser(pinCodeEncrypted);
+      await SecureStorage.instance.delete(key: SecureStorageKey.pinCode);
+      if (isEnableLocalAuth == true) {
+        await SecureAppManager.enableBiometric();
+      }
     }
   }
 
