@@ -66,16 +66,19 @@ class MigrateFromOldData {
   }
 
   static Future<void> migratePinCodeV2() async {
-    final pinCode = await SecureStorage.instance.read(key: SecureStorageKey.pinCode);
+    String? pinCodeEncryptedFromStorage = await SecureStorage.instance.read(
+      key: SecureStorageKey.pinCode,
+    );
+
     final isEnableLocalAuth = await SecureStorage.instance.readBool(
       SecureStorageKey.isEnableLocalAuth,
     );
-
-    if (pinCode != null) {
-      String pinCodeEncrypted = await DataSecureService.decryptPinCode(pinCode);
+    if (pinCodeEncryptedFromStorage != null && pinCodeEncryptedFromStorage.isNotEmpty) {
+      print("pinCodeEncryptedFromStorage: $pinCodeEncryptedFromStorage");
+      String pinCodeEncrypted = await DataSecureService.decryptPinCode(pinCodeEncryptedFromStorage);
       print("pinCodeEncrypted: $pinCodeEncrypted");
       await SecureAppManager.initializeNewUser(pinCodeEncrypted);
-      await SecureStorage.instance.delete(key: SecureStorageKey.pinCode);
+      // await SecureStorage.instance.delete(key: SecureStorageKey.pinCode);
       if (isEnableLocalAuth == true) {
         await SecureAppManager.enableBiometric();
       }

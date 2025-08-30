@@ -103,6 +103,7 @@ class DataSecureService {
   static Future<String> decryptPinCode(String value) async {
     if (value.isEmpty) return "";
     if (!isValueEncrypted(value)) return "";
+    print("hehe");
     try {
       return await EncryptV2.decrypt(value: value, keyType: KeyType.pinCode);
     } catch (e) {
