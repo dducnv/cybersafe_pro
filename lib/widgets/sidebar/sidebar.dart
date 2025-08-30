@@ -12,6 +12,7 @@ import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 class Sidebar extends StatelessWidget {
   const Sidebar({super.key});
@@ -132,6 +133,22 @@ class Sidebar extends StatelessWidget {
           title: Text(context.trSidebar(SidebarText.about), style: drawerTitleStyle),
           onTap: () {
             AppRoutes.navigateTo(context, AppRoutes.aboutApp);
+          },
+        ),
+        ListTile(
+          leading: SvgPicture.asset(
+            context.darkMode
+                ? 'assets/icons/brand_icons/github_icon-light.svg'
+                : 'assets/icons/brand_icons/github_icon-dark.svg',
+            width: 24,
+            height: 24,
+          ),
+          title: Text("OPEN-SOURCE", style: drawerTitleStyle),
+          onTap: () {
+            AppConfig.showDialogRedirectLink(
+              context,
+              url: "https://github.com/dducnv/cybersafe_pro",
+            );
           },
         ),
         if (kDebugMode)
