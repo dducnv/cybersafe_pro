@@ -1,4 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
 import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
@@ -13,7 +15,15 @@ class DecryptText extends StatefulWidget {
   final Widget Function(BuildContext context, String decryptedValue)? builder;
   final String? preDecryptedValue; // Giá trị đã giải mã nếu có (preload)
 
-  const DecryptText({super.key, this.style, required this.value, this.showLoading = true, required this.decryptTextType, this.builder, this.preDecryptedValue});
+  const DecryptText({
+    super.key,
+    this.style,
+    required this.value,
+    this.showLoading = true,
+    required this.decryptTextType,
+    this.builder,
+    this.preDecryptedValue,
+  });
 
   @override
   State<DecryptText> createState() => _DecryptTextState();
@@ -39,7 +49,9 @@ class _DecryptTextState extends State<DecryptText> {
   @override
   void didUpdateWidget(DecryptText oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.value != widget.value || oldWidget.decryptTextType != widget.decryptTextType || oldWidget.preDecryptedValue != widget.preDecryptedValue) {
+    if (oldWidget.value != widget.value ||
+        oldWidget.decryptTextType != widget.decryptTextType ||
+        oldWidget.preDecryptedValue != widget.preDecryptedValue) {
       if (widget.preDecryptedValue != null && widget.preDecryptedValue!.isNotEmpty) {
         setState(() {
           _decryptedValue = widget.preDecryptedValue;
@@ -65,13 +77,19 @@ class _DecryptTextState extends State<DecryptText> {
       } else {
         switch (widget.decryptTextType) {
           case DecryptTextType.opt:
-            decrypted = await DataSecureService.decryptTOTPKey(widget.value).timeout(_decryptTimeout, onTimeout: () => '');
+            decrypted = await DataSecureService.decryptTOTPKey(
+              widget.value,
+            ).timeout(_decryptTimeout, onTimeout: () => '');
             break;
           case DecryptTextType.info:
-            decrypted = await DataSecureService.decryptInfo(widget.value).timeout(_decryptTimeout, onTimeout: () => '');
+            decrypted = await DataSecureService.decryptInfo(
+              widget.value,
+            ).timeout(_decryptTimeout, onTimeout: () => '');
             break;
           case DecryptTextType.password:
-            decrypted = await DataSecureService.decryptPassword(widget.value).timeout(_decryptTimeout, onTimeout: () => '');
+            decrypted = await DataSecureService.decryptPassword(
+              widget.value,
+            ).timeout(_decryptTimeout, onTimeout: () => '');
             break;
         }
       }
@@ -103,7 +121,11 @@ class _DecryptTextState extends State<DecryptText> {
       return Shimmer.fromColors(
         baseColor: Theme.of(context).colorScheme.primary.withValues(alpha: .4),
         highlightColor: Theme.of(context).colorScheme.primary,
-        child: Text('Decrypting...', textAlign: TextAlign.start, style: widget.style),
+        child: Text(
+          context.trSafe(SettingsLocale.decryptingData),
+          textAlign: TextAlign.start,
+          style: widget.style,
+        ),
       );
     }
 

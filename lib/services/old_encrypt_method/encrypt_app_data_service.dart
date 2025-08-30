@@ -1,7 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'dart:async';
+
 import 'package:crypto/crypto.dart';
 import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
@@ -226,11 +227,11 @@ class EncryptAppDataService {
     try {
       final deviceKey = await _getDeviceKey();
       final encryptionKey = await _generateEncryptionKey(deviceKey, KeyType.info);
-      
+
       return await compute(_batchDecryptInIsolate, {
         'values': encryptedList,
         'key': encryptionKey,
-        'type': 'info'
+        'type': 'info',
       });
     } catch (e) {
       _logError('Lỗi batch giải mã thông tin', e);
@@ -273,11 +274,11 @@ class EncryptAppDataService {
     try {
       final deviceKey = await _getDeviceKey();
       final encryptionKey = await _generateEncryptionKey(deviceKey, KeyType.password);
-      
+
       return await compute(_batchDecryptInIsolate, {
         'values': encryptedList,
         'key': encryptionKey,
-        'type': 'password'
+        'type': 'password',
       });
     } catch (e) {
       _logError('Lỗi batch giải mã mật khẩu', e);
@@ -306,11 +307,11 @@ class EncryptAppDataService {
     try {
       final deviceKey = await _getDeviceKey();
       final encryptionKey = await _generateEncryptionKey(deviceKey, KeyType.totp);
-      
+
       return await compute(_batchDecryptInIsolate, {
         'values': encryptedList,
         'key': encryptionKey,
-        'type': 'totp'
+        'type': 'totp',
       });
     } catch (e) {
       _logError('Lỗi batch giải mã TOTP', e);
@@ -332,36 +333,54 @@ class EncryptAppDataService {
       ]);
 
       // Chuyển đổi accounts thành format có thể serialize
-      final accountsData = accounts.map((account) => {
-        'id': account.id,
-        'title': account.title,
-        'email': account.email ?? '',
-        'password': account.password ?? '',
-        'notes': account.notes ?? '',
-        'icon': account.icon,
-        'customFields': account.getCustomFields.map((field) => {
-          'id': field.id,
-          'name': field.name,
-          'value': field.value,
-          'hintText': field.hintText,
-          'typeField': field.typeField,
-        }).toList(),
-        'totp': account.getTotp != null ? {
-          'secretKey': account.getTotp!.secretKey,
-          'isShowToHome': account.getTotp!.isShowToHome,
-          'createdAt': account.getTotp!.createdAt.toIso8601String(),
-          'updatedAt': account.getTotp!.updatedAt.toIso8601String(),
-        } : null,
-        'category': account.getCategory?.toJson(),
-        'passwordUpdatedAt': account.passwordUpdatedAt?.toIso8601String(),
-        'passwordHistories': account.getPasswordHistories.map((history) => {
-          'password': history.password,
-          'createdAt': history.createdAt.toIso8601String(),
-        }).toList(),
-        'iconCustom': account.getIconCustom?.toJson(),
-        'createdAt': account.createdAt?.toIso8601String(),
-        'updatedAt': account.updatedAt?.toIso8601String(),
-      }).toList();
+      final accountsData =
+          accounts
+              .map(
+                (account) => {
+                  'id': account.id,
+                  'title': account.title,
+                  'email': account.email ?? '',
+                  'password': account.password ?? '',
+                  'notes': account.notes ?? '',
+                  'icon': account.icon,
+                  'customFields':
+                      account.getCustomFields
+                          .map(
+                            (field) => {
+                              'id': field.id,
+                              'name': field.name,
+                              'value': field.value,
+                              'hintText': field.hintText,
+                              'typeField': field.typeField,
+                            },
+                          )
+                          .toList(),
+                  'totp':
+                      account.getTotp != null
+                          ? {
+                            'secretKey': account.getTotp!.secretKey,
+                            'isShowToHome': account.getTotp!.isShowToHome,
+                            'createdAt': account.getTotp!.createdAt.toIso8601String(),
+                            'updatedAt': account.getTotp!.updatedAt.toIso8601String(),
+                          }
+                          : null,
+                  'category': account.getCategory?.toJson(),
+                  'passwordUpdatedAt': account.passwordUpdatedAt?.toIso8601String(),
+                  'passwordHistories':
+                      account.getPasswordHistories
+                          .map(
+                            (history) => {
+                              'password': history.password,
+                              'createdAt': history.createdAt.toIso8601String(),
+                            },
+                          )
+                          .toList(),
+                  'iconCustom': account.getIconCustom?.toJson(),
+                  'createdAt': account.createdAt?.toIso8601String(),
+                  'updatedAt': account.updatedAt?.toIso8601String(),
+                },
+              )
+              .toList();
 
       // Gửi tất cả vào isolate để decrypt
       return await compute(_batchDecryptAccountsInIsolate, {
@@ -391,7 +410,11 @@ class EncryptAppDataService {
   }
 
   // Tạo backup
-  Future<Map<String, dynamic>> createBackup(String pin, String backupName, {bool isTransfer = false}) async {
+  Future<Map<String, dynamic>> createBackup(
+    String pin,
+    String backupName, {
+    bool isTransfer = false,
+  }) async {
     if (!isTransfer) _validatePin(pin);
     try {
       final deviceKey = await _getDeviceKey();
@@ -408,8 +431,17 @@ class EncryptAppDataService {
       };
       final backupJson = jsonEncode(backupData);
       _validateBackupSize(backupJson);
-      final encryptedData = await EncryptService.encryptData(value: backupJson, key: _generateBackupKey(pin));
-      return {'type': 'CYBERSAFE_BACKUP', 'version': AppVersion.latest.version, 'data': encryptedData, 'checksum': _calculateChecksum(encryptedData), 'timestamp': DateTime.now().toIso8601String()};
+      final encryptedData = await EncryptService.encryptData(
+        value: backupJson,
+        key: _generateBackupKey(pin),
+      );
+      return {
+        'type': 'CYBERSAFE_BACKUP',
+        'version': AppVersion.latest.version,
+        'data': encryptedData,
+        'checksum': _calculateChecksum(encryptedData),
+        'timestamp': DateTime.now().toIso8601String(),
+      };
     } catch (e) {
       _logError('Lỗi tạo backup', e);
       rethrow;
@@ -431,7 +463,10 @@ class EncryptAppDataService {
       _validateBackupData(backupData);
 
       try {
-        final decryptedData = EncryptService.decryptData(value: backupData['data'], key: _generateBackupKey(pin));
+        final decryptedData = EncryptService.decryptData(
+          value: backupData['data'],
+          key: _generateBackupKey(pin),
+        );
         // Kiểm tra xem dữ liệu giải mã có đúng định dạng JSON không
         final data = jsonDecode(decryptedData);
 
@@ -483,7 +518,9 @@ class EncryptAppDataService {
 
   Future<String> _getDeviceKey() async {
     return await _withRetry(() async {
-      if (_cachedDeviceKey != null && _deviceKeyExpiry != null && DateTime.now().isBefore(_deviceKeyExpiry!)) {
+      if (_cachedDeviceKey != null &&
+          _deviceKeyExpiry != null &&
+          DateTime.now().isBefore(_deviceKeyExpiry!)) {
         // Khôi phục khóa từ cache (đã được bảo vệ)
         return _unprotectKey(_cachedDeviceKey!);
       }
@@ -516,7 +553,12 @@ class EncryptAppDataService {
       }
 
       final salt = 'cybersafe_${type.name}_salt_$deviceKey';
-      final key = await compute(_generateKeyInIsolate, {'salt': salt, 'deviceKey': deviceKey, 'iterations': EncryptionConfig.PBKDF2_ITERATIONS, 'keySize': EncryptionConfig.KEY_SIZE_BYTES});
+      final key = await compute(_generateKeyInIsolate, {
+        'salt': salt,
+        'deviceKey': deviceKey,
+        'iterations': EncryptionConfig.PBKDF2_ITERATIONS,
+        'keySize': EncryptionConfig.KEY_SIZE_BYTES,
+      });
 
       // Lưu vào cache sau khi bảo vệ
       _keyCache[cacheKey] = _CachedKey(_protectKey(key));
@@ -528,7 +570,13 @@ class EncryptAppDataService {
 
   static String _generateKeyInIsolate(Map<String, dynamic> params) {
     final generator = pc.PBKDF2KeyDerivator(pc.HMac(pc.SHA256Digest(), 64));
-    generator.init(pc.Pbkdf2Parameters(Uint8List.fromList(utf8.encode(params['salt'])), params['iterations'], params['keySize']));
+    generator.init(
+      pc.Pbkdf2Parameters(
+        Uint8List.fromList(utf8.encode(params['salt'])),
+        params['iterations'],
+        params['keySize'],
+      ),
+    );
     return base64.encode(generator.process(Uint8List.fromList(utf8.encode(params['deviceKey']))));
   }
 
@@ -544,7 +592,7 @@ class EncryptAppDataService {
   static List<String> _batchDecryptInIsolate(Map<String, dynamic> params) {
     final List<String> values = List<String>.from(params['values']);
     final String key = params['key'];
-    
+
     return values.map((value) {
       if (value.isEmpty) return value;
       try {
@@ -581,22 +629,23 @@ class EncryptAppDataService {
         };
 
         // Decrypt custom fields
-        final customFields = (account['customFields'] as List<dynamic>).map((field) {
-          final fieldMap = field as Map<String, dynamic>;
-          final isPassword = fieldMap['typeField'] == 'password';
-          final decryptedValue = _safeDecrypt(
-            fieldMap['value'], 
-            isPassword ? passwordKey : infoKey
-          );
-          
-          return {
-            'id': fieldMap['id'],
-            'name': fieldMap['name'],
-            'value': decryptedValue,
-            'hintText': fieldMap['hintText'],
-            'typeField': fieldMap['typeField'],
-          };
-        }).toList();
+        final customFields =
+            (account['customFields'] as List<dynamic>).map((field) {
+              final fieldMap = field as Map<String, dynamic>;
+              final isPassword = fieldMap['typeField'] == 'password';
+              final decryptedValue = _safeDecrypt(
+                fieldMap['value'],
+                isPassword ? passwordKey : infoKey,
+              );
+
+              return {
+                'id': fieldMap['id'],
+                'name': fieldMap['name'],
+                'value': decryptedValue,
+                'hintText': fieldMap['hintText'],
+                'typeField': fieldMap['typeField'],
+              };
+            }).toList();
 
         decryptedAccount['customFields'] = customFields;
 
@@ -614,13 +663,14 @@ class EncryptAppDataService {
         }
 
         // Decrypt password histories
-        final passwordHistories = (account['passwordHistories'] as List<dynamic>).map((history) {
-          final historyMap = history as Map<String, dynamic>;
-          return {
-            'password': _safeDecrypt(historyMap['password'], passwordKey),
-            'createdAt': historyMap['createdAt'],
-          };
-        }).toList();
+        final passwordHistories =
+            (account['passwordHistories'] as List<dynamic>).map((history) {
+              final historyMap = history as Map<String, dynamic>;
+              return {
+                'password': _safeDecrypt(historyMap['password'], passwordKey),
+                'createdAt': historyMap['createdAt'],
+              };
+            }).toList();
 
         decryptedAccount['passwordHistories'] = passwordHistories;
 
@@ -684,7 +734,9 @@ class EncryptAppDataService {
   String _generateBackupKey(String pin) {
     final salt = utf8.encode('cybersafe_backup_salt');
     final generator = pc.PBKDF2KeyDerivator(pc.HMac(pc.SHA256Digest(), 64));
-    generator.init(pc.Pbkdf2Parameters(Uint8List.fromList(salt), EncryptionConfig.PBKDF2_ITERATIONS, 32));
+    generator.init(
+      pc.Pbkdf2Parameters(Uint8List.fromList(salt), EncryptionConfig.PBKDF2_ITERATIONS, 32),
+    );
     return base64.encode(generator.process(Uint8List.fromList(utf8.encode(pin))));
   }
 
@@ -793,7 +845,9 @@ class EncryptAppDataService {
           final reencryptedAccount = await _reencryptAccountWithKeys(account, tempService);
 
           // Verify dữ liệu sau khi mã hóa lại
-          final reencryptedDecrypted = await tempService.decryptAccountForVerification(reencryptedAccount);
+          final reencryptedDecrypted = await tempService.decryptAccountForVerification(
+            reencryptedAccount,
+          );
 
           // So sánh dữ liệu trước và sau
           if (!_compareDecryptedAccounts(originalDecrypted, reencryptedDecrypted)) {
@@ -807,7 +861,9 @@ class EncryptAppDataService {
           if (successCount % 10 == 0 || successCount == totalAccounts) {
             final progress = (successCount / totalAccounts * 100);
             final elapsed = DateTime.now().difference(startTime);
-            logInfo('[EncryptAppDataService] Tiến độ: $progress% ($successCount/$totalAccounts) - Thời gian: ${elapsed.inSeconds}s');
+            logInfo(
+              '[EncryptAppDataService] Tiến độ: $progress% ($successCount/$totalAccounts) - Thời gian: ${elapsed.inSeconds}s',
+            );
             onCallBackCount(successEncrypt: successCount, totalAccount: totalAccounts);
             onCallBackProgress(progress);
             onCallBackTime(elapsed.inSeconds);
@@ -849,15 +905,27 @@ class EncryptAppDataService {
 
   // Service tạm thời để mã hóa với keys mới
 
-  Future<AccountOjbModel> _reencryptAccountWithKeys(AccountOjbModel account, _TempEncryptionService tempService) async {
+  Future<AccountOjbModel> _reencryptAccountWithKeys(
+    AccountOjbModel account,
+    _TempEncryptionService tempService,
+  ) async {
     try {
       // Mã hóa lại các trường cơ bản với keys mới
       final reencryptedAccount = AccountOjbModel(
         id: account.id,
         title: await tempService.encryptInfo(await decryptInfo(account.title)),
-        email: account.email != null ? await tempService.encryptInfo(await decryptInfo(account.email!)) : null,
-        password: account.password != null ? await tempService.encryptPassword(await decryptPassword(account.password!)) : null,
-        notes: account.notes != null ? await tempService.encryptInfo(await decryptInfo(account.notes!)) : null,
+        email:
+            account.email != null
+                ? await tempService.encryptInfo(await decryptInfo(account.email!))
+                : null,
+        password:
+            account.password != null
+                ? await tempService.encryptPassword(await decryptPassword(account.password!))
+                : null,
+        notes:
+            account.notes != null
+                ? await tempService.encryptInfo(await decryptInfo(account.notes!))
+                : null,
         icon: account.icon,
         categoryOjbModel: account.getCategory,
         iconCustomModel: account.getIconCustom,
@@ -869,14 +937,30 @@ class EncryptAppDataService {
       if (account.getCustomFields.isNotEmpty) {
         final reencryptedFields = await Future.wait(
           account.getCustomFields.map((field) async {
-            final decryptedValue = field.typeField == 'password' ? await decryptPassword(field.value) : await decryptInfo(field.value);
-            final reencryptedValue = field.typeField == 'password' ? await tempService.encryptPassword(decryptedValue) : await tempService.encryptInfo(decryptedValue);
+            final decryptedValue =
+                field.typeField == 'password'
+                    ? await decryptPassword(field.value)
+                    : await decryptInfo(field.value);
+            final reencryptedValue =
+                field.typeField == 'password'
+                    ? await tempService.encryptPassword(decryptedValue)
+                    : await tempService.encryptInfo(decryptedValue);
 
-            return AccountCustomFieldOjbModel(id: field.id, name: field.name, hintText: field.hintText, value: reencryptedValue, typeField: field.typeField);
+            return AccountCustomFieldOjbModel(
+              id: field.id,
+              name: field.name,
+              hintText: field.hintText,
+              value: reencryptedValue,
+              typeField: field.typeField,
+            );
           }),
         );
         reencryptedAccount.customFields.clear();
-        reencryptedAccount.customFields.addAll(reencryptedFields.where((field) => field.value.isNotEmpty).cast<AccountCustomFieldOjbModel>());
+        reencryptedAccount.customFields.addAll(
+          reencryptedFields
+              .where((field) => field.value.isNotEmpty)
+              .cast<AccountCustomFieldOjbModel>(),
+        );
       }
 
       // Mã hóa lại TOTP nếu có
@@ -895,12 +979,22 @@ class EncryptAppDataService {
     }
   }
 
-  Future<void> _restoreData(Map<String, dynamic> data, {Function(double progress)? onRestoreProgress}) async {
+  Future<void> _restoreData(
+    Map<String, dynamic> data, {
+    Function(double progress)? onRestoreProgress,
+  }) async {
     // 1. Chuẩn bị danh sách account mới (reset id, xử lý category/icon/custom fields/histories)
     final List<AccountOjbModel> newAccounts =
         (data['accounts'] as List).map((json) => AccountOjbModel.fromJson(json)).map((account) {
           // Reset ID về 0 để ObjectBox tự tạo ID mới
-          final accountNew = AccountOjbModel(id: 0, title: account.title, email: account.email ?? "", password: account.password ?? "", notes: account.notes ?? "", icon: account.icon ?? "");
+          final accountNew = AccountOjbModel(
+            id: 0,
+            title: account.title,
+            email: account.email ?? "",
+            password: account.password ?? "",
+            notes: account.notes ?? "",
+            icon: account.icon ?? "",
+          );
           // TOTP
           if (account.getTotp != null) {
             accountNew.totp.target = TOTPOjbModel(id: 0, secretKey: account.getTotp!.secretKey);
@@ -908,20 +1002,39 @@ class EncryptAppDataService {
           // Custom fields
           if (account.getCustomFields.isNotEmpty) {
             for (var customField in account.getCustomFields) {
-              accountNew.customFields.add(AccountCustomFieldOjbModel(id: 0, name: customField.name, value: customField.value, hintText: customField.hintText, typeField: customField.typeField));
+              accountNew.customFields.add(
+                AccountCustomFieldOjbModel(
+                  id: 0,
+                  name: customField.name,
+                  value: customField.value,
+                  hintText: customField.hintText,
+                  typeField: customField.typeField,
+                ),
+              );
             }
           }
           // Password histories
           if (account.getPasswordHistories.isNotEmpty) {
             for (var passwordHistory in account.getPasswordHistories) {
-              accountNew.passwordHistories.add(PasswordHistory(id: 0, password: passwordHistory.password, createdAt: passwordHistory.createdAt));
+              accountNew.passwordHistories.add(
+                PasswordHistory(
+                  id: 0,
+                  password: passwordHistory.password,
+                  createdAt: passwordHistory.createdAt,
+                ),
+              );
             }
           }
           // Category
           account.category.target ??= CategoryOjbModel(categoryName: "Backup");
-          final categoryResult = CategoryBox.findCategoryByName(account.category.target?.categoryName ?? "Backup");
+          final categoryResult = CategoryBox.findCategoryByName(
+            account.category.target?.categoryName ?? "Backup",
+          );
           if (categoryResult == null) {
-            final newCategory = CategoryOjbModel(id: 0, categoryName: account.category.target?.categoryName ?? "Backup");
+            final newCategory = CategoryOjbModel(
+              id: 0,
+              categoryName: account.category.target?.categoryName ?? "Backup",
+            );
             final id = CategoryBox.put(newCategory);
             newCategory.id = id;
             accountNew.category.target = newCategory;
@@ -930,7 +1043,9 @@ class EncryptAppDataService {
           }
           // Icon custom
           if (account.getIconCustom != null && account.getIconCustom!.imageBase64.isNotEmpty) {
-            final existingIcon = IconCustomBox.findIconByBase64Image(account.getIconCustom!.imageBase64);
+            final existingIcon = IconCustomBox.findIconByBase64Image(
+              account.getIconCustom!.imageBase64,
+            );
             if (existingIcon != null) {
               accountNew.iconCustom.target = existingIcon;
             } else {
@@ -963,7 +1078,12 @@ class EncryptAppDataService {
       final batch = newAccounts.skip(i).take(batchSize).toList();
       final accountsEncrypted = await compute(_encryptAccountsWithKeysBatch, {
         'accounts': batch,
-        'encryptionKeys': {'deviceKey': deviceKey, 'infoKey': infoKey, 'passwordKey': passwordKey, 'totpKey': totpKey},
+        'encryptionKeys': {
+          'deviceKey': deviceKey,
+          'infoKey': infoKey,
+          'passwordKey': passwordKey,
+          'totpKey': totpKey,
+        },
       });
       allEncrypted.addAll(accountsEncrypted);
       done += batch.length;
@@ -977,7 +1097,10 @@ class EncryptAppDataService {
   }
 
   Future<void> _saveCurrentVersion() async {
-    await _secureStorage.save(key: SecureStorageKey.appVersionStorageKey, value: AppVersion.latest.version);
+    await _secureStorage.save(
+      key: SecureStorageKey.appVersionStorageKey,
+      value: AppVersion.latest.version,
+    );
   }
 
   Future<void> _checkAndUpdateVersion() async {
@@ -1003,7 +1126,12 @@ class EncryptAppDataService {
   // Tạo encryption key mới nhưng không lưu
   Future<String> _generateNewEncryptionKeyOnly(String deviceKey, KeyType type) async {
     final salt = 'cybersafe_${type.name}_salt_$deviceKey';
-    return await compute(_generateKeyInIsolate, {'salt': salt, 'deviceKey': deviceKey, 'iterations': EncryptionConfig.PBKDF2_ITERATIONS, 'keySize': EncryptionConfig.KEY_SIZE_BYTES});
+    return await compute(_generateKeyInIsolate, {
+      'salt': salt,
+      'deviceKey': deviceKey,
+      'iterations': EncryptionConfig.PBKDF2_ITERATIONS,
+      'keySize': EncryptionConfig.KEY_SIZE_BYTES,
+    });
   }
 
   // Lưu toàn bộ keys mới vào storage
@@ -1015,17 +1143,26 @@ class EncryptAppDataService {
       await _secureStorage.save(key: storageKey, value: entry.value);
     }
 
-    await _secureStorage.save(key: SecureStorageKey.encryptionKeyCreationTime, value: DateTime.now().toIso8601String());
+    await _secureStorage.save(
+      key: SecureStorageKey.encryptionKeyCreationTime,
+      value: DateTime.now().toIso8601String(),
+    );
   }
 }
 
 // Top-level function for compute: batch toDecryptedJson
-Future<List<Map<String, dynamic>>> _accountsToDecryptedJsonBatch(List<AccountOjbModel> accounts) async {
+Future<List<Map<String, dynamic>>> _accountsToDecryptedJsonBatch(
+  List<AccountOjbModel> accounts,
+) async {
   return await Future.wait(accounts.map((acc) => acc.toDecryptedJson()));
 }
 
 // Helper: concurrentMap with throttled concurrency
-Future<List<T>> _concurrentMap<T, E>(Iterable<E> items, Future<T> Function(E item) mapper, {int maxConcurrent = 4}) async {
+Future<List<T>> _concurrentMap<T, E>(
+  Iterable<E> items,
+  Future<T> Function(E item) mapper, {
+  int maxConcurrent = 4,
+}) async {
   final results = <T>[];
   final iterator = items.iterator;
   int running = 0;
@@ -1062,7 +1199,14 @@ Future<List<T>> _concurrentMap<T, E>(Iterable<E> items, Future<T> Function(E ite
 Future<List<AccountOjbModel>> _encryptAccountsWithKeysBatch(Map<String, dynamic> args) async {
   final List<AccountOjbModel> accounts = (args['accounts'] as List).cast<AccountOjbModel>();
   final keys = args['encryptionKeys'] as Map<String, String>;
-  final tempService = _TempEncryptionService(deviceKey: keys['deviceKey']!, encryptionKeys: {KeyType.info: keys['infoKey']!, KeyType.password: keys['passwordKey']!, KeyType.totp: keys['totpKey']!});
+  final tempService = _TempEncryptionService(
+    deviceKey: keys['deviceKey']!,
+    encryptionKeys: {
+      KeyType.info: keys['infoKey']!,
+      KeyType.password: keys['passwordKey']!,
+      KeyType.totp: keys['totpKey']!,
+    },
+  );
 
   const int batchSize = 50; // hoặc 20, 100 tùy RAM
   const int maxConcurrent = 4; // Giới hạn số encryptFernet chạy song song
@@ -1077,7 +1221,10 @@ Future<List<AccountOjbModel>> _encryptAccountsWithKeysBatch(Map<String, dynamic>
             return AccountCustomFieldOjbModel(
               id: field.id,
               name: field.name,
-              value: field.typeField == 'password' ? await tempService.encryptPassword(field.value) : await tempService.encryptInfo(field.value),
+              value:
+                  field.typeField == 'password'
+                      ? await tempService.encryptPassword(field.value)
+                      : await tempService.encryptInfo(field.value),
               hintText: field.hintText,
               typeField: field.typeField,
             );
@@ -1089,7 +1236,11 @@ Future<List<AccountOjbModel>> _encryptAccountsWithKeysBatch(Map<String, dynamic>
       if (acc.getPasswordHistories.isNotEmpty) {
         passwordHistoriesList = await Future.wait(
           acc.getPasswordHistories.map((history) async {
-            return PasswordHistory(id: history.id, password: await tempService.encryptPassword(history.password), createdAt: history.createdAt);
+            return PasswordHistory(
+              id: history.id,
+              password: await tempService.encryptPassword(history.password),
+              createdAt: history.createdAt,
+            );
           }),
         );
       }
@@ -1101,7 +1252,10 @@ Future<List<AccountOjbModel>> _encryptAccountsWithKeysBatch(Map<String, dynamic>
         password: acc.password != null ? await tempService.encryptPassword(acc.password!) : null,
         notes: acc.notes != null ? await tempService.encryptInfo(acc.notes!) : null,
         icon: acc.icon,
-        totpOjbModel: acc.getTotp != null ? TOTPOjbModel(secretKey: await tempService.encryptTOTPKey(acc.getTotp!.secretKey)) : null,
+        totpOjbModel:
+            acc.getTotp != null
+                ? TOTPOjbModel(secretKey: await tempService.encryptTOTPKey(acc.getTotp!.secretKey))
+                : null,
         categoryOjbModel: acc.getCategory,
         iconCustomModel: acc.getIconCustom,
         customFieldOjbModel: customFields,
@@ -1138,7 +1292,10 @@ extension EncryptAppDataServiceExtension on EncryptAppDataService {
     // Decrypt custom fields
     if (account.getCustomFields.isNotEmpty) {
       for (var field in account.getCustomFields) {
-        final decryptedValue = field.typeField == 'password' ? await decryptPassword(field.value) : await decryptInfo(field.value);
+        final decryptedValue =
+            field.typeField == 'password'
+                ? await decryptPassword(field.value)
+                : await decryptInfo(field.value);
         decrypted['custom_${field.id}'] = decryptedValue;
       }
     }
@@ -1227,7 +1384,10 @@ class _TempEncryptionService {
 
     if (account.getCustomFields.isNotEmpty) {
       for (var field in account.getCustomFields) {
-        final decryptedValue = field.typeField == 'password' ? await decryptPassword(field.value) : await decryptInfo(field.value);
+        final decryptedValue =
+            field.typeField == 'password'
+                ? await decryptPassword(field.value)
+                : await decryptInfo(field.value);
         decrypted['custom_${field.id}'] = decryptedValue;
       }
     }

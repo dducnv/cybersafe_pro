@@ -2,6 +2,7 @@ import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/components/icon_show_component.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/details_account_text.dart';
+import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/providers/details_account_provider.dart';
@@ -19,9 +20,9 @@ import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
 import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 class DetailsAccountMobileLayout extends StatefulWidget {
   final int accountId;
@@ -67,7 +68,10 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
                 (index) => AnimationConfiguration.staggeredList(
                   position: index,
                   duration: const Duration(milliseconds: 400),
-                  child: SlideAnimation(verticalOffset: 30.0, child: FadeInAnimation(child: detailBlocks[index])),
+                  child: SlideAnimation(
+                    verticalOffset: 30.0,
+                    child: FadeInAnimation(child: detailBlocks[index]),
+                  ),
                 ),
               ),
             ),
@@ -108,7 +112,12 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
     }
 
     // Password history and updated at
-    blocks.add(_PasswordHistoryAndUpdatedSection(passwordHistories: provider.passwordHistoryDriftModelData, account: account));
+    blocks.add(
+      _PasswordHistoryAndUpdatedSection(
+        passwordHistories: provider.passwordHistoryDriftModelData,
+        account: account,
+      ),
+    );
 
     blocks.add(const SizedBox(height: 16));
 
@@ -122,7 +131,8 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
 
   /// Check if account has base info (username/password)
   bool _hasBaseInfo(AccountDriftModelData account) {
-    return (account.username != null && account.username!.isNotEmpty) || (account.password != null && account.password!.isNotEmpty);
+    return (account.username != null && account.username!.isNotEmpty) ||
+        (account.password != null && account.password!.isNotEmpty);
   }
 
   /// Check if account has notes
@@ -132,7 +142,8 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
 
   /// Check if account has custom fields
   bool _hasCustomFields(DetailsAccountProvider provider) {
-    return provider.accountCustomFieldDriftModelData != null && provider.accountCustomFieldDriftModelData!.isNotEmpty;
+    return provider.accountCustomFieldDriftModelData != null &&
+        provider.accountCustomFieldDriftModelData!.isNotEmpty;
   }
 
   /// App bar with actions
@@ -142,7 +153,12 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
       scrolledUnderElevation: 0,
       shadowColor: Colors.transparent,
       backgroundColor: Theme.of(context).colorScheme.surface,
-      actions: [IconButton(onPressed: () => _showActionBottomSheet(provider), icon: const Icon(Icons.more_vert))],
+      actions: [
+        IconButton(
+          onPressed: () => _showActionBottomSheet(provider),
+          icon: const Icon(Icons.more_vert),
+        ),
+      ],
     );
   }
 
@@ -153,7 +169,10 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
 
   /// Error screen
   Widget _buildErrorScreen() {
-    return Scaffold(appBar: AppBar(title: const Text('Account Details')), body: const Center(child: Text('Account not found')));
+    return Scaffold(
+      appBar: AppBar(title: const Text('Account Details')),
+      body: const Center(child: Text('Account not found')),
+    );
   }
 
   /// Show action bottom sheet (edit/delete)
@@ -171,7 +190,10 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
               children: [
                 _buildBottomSheetHandle(),
                 SizedBox(height: 10.h),
-                _buildActionListTile(title: context.trDetails(DetailsAccountText.editAccount), onTap: () => _handleEditAccount()),
+                _buildActionListTile(
+                  title: context.trDetails(DetailsAccountText.editAccount),
+                  onTap: () => _handleEditAccount(),
+                ),
                 _buildActionListTile(
                   title: context.trDetails(DetailsAccountText.deleteAccount),
                   style: CustomTextStyle.regular(color: Theme.of(context).colorScheme.error),
@@ -187,18 +209,33 @@ class _DetailsAccountMobileLayoutState extends State<DetailsAccountMobileLayout>
 
   /// Bottom sheet handle
   Widget _buildBottomSheetHandle() {
-    return Container(width: 40.w, height: 4.h, decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(10)));
+    return Container(
+      width: 40.w,
+      height: 4.h,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(10),
+      ),
+    );
   }
 
   /// Action list tile
-  Widget _buildActionListTile({required String title, TextStyle? style, required VoidCallback onTap}) {
+  Widget _buildActionListTile({
+    required String title,
+    TextStyle? style,
+    required VoidCallback onTap,
+  }) {
     return ListTile(title: Text(title, style: style), onTap: onTap);
   }
 
   /// Handle edit account action
   Future<void> _handleEditAccount() async {
     AppRoutes.pop(context);
-    await AppRoutes.navigateTo(context, AppRoutes.updateAccount, arguments: {"accountId": widget.accountId});
+    await AppRoutes.navigateTo(
+      context,
+      AppRoutes.updateAccount,
+      arguments: {"accountId": widget.accountId},
+    );
 
     if (!mounted) return;
     context.read<DetailsAccountProvider>().loadAccountDetails(widget.accountId);
@@ -247,18 +284,30 @@ class _AccountIconSection extends StatelessWidget {
             height: 70.h,
             clipBehavior: Clip.hardEdge,
             padding: EdgeInsets.all(10),
-            decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainer, borderRadius: BorderRadius.circular(15)),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(15),
+            ),
             child: Center(
               child: IconShowComponent(
                 account: account,
                 width: 50.h,
                 height: 50.h,
-                textStyle: CustomTextStyle.regular(fontSize: 30.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+                textStyle: CustomTextStyle.regular(
+                  fontSize: 30.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
             ),
           ),
           SizedBox(height: 5.h),
-          DecryptText(showLoading: true, style: CustomTextStyle.regular(fontWeight: FontWeight.bold, fontSize: 20.sp), value: account.title, decryptTextType: DecryptTextType.info),
+          DecryptText(
+            showLoading: true,
+            style: CustomTextStyle.regular(fontWeight: FontWeight.bold, fontSize: 20.sp),
+            value: account.title,
+            decryptTextType: DecryptTextType.info,
+          ),
         ],
       ),
     );
@@ -278,7 +327,14 @@ class _TOTPSection extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(context.trDetails(DetailsAccountText.otpCode), style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+        Text(
+          context.trDetails(DetailsAccountText.otpCode),
+          style: CustomTextStyle.regular(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[600],
+          ),
+        ),
         const SizedBox(height: 5),
         RequestPro(
           child: CardCustomWidget(
@@ -337,9 +393,24 @@ class _BaseInfoSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 10),
-        Text(context.trDetails(DetailsAccountText.baseInfo), style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+        Text(
+          context.trDetails(DetailsAccountText.baseInfo),
+          style: CustomTextStyle.regular(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[600],
+          ),
+        ),
         SizedBox(height: 5.h),
-        CardCustomWidget(child: Column(children: [if (_hasUsername) _buildUsernameField(), if (_hasBothUsernameAndPassword) _buildDivider(context), if (_hasPassword) _buildPasswordField()])),
+        CardCustomWidget(
+          child: Column(
+            children: [
+              if (_hasUsername) _buildUsernameField(),
+              if (_hasBothUsernameAndPassword) _buildDivider(context),
+              if (_hasPassword) _buildPasswordField(),
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -351,15 +422,33 @@ class _BaseInfoSection extends StatelessWidget {
   bool get _hasBothUsernameAndPassword => _hasUsername && _hasPassword;
 
   Widget _buildUsernameField() {
-    return Builder(builder: (context) => ItemCopyValue(title: context.trDetails(DetailsAccountText.username), value: account.username!, isLastItem: !_hasPassword));
+    return Builder(
+      builder:
+          (context) => ItemCopyValue(
+            title: context.trDetails(DetailsAccountText.username),
+            value: account.username!,
+            isLastItem: !_hasPassword,
+          ),
+    );
   }
 
   Widget _buildPasswordField() {
-    return Builder(builder: (context) => ItemCopyValue(title: context.trDetails(DetailsAccountText.password), value: account.password!, isLastItem: true, isPrivateValue: true));
+    return Builder(
+      builder:
+          (context) => ItemCopyValue(
+            title: context.trDetails(DetailsAccountText.password),
+            value: account.password!,
+            isLastItem: true,
+            isPrivateValue: true,
+          ),
+    );
   }
 
   Widget _buildDivider(BuildContext context) {
-    return Padding(padding: EdgeInsets.symmetric(vertical: 5.h), child: Divider(color: Theme.of(context).colorScheme.surfaceContainerHighest));
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 5.h),
+      child: Divider(color: Theme.of(context).colorScheme.surfaceContainerHighest),
+    );
   }
 }
 
@@ -375,14 +464,24 @@ class _CategorySection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        Text(context.trDetails(DetailsAccountText.category), style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+        Text(
+          context.trDetails(DetailsAccountText.category),
+          style: CustomTextStyle.regular(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[600],
+          ),
+        ),
         const SizedBox(height: 5),
         CardCustomWidget(
           child: Row(
             children: [
               Icon(Icons.folder, color: Theme.of(context).colorScheme.primary, size: 24.sp),
               const SizedBox(width: 10),
-              Text(category?.categoryName ?? "", style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w400)),
+              Text(
+                category?.categoryName ?? "",
+                style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w400),
+              ),
             ],
           ),
         ),
@@ -406,7 +505,16 @@ class _NotesSection extends StatelessWidget {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [Text(context.trDetails(DetailsAccountText.note), style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]))],
+              children: [
+                Text(
+                  context.trDetails(DetailsAccountText.note),
+                  style: CustomTextStyle.regular(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 5),
             FutureBuilder(
@@ -433,7 +541,15 @@ class _NotesSection extends StatelessWidget {
                 return Shimmer.fromColors(
                   baseColor: Theme.of(context).colorScheme.primary.withValues(alpha: .4),
                   highlightColor: Theme.of(context).colorScheme.primary,
-                  child: Text('Decrypting...', textAlign: TextAlign.start, style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+                  child: Text(
+                    context.trSafe(SettingsLocale.decryptingData),
+                    textAlign: TextAlign.start,
+                    style: CustomTextStyle.regular(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[600],
+                    ),
+                  ),
                 );
               },
             ),
@@ -456,9 +572,20 @@ class _CustomFieldsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        Text(context.trDetails(DetailsAccountText.customFields), style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+        Text(
+          context.trDetails(DetailsAccountText.customFields),
+          style: CustomTextStyle.regular(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[600],
+          ),
+        ),
         const SizedBox(height: 5),
-        CardCustomWidget(child: Column(children: customFields.map((field) => _buildCustomField(context, field)).toList())),
+        CardCustomWidget(
+          child: Column(
+            children: customFields.map((field) => _buildCustomField(context, field)).toList(),
+          ),
+        ),
       ],
     );
   }
@@ -468,7 +595,12 @@ class _CustomFieldsSection extends StatelessWidget {
 
     return Column(
       children: [
-        ItemCopyValue(title: field.hintText, value: field.value, isPrivateValue: field.typeField.toLowerCase().contains("password"), isLastItem: isLast),
+        ItemCopyValue(
+          title: field.hintText,
+          value: field.value,
+          isPrivateValue: field.typeField.toLowerCase().contains("password"),
+          isLastItem: isLast,
+        ),
         if (!isLast) Divider(color: Theme.of(context).colorScheme.surfaceContainerHighest),
       ],
     );
@@ -484,7 +616,14 @@ class _PasswordHistoryAndUpdatedSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [if (_hasPasswordHistory) _buildPasswordHistoryWidget(context), const SizedBox(height: 10), _buildUpdatedAtWidget(context)]);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (_hasPasswordHistory) _buildPasswordHistoryWidget(context),
+        const SizedBox(height: 10),
+        _buildUpdatedAtWidget(context),
+      ],
+    );
   }
 
   bool get _hasPasswordHistory => passwordHistories != null && passwordHistories!.isNotEmpty;
@@ -502,9 +641,20 @@ class _PasswordHistoryAndUpdatedSection extends StatelessWidget {
                 children: [
                   TextSpan(
                     text: "${context.trDetails(DetailsAccountText.passwordHistoryTitle)}: ",
-                    style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]),
+                    style: CustomTextStyle.regular(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[600],
+                    ),
                   ),
-                  TextSpan(text: "${passwordHistories!.length}", style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary)),
+                  TextSpan(
+                    text: "${passwordHistories!.length}",
+                    style: CustomTextStyle.regular(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -516,7 +666,11 @@ class _PasswordHistoryAndUpdatedSection extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
                   child: Text(
                     context.trDetails(DetailsAccountText.passwordHistoryDetail),
-                    style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
+                    style: CustomTextStyle.regular(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
                 ),
               ),
@@ -531,8 +685,22 @@ class _PasswordHistoryAndUpdatedSection extends StatelessWidget {
     return RichText(
       text: TextSpan(
         children: [
-          TextSpan(text: "${context.trDetails(DetailsAccountText.updatedAt)}: ", style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
-          TextSpan(text: formatDateTime(account.updatedAt), style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.grey[600])),
+          TextSpan(
+            text: "${context.trDetails(DetailsAccountText.updatedAt)}: ",
+            style: CustomTextStyle.regular(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
+            ),
+          ),
+          TextSpan(
+            text: formatDateTime(account.updatedAt),
+            style: CustomTextStyle.regular(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w400,
+              color: Colors.grey[600],
+            ),
+          ),
         ],
       ),
     );
@@ -549,7 +717,10 @@ class _PasswordHistoryAndUpdatedSection extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[_buildBottomSheetHeader(context), Expanded(child: _buildPasswordHistoryList(context))],
+              children: <Widget>[
+                _buildBottomSheetHeader(context),
+                Expanded(child: _buildPasswordHistoryList(context)),
+              ],
             ),
           ),
         );
@@ -563,8 +734,18 @@ class _PasswordHistoryAndUpdatedSection extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(context.trDetails(DetailsAccountText.passwordHistoryTitle), style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
-          IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close, size: 22)),
+          Text(
+            context.trDetails(DetailsAccountText.passwordHistoryTitle),
+            style: CustomTextStyle.regular(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
+            ),
+          ),
+          IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.close, size: 22),
+          ),
         ],
       ),
     );
@@ -576,15 +757,28 @@ class _PasswordHistoryAndUpdatedSection extends StatelessWidget {
       itemBuilder: (BuildContext context, int index) {
         final passwordHistory = passwordHistories![index];
         return ListTile(
-          title: DecryptText(decryptTextType: DecryptTextType.password, style: Theme.of(context).textTheme.bodyLarge!, value: passwordHistory.password),
-          subtitle: Text(formatDateTime(passwordHistory.createdAt), style: Theme.of(context).textTheme.bodyMedium),
-          trailing: IconButton(icon: const Icon(Icons.copy), onPressed: () => _copyPasswordHistory(context, passwordHistory)),
+          title: DecryptText(
+            decryptTextType: DecryptTextType.password,
+            style: Theme.of(context).textTheme.bodyLarge!,
+            value: passwordHistory.password,
+          ),
+          subtitle: Text(
+            formatDateTime(passwordHistory.createdAt),
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          trailing: IconButton(
+            icon: const Icon(Icons.copy),
+            onPressed: () => _copyPasswordHistory(context, passwordHistory),
+          ),
         );
       },
     );
   }
 
-  Future<void> _copyPasswordHistory(BuildContext context, PasswordHistoryDriftModelData passwordHistory) async {
+  Future<void> _copyPasswordHistory(
+    BuildContext context,
+    PasswordHistoryDriftModelData passwordHistory,
+  ) async {
     final decryptPassword = await DataSecureService.decryptPassword(passwordHistory.password);
 
     if (decryptPassword.isNotEmpty && context.mounted) {

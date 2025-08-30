@@ -1,4 +1,3 @@
-
 import 'change_app_info.dart';
 import 'configs.dart';
 import 'copy_assets.dart';

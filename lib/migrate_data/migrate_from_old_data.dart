@@ -14,6 +14,9 @@ import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/migrate_data/old_data_decrypt.dart';
 import 'package:cybersafe_pro/repositories/driff_db/models/account_aggregate.dart';
+import 'package:cybersafe_pro/secure/encrypt/encrypt_v2/encrypt_v2.dart';
+import 'package:cybersafe_pro/secure/encrypt/key_manager.dart' as key_manager;
+import 'package:cybersafe_pro/secure/secure_app_manager.dart';
 import 'package:cybersafe_pro/services/account/account_services.dart';
 import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
@@ -26,6 +29,7 @@ import 'package:path_provider/path_provider.dart';
 class MigrateFromOldData {
   static Future<bool> startMigrate(BuildContext context) async {
     try {
+      await migratePinCodeV2();
       if (await SecureStorage.instance.read(key: SecureStorageKey.isMigrateOldData) == "true") {
         return false;
       }
@@ -61,6 +65,27 @@ class MigrateFromOldData {
       return false;
     } finally {
       hideLoadingDialog();
+    }
+  }
+
+  static Future<String?> _pinCode() async {
+    final pinCode = await SecureStorage.instance.read(key: SecureStorageKey.pinCode);
+    if (pinCode == null) return null;
+    final key = await SecureStorage.instance.read(key: SecureStorageKey.securePinCodeKey);
+    return await EncryptV2.decrypt(value: pinCode, keyType: key_manager.KeyType.pinCode, key: key);
+  }
+
+  static Future<void> migratePinCodeV2() async {
+    final pinCode = await _pinCode();
+    if (pinCode != null && pinCode.isNotEmpty) {
+      final isEnableLocalAuth = await SecureStorage.instance.readBool(
+        SecureStorageKey.isEnableLocalAuth,
+      );
+      await SecureAppManager.initializeNewUser(pinCode);
+      await SecureStorage.instance.delete(key: SecureStorageKey.pinCode);
+      if (isEnableLocalAuth == true) {
+        await SecureAppManager.enableBiometric();
+      }
     }
   }
 

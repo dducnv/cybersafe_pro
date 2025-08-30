@@ -1,16 +1,11 @@
 import 'package:cybersafe_pro/components/bottom_sheets/choose_lang_bottom_sheet.dart';
-import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
-import 'package:cybersafe_pro/constants/secure_storage_key.dart' show SecureStorageKey;
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/app_locale.dart';
 import 'package:cybersafe_pro/localization/keys/onboarding_text.dart';
-import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/resources/app_config.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
-import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/secure_application_util.dart';
-import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
 import 'package:cybersafe_pro/widgets/setting_item_widget/setting_item_widget.dart';
 import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
@@ -39,7 +34,6 @@ class OnboardingScreenState extends State<OnboardingScreen> {
 
   void initialization() async {
     FlutterNativeSplash.remove();
-    DataSecureService.preWarmKeys();
     SecureApplicationUtil.instance.pause();
   }
 
@@ -282,17 +276,6 @@ class OnboardingScreenState extends State<OnboardingScreen> {
                             isDisabled: !value,
                             kMargin: 0,
                             onPressed: () async {
-                              showLoadingDialog(
-                                loadingText: ValueNotifier(
-                                  context.trSafe(OnboardingText.initDatabase),
-                                ),
-                              );
-                              await context.read<CategoryProvider>().initDataCategory(context);
-                              await SecureStorage.instance.save(
-                                key: SecureStorageKey.firstOpenApp,
-                                value: "false",
-                              );
-                              hideLoadingDialog();
                               if (context.mounted) {
                                 Navigator.pushNamed(context, AppRoutes.registerMasterPin);
                               }

@@ -5,10 +5,10 @@ import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/my_app.dart';
 import 'package:cybersafe_pro/providers/provider.dart';
 import 'package:cybersafe_pro/providers/theme_provider.dart';
-import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 import 'package:cybersafe_pro/resources/shared_preferences/constants.dart';
 import 'package:cybersafe_pro/resources/shared_preferences/shared_preferences_helper.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
+import 'package:cybersafe_pro/secure/secure_app_manager.dart';
 import 'package:cybersafe_pro/services/local_auth_service.dart';
 import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/utils/device_type.dart';
@@ -84,7 +84,6 @@ Future<void> initApp() async {
   timezone.initializeTimeZones();
   //only show status bar
   // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.top]);
-  await DriffDbManager.instance.init();
   await SharedPreferencesHelper.init();
   await clearSecureStorageOnReinstall();
 
@@ -137,8 +136,10 @@ Future<String> _determineInitialRoute() async {
   }
 
   // Kiểm tra PIN
-  final pinCode = await SecureStorage.instance.read(key: SecureStorageKey.pinCode);
-  if (pinCode == null) {
+  final isPINSet =
+      await SecureAppManager.isPINSet() ||
+      await SecureStorage.instance.read(key: SecureStorageKey.pinCode) != null;
+  if (!isPINSet) {
     return AppRoutes.registerMasterPin;
   }
 

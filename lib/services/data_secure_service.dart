@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:cybersafe_pro/encrypt/encrypt_v1/encrypt_v1.dart';
-import 'package:cybersafe_pro/encrypt/encrypt_v2/encrypt_v2.dart';
-import 'package:cybersafe_pro/encrypt/key_manager.dart';
+import 'package:cybersafe_pro/secure/encrypt/encrypt_v1/encrypt_v1.dart';
+import 'package:cybersafe_pro/secure/encrypt/encrypt_v2/encrypt_v2.dart';
+import 'package:cybersafe_pro/secure/encrypt/key_manager.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 
 class DataSecureService {
@@ -106,7 +106,8 @@ class DataSecureService {
     try {
       return await EncryptV2.decrypt(value: value, keyType: KeyType.pinCode);
     } catch (e) {
-      throw Exception('Failed to decrypt PIN code: $e');
+      logError('Failed to decrypt PIN code: $e', functionName: 'DataSecureService.decryptPinCode');
+      return "";
     }
   }
 
@@ -192,6 +193,8 @@ class DataSecureService {
     if (accountsData.isEmpty) return [];
 
     try {
+      // Không sử dụng compute() vì SecureArgon2 cần KeyManager trong main isolate
+      // Thay vào đó xử lý batch trong main isolate với Future.wait()
       await preWarmKeys();
 
       const batchSize = 20;

@@ -70,7 +70,6 @@ Future<bool> checkLocalAuth() async {
   }
 
   bool authenticated = await LocalAuthConfig.instance.authenticate();
-
   return authenticated;
 }
 

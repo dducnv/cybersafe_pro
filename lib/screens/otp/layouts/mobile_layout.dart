@@ -4,6 +4,7 @@ import 'package:cybersafe_pro/database/models/icon_custom_model.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
 import 'package:cybersafe_pro/localization/keys/otp_text.dart';
+import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/home_provider.dart';
 import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
@@ -105,6 +106,9 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
                                 }
                                 showLoadingDialog(
                                   context: context,
+                                  loadingText: ValueNotifier(
+                                    context.trSafe(SettingsLocale.decryptingData),
+                                  ),
                                 ); // Sửa lại truyền context đúng dạng
                                 String decryptedSecretKey = '';
                                 try {

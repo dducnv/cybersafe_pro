@@ -1,7 +1,7 @@
 import 'dart:ffi';
 import 'dart:io';
 
-import 'package:cybersafe_pro/encrypt/key_manager.dart';
+import 'package:cybersafe_pro/secure/encrypt/key_manager.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
@@ -33,6 +33,7 @@ class DriftSqliteDatabase extends _$DriftSqliteDatabase {
 
   /// Mở kết nối với SQLCipher encryption
   static QueryExecutor _openConnection() {
+    print("openConnection");
     return LazyDatabase(() async {
       try {
         final dbFolder = await getApplicationDocumentsDirectory();

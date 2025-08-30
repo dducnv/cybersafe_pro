@@ -1,10 +1,16 @@
+import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
+import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/login_text.dart';
+import 'package:cybersafe_pro/localization/keys/onboarding_text.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
+import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/providers/local_auth_provider.dart';
+import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/secure_application_util.dart';
+import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:cybersafe_pro/utils/toast_noti.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:cybersafe_pro/widgets/button/custom_button_widget.dart';
@@ -19,12 +25,14 @@ class ConfirmPinCodeWidget extends StatefulWidget {
   final GlobalKey<FormState> formConfirmKey;
   final PageController pageController;
   final bool isChangePin;
+  final String? oldPin;
   const ConfirmPinCodeWidget({
     super.key,
     required this.appPinCodeConfirmKey,
     required this.formConfirmKey,
     required this.pageController,
     this.isChangePin = false,
+    this.oldPin,
   });
 
   @override
@@ -98,17 +106,38 @@ class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
     );
   }
 
-  _handleSubmit() {
+  _handleSubmit() async {
     widget.formConfirmKey.currentState!.validate();
     bool isVerified = Provider.of<LocalAuthProvider>(
       context,
       listen: false,
     ).verifyRegisterPinCode(pinCodeController.text);
     if (isVerified && pinCodeController.text.isNotEmpty && context.mounted) {
-      Provider.of<LocalAuthProvider>(context, listen: false).savePinCode();
-      context.read<AppProvider>().initializeTimer();
+      showLoadingDialog(
+        loadingText:
+            !widget.isChangePin ? ValueNotifier(context.trSafe(OnboardingText.initDatabase)) : null,
+      );
+      if (!widget.isChangePin) {
+        await Provider.of<LocalAuthProvider>(context, listen: false).savePinCode();
+      } else {
+        await Provider.of<LocalAuthProvider>(
+          context,
+          listen: false,
+        ).changePinCode(widget.oldPin ?? "");
+      }
+
       SecureApplicationUtil.instance.unpause();
-      AppRoutes.navigateAndRemoveUntil(context, AppRoutes.home);
+
+      if (!widget.isChangePin) {
+        await DriffDbManager.instance.init();
+        if (mounted) await context.read<CategoryProvider>().initDataCategory(context);
+        await SecureStorage.instance.save(key: SecureStorageKey.firstOpenApp, value: "false");
+      }
+      hideLoadingDialog();
+      if (mounted) {
+        context.read<AppProvider>().initializeTimer();
+        AppRoutes.navigateAndRemoveUntil(context, AppRoutes.home);
+      }
     } else {
       timeCorrect++;
       widget.appPinCodeConfirmKey.currentState!.triggerErrorAnimation();

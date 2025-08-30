@@ -28,6 +28,7 @@ class MobileLayout extends StatefulWidget {
   final bool isFromBackup;
   final bool isFromRestore;
   final bool isFromDeleteData;
+  final String? title;
   final SecureApplicationController? secureApplicationController;
   final Function({
     bool? isLoginSuccess,
@@ -38,6 +39,7 @@ class MobileLayout extends StatefulWidget {
 
   const MobileLayout({
     super.key,
+    this.title,
     this.showBiometric = true,
     this.isFromBackup = false,
     this.isFromRestore = false,
@@ -60,8 +62,12 @@ class _MobileLayoutState extends State<MobileLayout> {
   void initState() {
     super.initState();
     _setupLockStatusCheck();
-
-    //Listen ENTER KEYBOARD
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final provider = context.read<LocalAuthProvider>();
+        provider.restartLockTimer();
+      }
+    });
   }
 
   void _setupLockStatusCheck() {
@@ -104,6 +110,8 @@ class _MobileLayoutState extends State<MobileLayout> {
       body: Consumer<LocalAuthProvider>(
         builder: (context, provider, child) {
           final isCurrentlyLocked = provider.isLocked;
+          final isLoading = provider.isLoading;
+
           return KeyboardListener(
             focusNode: FocusNode(),
             onKeyEvent: (event) {
@@ -121,9 +129,10 @@ class _MobileLayoutState extends State<MobileLayout> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      widget.isFromBackup
-                          ? context.trLogin(LoginText.enterAnyPin)
-                          : context.trLogin(LoginText.enterPin),
+                      widget.title ??
+                          (widget.isFromBackup
+                              ? context.trLogin(LoginText.enterAnyPin)
+                              : context.trLogin(LoginText.enterPin)),
                       style: CustomTextStyle.regular(fontSize: 20.sp, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
@@ -182,17 +191,28 @@ class _MobileLayoutState extends State<MobileLayout> {
                       width: 75,
                       height: 75,
                       onPressed:
-                          isCurrentlyLocked
+                          (isCurrentlyLocked || isLoading) // ✅ Disable khi loading
                               ? null
                               : () async {
                                 await handleLogin(provider);
                               },
                       text: "",
-                      child: Icon(
-                        Icons.arrow_forward,
-                        size: 24,
-                        color: isCurrentlyLocked ? Colors.grey : Colors.white,
-                      ),
+                      child:
+                          isLoading
+                              ? SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                              : Icon(
+                                Icons.arrow_forward,
+                                size: 24,
+                                color:
+                                    (isCurrentlyLocked || isLoading) ? Colors.grey : Colors.white,
+                              ),
                     ),
                   ],
                 ),
@@ -309,7 +329,6 @@ class _MobileLayoutState extends State<MobileLayout> {
       }
       return;
     }
-
     bool isLoginSuccess = await provider.handleLogin();
 
     if (isLoginSuccess && mounted) {
@@ -325,7 +344,6 @@ class _MobileLayoutState extends State<MobileLayout> {
       try {
         if (mounted) {
           final appProvider = Provider.of<AppProvider>(context, listen: false);
-
           appProvider.initializeTimer();
           AppRoutes.navigateAndRemoveUntil(context, AppRoutes.home);
         }

@@ -49,4 +49,7 @@ abstract class Env {
 
   @EnviedField(varName: 'ORCHESTRATION_ENCRYPTION_KEY', obfuscate: true)
   static final String orchestrationEncryptionKey = _Env.orchestrationEncryptionKey;
+
+  @EnviedField(varName: 'BIOMETRIC_RMK_WRAP_KEY', obfuscate: true)
+  static final String biometricRmkWrapKey = _Env.biometricRmkWrapKey;
 }

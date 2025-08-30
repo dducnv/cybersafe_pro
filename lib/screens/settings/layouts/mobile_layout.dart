@@ -1,13 +1,14 @@
 import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/otp_text.dart';
 import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/home_provider.dart';
 import 'package:cybersafe_pro/resources/size_text_icon.dart';
+import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/screens/login_master_password/login_master_password.dart';
-import 'package:cybersafe_pro/screens/register_master_pin/register_master_pin.dart';
 import 'package:cybersafe_pro/screens/settings/widgets/change_lang_widget.dart';
 import 'package:cybersafe_pro/screens/settings/widgets/set_theme_color.dart';
 import 'package:cybersafe_pro/screens/settings/widgets/set_theme_mode_widget.dart';
@@ -79,11 +80,27 @@ class SettingMobileLayout extends StatelessWidget {
                   title: context.appLocale.settingsLocale.getText(SettingsLocale.changePin),
                   icon: Icons.pin,
                   onTap: () {
-                    Navigator.of(context).push(
+                    Navigator.of(GlobalKeys.appRootNavigatorKey.currentContext!).push(
                       MaterialPageRoute(
-                        builder: (context) {
-                          return const RegisterMasterPin(isChangePin: true);
-                        },
+                        builder:
+                            (context) => LoginMasterPassword(
+                              showBiometric: false,
+                              isFromDeleteData: true,
+                              title: context.trSafe(OtpText.enterOldPin),
+                              callBackLoginCallback: ({
+                                bool? isLoginSuccess,
+                                String? pin,
+                                GlobalKey<AppPinCodeFieldsState>? appPinCodeKey,
+                              }) async {
+                                if (isLoginSuccess == true && pin != null) {
+                                  AppRoutes.navigateToReplacement(
+                                    context,
+                                    AppRoutes.registerMasterPin,
+                                    arguments: {"isChangePin": true, "oldPin": pin},
+                                  );
+                                }
+                              },
+                            ),
                       ),
                     );
                   },
@@ -351,7 +368,10 @@ class SettingMobileLayout extends StatelessWidget {
                   pin != null &&
                   GlobalKeys.appRootNavigatorKey.currentContext != null) {
                 try {
-                  showLoadingDialog(context: GlobalKeys.appRootNavigatorKey.currentContext!);
+                  showLoadingDialog(
+                    context: GlobalKeys.appRootNavigatorKey.currentContext!,
+                    loadingText: ValueNotifier(context.trSafe(SettingsLocale.waitingNotification)),
+                  );
                   await Future.delayed(const Duration(milliseconds: 50));
                   if (!context.mounted) return;
                   final result = await DataManagerService.restoreBackup(
@@ -418,7 +438,10 @@ class SettingMobileLayout extends StatelessWidget {
 
   Future<void> _onBackUp(BuildContext context, String pin) async {
     try {
-      showLoadingDialog();
+      showLoadingDialog(
+        context: GlobalKeys.appRootNavigatorKey.currentContext!,
+        loadingText: ValueNotifier(context.trSafe(SettingsLocale.waitingNotification)),
+      );
       final result = await DataManagerService.backupData(
         GlobalKeys.appRootNavigatorKey.currentContext!,
         pin,
@@ -438,7 +461,12 @@ class SettingMobileLayout extends StatelessWidget {
 
   void _importDataFromBrowser(BuildContext context) async {
     try {
+      showLoadingDialog(
+        context: GlobalKeys.appRootNavigatorKey.currentContext!,
+        loadingText: ValueNotifier(context.trSafe(SettingsLocale.waitingNotification)),
+      );
       final result = await DataManagerService.importDataFromBrowser();
+      if (context.mounted) hideLoadingDialog();
       if (!context.mounted) return;
       if (result) {
         showToastSuccess("Import data from browser success", context: context);

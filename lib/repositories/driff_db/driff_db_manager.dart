@@ -29,6 +29,7 @@ class DriffDbManager {
     if (_database != null) return;
     _database = DriftSqliteDatabase();
     if (_database == null) return;
+    await _preWarmEncryptionKeys();
     accountAdapter = AccountAdapter(_database!);
     accountCustomFieldAdapter = AccountCustomFieldAdapter(_database!);
     categoryAdapter = CategoryAdapter(_database!);

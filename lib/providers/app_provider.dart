@@ -1,10 +1,11 @@
 import 'dart:async';
 
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
-import 'package:cybersafe_pro/encrypt/key_manager.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/home_provider.dart';
+import 'package:cybersafe_pro/providers/statistic_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
+import 'package:cybersafe_pro/secure/encrypt/key_manager.dart';
 import 'package:cybersafe_pro/services/old_encrypt_method/data_manager_service_old.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
@@ -128,7 +129,8 @@ class AppProvider extends ChangeNotifier {
     logInfo("APP BACKGROUND");
     context.read<AccountProvider>().clearData();
     context.read<HomeProvider>().clearData();
-    KeyManager.instance.onAppBackground();
+    context.read<StatisticProvider>().reset();
+    KeyManager.onAppBackground();
     if (_lockOnBackground && DataManagerServiceOld.canLockApp) {
       try {
         _rootTimer?.cancel();

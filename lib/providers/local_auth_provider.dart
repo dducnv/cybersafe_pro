@@ -3,12 +3,11 @@ import 'dart:async';
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
-import 'package:cybersafe_pro/services/data_secure_service.dart';
+import 'package:cybersafe_pro/secure/secure_app_manager.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_application_util.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
-import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/app_pin_code_fields/app_pin_code_fields.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -29,6 +28,9 @@ class LocalAuthProvider extends ChangeNotifier {
   bool _isLocked = false;
   DateTime? _lockUntil;
   int _lockDurationMultiplier = 1;
+
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
 
   // Configuration
   static const int _maxLoginAttempts = 3;
@@ -55,27 +57,6 @@ class LocalAuthProvider extends ChangeNotifier {
     await _focusPinInput();
     // }
   }
-
-  // bool _shouldUseBiometric(bool canUseBiometric) {
-  //   return LocalAuthConfig.instance.isAvailableBiometrics &&
-  //       LocalAuthConfig.instance.isOpenUseBiometric &&
-  //       canUseBiometric;
-  // }
-
-  // Future<void> _handleBiometricAuth(
-  //   Function() biometricLoginCallBack, {
-  //   bool isNavigateToHome = true,
-  // }) async {
-  //   await Future.delayed(const Duration(milliseconds: 500));
-  //   bool isAuth = await checkLocalAuth();
-
-  //   if (isAuth) {
-  //     if (isNavigateToHome) navigatorToHome();
-  //     biometricLoginCallBack.call();
-  //   } else {
-  //     await _focusPinInput();
-  //   }
-  // }
 
   Future<void> _focusPinInput() async {
     await Future.delayed(const Duration(milliseconds: 250));
@@ -150,8 +131,13 @@ class LocalAuthProvider extends ChangeNotifier {
   // save pin code
   Future<bool> savePinCode() async {
     if (_pinCodeConfirm.isEmpty) return false;
-    String pinCodeEncrypted = await DataSecureService.encryptPinCode(_pinCodeConfirm);
-    await SecureStorage.instance.save(key: SecureStorageKey.pinCode, value: pinCodeEncrypted);
+    await SecureAppManager.initializeNewUser(_pinCodeConfirm);
+    return true;
+  }
+
+  Future<bool> changePinCode(String oldPin) async {
+    if (oldPin.isEmpty) return false;
+    await SecureAppManager.changePIN(oldPin, _pinCodeConfirm);
     return true;
   }
 
@@ -172,18 +158,27 @@ class LocalAuthProvider extends ChangeNotifier {
       }
 
       String pinCode = textEditingController.text;
-      if (pinCode.length == 6) {
-        bool verify = await verifyLoginPinCode(pinCode);
-        if (!verify) {
-          await _handleLoginFailure();
-          return false;
+      if (pinCode.length >= 6) {
+        // Set loading state
+        _setLoading(true);
+
+        try {
+          bool verify = await verifyLoginPinCode(pinCode);
+          if (!verify) {
+            await _handleLoginFailure();
+            return false;
+          }
+          await _resetLockStatus();
+          return true;
+        } finally {
+          // Clear loading state
+          _setLoading(false);
         }
-        await _resetLockStatus();
-        return true;
       }
       _triggerErrorAnimation();
     } catch (e) {
       logError('Error handling login: $e');
+      _setLoading(false);
     }
     return false;
   }
@@ -215,33 +210,34 @@ class LocalAuthProvider extends ChangeNotifier {
     }
   }
 
-  void onBiometric() async {
+  Future<bool> onBiometric() async {
     try {
-      bool isAuth = await checkLocalAuth();
+      _setLoading(true);
+
+      bool isAuth = await SecureAppManager.authenticateUser();
       if (SecureApplicationUtil.instance.secureApplicationController?.locked == true) {
         if (isAuth) {
           SecureApplicationUtil.instance.authSuccess();
         } else {
           SecureApplicationUtil.instance.authFailed();
         }
-        return;
+        return isAuth;
       }
       if (isAuth) {
         navigatorToHome();
       }
+      return isAuth;
     } catch (e) {
       logError('Error using biometric: $e');
+      return false;
+    } finally {
+      _setLoading(false);
     }
   }
 
   Future<bool> verifyLoginPinCode(String pinCode) async {
     try {
-      String? pinCodeEncryptedFromStorage = await SecureStorage.instance.read(
-        key: SecureStorageKey.pinCode,
-      );
-      if (pinCodeEncryptedFromStorage == null) return false;
-      String pinCodeEncrypted = await DataSecureService.decryptPinCode(pinCodeEncryptedFromStorage);
-      return pinCodeEncrypted == pinCode;
+      return SecureAppManager.authenticateUser(pinCode);
     } catch (e) {
       logError('Error verifying pin code: $e');
       return false;
@@ -381,6 +377,12 @@ class LocalAuthProvider extends ChangeNotifier {
     }
   }
 
+  void restartLockTimer() {
+    if (_isLocked && _lockUntil != null) {
+      _startLockTimer();
+    }
+  }
+
   void _startLockTimer() {
     _lockTimer?.cancel();
     if (_lockUntil == null) return;
@@ -392,6 +394,13 @@ class LocalAuthProvider extends ChangeNotifier {
       }
       notifyListeners();
     });
+  }
+
+  void _setLoading(bool loading) {
+    if (_isLoading != loading) {
+      _isLoading = loading;
+      notifyListeners();
+    }
   }
 
   @override

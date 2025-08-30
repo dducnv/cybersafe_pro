@@ -7,7 +7,6 @@ import 'package:cybersafe_pro/localization/app_locale.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/home_provider.dart';
 import 'package:cybersafe_pro/providers/theme_provider.dart';
-import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/screens/login_master_password/login_master_password.dart';
 import 'package:cybersafe_pro/screens/onboarding/onboarding_screen.dart';
@@ -55,9 +54,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       context.read<AppProvider>().handleAppBackground(context);
     } else if (state == AppLifecycleState.resumed) {
       context.read<AppProvider>().handleAppResume(context);
-      await DriffDbManager.instance.init();
-
       final deviceType = DeviceInfo.getDeviceType(context);
+      SecureApplicationUtil.instance.unpause();
       if (deviceType == DeviceType.desktop) {
         final currentRoute = ModalRoute.of(context)?.settings.name;
         if (currentRoute != null && currentRoute != AppRoutes.home) {

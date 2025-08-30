@@ -33,6 +33,18 @@ class StatisticProvider extends ChangeNotifier {
   // Cache cho kết quả kiểm tra mật khẩu
   final Map<String, bool> _passwordStrengthCache = {};
 
+  // Getters để truy cập dễ dàng
+  Map<int, List<AccountDriftModelData>> get accountPasswordWeakByCategories =>
+      statistics?.weakByCategories ?? {};
+
+  List<List<AccountDriftModelData>> get accountSamePassword => statistics?.sameGroups ?? [];
+
+  int get totalAccountPasswordWeak => statistics?.totalWeak ?? 0;
+
+  int get totalAccountPasswordStrong => statistics?.totalStrong ?? 0;
+
+  int get totalAccountSamePassword => statistics?.totalSame ?? 0;
+
   bool validateStructure(String value) {
     if (_passwordStrengthCache.containsKey(value)) {
       return _passwordStrengthCache[value]!;
@@ -181,16 +193,4 @@ class StatisticProvider extends ChangeNotifier {
   void clearCache() {
     _passwordStrengthCache.clear();
   }
-
-  // Getters để truy cập dễ dàng
-  Map<int, List<AccountDriftModelData>> get accountPasswordWeakByCategories =>
-      statistics?.weakByCategories ?? {};
-
-  List<List<AccountDriftModelData>> get accountSamePassword => statistics?.sameGroups ?? [];
-
-  int get totalAccountPasswordWeak => statistics?.totalWeak ?? 0;
-
-  int get totalAccountPasswordStrong => statistics?.totalStrong ?? 0;
-
-  int get totalAccountSamePassword => statistics?.totalSame ?? 0;
 }

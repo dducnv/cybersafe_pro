@@ -4,6 +4,7 @@ import 'package:cybersafe_pro/components/icon_show_component.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/details_account_text.dart';
 import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
+import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/providers/desktop_home_provider.dart';
@@ -14,13 +15,14 @@ import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 import 'package:cybersafe_pro/resources/size_text_icon.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/screens/category_manager/layouts/mobile_layout.dart';
-import 'package:cybersafe_pro/screens/create_account/create_account_screen.dart' show CreateAccountScreen;
+import 'package:cybersafe_pro/screens/create_account/create_account_screen.dart'
+    show CreateAccountScreen;
 import 'package:cybersafe_pro/screens/create_account/layouts/mobile_layout.dart';
 import 'package:cybersafe_pro/screens/home/components/desktop_appbar.dart';
+import 'package:cybersafe_pro/screens/otp/layouts/mobile_layout.dart';
 import 'package:cybersafe_pro/screens/password_generator/password_generate_screen.dart';
 import 'package:cybersafe_pro/screens/settings/layouts/mobile_layout.dart';
 import 'package:cybersafe_pro/screens/statistic/statistic_screen.dart';
-import 'package:cybersafe_pro/screens/otp/layouts/mobile_layout.dart';
 import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/utils/device_type.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
@@ -102,27 +104,63 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
   }
 
   void _openCreateAccountSheet() {
-    showModalSideSheet(context: context, ignoreAppBar: true, barrierDismissible: true, withCloseControll: false, body: const CreateAccountMobileLayout());
+    showModalSideSheet(
+      context: context,
+      ignoreAppBar: true,
+      barrierDismissible: true,
+      withCloseControll: false,
+      body: const CreateAccountMobileLayout(),
+    );
   }
 
   void _openSettingsSheet() {
-    showModalSideSheet(context: context, ignoreAppBar: true, barrierDismissible: true, withCloseControll: false, body: const SettingMobileLayout());
+    showModalSideSheet(
+      context: context,
+      ignoreAppBar: true,
+      barrierDismissible: true,
+      withCloseControll: false,
+      body: const SettingMobileLayout(),
+    );
   }
 
   void _openPasswordGeneratorSheet() {
-    showModalSideSheet(context: context, ignoreAppBar: true, barrierDismissible: true, withCloseControll: false, body: const PasswordGenerateScreen());
+    showModalSideSheet(
+      context: context,
+      ignoreAppBar: true,
+      barrierDismissible: true,
+      withCloseControll: false,
+      body: const PasswordGenerateScreen(),
+    );
   }
 
   void _openStatisticSheet() {
-    showModalSideSheet(context: context, ignoreAppBar: true, barrierDismissible: true, withCloseControll: false, body: const StatisticScreen());
+    showModalSideSheet(
+      context: context,
+      ignoreAppBar: true,
+      barrierDismissible: true,
+      withCloseControll: false,
+      body: const StatisticScreen(),
+    );
   }
 
   void _openCategoryManagerSheet() {
-    showModalSideSheet(context: context, ignoreAppBar: true, barrierDismissible: true, withCloseControll: false, body: const CategoryManagerMobileLayout());
+    showModalSideSheet(
+      context: context,
+      ignoreAppBar: true,
+      barrierDismissible: true,
+      withCloseControll: false,
+      body: const CategoryManagerMobileLayout(),
+    );
   }
 
   void _openOtpListSheet() {
-    showModalSideSheet(context: context, ignoreAppBar: true, barrierDismissible: true, withCloseControll: false, body: const OtpMobileLayout());
+    showModalSideSheet(
+      context: context,
+      ignoreAppBar: true,
+      barrierDismissible: true,
+      withCloseControll: false,
+      body: const OtpMobileLayout(),
+    );
   }
 
   @override
@@ -146,7 +184,10 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         _buildNavItem(icon: Icons.category, onTap: _openCategoryManagerSheet),
-                        _buildNavItem(icon: Icons.password_rounded, onTap: _openPasswordGeneratorSheet),
+                        _buildNavItem(
+                          icon: Icons.password_rounded,
+                          onTap: _openPasswordGeneratorSheet,
+                        ),
                         _buildNavItem(icon: Icons.bar_chart_rounded, onTap: _openStatisticSheet),
                         _buildNavItem(icon: Icons.key, onTap: _openOtpListSheet),
                       ],
@@ -160,7 +201,12 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                       padding: const EdgeInsets.only(right: 16),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surface,
-                        border: Border(right: BorderSide(color: context.darkMode ? Colors.grey.shade800 : Colors.grey.shade300, width: 1)),
+                        border: Border(
+                          right: BorderSide(
+                            color: context.darkMode ? Colors.grey.shade800 : Colors.grey.shade300,
+                            width: 1,
+                          ),
+                        ),
                       ),
                       child: Column(
                         children: [
@@ -186,13 +232,17 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
 
                                       final categoryKeys = groupedAccounts.keys.toList();
                                       final categoryId = categoryKeys[index];
-                                      final category = categoryProvider.mapCategoryIdCategory[categoryId];
+                                      final category =
+                                          categoryProvider.mapCategoryIdCategory[categoryId];
                                       final accounts = groupedAccounts[categoryId] ?? [];
 
                                       return CardItem<AccountDriftModelData>(
                                         items: accounts,
                                         title: category?.categoryName ?? "",
-                                        totalItems: categoryProvider.mapCategoryIdTotalAccount[categoryId] ?? 0,
+                                        totalItems:
+                                            categoryProvider
+                                                .mapCategoryIdTotalAccount[categoryId] ??
+                                            0,
                                         showSeeMore: homeProvider.canExpandCategory(categoryId),
                                         onSeeMoreItems: () {
                                           homeProvider.loadMoreAccountsForCategory(categoryId);
@@ -203,8 +253,12 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                                             child: AnimatedContainer(
                                               duration: const Duration(milliseconds: 200),
                                               curve: Curves.easeInOut,
-                                              child: Selector<DesktopHomeProvider, AccountDriftModelData?>(
-                                                selector: (context, provider) => provider.selectedAccount,
+                                              child: Selector<
+                                                DesktopHomeProvider,
+                                                AccountDriftModelData?
+                                              >(
+                                                selector:
+                                                    (context, provider) => provider.selectedAccount,
                                                 builder: (context, selectedAccount, child) {
                                                   return AccountItemWidget(
                                                     accountModel: account,
@@ -213,14 +267,19 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                                                     onLongPress: () {},
                                                     onCallBackPop: () {},
                                                     onTapSubButton: () {
-                                                      bottomSheetOptionAccountItem(viewModel: homeProvider, accountModel: account);
+                                                      bottomSheetOptionAccountItem(
+                                                        viewModel: homeProvider,
+                                                        accountModel: account,
+                                                      );
                                                     },
                                                     onSelect: () {
                                                       homeProvider.handleSelectAccount(account);
                                                     },
                                                     onTap: () {
                                                       // Chọn tài khoản để hiển thị chi tiết
-                                                      context.read<DesktopHomeProvider>().selectAccount(account);
+                                                      context
+                                                          .read<DesktopHomeProvider>()
+                                                          .selectAccount(account);
                                                     },
                                                   );
                                                 },
@@ -251,7 +310,12 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                             return FadeTransition(
                               opacity: animation,
                               child: SlideTransition(
-                                position: Tween<Offset>(begin: const Offset(0.1, 0), end: Offset.zero).animate(CurvedAnimation(parent: animation, curve: Curves.easeInOut)),
+                                position: Tween<Offset>(
+                                  begin: const Offset(0.1, 0),
+                                  end: Offset.zero,
+                                ).animate(
+                                  CurvedAnimation(parent: animation, curve: Curves.easeInOut),
+                                ),
                                 child: child,
                               ),
                             );
@@ -268,15 +332,31 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                                         child: Column(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
-                                            Icon(Icons.account_circle_outlined, size: 64, color: Colors.grey[400]),
+                                            Icon(
+                                              Icons.account_circle_outlined,
+                                              size: 64,
+                                              color: Colors.grey[400],
+                                            ),
                                             const SizedBox(height: 16),
-                                            Text("Select an account to view details.", style: CustomTextStyle.regular(fontSize: 16, color: Colors.grey)),
+                                            Text(
+                                              "Select an account to view details.",
+                                              style: CustomTextStyle.regular(
+                                                fontSize: 16,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
                                           ],
                                         ),
                                       ),
                                     ),
                                   )
-                                  : Container(key: ValueKey('account_${desktopProvider.selectedAccount!.id}'), child: _buildAccountDetails(context, desktopProvider.selectedAccount!)),
+                                  : Container(
+                                    key: ValueKey('account_${desktopProvider.selectedAccount!.id}'),
+                                    child: _buildAccountDetails(
+                                      context,
+                                      desktopProvider.selectedAccount!,
+                                    ),
+                                  ),
                         );
                       },
                     ),
@@ -286,7 +366,10 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
             ),
 
             // Phần danh mục ở dưới
-            Padding(padding: EdgeInsets.only(top: 16, bottom: 24.h), child: _buildCategoryDetail(context)),
+            Padding(
+              padding: EdgeInsets.only(top: 16, bottom: 24.h),
+              child: _buildCategoryDetail(context),
+            ),
           ],
         ),
       ),
@@ -315,7 +398,13 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                       duration: const Duration(milliseconds: 400),
                       tween: Tween(begin: 0.0, end: 1.0),
                       builder: (context, value, child) {
-                        return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildAccountIcon(context, account)));
+                        return Transform.translate(
+                          offset: Offset(0, 20 * (1 - value)),
+                          child: Opacity(
+                            opacity: value,
+                            child: _buildAccountIcon(context, account),
+                          ),
+                        );
                       },
                     ),
                     SizedBox(height: 16),
@@ -324,17 +413,28 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                         duration: const Duration(milliseconds: 500),
                         tween: Tween(begin: 0.0, end: 1.0),
                         builder: (context, value, child) {
-                          return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildTOTPWidget(accountDetailsProvider.totpDriftModelData!)));
+                          return Transform.translate(
+                            offset: Offset(0, 20 * (1 - value)),
+                            child: Opacity(
+                              opacity: value,
+                              child: _buildTOTPWidget(accountDetailsProvider.totpDriftModelData!),
+                            ),
+                          );
                         },
                       ),
                     SizedBox(height: 16),
-                    if ((accountDetailsProvider.accountDriftModelData?.username != null && accountDetailsProvider.accountDriftModelData!.username!.isNotEmpty) ||
-                        (accountDetailsProvider.accountDriftModelData?.password != null && accountDetailsProvider.accountDriftModelData!.password!.isNotEmpty))
+                    if ((accountDetailsProvider.accountDriftModelData?.username != null &&
+                            accountDetailsProvider.accountDriftModelData!.username!.isNotEmpty) ||
+                        (accountDetailsProvider.accountDriftModelData?.password != null &&
+                            accountDetailsProvider.accountDriftModelData!.password!.isNotEmpty))
                       TweenAnimationBuilder<double>(
                         duration: const Duration(milliseconds: 600),
                         tween: Tween(begin: 0.0, end: 1.0),
                         builder: (context, value, child) {
-                          return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildBaseInfo(context, account)));
+                          return Transform.translate(
+                            offset: Offset(0, 20 * (1 - value)),
+                            child: Opacity(opacity: value, child: _buildBaseInfo(context, account)),
+                          );
                         },
                       ),
                     SizedBox(height: 16),
@@ -342,7 +442,16 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                       duration: const Duration(milliseconds: 700),
                       tween: Tween(begin: 0.0, end: 1.0),
                       builder: (context, value, child) {
-                        return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildCategory(context, accountDetailsProvider.categoryDriftModelData!)));
+                        return Transform.translate(
+                          offset: Offset(0, 20 * (1 - value)),
+                          child: Opacity(
+                            opacity: value,
+                            child: _buildCategory(
+                              context,
+                              accountDetailsProvider.categoryDriftModelData!,
+                            ),
+                          ),
+                        );
                       },
                     ),
                     SizedBox(height: 16),
@@ -351,18 +460,30 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                         duration: const Duration(milliseconds: 800),
                         tween: Tween(begin: 0.0, end: 1.0),
                         builder: (context, value, child) {
-                          return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildNoteWidget(context, account)));
+                          return Transform.translate(
+                            offset: Offset(0, 20 * (1 - value)),
+                            child: Opacity(
+                              opacity: value,
+                              child: _buildNoteWidget(context, account),
+                            ),
+                          );
                         },
                       ),
                     SizedBox(height: 16),
-                    if (accountDetailsProvider.accountCustomFieldDriftModelData?.isNotEmpty ?? false)
+                    if (accountDetailsProvider.accountCustomFieldDriftModelData?.isNotEmpty ??
+                        false)
                       TweenAnimationBuilder<double>(
                         duration: const Duration(milliseconds: 900),
                         tween: Tween(begin: 0.0, end: 1.0),
                         builder: (context, value, child) {
                           return Transform.translate(
                             offset: Offset(0, 20 * (1 - value)),
-                            child: Opacity(opacity: value, child: _buildCustomFieldsWidget(accountDetailsProvider.accountCustomFieldDriftModelData!)),
+                            child: Opacity(
+                              opacity: value,
+                              child: _buildCustomFieldsWidget(
+                                accountDetailsProvider.accountCustomFieldDriftModelData!,
+                              ),
+                            ),
                           );
                         },
                       ),
@@ -373,7 +494,13 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                         builder: (context, value, child) {
                           return Transform.translate(
                             offset: Offset(0, 20 * (1 - value)),
-                            child: Opacity(opacity: value, child: _buildPasswordHistoryWidget(accountDetailsProvider.passwordHistoryDriftModelData!, accountDetailsProvider.accountDriftModelData!)),
+                            child: Opacity(
+                              opacity: value,
+                              child: _buildPasswordHistoryWidget(
+                                accountDetailsProvider.passwordHistoryDriftModelData!,
+                                accountDetailsProvider.accountDriftModelData!,
+                              ),
+                            ),
                           );
                         },
                       ),
@@ -381,7 +508,10 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                       duration: const Duration(milliseconds: 1100),
                       tween: Tween(begin: 0.0, end: 1.0),
                       builder: (context, value, child) {
-                        return Transform.translate(offset: Offset(0, 20 * (1 - value)), child: Opacity(opacity: value, child: _buildUpdatedAtWidget(account)));
+                        return Transform.translate(
+                          offset: Offset(0, 20 * (1 - value)),
+                          child: Opacity(opacity: value, child: _buildUpdatedAtWidget(account)),
+                        );
                       },
                     ),
                   ],
@@ -410,13 +540,20 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                   height: 70.h,
                   clipBehavior: Clip.hardEdge,
                   padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainer, borderRadius: BorderRadius.circular(15)),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainer,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
                   child: Center(
                     child: IconShowComponent(
                       account: account,
                       width: 50.h,
                       height: 50.h,
-                      textStyle: CustomTextStyle.regular(fontSize: 30.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+                      textStyle: CustomTextStyle.regular(
+                        fontSize: 30.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
                 ),
@@ -431,7 +568,12 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
             builder: (context, value, child) {
               return Opacity(
                 opacity: value,
-                child: DecryptText(showLoading: true, style: CustomTextStyle.regular(fontWeight: FontWeight.bold, fontSize: 20.sp), value: account.title, decryptTextType: DecryptTextType.info),
+                child: DecryptText(
+                  showLoading: true,
+                  style: CustomTextStyle.regular(fontWeight: FontWeight.bold, fontSize: 20.sp),
+                  value: account.title,
+                  decryptTextType: DecryptTextType.info,
+                ),
               );
             },
           ),
@@ -446,17 +588,36 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 10),
-        Text(context.trDetails(DetailsAccountText.baseInfo), style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+        Text(
+          context.trDetails(DetailsAccountText.baseInfo),
+          style: CustomTextStyle.regular(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[600],
+          ),
+        ),
         SizedBox(height: 5.h),
         CardCustomWidget(
           child: Column(
             children: [
               if (account.username != null && account.username!.isNotEmpty)
-                ItemCopyValue(title: context.trDetails(DetailsAccountText.username), value: account.username!, isLastItem: account.password?.isEmpty ?? true),
+                ItemCopyValue(
+                  title: context.trDetails(DetailsAccountText.username),
+                  value: account.username!,
+                  isLastItem: account.password?.isEmpty ?? true,
+                ),
               if (account.password != null && account.password!.isNotEmpty)
-                Padding(padding: EdgeInsets.symmetric(vertical: 5.h), child: Divider(color: Theme.of(context).colorScheme.surfaceContainerHighest)),
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 5.h),
+                  child: Divider(color: Theme.of(context).colorScheme.surfaceContainerHighest),
+                ),
               if (account.password != null && account.password!.isNotEmpty)
-                ItemCopyValue(title: context.trDetails(DetailsAccountText.password), value: account.password!, isLastItem: true, isPrivateValue: true),
+                ItemCopyValue(
+                  title: context.trDetails(DetailsAccountText.password),
+                  value: account.password!,
+                  isLastItem: true,
+                  isPrivateValue: true,
+                ),
             ],
           ),
         ),
@@ -469,14 +630,24 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        Text(context.trDetails(DetailsAccountText.category), style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+        Text(
+          context.trDetails(DetailsAccountText.category),
+          style: CustomTextStyle.regular(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[600],
+          ),
+        ),
         const SizedBox(height: 5),
         CardCustomWidget(
           child: Row(
             children: [
               Icon(Icons.folder, color: Theme.of(context).colorScheme.primary, size: 24.sp),
               const SizedBox(width: 10),
-              Text(category.categoryName, style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w400)),
+              Text(
+                category.categoryName,
+                style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w400),
+              ),
             ],
           ),
         ),
@@ -492,7 +663,16 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [Text(context.trDetails(DetailsAccountText.note), style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]))],
+              children: [
+                Text(
+                  context.trDetails(DetailsAccountText.note),
+                  style: CustomTextStyle.regular(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 5),
             FutureBuilder(
@@ -519,7 +699,15 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                 return Shimmer.fromColors(
                   baseColor: Theme.of(context).colorScheme.primary.withValues(alpha: .4),
                   highlightColor: Theme.of(context).colorScheme.primary,
-                  child: Text('Decrypting...', textAlign: TextAlign.start, style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+                  child: Text(
+                    context.trSafe(SettingsLocale.decryptingData),
+                    textAlign: TextAlign.start,
+                    style: CustomTextStyle.regular(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[600],
+                    ),
+                  ),
                 );
               },
             ),
@@ -534,7 +722,14 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
-        Text(context.trDetails(DetailsAccountText.customFields), style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+        Text(
+          context.trDetails(DetailsAccountText.customFields),
+          style: CustomTextStyle.regular(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[600],
+          ),
+        ),
         const SizedBox(height: 5),
         CardCustomWidget(
           child: Column(
@@ -542,8 +737,14 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
               ...customFields.map(
                 (element) => Column(
                   children: [
-                    ItemCopyValue(title: element.hintText, value: element.value, isPrivateValue: element.typeField.toLowerCase().contains("password"), isLastItem: customFields.last == element),
-                    if (customFields.last != element) Divider(color: Theme.of(context).colorScheme.surfaceContainerHighest),
+                    ItemCopyValue(
+                      title: element.hintText,
+                      value: element.value,
+                      isPrivateValue: element.typeField.toLowerCase().contains("password"),
+                      isLastItem: customFields.last == element,
+                    ),
+                    if (customFields.last != element)
+                      Divider(color: Theme.of(context).colorScheme.surfaceContainerHighest),
                   ],
                 ),
               ),
@@ -559,7 +760,14 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(context.trDetails(DetailsAccountText.otpCode), style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+        Text(
+          context.trDetails(DetailsAccountText.otpCode),
+          style: CustomTextStyle.regular(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[600],
+          ),
+        ),
         const SizedBox(height: 5),
         RequestPro(
           child: CardCustomWidget(
@@ -605,14 +813,31 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
     return RichText(
       text: TextSpan(
         children: [
-          TextSpan(text: "${context.trDetails(DetailsAccountText.updatedAt)}: ", style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
-          TextSpan(text: formatDateTime(account.updatedAt), style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.grey[600])),
+          TextSpan(
+            text: "${context.trDetails(DetailsAccountText.updatedAt)}: ",
+            style: CustomTextStyle.regular(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
+            ),
+          ),
+          TextSpan(
+            text: formatDateTime(account.updatedAt),
+            style: CustomTextStyle.regular(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w400,
+              color: Colors.grey[600],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildPasswordHistoryWidget(List<PasswordHistoryDriftModelData> passwordHistories, AccountDriftModelData account) {
+  Widget _buildPasswordHistoryWidget(
+    List<PasswordHistoryDriftModelData> passwordHistories,
+    AccountDriftModelData account,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -625,9 +850,20 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                 children: [
                   TextSpan(
                     text: "${context.trDetails(DetailsAccountText.passwordHistoryTitle)}: ",
-                    style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.grey[600]),
+                    style: CustomTextStyle.regular(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[600],
+                    ),
                   ),
-                  TextSpan(text: "${passwordHistories.length}", style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary)),
+                  TextSpan(
+                    text: "${passwordHistories.length}",
+                    style: CustomTextStyle.regular(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -635,13 +871,21 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(50),
                 onTap: () {
-                  bottomSheetPasswordHistory(context: context, account: account, passwordHistories: passwordHistories);
+                  bottomSheetPasswordHistory(
+                    context: context,
+                    account: account,
+                    passwordHistories: passwordHistories,
+                  );
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
                   child: Text(
                     context.trDetails(DetailsAccountText.passwordHistoryDetail),
-                    style: CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.primary),
+                    style: CustomTextStyle.regular(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
                 ),
               ),
@@ -652,7 +896,11 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
     );
   }
 
-  Future<void> bottomSheetPasswordHistory({required BuildContext context, required AccountDriftModelData account, required List<PasswordHistoryDriftModelData> passwordHistories}) async {
+  Future<void> bottomSheetPasswordHistory({
+    required BuildContext context,
+    required AccountDriftModelData account,
+    required List<PasswordHistoryDriftModelData> passwordHistories,
+  }) async {
     return showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -669,7 +917,14 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(context.trDetails(DetailsAccountText.passwordHistoryTitle), style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey[600])),
+                      Text(
+                        context.trDetails(DetailsAccountText.passwordHistoryTitle),
+                        style: CustomTextStyle.regular(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[600],
+                        ),
+                      ),
                       IconButton(
                         onPressed: () {
                           Navigator.pop(context);
@@ -685,12 +940,21 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                     itemBuilder: (BuildContext context, int index) {
                       final passwordHistory = passwordHistories[index];
                       return ListTile(
-                        title: DecryptText(decryptTextType: DecryptTextType.password, style: Theme.of(context).textTheme.bodyLarge!, value: passwordHistory.password),
-                        subtitle: Text(formatDateTime(passwordHistory.createdAt), style: Theme.of(context).textTheme.bodyMedium),
+                        title: DecryptText(
+                          decryptTextType: DecryptTextType.password,
+                          style: Theme.of(context).textTheme.bodyLarge!,
+                          value: passwordHistory.password,
+                        ),
+                        subtitle: Text(
+                          formatDateTime(passwordHistory.createdAt),
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
                         trailing: IconButton(
                           icon: const Icon(Icons.copy),
                           onPressed: () async {
-                            final decryptPassword = await DataSecureService.decryptPassword(passwordHistory.password);
+                            final decryptPassword = await DataSecureService.decryptPassword(
+                              passwordHistory.password,
+                            );
                             if (decryptPassword.isNotEmpty && context.mounted) {
                               clipboardCustom(context: context, text: decryptPassword);
                             }
@@ -709,7 +973,11 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
   }
 
   Widget _buildNavItem({required IconData icon, required VoidCallback? onTap}) {
-    return InkWell(onTap: onTap, borderRadius: BorderRadius.circular(100), child: Padding(padding: const EdgeInsets.all(24), child: Icon(icon, size: 24.sp)));
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(100),
+      child: Padding(padding: const EdgeInsets.all(24), child: Icon(icon, size: 24.sp)),
+    );
   }
 
   Widget _buildCategoryDetail(BuildContext context) {
@@ -748,7 +1016,13 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
 
                             return Material(
                               child: Ink(
-                                decoration: BoxDecoration(color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey.withAlpha(50), borderRadius: BorderRadius.circular(25)),
+                                decoration: BoxDecoration(
+                                  color:
+                                      isSelected
+                                          ? Theme.of(context).colorScheme.primary
+                                          : Colors.grey.withAlpha(50),
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
                                 child: InkWell(
                                   borderRadius: BorderRadius.circular(25),
                                   onTap: () {
@@ -760,15 +1034,34 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                                     child: Stack(
                                       children: [
                                         Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 2.w),
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 20.w,
+                                            vertical: 2.w,
+                                          ),
                                           child: Center(
-                                            child: Text(category.categoryName, style: CustomTextStyle.regular(fontSize: 14.sp, color: isSelected ? Theme.of(context).colorScheme.onPrimary : null)),
+                                            child: Text(
+                                              category.categoryName,
+                                              style: CustomTextStyle.regular(
+                                                fontSize: 14.sp,
+                                                color:
+                                                    isSelected
+                                                        ? Theme.of(context).colorScheme.onPrimary
+                                                        : null,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                         if (isSelected)
                                           Positioned(
                                             right: 0,
-                                            child: Padding(padding: EdgeInsets.all(8.h).copyWith(right: 20), child: Icon(Icons.close, size: 18.sp, color: Theme.of(context).colorScheme.onPrimary)),
+                                            child: Padding(
+                                              padding: EdgeInsets.all(8.h).copyWith(right: 20),
+                                              child: Icon(
+                                                Icons.close,
+                                                size: 18.sp,
+                                                color: Theme.of(context).colorScheme.onPrimary,
+                                              ),
+                                            ),
                                           ),
                                       ],
                                     ),
@@ -802,11 +1095,17 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(context.appLocale.homeLocale.getText(HomeLocale.click), style: CustomTextStyle.regular(fontSize: 16.sp)),
+              Text(
+                context.appLocale.homeLocale.getText(HomeLocale.click),
+                style: CustomTextStyle.regular(fontSize: 16.sp),
+              ),
               const SizedBox(width: 5),
               CircleAvatar(child: Icon(Icons.add, size: 21.sp)),
               const SizedBox(width: 5),
-              Text(context.appLocale.homeLocale.getText(HomeLocale.toAddAccount), style: CustomTextStyle.regular(fontSize: 16.sp)),
+              Text(
+                context.appLocale.homeLocale.getText(HomeLocale.toAddAccount),
+                style: CustomTextStyle.regular(fontSize: 16.sp),
+              ),
             ],
           ),
         ],
@@ -814,7 +1113,10 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
     );
   }
 
-  Future<void> bottomSheetOptionAccountItem({required HomeProvider viewModel, required AccountDriftModelData accountModel}) async {
+  Future<void> bottomSheetOptionAccountItem({
+    required HomeProvider viewModel,
+    required AccountDriftModelData accountModel,
+  }) async {
     return showModalBottomSheet(
       context: context,
       builder: (_) {
@@ -823,14 +1125,30 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                Container(width: 40.w, height: 4.h, decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(10))),
+                Container(
+                  width: 40.w,
+                  height: 4.h,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
 
                 Selector<HomeProvider, bool>(
-                  selector: (context, viewModel) => viewModel.accountSelected.contains(accountModel),
+                  selector:
+                      (context, viewModel) => viewModel.accountSelected.contains(accountModel),
                   builder: (context, isSelected, child) {
                     return ListTile(
-                      leading: isSelected ? Icon(Icons.cancel_outlined, size: 24.sp) : Icon(Icons.check_circle_outline_rounded, size: 24.sp),
-                      title: Text(isSelected ? context.trHome(HomeLocale.unSelectAccount) : context.trHome(HomeLocale.selectAccount), style: titleHomeOptiomItemStyle),
+                      leading:
+                          isSelected
+                              ? Icon(Icons.cancel_outlined, size: 24.sp)
+                              : Icon(Icons.check_circle_outline_rounded, size: 24.sp),
+                      title: Text(
+                        isSelected
+                            ? context.trHome(HomeLocale.unSelectAccount)
+                            : context.trHome(HomeLocale.selectAccount),
+                        style: titleHomeOptiomItemStyle,
+                      ),
                       onTap: () {
                         viewModel.handleSelectAccount(accountModel);
                         Navigator.pop(context);
@@ -841,7 +1159,10 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
 
                 ListTile(
                   leading: Icon(Icons.info, size: 24.sp),
-                  title: Text(context.trHome(HomeLocale.accountDetails), style: titleHomeOptiomItemStyle),
+                  title: Text(
+                    context.trHome(HomeLocale.accountDetails),
+                    style: titleHomeOptiomItemStyle,
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     context.read<DesktopHomeProvider>().selectAccount(accountModel);
@@ -849,7 +1170,10 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                 ),
                 ListTile(
                   leading: Icon(Icons.edit, size: 24.sp),
-                  title: Text(context.trHome(HomeLocale.updateAccount), style: titleHomeOptiomItemStyle),
+                  title: Text(
+                    context.trHome(HomeLocale.updateAccount),
+                    style: titleHomeOptiomItemStyle,
+                  ),
                   onTap: () async {
                     Navigator.pop(context);
                     await showModalSideSheet(
@@ -873,7 +1197,10 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                 if (accountModel.username != null && accountModel.username != "")
                   ListTile(
                     leading: Icon(Icons.account_circle_rounded, size: 24.sp),
-                    title: Text(context.trHome(HomeLocale.copyUsername), style: titleHomeOptiomItemStyle),
+                    title: Text(
+                      context.trHome(HomeLocale.copyUsername),
+                      style: titleHomeOptiomItemStyle,
+                    ),
                     onTap: () async {
                       Navigator.pop(context);
                       clipboardCustom(context: context, text: accountModel.username ?? "");
@@ -882,17 +1209,25 @@ class _HomeDesktopLayoutState extends State<HomeDesktopLayout> {
                 if (accountModel.password != null && accountModel.password != "")
                   ListTile(
                     leading: Icon(Icons.password, size: 24.sp),
-                    title: Text(context.trHome(HomeLocale.copyPassword), style: titleHomeOptiomItemStyle),
+                    title: Text(
+                      context.trHome(HomeLocale.copyPassword),
+                      style: titleHomeOptiomItemStyle,
+                    ),
                     onTap: () async {
                       Navigator.pop(context);
-                      String password = await DataSecureService.decryptPassword(accountModel.password ?? "");
+                      String password = await DataSecureService.decryptPassword(
+                        accountModel.password ?? "",
+                      );
                       if (!context.mounted) return;
                       clipboardCustom(context: context, text: password);
                     },
                   ),
                 ListTile(
                   leading: Icon(Icons.delete, color: Colors.red, size: 24.sp),
-                  title: Text(context.trHome(HomeLocale.deleteAccount), style: CustomTextStyle.regular(color: Colors.red, fontSize: 16.sp)),
+                  title: Text(
+                    context.trHome(HomeLocale.deleteAccount),
+                    style: CustomTextStyle.regular(color: Colors.red, fontSize: 16.sp),
+                  ),
                   onTap: () {
                     showAppCustomDialog(
                       context,

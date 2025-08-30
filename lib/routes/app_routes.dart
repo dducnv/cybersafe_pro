@@ -145,7 +145,8 @@ class AppRoutes {
       case accountSamePassword:
         return const SamePasswordsView();
       case registerMasterPin:
-        return const RegisterMasterPin();
+        final args = arguments is Map<String, dynamic> ? arguments : {};
+        return RegisterMasterPin(isChangePin: args["isChangePin"] ?? false, oldPin: args["oldPin"]);
       case loginMasterPin:
         return const LoginMasterPassword();
       case aboutApp:
