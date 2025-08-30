@@ -75,7 +75,10 @@ class MigrateFromOldData {
     );
     if (pinCodeEncryptedFromStorage != null && pinCodeEncryptedFromStorage.isNotEmpty) {
       print("pinCodeEncryptedFromStorage: $pinCodeEncryptedFromStorage");
-      String pinCodeEncrypted = await DataSecureService.decryptPinCode(pinCodeEncryptedFromStorage);
+      String pinCodeEncrypted = await DataSecureService.decryptPinCode(
+        pinCodeEncryptedFromStorage,
+        fromMigrate: true,
+      );
       print("pinCodeEncrypted: $pinCodeEncrypted");
       await SecureAppManager.initializeNewUser(pinCodeEncrypted);
       // await SecureStorage.instance.delete(key: SecureStorageKey.pinCode);

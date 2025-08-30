@@ -100,12 +100,15 @@ class DataSecureService {
     }
   }
 
-  static Future<String> decryptPinCode(String value) async {
+  static Future<String> decryptPinCode(String value, {bool fromMigrate = false}) async {
     if (value.isEmpty) return "";
     if (!isValueEncrypted(value)) return "";
-    print("hehe");
     try {
-      return await EncryptV2.decrypt(value: value, keyType: KeyType.pinCode);
+      return await EncryptV2.decrypt(
+        value: value,
+        keyType: KeyType.pinCode,
+        fromMigrate: fromMigrate,
+      );
     } catch (e) {
       logError('Failed to decrypt PIN code: $e', functionName: 'DataSecureService.decryptPinCode');
       return "";

@@ -118,6 +118,7 @@ class EncryptV2 {
     required String value,
     required KeyType keyType,
     String? associatedData,
+    bool fromMigrate = false,
   }) async {
     if (value.isEmpty) {
       throw ArgumentError('value không được rỗng');
@@ -145,7 +146,7 @@ class EncryptV2 {
 
       String result;
       if (kdf == 'KeyManager-HKDF_V2') {
-        final baseSecretB64 = await KeyManager.getKey(keyType);
+        final baseSecretB64 = await KeyManager.getKey(keyType, fromMigrate: fromMigrate);
 
         return await compute<Map<String, dynamic>, String>(_decryptHKDFInIsolate, {
           'encryptedData': package['data'],
