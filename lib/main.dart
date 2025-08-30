@@ -136,7 +136,9 @@ Future<String> _determineInitialRoute() async {
   }
 
   // Kiểm tra PIN
-  final isPINSet = await SecureAppManager.isPINSet();
+  final isPINSet =
+      await SecureAppManager.isPINSet() ||
+      await SecureStorage.instance.read(key: SecureStorageKey.pinCode) != null;
   if (!isPINSet) {
     return AppRoutes.registerMasterPin;
   }

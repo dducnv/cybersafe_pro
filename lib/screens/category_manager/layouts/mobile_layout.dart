@@ -4,7 +4,6 @@ import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/category_text.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
-import 'package:cybersafe_pro/providers/home_provider.dart';
 import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
@@ -34,11 +33,19 @@ class CategoryManagerMobileLayout extends StatelessWidget {
       ),
       body: SafeArea(
         child: Selector<CategoryProvider, Tuple2<List<CategoryDriftModelData>, Map<int, int>>>(
-          selector: (context, provider) => Tuple2(provider.categories, provider.mapCategoryIdTotalAccount),
+          selector:
+              (context, provider) =>
+                  Tuple2(provider.categories, provider.mapCategoryIdTotalAccount),
           builder: (context, categoryProvider, child) {
             final accountProvider = context.read<AccountProvider>();
             return categoryProvider.item1.isEmpty
-                ? Center(child: Image.asset("assets/images/exclamation-mark.png", width: 60.w, height: 60.h))
+                ? Center(
+                  child: Image.asset(
+                    "assets/images/exclamation-mark.png",
+                    width: 60.w,
+                    height: 60.h,
+                  ),
+                )
                 : ClipRRect(
                   borderRadius: BorderRadius.circular(25),
                   child: RefreshIndicator(
@@ -61,12 +68,19 @@ class CategoryManagerMobileLayout extends StatelessWidget {
                                 Expanded(
                                   child: Text(
                                     "${category.categoryName} (${accountProvider.mapCategoryIdTotalAccount[category.id] ?? 0})",
-                                    style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w500),
+                                    style: CustomTextStyle.regular(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
                                 ),
                                 IconButton(
                                   onPressed: () {
-                                    showCreateCategoryBottomSheet(context, isUpdate: true, categoryDriftModelData: category);
+                                    showCreateCategoryBottomSheet(
+                                      context,
+                                      isUpdate: true,
+                                      categoryDriftModelData: category,
+                                    );
                                   },
                                   icon: Icon(Icons.edit_note_rounded, size: 21.sp),
                                 ),
@@ -96,13 +110,19 @@ class CategoryManagerMobileLayout extends StatelessWidget {
     );
   }
 
-  _showDeleteCategoryPopup({required BuildContext context, required CategoryDriftModelData category}) async {
+  _showDeleteCategoryPopup({
+    required BuildContext context,
+    required CategoryDriftModelData category,
+  }) async {
     final categoryProvider = context.read<CategoryProvider>();
     return showAppCustomDialog(
       context,
       AppCustomDialog(
         title: context.trSafe(CategoryText.deleteCategory),
-        message: categoryProvider.mapCategoryIdTotalAccount[category.id] != 0 ? context.trSafe(CategoryText.deleteWarningWithAccounts) : context.trSafe(CategoryText.deleteWarningEmpty),
+        message:
+            categoryProvider.mapCategoryIdTotalAccount[category.id] != 0
+                ? context.trSafe(CategoryText.deleteWarningWithAccounts)
+                : context.trSafe(CategoryText.deleteWarningEmpty),
         confirmText: context.trSafe(CategoryText.deleteCategory),
         cancelText: context.trSafe(CategoryText.cancel),
         cancelButtonColor: Theme.of(context).colorScheme.primary,
@@ -110,11 +130,7 @@ class CategoryManagerMobileLayout extends StatelessWidget {
         isCountDownTimer: categoryProvider.mapCategoryIdTotalAccount[category.id] != 0,
         canConfirmInitially: categoryProvider.mapCategoryIdTotalAccount[category.id] == 0,
         onConfirm: () async {
-          bool result = await context.read<CategoryProvider>().deleteCategory(category);
-          if (result && context.mounted) {
-            context.read<HomeProvider>().refreshData();
-            Navigator.pop(context);
-          }
+          await context.read<CategoryProvider>().deleteCategory(category);
         },
       ),
     );

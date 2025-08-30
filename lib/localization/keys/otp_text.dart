@@ -8,4 +8,5 @@ class OtpText {
   static const String invalidSecretKey = 'invalid_secret_key';
   static const String enterManually = 'enter_manually';
   static const String secretKeyValidation = 'secret_key_validation';
-} 
+  static const String enterOldPin = 'enter_old_pin';
+}

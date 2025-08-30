@@ -19,6 +19,7 @@ class LoginMasterPassword extends StatefulWidget {
   final bool isFromRestore;
   final bool isFromDeleteData;
   final bool fromSecureGate;
+  final String? title;
   final SecureApplicationController? secureApplicationController;
   final Function({
     bool? isLoginSuccess,
@@ -36,6 +37,7 @@ class LoginMasterPassword extends StatefulWidget {
     this.fromSecureGate = false,
     this.callBackLoginCallback,
     this.secureApplicationController,
+    this.title,
   });
 
   @override
@@ -92,6 +94,7 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
       isFromDeleteData: widget.isFromDeleteData,
       callBackLoginCallback: widget.callBackLoginCallback,
       secureApplicationController: widget.secureApplicationController,
+      title: widget.title,
     );
   }
 }

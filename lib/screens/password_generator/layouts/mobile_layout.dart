@@ -3,9 +3,9 @@ import 'package:cybersafe_pro/localization/screens/home/home_locale.dart';
 import 'package:cybersafe_pro/providers/password_generate_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
+import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
 
@@ -81,19 +81,12 @@ class _PasswordGenerateMobileLayoutState extends State<PasswordGenerateMobileLay
                 context,
                 icon: viewModel.isFromForm ? Icons.arrow_outward : Icons.copy_outlined,
                 onTap: () {
+                  clipboardCustom(context: context, text: viewModel.password);
                   if (viewModel.isFromForm) {
                     viewModel.onPasswordChanged!(viewModel.password);
                     Navigator.of(context).pop();
                     return;
                   }
-                  Clipboard.setData(ClipboardData(text: viewModel.password));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Đã sao chép mật khẩu vào bộ nhớ tạm"),
-                      behavior: SnackBarBehavior.floating,
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
                 },
               ),
             ),

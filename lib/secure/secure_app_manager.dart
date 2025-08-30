@@ -1,17 +1,28 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
+import 'package:cybersafe_pro/env/env.dart';
 import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 import 'package:cybersafe_pro/secure/encrypt/encryption_config.dart';
 import 'package:cybersafe_pro/services/local_auth_service.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:encrypt/encrypt.dart' as enc;
 import 'package:flutter/foundation.dart';
 import 'package:pointycastle/export.dart' as pc;
+
+class AuthenticationResult {
+  final bool isAuthenticated;
+  final String? usedPIN;
+  final bool usedBiometric;
+
+  AuthenticationResult({required this.isAuthenticated, this.usedPIN, this.usedBiometric = false});
+}
 
 class SecureAppManager {
   static final instance = SecureAppManager._internal();
@@ -31,7 +42,7 @@ class SecureAppManager {
         return false;
       }
 
-      final sessionInitialized = await instance._initializeSession(pin);
+      final sessionInitialized = await instance._initializeSession(pin: pin);
       if (!sessionInitialized) {
         logError('Không thể khởi tạo session', functionName: 'SecureAppManager.initializeNewUser');
         return false;
@@ -50,13 +61,15 @@ class SecureAppManager {
 
   static Future<bool> authenticateUser([String? pin]) async {
     try {
-      final isAuthenticated = await instance._authenticate(pin);
-      if (!isAuthenticated) {
+      final authResult = await instance._authenticate(pin);
+      if (!authResult.isAuthenticated) {
         logError('Xác thực thất bại', functionName: 'SecureAppManager.authenticateUser');
         return false;
       }
-
-      final sessionInitialized = await instance._initializeSession(pin);
+      final sessionInitialized = await instance._initializeSession(
+        pin: authResult.usedPIN,
+        usedBiometric: authResult.usedBiometric,
+      );
       if (!sessionInitialized) {
         logError('Không thể khởi tạo session', functionName: 'SecureAppManager.authenticateUser');
         return false;
@@ -173,23 +186,33 @@ class SecureAppManager {
     }
   }
 
-  Future<bool> _authenticate([String? pin]) async {
+  Future<AuthenticationResult> _authenticate([String? pin]) async {
     try {
-      if (await _isBiometricEnabled()) {
+      if (await _isBiometricEnabled() && pin == null) {
+        logInfo('Thử xác thực bằng biometric...');
         final biometricResult = await _authenticateWithBiometric();
         if (biometricResult) {
-          logInfo('Xác thực bằng biometric thành công');
-          return true;
+          return AuthenticationResult(isAuthenticated: true, usedBiometric: true);
+        } else {
+          logInfo('Xác thực bằng biometric thất bại');
         }
       }
       if (pin != null) {
-        return await _verifyPIN(pin);
+        logInfo('Thử xác thực bằng PIN...');
+        final pinResult = await _verifyPIN(pin);
+        if (pinResult) {
+          logInfo('Xác thực bằng PIN thành công');
+          return AuthenticationResult(isAuthenticated: true, usedPIN: pin);
+        } else {
+          logInfo('Xác thực bằng PIN thất bại');
+        }
       }
 
-      return false;
+      logInfo('Không có phương thức xác thực nào thành công');
+      return AuthenticationResult(isAuthenticated: false);
     } catch (e, stackTrace) {
       logError('Lỗi khi xác thực: $e\n$stackTrace', functionName: 'SecureAppManager._authenticate');
-      return false;
+      return AuthenticationResult(isAuthenticated: false);
     }
   }
 
@@ -230,9 +253,16 @@ class SecureAppManager {
     }
   }
 
-  Future<bool> _initializeSession([String? pin]) async {
+  Future<bool> _initializeSession({String? pin, bool usedBiometric = false}) async {
     try {
-      final rmk = await _getRootMasterKey(pin);
+      Uint8List? rmk;
+
+      if (usedBiometric) {
+        rmk = await _getRootMasterKeyWithBiometric();
+      } else if (pin != null) {
+        rmk = await _getRootMasterKeyWithPIN(pin);
+      }
+
       if (rmk == null) {
         logError(
           'Không thể lấy Root Master Key',
@@ -272,29 +302,6 @@ class SecureAppManager {
     return true;
   }
 
-  Future<Uint8List?> _getRootMasterKey([String? pin]) async {
-    try {
-      if (await _isBiometricEnabled()) {
-        final rmk = await _getRootMasterKeyWithBiometric();
-        if (rmk != null) {
-          return rmk;
-        }
-      }
-
-      if (pin != null) {
-        return await _getRootMasterKeyWithPIN(pin);
-      }
-
-      return null;
-    } catch (e, stackTrace) {
-      logError(
-        'Lỗi khi lấy RMK: $e\n$stackTrace',
-        functionName: 'SecureAppManager._getRootMasterKey',
-      );
-      return null;
-    }
-  }
-
   Future<bool> _enableBiometric() async {
     try {
       if (!_isBiometricAvailable()) {
@@ -305,9 +312,13 @@ class SecureAppManager {
         return false;
       }
 
-      final biometricKey = _generateSecureRandomBytes(EncryptionConfig.biometricKeyLength);
       final biometricSalt = _generateSecureRandomBytes(32);
+      await SecureStorage.instance.save(
+        key: SecureStorageKey.biometricSaltKey,
+        value: base64.encode(biometricSalt),
+      );
 
+      final biometricKey = _generateSecureRandomBytes(EncryptionConfig.biometricKeyLength);
       final biometricKeyHash = await compute(_hashBiometricKeyInIsolate, {
         'key': base64.encode(biometricKey),
         'salt': base64.encode(biometricSalt),
@@ -320,16 +331,20 @@ class SecureAppManager {
         key: SecureStorageKey.biometricKeyKey,
         value: biometricKeyHash,
       );
-      await SecureStorage.instance.save(
-        key: SecureStorageKey.biometricSaltKey,
-        value: base64.encode(biometricSalt),
-      );
       await SecureStorage.instance.save(key: SecureStorageKey.biometricEnabledKey, value: 'true');
 
       await LocalAuthConfig.instance.setUseBiometric(true);
 
+      final biometricDerivedKey = await _deriveBiometricKey();
+      final wrappedRMKByBiometric = await _wrapKey(_rootMasterKey!, biometricDerivedKey);
+      await SecureStorage.instance.save(
+        key: SecureStorageKey.wrappedRmkBiometricKey,
+        value: wrappedRMKByBiometric,
+      );
+
       _secureWipe(biometricKey);
       _secureWipe(biometricSalt);
+      _secureWipe(biometricDerivedKey);
 
       logInfo('Biometric authentication đã được bật');
       return true;
@@ -348,6 +363,7 @@ class SecureAppManager {
         SecureStorage.instance.delete(key: SecureStorageKey.biometricKeyKey),
         SecureStorage.instance.delete(key: SecureStorageKey.biometricSaltKey),
         SecureStorage.instance.delete(key: SecureStorageKey.biometricEnabledKey),
+        SecureStorage.instance.delete(key: SecureStorageKey.wrappedRmkBiometricKey),
       ]);
 
       await LocalAuthConfig.instance.setUseBiometric(false);
@@ -485,15 +501,13 @@ class SecureAppManager {
 
   Future<Uint8List?> _getRootMasterKeyWithBiometric() async {
     try {
-      if (!await _authenticateWithBiometric()) {
-        return null;
-      }
       final wrappedRMKBase64 = await SecureStorage.instance.read(
-        key: SecureStorageKey.wrappedRmkKey,
+        key: SecureStorageKey.wrappedRmkBiometricKey,
       );
       if (wrappedRMKBase64 == null) {
         return null;
       }
+
       final biometricDerivedKey = await _deriveBiometricKey();
       final rmk = await _unwrapKey(wrappedRMKBase64, biometricDerivedKey);
       _secureWipe(biometricDerivedKey);
@@ -511,13 +525,19 @@ class SecureAppManager {
   Future<bool> _generateAndSaveRootMasterKey(String pin) async {
     try {
       final rmk = _generateSecureRandomBytes(EncryptionConfig.rmkLength);
+
       final pinDerivedKey = await _deriveKeyFromPIN(pin);
-      final wrappedRMK = await _wrapKey(rmk, pinDerivedKey);
-      await SecureStorage.instance.save(key: SecureStorageKey.wrappedRmkKey, value: wrappedRMK);
+      final wrappedRMKByPIN = await _wrapKey(rmk, pinDerivedKey);
+
+      await SecureStorage.instance.save(
+        key: SecureStorageKey.wrappedRmkKey,
+        value: wrappedRMKByPIN,
+      );
       await SecureStorage.instance.save(
         key: SecureStorageKey.rmkCreatedAtKey,
         value: DateTime.now().toIso8601String(),
       );
+
       _secureWipe(rmk);
       _secureWipe(pinDerivedKey);
 
@@ -553,8 +573,9 @@ class SecureAppManager {
     }
 
     final salt = base64.decode(saltBase64);
-    final deviceInfo = await _getDeviceInfo();
-    final keyMaterial = utf8.encode('$deviceInfo${DateTime.now().millisecondsSinceEpoch}');
+
+    final deviceInfo = await generateDeviceHashId();
+    final keyMaterial = utf8.encode(deviceInfo);
 
     final argon2Params = pc.Argon2Parameters(
       pc.Argon2Parameters.ARGON2_id,
@@ -656,10 +677,6 @@ class SecureAppManager {
     }
   }
 
-  Future<String> _getDeviceInfo() async {
-    return 'device_unique_id_v2';
-  }
-
   Future<String> _wrapKey(Uint8List keyToWrap, Uint8List wrappingKey) async {
     try {
       final iv = _generateSecureRandomBytes(12);
@@ -672,6 +689,7 @@ class SecureAppManager {
         'data': encrypted.base64,
         'algorithm': 'AES-256-GCM',
         'version': '2.0',
+        'type': 'WRAP',
         'timestamp': DateTime.now().toIso8601String(),
       };
 
@@ -728,5 +746,26 @@ class SecureAppManager {
       }
     }
     data.fillRange(0, data.length, 0);
+  }
+
+  Future<String> generateDeviceHashId() async {
+    final deviceInfoPlugin = DeviceInfoPlugin();
+    final raw = [];
+    if (Platform.isAndroid) {
+      final androidInfo = await deviceInfoPlugin.androidInfo;
+      raw.add(androidInfo.id);
+      raw.add(androidInfo.brand);
+      raw.add(androidInfo.device);
+    } else if (Platform.isIOS) {
+      final iosInfo = await deviceInfoPlugin.iosInfo;
+      raw.add(iosInfo.model);
+      raw.add(iosInfo.identifierForVendor);
+      raw.add(iosInfo.name);
+      raw.add(iosInfo.identifierForVendor);
+    }
+    raw.add(Env.biometricRmkWrapKey);
+    raw.add(Env.appSignatureKey);
+    final rawString = raw.join('|');
+    return sha256.convert(utf8.encode(rawString)).toString().toUpperCase();
   }
 }

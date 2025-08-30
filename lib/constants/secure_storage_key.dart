@@ -38,6 +38,7 @@ class SecureStorageKey {
   static const String pinSaltKey = '@secure_pin_salt_v2';
   static const String pinHashKey = '@secure_pin_hash_v2';
   static const String wrappedRmkKey = '@wrapped_rmk_v2';
+  static const String wrappedRmkBiometricKey = '@wrapped_rmk_biometric_v2';
   static const String pinVersionKey = '@pin_version';
   static const String rmkCreatedAtKey = '@rmk_created_at';
 

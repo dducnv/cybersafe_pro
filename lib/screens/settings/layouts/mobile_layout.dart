@@ -1,6 +1,7 @@
 import 'package:cybersafe_pro/components/dialog/app_custom_dialog.dart';
 import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
+import 'package:cybersafe_pro/localization/keys/otp_text.dart';
 import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
 import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
@@ -85,6 +86,7 @@ class SettingMobileLayout extends StatelessWidget {
                             (context) => LoginMasterPassword(
                               showBiometric: false,
                               isFromDeleteData: true,
+                              title: context.trSafe(OtpText.enterOldPin),
                               callBackLoginCallback: ({
                                 bool? isLoginSuccess,
                                 String? pin,

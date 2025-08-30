@@ -27,14 +27,6 @@ class EncryptionConfig {
   static const int MAX_FAILED_ATTEMPTS = 5;
   static const Duration LOCKOUT_DURATION = Duration(minutes: 5);
 
-  //Secure Pin
-  static const int saltLength = 32;
-  static const int rmkLength = 32;
-  static const int pinHashLength = 32;
-  static const int memoryPowerOf2 = 16; // 64 MiB
-  static const int iterations = 3;
-  static const int parallelism = 1;
-
   static const int biometricKeyLength = 32;
 
   // Cache configuration
@@ -67,6 +59,14 @@ class EncryptionConfig {
       return DevicePerformance.lowEnd;
     }
   }
+
+  static int memoryPowerOf2 = 15;
+  static int iterations = 2;
+  static int parallelism = 1;
+
+  static const int saltLength = 32;
+  static const int rmkLength = 32;
+  static const int pinHashLength = 32;
 
   static void _performCryptoPerformanceTest() {
     try {

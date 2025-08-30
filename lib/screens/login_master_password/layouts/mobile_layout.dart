@@ -28,6 +28,7 @@ class MobileLayout extends StatefulWidget {
   final bool isFromBackup;
   final bool isFromRestore;
   final bool isFromDeleteData;
+  final String? title;
   final SecureApplicationController? secureApplicationController;
   final Function({
     bool? isLoginSuccess,
@@ -38,6 +39,7 @@ class MobileLayout extends StatefulWidget {
 
   const MobileLayout({
     super.key,
+    this.title,
     this.showBiometric = true,
     this.isFromBackup = false,
     this.isFromRestore = false,
@@ -127,9 +129,10 @@ class _MobileLayoutState extends State<MobileLayout> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      widget.isFromBackup
-                          ? context.trLogin(LoginText.enterAnyPin)
-                          : context.trLogin(LoginText.enterPin),
+                      widget.title ??
+                          (widget.isFromBackup
+                              ? context.trLogin(LoginText.enterAnyPin)
+                              : context.trLogin(LoginText.enterPin)),
                       style: CustomTextStyle.regular(fontSize: 20.sp, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
