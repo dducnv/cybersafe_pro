@@ -1,4 +1,4 @@
-<h1 align="center"><img src="/assets/images/pro_app_logo.png.png" align="center" width="100" alt="CyberSafe Logo">CyberSafe - Trình Quản Lý Mật Khẩu Ngoại Tuyến</h1>
+<h1 align="center"><img src="/assets/images/pro_app_logo.png" align="center" width="100" alt="CyberSafe Logo">CyberSafe - Trình Quản Lý Mật Khẩu Ngoại Tuyến</h1>
 
 # CyberSafe là gì?
 
