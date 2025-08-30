@@ -38,9 +38,9 @@ class KeyManager {
   int _failedAttempts = 0;
   DateTime? _lockoutUntil;
 
-  static Future<String> getKey(KeyType type, {bool fromMigrate = false}) async {
+  static Future<String> getKey(KeyType type) async {
     ArgumentError.checkNotNull(type, 'type');
-    return await instance._getEncryptionKey(type, fromMigrate: fromMigrate);
+    return await instance._getEncryptionKey(type);
   }
 
   static Future<String> getDerivedKey(KeyType type, String context, String purpose) async {
@@ -68,17 +68,11 @@ class KeyManager {
     instance._dispose();
   }
 
-  Future<String> _getEncryptionKey(KeyType type, {bool fromMigrate = false}) async {
+  Future<String> _getEncryptionKey(KeyType type) async {
     return await _withRetry(() async {
       await _checkRateLimit();
 
       final cacheKey = '${type.name}_key';
-      if (fromMigrate) {
-        final wrappedKeyData = await _secureStorage.read(key: _getStorageKeyForType(type));
-        if (wrappedKeyData != null) {
-          return wrappedKeyData;
-        }
-      }
 
       if (_keyCache.containsKey(cacheKey) && !_keyCache[cacheKey]!.isExpired) {
         return _keyCache[cacheKey]!.value;

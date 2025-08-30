@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/app_locale.dart';
-import 'package:cybersafe_pro/migrate_data/migrate_from_old_data.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/home_provider.dart';
 import 'package:cybersafe_pro/providers/theme_provider.dart';
@@ -69,7 +68,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   Future<void> initApp() async {
     _initLocale();
-    await MigrateFromOldData.migratePinCodeV2();
   }
 
   // Khởi tạo ngôn ngữ từ storage
