@@ -53,7 +53,7 @@ class KeyManager {
     final String? key,
     List<String> purposes = const ['aes', 'hmac'],
   }) async {
-    return await instance._getDerivedKeys(type, context, purposes);
+    return await instance._getDerivedKeys(type, context, purposes, key);
   }
 
   static Future<void> clearDerivedKeyCache([String? specificContext]) async {
@@ -201,8 +201,9 @@ class KeyManager {
     KeyType type,
     String context,
     List<String> purposes,
+    String? key,
   ) async {
-    final masterKey = await _getEncryptionKey(type);
+    final masterKey = key ?? await _getEncryptionKey(type);
     final derivedKeys = <String, String>{};
 
     for (final purpose in purposes) {
