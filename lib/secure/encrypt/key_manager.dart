@@ -50,6 +50,7 @@ class KeyManager {
   static Future<Map<String, String>> getDerivedKeys(
     KeyType type,
     String context, {
+    final String? key,
     List<String> purposes = const ['aes', 'hmac'],
   }) async {
     return await instance._getDerivedKeys(type, context, purposes);
@@ -184,14 +185,14 @@ class KeyManager {
     }
   }
 
-  Future<String> _getDerivedKey(KeyType type, String context, String purpose) async {
+  Future<String> _getDerivedKey(KeyType type, String context, String purpose, {String? key}) async {
     final cacheKey = '${type.name}_${context}_$purpose';
 
     if (_derivedKeyCache.containsKey(cacheKey) && !_derivedKeyCache[cacheKey]!.isExpired) {
       return _derivedKeyCache[cacheKey]!.value;
     }
 
-    final masterKey = await _getEncryptionKey(type);
+    final masterKey = key ?? await _getEncryptionKey(type);
     return await _getDerivedKeyFromMaster(masterKey, type, context, purpose);
   }
 

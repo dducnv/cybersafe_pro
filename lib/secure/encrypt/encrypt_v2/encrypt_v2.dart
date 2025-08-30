@@ -162,6 +162,7 @@ class EncryptV2 {
           keyType,
           _encryptionContext,
           purposes: ['aes', 'hmac'],
+          key: key,
         );
         final keyTime = stopwatch.elapsedMilliseconds;
         if (keyTime > 100) {
