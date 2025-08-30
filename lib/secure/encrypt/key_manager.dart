@@ -97,7 +97,6 @@ class KeyManager {
       _keyCache[cacheKey] = CachedKey(key);
       _monitorCache();
       _failedAttempts = 0;
-      logInfo('✅ Đã lấy key thành công: $key');
       return key;
     }, functionName: "_getEncryptionKey");
   }

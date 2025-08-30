@@ -78,7 +78,6 @@ class MigrateFromOldData {
   static Future<void> migratePinCodeV2() async {
     final pinCode = await _pinCode();
     if (pinCode != null && pinCode.isNotEmpty) {
-      print("pinCode: $pinCode");
       final isEnableLocalAuth = await SecureStorage.instance.readBool(
         SecureStorageKey.isEnableLocalAuth,
       );
