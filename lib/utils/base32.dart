@@ -1,3 +1,8 @@
+// This file includes code from "dart-base32" by @daegalus
+// Repository: https://github.com/Daegalus/dart-base32
+// Licensed under the MIT License.
+// Copyright (c) Daegalus
+
 import 'dart:typed_data';
 
 import 'package:cybersafe_pro/utils/encodings_base32.dart';

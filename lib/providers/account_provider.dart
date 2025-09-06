@@ -463,7 +463,7 @@ class AccountProvider extends ChangeNotifier {
   /// Perform database search with pagination
   Future<List<AccountDriftModelData>> _performDatabaseSearchWithPagination(
     String query, {
-    int limit = 20,
+    int limit = 50,
     int offset = 0,
   }) async {
     // Get all accounts first (for now, can be optimized later with database-level pagination)
@@ -506,7 +506,7 @@ class AccountProvider extends ChangeNotifier {
         .trim();
   }
 
-  bool _smartFuzzyMatch(String text, String query, {int threshold = 40}) {
+  bool _smartFuzzyMatch(String text, String query, {int threshold = 10}) {
     final normalizedText = _normalize(text);
     final normalizedQuery = _normalize(query);
 

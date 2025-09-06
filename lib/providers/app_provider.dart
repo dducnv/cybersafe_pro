@@ -23,18 +23,15 @@ class AppProvider extends ChangeNotifier {
 
   bool isShowRequestRotateKey = false;
 
-  //time login
   Timer? _rootTimer;
   bool _isOpenAutoLock = false;
   bool get isOpenAutoLock => _isOpenAutoLock;
   int _timeAutoLock = 5;
   int get timeAutoLock => _timeAutoLock;
 
-  // Thêm biến cho tính năng khóa tự động khi ứng dụng ở chế độ nền
   bool _lockOnBackground = false;
   bool get lockOnBackground => _lockOnBackground;
 
-  // Quản lý timer tốt hơn trong dispose
   @override
   void dispose() {
     stopTimer();
@@ -73,6 +70,7 @@ class AppProvider extends ChangeNotifier {
     Duration time = _timeAutoLock < 1 ? Duration(seconds: 30) : Duration(minutes: _timeAutoLock);
     _rootTimer = Timer(time, () {
       logInfo('Auto lock timer expired');
+      clearAppData();
       logOutUser();
     });
   }
@@ -84,6 +82,7 @@ class AppProvider extends ChangeNotifier {
 
   void logOutUser() {
     stopTimer();
+
     AppRoutes.navigateAndRemoveUntil(
       GlobalKeys.appRootNavigatorKey.currentContext!,
       AppRoutes.loginMasterPin,
@@ -111,11 +110,9 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Phương thức để cài đặt khóa khi ứng dụng ở nền
   void setLockOnBackground(bool value) {
     _lockOnBackground = value;
     SecureStorage.instance.saveBool(SecureStorageKey.lockOnBackground, value);
-    // Cập nhật secure_application
     notifyListeners();
   }
 
@@ -127,10 +124,7 @@ class AppProvider extends ChangeNotifier {
   void handleAppBackground(BuildContext context) {
     stopTimer();
     logInfo("APP BACKGROUND");
-    context.read<AccountProvider>().clearData();
-    context.read<HomeProvider>().clearData();
-    context.read<StatisticProvider>().reset();
-    KeyManager.onAppBackground();
+    clearAppData(context);
     if (_lockOnBackground && DataManagerServiceOld.canLockApp) {
       try {
         _rootTimer?.cancel();
@@ -138,6 +132,15 @@ class AppProvider extends ChangeNotifier {
         logError('Lỗi khi xử lý ứng dụng chạy nền: $e');
       }
     }
+  }
+
+  void clearAppData([BuildContext? context]) {
+    final safeContext = context ?? GlobalKeys.appRootNavigatorKey.currentContext;
+    if (safeContext == null) return;
+    safeContext.read<AccountProvider>().clearData();
+    safeContext.read<HomeProvider>().clearData();
+    safeContext.read<StatisticProvider>().reset();
+    KeyManager.onAppBackground();
   }
 
   // Log các hành động quan trọng

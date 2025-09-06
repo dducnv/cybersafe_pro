@@ -69,7 +69,9 @@ class CategoryProvider extends ChangeNotifier {
 
       // Count accounts for all categories in parallel for better performance
       final categoryIds = categoryList.map((c) => c.id).toList();
-      final accountCounts = await DriffDbManager.instance.accountAdapter.countByCategories(categoryIds);
+      final accountCounts = await DriffDbManager.instance.accountAdapter.countByCategories(
+        categoryIds,
+      );
 
       // Update account counts map
       mapCategoryIdTotalAccount.clear();
@@ -81,7 +83,13 @@ class CategoryProvider extends ChangeNotifier {
 
   Future<void> initDataCategory(BuildContext context) async {
     logInfo("initDataCategory");
-    List<String> listCategory = [CategoryText.bank, CategoryText.job, CategoryText.study, CategoryText.shopping, CategoryText.entertainment];
+    List<String> listCategory = [
+      CategoryText.bank,
+      CategoryText.job,
+      CategoryText.study,
+      CategoryText.shopping,
+      CategoryText.entertainment,
+    ];
     for (var category in listCategory) {
       if (!context.mounted) return;
       await createCategory(context.read<AppLocale>().categoryLocale.getText(category));
@@ -95,12 +103,20 @@ class CategoryProvider extends ChangeNotifier {
       }
 
       // Kiểm tra trùng tên
-      if (_categories.values.any((c) => c.categoryName.toLowerCase() == categoryName.toLowerCase())) {
+      if (_categories.values.any(
+        (c) => c.categoryName.toLowerCase() == categoryName.toLowerCase(),
+      )) {
         throwAppError(ErrorText.categoryExists);
       }
 
       final id = await DriffDbManager.instance.categoryAdapter.insertCategory(categoryName);
-      final newCategory = CategoryDriftModelData(id: id, categoryName: categoryName, indexPos: 0, createdAt: DateTime.now(), updatedAt: DateTime.now());
+      final newCategory = CategoryDriftModelData(
+        id: id,
+        categoryName: categoryName,
+        indexPos: 0,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
       _categories[id] = newCategory;
       txtCategoryName.clear();
       return true;
@@ -115,7 +131,9 @@ class CategoryProvider extends ChangeNotifier {
         throwAppError(ErrorText.categoryNameEmpty);
       }
       // Kiểm tra trùng tên với các category khác
-      if (_categories.values.any((c) => c.id != id && c.categoryName.toLowerCase() == categoryName.toLowerCase())) {
+      if (_categories.values.any(
+        (c) => c.id != id && c.categoryName.toLowerCase() == categoryName.toLowerCase(),
+      )) {
         throwAppError(ErrorText.categoryExists);
       }
       final newId = await DriffDbManager.instance.categoryAdapter.updateCategory(id, categoryName);
@@ -139,37 +157,88 @@ class CategoryProvider extends ChangeNotifier {
   }
 
   Future<void> reorderCategory(int oldIndex, int newIndex) async {
-    if (oldIndex < newIndex) {
-      newIndex -= 1;
+    try {
+      // Điều chỉnh newIndex theo quy tắc của ReorderableListView
+      if (oldIndex < newIndex) {
+        newIndex -= 1;
+      }
+
+      // Lấy danh sách categories đã sắp xếp theo indexPos (từ cao xuống thấp)
+      final List<CategoryDriftModelData> sortedList = List.from(categories)
+        ..sort((a, b) => b.indexPos.compareTo(a.indexPos));
+
+      // Kiểm tra bounds và validation
+      if (!_validateReorderIndices(oldIndex, newIndex, sortedList.length)) {
+        return;
+      }
+
+      // Thực hiện reorder
+      final CategoryDriftModelData movedItem = sortedList.removeAt(oldIndex);
+      sortedList.insert(newIndex, movedItem);
+
+      // Cập nhật indexPos cho tất cả items
+      final List<CategoryDriftModelData> updatedList = _updateIndexPositions(sortedList);
+
+      // Cập nhật cache và database
+      _updateCategoriesInCache(updatedList);
+      await DriffDbManager.instance.categoryAdapter.putMany(updatedList);
+
+      isChangedCategoryIndex = true;
+      // Chỉ notify khi cần thiết để tránh rebuild không cần thiết
+      notifyListeners();
+
+      logInfo(
+        'Category reordered successfully: ${movedItem.categoryName} from position $oldIndex to $newIndex',
+      );
+    } catch (e) {
+      logError('Error reordering category: $e');
+      // Refresh data để đảm bảo consistency
+      await refresh();
     }
+  }
 
-    // Get sorted list by indexPos
-    final List<CategoryDriftModelData> sortedList = categories..sort((a, b) => b.indexPos.compareTo(a.indexPos));
+  bool _validateReorderIndices(int oldIndex, int newIndex, int listLength) {
+    if (oldIndex < 0 || oldIndex >= listLength || newIndex < 0 || newIndex >= listLength) {
+      logError(
+        'Invalid reorder indices: oldIndex=$oldIndex, newIndex=$newIndex, listLength=$listLength',
+      );
+      return false;
+    }
+    return true;
+  }
 
-    // Remove and insert item
-    final CategoryDriftModelData item = sortedList.removeAt(oldIndex);
-    sortedList.insert(newIndex, item);
-
-    // Update positions and cache
-    _categories.clear();
+  List<CategoryDriftModelData> _updateIndexPositions(List<CategoryDriftModelData> sortedList) {
+    final List<CategoryDriftModelData> updatedList = [];
     for (int i = 0; i < sortedList.length; i++) {
       final category = sortedList[i];
-      category.copyWith(indexPos: sortedList.length - i);
+      final newIndexPos = sortedList.length - i; // indexPos từ cao xuống thấp
+
+      // Tạo copy mới với indexPos đã cập nhật
+      final updatedCategory = category.copyWith(indexPos: newIndexPos);
+      updatedList.add(updatedCategory);
+    }
+    return updatedList;
+  }
+
+  void _updateCategoriesInCache(List<CategoryDriftModelData> updatedList) {
+    // Tối ưu: chỉ cập nhật những item thay đổi thay vì clear toàn bộ
+    _categories.clear();
+    for (final category in updatedList) {
       _categories[category.id] = category;
     }
-
-    // Batch update to database
-    await DriffDbManager.instance.categoryAdapter.putMany(sortedList);
-    isChangedCategoryIndex = true;
-    notifyListeners();
   }
 
   // Helper method để refresh data
   Future<void> refresh() async {
-    _categories.clear();
-    mapCategoryIdTotalAccount.clear();
-    await getCategories();
-    notifyListeners();
+    try {
+      _categories.clear();
+      mapCategoryIdTotalAccount.clear();
+      await getCategories();
+      notifyListeners();
+    } catch (e) {
+      logError('Error refreshing categories: $e');
+      rethrow;
+    }
   }
 
   void clearAllData() {

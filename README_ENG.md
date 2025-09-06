@@ -66,6 +66,22 @@ CyberSafe is available on Google Play Store in two versions:
 - Fully offline operation.
 - Modern and easy-to-use interface.
 
+## 📜 Acknowledgements
+
+CyberSafe makes use of and references some open-source projects:
+
+dart-base32
+
+- © @daegalus – MIT License
+- https://github.com/Daegalus/dart-base32
+
+dart-otp
+
+- © @daegalus – MIT License
+- https://github.com/Daegalus/dart-otp
+
+Special thanks to the open-source community for their contributions that made this project possible.
+
 ---
 
 ## 🤝 Contribution & Contact

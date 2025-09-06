@@ -72,3 +72,19 @@ CyberSafe hiện đã có mặt trên Google Play Store với hai phiên bản:
 
 - Nếu bạn có ý tưởng hoặc muốn đóng góp, hãy mở Issue hoặc Pull Request.
 - Mọi thắc mắc, góp ý vui lòng liên hệ qua email: [contact.ducnv@gmail.com]
+
+## 📜 Ghi nhận
+
+CyberSafe sử dụng và tham khảo một số phần mã nguồn mở:
+
+dart-base32
+
+- © @daegalus – MIT License
+- https://github.com/Daegalus/dart-base32
+
+dart-otp
+
+- © @daegalus – MIT License
+- https://github.com/Daegalus/dart-otp
+
+Chân thành cảm ơn cộng đồng mã nguồn mở đã đóng góp cho sự phát triển của dự án.
