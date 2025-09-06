@@ -181,13 +181,13 @@ class StatisticProvider extends ChangeNotifier {
     }
   }
 
-  void reset() {
+  void reset({bool notify = true}) {
     statistics = null;
     totalAccount = 0;
     isLoading = false;
     error = null;
     _passwordStrengthCache.clear();
-    notifyListeners();
+    if (notify) notifyListeners();
   }
 
   void clearCache() {

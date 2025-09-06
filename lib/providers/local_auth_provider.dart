@@ -171,13 +171,14 @@ class LocalAuthProvider extends ChangeNotifier {
           await _resetLockStatus();
           return true;
         } finally {
-          // Clear loading state
+          textEditingController.clear();
           _setLoading(false);
         }
       }
       _triggerErrorAnimation();
     } catch (e) {
       logError('Error handling login: $e');
+      textEditingController.clear();
       _setLoading(false);
     }
     return false;
@@ -274,6 +275,8 @@ class LocalAuthProvider extends ChangeNotifier {
         if (!_isLocked) {
           await _resetLockStatus();
         } else {
+          // Nếu vẫn còn bị khóa, khởi động timer
+          _startLockTimer();
           notifyListeners();
         }
       }
@@ -304,21 +307,15 @@ class LocalAuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Khóa tài khoản và tăng thời gian khóa nếu đã khóa trước đó
   Future<void> _lockAccount() async {
     _isLocked = true;
-
-    // Tính toán thời gian khóa với hệ số nhân
     int lockDurationMinutes = _baseLockDurationMinutes * _lockDurationMultiplier;
 
-    // Giới hạn thời gian khóa tối đa
     if (lockDurationMinutes > _maxLockDurationMinutes) {
       lockDurationMinutes = _maxLockDurationMinutes;
     }
 
     _lockUntil = DateTime.now().add(Duration(minutes: lockDurationMinutes));
-
-    // Lưu thông tin khóa vào bộ nhớ
     await SecureStorage.instance.save(
       key: SecureStorageKey.lockUntil,
       value: _lockUntil!.toIso8601String(),
@@ -344,56 +341,68 @@ class LocalAuthProvider extends ChangeNotifier {
       value: _loginFailCount.toString(),
     );
 
-    // Nếu vượt quá số lần thử tối đa, khóa tài khoản
     if (_loginFailCount >= _maxLoginAttempts) {
-      // Tăng hệ số thời gian khóa mỗi khi khóa tài khoản
       _lockDurationMultiplier *= 2;
-
-      // Lưu hệ số mới
       await SecureStorage.instance.save(
         key: SecureStorageKey.lockDurationMultiplier,
         value: _lockDurationMultiplier.toString(),
       );
 
       await _lockAccount();
-      _loginFailCount = 0; // Reset lại đếm số lần đăng nhập sai
+      _loginFailCount = 0;
     }
   }
 
-  // Lên lịch reset trạng thái khóa
   void _scheduleLockStatusReset() {
-    // Sử dụng Future.microtask để tránh setState khi đang build
     Future.microtask(() async {
       await _resetLockStatus();
     });
   }
 
-  // Hàm này có thể được gọi để kiểm tra và cập nhật trạng thái khóa
   Future<void> checkAndUpdateLockStatus() async {
     // Kiểm tra xem tài khoản còn bị khóa không
-    if (_isLocked && _lockUntil != null && DateTime.now().isAfter(_lockUntil!)) {
-      // Thời gian khóa đã hết, reset trạng thái
-      await _resetLockStatus();
+    if (_isLocked && _lockUntil != null) {
+      if (DateTime.now().isAfter(_lockUntil!)) {
+        await _resetLockStatus();
+      } else {
+        if (_lockTimer == null || !_lockTimer!.isActive) {
+          _startLockTimer();
+        }
+      }
     }
   }
 
   void restartLockTimer() {
     if (_isLocked && _lockUntil != null) {
-      _startLockTimer();
+      if (DateTime.now().isBefore(_lockUntil!)) {
+        // Đảm bảo timer cũ được dừng trước khi khởi động timer mới
+        _lockTimer?.cancel();
+        _startLockTimer();
+      } else {
+        _scheduleLockStatusReset();
+      }
     }
   }
 
   void _startLockTimer() {
     _lockTimer?.cancel();
     if (_lockUntil == null) return;
+
     _lockTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!isLocked) {
+      // Kiểm tra lại trạng thái lock hiện tại
+      final currentLockStatus = _checkCurrentLockStatus();
+
+      if (!currentLockStatus) {
+        // Không còn bị khóa, dừng timer và reset trạng thái
         timer.cancel();
-        notifyListeners();
+        _scheduleLockStatusReset();
         return;
       }
+
       notifyListeners();
     });
+
+    notifyListeners();
   }
 
   void _setLoading(bool loading) {

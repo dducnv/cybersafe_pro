@@ -58,14 +58,45 @@ class _MobileLayoutState extends State<MobileLayout> {
   final GlobalKey<AppPinCodeFieldsState> _pinCodeKey = GlobalKey<AppPinCodeFieldsState>();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+  // Constants để dễ bảo trì và tái sử dụng
+  static const double _maxWidth = 300.0;
+  static const double _spacing = 20.0;
+  static const double _buttonSize = 75.0;
+  static const double _iconSize = 24.0;
+  static const double _smallSpacing = 10.0;
+  static const double _horizontalPadding = 30.0;
+  static const double _borderRadius = 20.0;
+  static const double _countdownMargin = 24.0;
+  static const double _countdownPadding = 16.0;
+  static const double _countdownFontSize = 18.0;
+
   @override
   void initState() {
     super.initState();
     _setupLockStatusCheck();
+    _initializeProvider();
+    _ensureTimerRunning();
+  }
+
+  void _ensureTimerRunning() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         final provider = context.read<LocalAuthProvider>();
-        provider.restartLockTimer();
+        if (provider.isLocked) {
+          provider.restartLockTimer();
+        }
+      }
+    });
+  }
+
+  void _initializeProvider() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (mounted) {
+        final provider = context.read<LocalAuthProvider>();
+        await provider.checkAndUpdateLockStatus();
+        if (provider.isLocked) {
+          provider.restartLockTimer();
+        }
       }
     });
   }
@@ -76,7 +107,13 @@ class _MobileLayoutState extends State<MobileLayout> {
     ) {
       if (mounted) {
         final provider = context.read<LocalAuthProvider>();
+        // Cập nhật trạng thái lock
         provider.updateLockStatus();
+
+        // Đảm bảo timer luôn chạy khi bị lock
+        if (provider.isLocked) {
+          provider.restartLockTimer();
+        }
       }
     });
   }
@@ -84,149 +121,188 @@ class _MobileLayoutState extends State<MobileLayout> {
   @override
   void dispose() {
     _lockStatusSubscription?.cancel();
+    _pinCodeFocusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          widget.isFromBackup || widget.isFromRestore || widget.isFromDeleteData
-              ? AppBar(
-                elevation: 0,
-                backgroundColor: Theme.of(context).colorScheme.surface,
-                scrolledUnderElevation: 0,
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () async {
-                    final result = await showConfirmExitDialog(context);
-                    if (result == true && context.mounted) {
-                      Navigator.of(context).pop();
-                    }
-                  },
-                ),
-              )
-              : null,
+      appBar: _buildAppBar(),
       body: Consumer<LocalAuthProvider>(
         builder: (context, provider, child) {
           final isCurrentlyLocked = provider.isLocked;
           final isLoading = provider.isLoading;
 
+          // Đảm bảo timer được khởi động lại khi widget rebuild
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && isCurrentlyLocked) {
+              // Kiểm tra và khởi động lại timer
+              provider.restartLockTimer();
+            }
+          });
+
           return KeyboardListener(
             focusNode: FocusNode(),
-            onKeyEvent: (event) {
-              if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.enter) {
-                if (!isCurrentlyLocked) {
-                  handleLogin(provider);
-                }
-              }
-            },
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 300),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      widget.title ??
-                          (widget.isFromBackup
-                              ? context.trLogin(LoginText.enterAnyPin)
-                              : context.trLogin(LoginText.enterPin)),
-                      style: CustomTextStyle.regular(fontSize: 20.sp, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 20),
-                    if (widget.isFromBackup)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
-                        child: Text(
-                          context.trLogin(LoginText.backupNote),
-                          textAlign: TextAlign.center,
-                          style: CustomTextStyle.regular(fontSize: 14, fontStyle: FontStyle.italic),
-                        ),
-                      ),
-                    if (widget.isFromRestore)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 30).copyWith(bottom: 10),
-                        child: Text(
-                          context.trLogin(LoginText.restoreNote),
-                          textAlign: TextAlign.center,
-                          style: CustomTextStyle.regular(fontSize: 14, fontStyle: FontStyle.italic),
-                        ),
-                      ),
-                    if (isCurrentlyLocked) _buildLockedStatus(provider),
-
-                    if (!isCurrentlyLocked) _buildPinCodeFields(provider),
-
-                    if (!isCurrentlyLocked)
-                      if (widget.showBiometric &&
-                          LocalAuthConfig.instance.isAvailableBiometrics &&
-                          LocalAuthConfig.instance.isOpenUseBiometric) ...[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            IconButton(
-                              onPressed: () {
-                                provider.onBiometric();
-                              },
-                              icon:
-                                  Platform.isIOS
-                                      ? SvgPicture.asset(
-                                        'assets/icons/face_id.svg',
-                                        width: 20.w,
-                                        height: 20.h,
-                                        color: Theme.of(context).colorScheme.primary,
-                                      )
-                                      : const Icon(Icons.fingerprint),
-                            ),
-                          ],
-                        ),
-                      ] else ...[
-                        SizedBox(height: 20),
-                      ],
-
-                    CustomButtonWidget(
-                      borderRaidus: 100,
-                      width: 75,
-                      height: 75,
-                      onPressed:
-                          (isCurrentlyLocked || isLoading) // ✅ Disable khi loading
-                              ? null
-                              : () async {
-                                await handleLogin(provider);
-                              },
-                      text: "",
-                      child:
-                          isLoading
-                              ? SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                ),
-                              )
-                              : Icon(
-                                Icons.arrow_forward,
-                                size: 24,
-                                color:
-                                    (isCurrentlyLocked || isLoading) ? Colors.grey : Colors.white,
-                              ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            onKeyEvent: (event) => _handleKeyboardEvent(event, isCurrentlyLocked, provider),
+            child: _buildMainContent(provider, isCurrentlyLocked, isLoading),
           );
         },
       ),
     );
   }
 
+  PreferredSizeWidget? _buildAppBar() {
+    if (!widget.isFromBackup && !widget.isFromRestore && !widget.isFromDeleteData) {
+      return null;
+    }
+
+    return AppBar(
+      elevation: 0,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      scrolledUnderElevation: 0,
+      leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: _handleBackPress),
+    );
+  }
+
+  Future<void> _handleBackPress() async {
+    final result = await showConfirmExitDialog(context);
+    if (result == true && context.mounted) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  void _handleKeyboardEvent(KeyEvent event, bool isCurrentlyLocked, LocalAuthProvider provider) {
+    if (event is KeyDownEvent &&
+        event.logicalKey == LogicalKeyboardKey.enter &&
+        !isCurrentlyLocked) {
+      handleLogin(provider);
+    }
+  }
+
+  Widget _buildMainContent(LocalAuthProvider provider, bool isCurrentlyLocked, bool isLoading) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: _maxWidth),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _buildTitle(),
+            const SizedBox(height: _spacing),
+            _buildNoteText(),
+            if (isCurrentlyLocked) _buildLockedStatus(provider),
+            if (!isCurrentlyLocked) _buildPinCodeFields(provider),
+            _buildBiometricButton(provider),
+            _buildLoginButton(provider, isCurrentlyLocked, isLoading),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTitle() {
+    final title = widget.title ?? _getDefaultTitle();
+    return Text(
+      title,
+      style: CustomTextStyle.regular(fontSize: 20.sp, fontWeight: FontWeight.bold),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  String _getDefaultTitle() {
+    if (widget.isFromBackup) {
+      return context.trLogin(LoginText.enterAnyPin);
+    }
+    return context.trLogin(LoginText.enterPin);
+  }
+
+  Widget _buildNoteText() {
+    if (widget.isFromBackup) {
+      return _buildNoteContainer(context.trLogin(LoginText.backupNote));
+    }
+    if (widget.isFromRestore) {
+      return _buildNoteContainer(context.trLogin(LoginText.restoreNote));
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildNoteContainer(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: _horizontalPadding,
+      ).copyWith(bottom: _smallSpacing),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: CustomTextStyle.regular(fontSize: 14, fontStyle: FontStyle.italic),
+      ),
+    );
+  }
+
+  Widget _buildBiometricButton(LocalAuthProvider provider) {
+    if (!widget.showBiometric ||
+        !LocalAuthConfig.instance.isAvailableBiometrics ||
+        !LocalAuthConfig.instance.isOpenUseBiometric) {
+      return const SizedBox(height: _spacing);
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [IconButton(onPressed: () => provider.onBiometric(), icon: _buildBiometricIcon())],
+    );
+  }
+
+  Widget _buildBiometricIcon() {
+    if (Platform.isIOS) {
+      return SvgPicture.asset(
+        'assets/icons/face_id.svg',
+        width: 20.w,
+        height: 20.h,
+        color: Theme.of(context).colorScheme.primary,
+      );
+    }
+    return const Icon(Icons.fingerprint);
+  }
+
+  Widget _buildLoginButton(LocalAuthProvider provider, bool isCurrentlyLocked, bool isLoading) {
+    final isDisabled = isCurrentlyLocked || isLoading;
+
+    return CustomButtonWidget(
+      borderRaidus: 100,
+      width: _buttonSize,
+      height: _buttonSize,
+      onPressed: isDisabled ? null : () => handleLogin(provider),
+      text: "",
+      child: _buildButtonContent(isLoading, isDisabled),
+    );
+  }
+
+  Widget _buildButtonContent(bool isLoading, bool isDisabled) {
+    if (isLoading) {
+      return const SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        ),
+      );
+    }
+
+    return Icon(
+      Icons.arrow_forward,
+      size: _iconSize,
+      color: isDisabled ? Colors.grey : Colors.white,
+    );
+  }
+
   Widget _buildLockedStatus(LocalAuthProvider provider) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10).copyWith(bottom: 24),
+      padding: const EdgeInsets.symmetric(
+        horizontal: _smallSpacing,
+        vertical: _smallSpacing,
+      ).copyWith(bottom: _countdownMargin),
       child: Column(
         children: [
           Text(
@@ -234,7 +310,7 @@ class _MobileLayoutState extends State<MobileLayout> {
             textAlign: TextAlign.center,
             style: CustomTextStyle.regular(color: Colors.red, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: _smallSpacing),
           Text(
             context
                 .trLogin(LoginText.pleaseTryAgainLater)
@@ -251,17 +327,17 @@ class _MobileLayoutState extends State<MobileLayout> {
 
   Widget _buildCountdownDisplay(LocalAuthProvider provider) {
     return Container(
-      margin: const EdgeInsets.only(top: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.only(top: _smallSpacing),
+      padding: const EdgeInsets.symmetric(horizontal: _countdownPadding, vertical: 8),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(_borderRadius),
       ),
       child: Text(
         provider.formattedRemainingTime,
         style: CustomTextStyle.regular(
           fontWeight: FontWeight.bold,
-          fontSize: 18,
+          fontSize: _countdownFontSize,
           color: Theme.of(context).colorScheme.error,
         ),
       ),
@@ -278,87 +354,110 @@ class _MobileLayoutState extends State<MobileLayout> {
       autoDismissKeyboard: DeviceInfo.getDeviceType(context) == DeviceType.mobile,
       textEditingController: provider.textEditingController,
       focusNode: provider.focusNode,
-
-      onSubmitted: (value) async {
-        if (!mounted) return;
-        await handleLogin(provider);
-      },
-      onEnter: () async {
-        if (!mounted) return;
-        await handleLogin(provider);
-      },
-      validator: (value) {
-        if (value!.length < 6) {
-          return context.trSafe(LoginText.pinCodeRequired);
-        }
-        return null;
-      },
+      onSubmitted: (value) => _handlePinSubmission(provider),
+      onEnter: () => _handlePinSubmission(provider),
+      validator: _validatePinCode,
       onCompleted: (value, state) {},
       onChanged: (value) {},
     );
+  }
+
+  Future<void> _handlePinSubmission(LocalAuthProvider provider) async {
+    if (!mounted) return;
+    await handleLogin(provider);
+  }
+
+  String? _validatePinCode(String? value) {
+    if (value == null || value.isEmpty) {
+      return context.trSafe(LoginText.pinCodeRequired);
+    }
+    if (value.length < 6) {
+      return context.trSafe(LoginText.pinCodeRequired);
+    }
+    return null;
   }
 
   Future<void> handleLogin(LocalAuthProvider provider) async {
     if (!mounted) return;
 
     if (widget.secureApplicationController != null) {
-      bool isLoginSuccess = await provider.handleLogin();
+      await _handleSecureApplicationLogin(provider);
+      return;
+    }
 
-      if (isLoginSuccess) {
-        if (widget.callBackLoginCallback != null) {
-          widget.callBackLoginCallback!(
-            isLoginSuccess: true,
-            pin: provider.textEditingController.text,
-            appPinCodeKey: _pinCodeKey,
-          );
-        }
-        SecureApplicationUtil.instance.authSuccess();
-      } else {
-        SecureApplicationUtil.instance.authFailed();
-      }
-      return;
-    }
     if (widget.isFromBackup || widget.isFromRestore) {
-      if (widget.callBackLoginCallback != null) {
-        widget.callBackLoginCallback!(
-          isLoginSuccess: true,
-          pin: provider.textEditingController.text,
-          appPinCodeKey: _pinCodeKey,
-        );
-        SecureApplicationUtil.instance.unpause();
-      }
+      await _handleBackupRestoreLogin(provider);
       return;
     }
-    bool isLoginSuccess = await provider.handleLogin();
+
+    await _handleNormalLogin(provider);
+  }
+
+  Future<void> _handleSecureApplicationLogin(LocalAuthProvider provider) async {
+    final isLoginSuccess = await provider.handleLogin();
+
+    if (isLoginSuccess) {
+      _callLoginCallback(provider);
+      provider.textEditingController.clear();
+      SecureApplicationUtil.instance.authSuccess();
+    } else {
+      SecureApplicationUtil.instance.authFailed();
+    }
+  }
+
+  Future<void> _handleBackupRestoreLogin(LocalAuthProvider provider) async {
+    _callLoginCallback(provider);
+    provider.textEditingController.clear();
+    SecureApplicationUtil.instance.unpause();
+  }
+
+  Future<void> _handleNormalLogin(LocalAuthProvider provider) async {
+    final isLoginSuccess = await provider.handleLogin();
 
     if (isLoginSuccess && mounted) {
-      if (widget.callBackLoginCallback != null) {
-        widget.callBackLoginCallback!(
-          isLoginSuccess: true,
-          pin: provider.textEditingController.text,
-          appPinCodeKey: _pinCodeKey,
-        );
-        return;
-      }
-
-      try {
-        if (mounted) {
-          final appProvider = Provider.of<AppProvider>(context, listen: false);
-          appProvider.initializeTimer();
-          AppRoutes.navigateAndRemoveUntil(context, AppRoutes.home);
-        }
-      } catch (e) {
-        logError('Error navigating after login: $e');
-      } finally {
-        SecureApplicationUtil.instance.unpause();
-      }
+      _callLoginCallback(provider);
+      provider.textEditingController.clear();
+      await _navigateToHome();
     } else {
-      if (!mounted) return;
-      showToastError(
-        context.trSafe(LoginText.incorrectPin),
-        context: context,
-        position: StyledToastPosition.top,
+      _showErrorToast();
+    }
+  }
+
+  void _callLoginCallback(LocalAuthProvider provider) {
+    if (widget.callBackLoginCallback != null) {
+      widget.callBackLoginCallback!(
+        isLoginSuccess: true,
+        pin: provider.textEditingController.text,
+        appPinCodeKey: _pinCodeKey,
       );
     }
+  }
+
+  Future<void> _navigateToHome() async {
+    try {
+      if (mounted) {
+        final appProvider = Provider.of<AppProvider>(context, listen: false);
+        appProvider.initializeTimer();
+        AppRoutes.navigateAndRemoveUntil(context, AppRoutes.home);
+      }
+    } catch (e) {
+      logError('Error navigating after login: $e');
+      // Fallback navigation nếu có lỗi
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.home, (route) => false);
+      }
+    } finally {
+      SecureApplicationUtil.instance.unpause();
+    }
+  }
+
+  void _showErrorToast() {
+    if (!mounted) return;
+
+    showToastError(
+      context.trSafe(LoginText.incorrectPin),
+      context: context,
+      position: StyledToastPosition.top,
+    );
   }
 }

@@ -3,6 +3,7 @@ import 'package:cybersafe_pro/localization/keys/statistic_text.dart';
 import 'package:cybersafe_pro/providers/statistic_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/screens/statistic/widgets/security_check_item.dart';
+import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/widgets/request_pro/request_pro.dart';
 import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
@@ -26,7 +27,6 @@ class _StatisticMobileLayoutState extends State<StatisticMobileLayout> {
 
     final statisticProvider = Provider.of<StatisticProvider>(context, listen: false);
     final totalAccounts = statisticProvider.totalAccount.toDouble();
-    if (totalAccounts == 0) return;
 
     final strongPasswords = statisticProvider.totalAccountPasswordStrong.toDouble();
     final weakPasswords = statisticProvider.totalAccountPasswordWeak.toDouble();
@@ -40,10 +40,23 @@ class _StatisticMobileLayoutState extends State<StatisticMobileLayout> {
       };
 
       // Tính điểm bảo mật (thang điểm 100)
-      final strengthScore = (strongPasswords - weakPasswords) * (100 / totalAccounts);
-      final duplicateScore = duplicatePasswords * (20 / totalAccounts);
+      if (totalAccounts == 0) {
+        score = 0; // Không có tài khoản = 0 điểm
+      } else {
+        // Điểm cơ bản dựa trên tỷ lệ mật khẩu mạnh
+        final strongPasswordRatio = strongPasswords / totalAccounts;
+        final baseScore = strongPasswordRatio * 70; // Tối đa 70 điểm cho mật khẩu mạnh
 
-      score = (strengthScore - duplicateScore).round().clamp(0, 100);
+        // Trừ điểm cho mật khẩu yếu
+        final weakPasswordRatio = weakPasswords / totalAccounts;
+        final weakPenalty = weakPasswordRatio * 30; // Trừ tối đa 30 điểm cho mật khẩu yếu
+
+        // Trừ điểm cho mật khẩu trùng lặp
+        final duplicateRatio = duplicatePasswords / totalAccounts;
+        final duplicatePenalty = duplicateRatio * 20; // Trừ tối đa 20 điểm cho mật khẩu trùng
+        final finalScore = baseScore - weakPenalty - duplicatePenalty;
+        score = finalScore.round().clamp(0, 100);
+      }
     });
   }
 
@@ -57,15 +70,25 @@ class _StatisticMobileLayoutState extends State<StatisticMobileLayout> {
       context.trSafe(StatisticText.duplicatePasswords): 0,
     };
     score = 0;
+    _updateStatistics();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    Future.delayed(Duration(milliseconds: 500), () {
+    Future.delayed(const Duration(milliseconds: 500), () {
       if (!mounted) return;
-      _updateStatistics();
+      final statisticProvider = Provider.of<StatisticProvider>(context, listen: false);
+      if (!statisticProvider.isLoading && statisticProvider.statistics != null) {
+        _updateStatistics();
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    GlobalKeys.appRootNavigatorKey.currentContext?.read<StatisticProvider>().reset(notify: false);
   }
 
   @override
@@ -81,7 +104,9 @@ class _StatisticMobileLayoutState extends State<StatisticMobileLayout> {
         builder: (context, statisticProvider, child) {
           // Cập nhật thống kê mỗi khi provider thay đổi
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) _updateStatistics();
+            if (mounted && !statisticProvider.isLoading) {
+              _updateStatistics();
+            }
           });
 
           return SizedBox(

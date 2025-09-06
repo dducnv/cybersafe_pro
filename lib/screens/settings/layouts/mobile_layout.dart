@@ -126,24 +126,6 @@ class SettingMobileLayout extends StatelessWidget {
                     pickTimeAutoLock(context);
                   },
                 ),
-                const SizedBox(height: 5),
-                // Consumer<AppProvider>(
-                //   builder: (context, provider, child) {
-                //     return SettingItemWidget(
-                //       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                //       title: context.appLocale.settingsLocale.getText(SettingsLocale.lockOnBackground),
-                //       suffix: AppCustomSwitch(
-                //         value: provider.lockOnBackground,
-                //         onChanged: (value) {
-                //           provider.setLockOnBackground(value);
-                //         },
-                //       ),
-                //       onTap: () {
-                //         provider.setLockOnBackground(!provider.lockOnBackground);
-                //       },
-                //     );
-                //   },
-                // ),
                 const SizedBox(height: 16),
                 Padding(
                   padding: const EdgeInsets.only(left: 16),
@@ -153,39 +135,6 @@ class SettingMobileLayout extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 5),
-                // if (!AppConfig.isProApp && !Platform.isMacOS && !Platform.isWindows)
-                //   SettingItemWidget(
-                //     isGradientBg: true,
-                //     titleStyle: settingTitleItemStyle.copyWith(color: Colors.white),
-                //     title: context.appLocale.settingsLocale.getText(SettingsLocale.transferData),
-                //     icon: Icons.import_export_rounded,
-                //     onTap: () async {
-                //       showAppCustomDialog(
-                //         context,
-                //         AppCustomDialog(
-                //           title: context.trSafe(SettingsLocale.transferData),
-                //           message: context.trSafe(SettingsLocale.transferDataMessage),
-                //           confirmText: context.trSafe(SettingsLocale.confirm),
-                //           canConfirmInitially: true,
-                //           cancelText: context.trSafe(SettingsLocale.cancel),
-                //           onConfirm: () async {
-                //             try {
-                //               bool checkUri = await canLaunchUrlString("cybersafepro://transfer");
-                //               if (checkUri) {
-                //                 DataManagerServiceOld.transferData(context);
-                //               } else {
-                //                 openUrl(AppConfig.proPlayStoreUrl, context: context);
-                //               }
-                //             } catch (e) {
-                //               logError(e.toString());
-                //             }
-                //           },
-                //         ),
-                //       );
-                //     },
-                //   ),
-
-                // const SizedBox(height: 5),
                 SettingItemWidget(
                   title: context.appLocale.settingsLocale.getText(
                     SettingsLocale.importDataFromBrowser,
@@ -288,14 +237,14 @@ class SettingMobileLayout extends StatelessWidget {
                             child: NumberPicker(
                               haptics: true,
                               zeroPad: true,
-                              value: provider.timeAutoLock < 1 ? 0 : provider.timeAutoLock,
+                              value: provider.timeAutoLock < 1 ? 1 : provider.timeAutoLock,
                               selectedTextStyle: CustomTextStyle.regular(
                                 color: Theme.of(context).colorScheme.primary,
                                 fontSize: 25.sp,
                                 fontWeight: FontWeight.bold,
                               ),
                               itemCount: 5,
-                              minValue: 0,
+                              minValue: 1,
                               maxValue: 30,
                               itemWidth: 70.h,
                               itemHeight: 70.h,
@@ -308,7 +257,6 @@ class SettingMobileLayout extends StatelessWidget {
                               ),
                               axis: Axis.horizontal,
                               textMapper: (numberText) {
-                                if (numberText == '0') return '30s';
                                 return "$numberText'";
                               },
                               onChanged: (value) {

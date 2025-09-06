@@ -1,3 +1,8 @@
+// Portions of this code are adapted from the following projects by @daegalus:
+// - dart-otp:    https://github.com/Daegalus/dart-otp
+// Licensed under the MIT License.
+// Copyright (c) Daegalus
+
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
