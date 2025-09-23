@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:cybersafe_pro/providers/account_form_provider.dart';
 import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
@@ -9,21 +7,32 @@ import 'package:cybersafe_pro/services/account/account_services.dart';
 import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/services/otp.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
+import 'package:diacritic/diacritic.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
-import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 
 class AccountProvider extends ChangeNotifier {
   final Map<int, AccountDriftModelData> _accounts = {};
   final Map<int, List<AccountDriftModelData>> _groupedCategoryIdAccounts = {};
   final Map<int, AccountDriftModelData> _basicInfoCache = {};
   final Map<int, int> mapCategoryIdTotalAccount = {};
+  List<AccountDriftModelData> _decryptedAccountsCache = [];
 
   Map<int, AccountDriftModelData> get accounts => Map.unmodifiable(_accounts);
   List<AccountDriftModelData> get accountList => _accounts.values.toList();
   Map<int, List<AccountDriftModelData>> get groupedAccountsByCategoryId =>
       Map.unmodifiable(_groupedCategoryIdAccounts);
   List<IconCustomDriftModelData> listIconsCustom = [];
+
+  /// Refresh cache of all decrypted accounts (call after any change)
+  Future<void> refreshDecryptedAccountsCache() async {
+    final accountsToSearch = await DriffDbManager.instance.accountAdapter.getAllBasicInfo();
+    if (accountsToSearch.isEmpty) {
+      _decryptedAccountsCache = [];
+      return;
+    }
+    _decryptedAccountsCache = await _getDecryptedBasicInfoMany(accountsToSearch);
+  }
 
   Future<void> getLimitAccountsByCategory({
     required Map<int, CategoryDriftModelData> mapCategories,
@@ -316,9 +325,6 @@ class AccountProvider extends ChangeNotifier {
         _basicInfoCache.remove(account.id);
       }
 
-      // Clear search cache when accounts change
-      clearSearchCache();
-
       return true;
     } catch (e) {
       logError('Error deleting multiple accounts: $e');
@@ -326,192 +332,29 @@ class AccountProvider extends ChangeNotifier {
     }
   }
 
-  // Cache for search results
-  final Map<String, List<AccountDriftModelData>> _searchCache = {};
-  static const int _maxSearchCacheSize = 50;
-
-  // Cache for all accounts (for search optimization)
-  List<AccountDriftModelData>? _allAccountsCache;
-  DateTime? _allAccountsCacheTime;
-  static const Duration _allAccountsCacheExpiry = Duration(minutes: 5);
-
   Future<List<AccountDriftModelData>> searchAccounts(String query) async {
     if (query.isEmpty) return <AccountDriftModelData>[];
-
     final queryLower = query.toLowerCase().trim();
-
-    // Check cache first
-    if (_searchCache.containsKey(queryLower)) {
-      return _searchCache[queryLower]!;
+    if (_decryptedAccountsCache.isEmpty) {
+      await refreshDecryptedAccountsCache();
     }
-
-    // Use database search for better performance
-    final searchResults = await _performDatabaseSearch(queryLower);
-
-    // Cache the results (with size limit)
-    if (_searchCache.length >= _maxSearchCacheSize) {
-      // Remove oldest entries
-      final keysToRemove = _searchCache.keys.take(_searchCache.length - _maxSearchCacheSize + 1);
-      for (final key in keysToRemove) {
-        _searchCache.remove(key);
-      }
-    }
-    _searchCache[queryLower] = searchResults;
-
-    return searchResults;
-  }
-
-  /// Perform optimized database search
-  Future<List<AccountDriftModelData>> _performDatabaseSearch(String query) async {
-    // Get accounts to search (use cache if available)
-    final accountsToSearch = await _getAccountsForSearch();
-
-    if (accountsToSearch.isEmpty) {
-      return [];
-    }
-
-    // Decrypt accounts for search
-    final decryptedResults = await _getDecryptedBasicInfoMany(accountsToSearch);
-
-    // Filter by decrypted content
-    return decryptedResults.where((account) {
-      final titleMatch = account.title.toLowerCase().contains(query);
-      final usernameMatch = account.username?.toLowerCase().contains(query) ?? false;
-      return titleMatch || usernameMatch;
+    return _decryptedAccountsCache.where((account) {
+      return _matchesSearchQuery(account, queryLower);
     }).toList();
   }
 
-  /// Get accounts for search with caching optimization
-  Future<List<AccountDriftModelData>> _getAccountsForSearch() async {
-    // Check if we have valid cached accounts
-    if (_allAccountsCache != null && _allAccountsCacheTime != null) {
-      final cacheAge = DateTime.now().difference(_allAccountsCacheTime!);
-      if (cacheAge < _allAccountsCacheExpiry) {
-        return _allAccountsCache!;
-      }
-    }
-
-    // Use grouped accounts if available (already loaded)
-    if (_groupedCategoryIdAccounts.isNotEmpty) {
-      final groupedAccounts =
-          _groupedCategoryIdAccounts.values.expand((accounts) => accounts).toList();
-
-      // Cache the grouped accounts for search
-      _allAccountsCache = groupedAccounts;
-      _allAccountsCacheTime = DateTime.now();
-
-      return groupedAccounts;
-    }
-
-    // Fallback to getting all accounts from database
-    final allAccounts = await DriffDbManager.instance.accountAdapter.getAllBasicInfo();
-
-    // Cache the results
-    _allAccountsCache = allAccounts;
-    _allAccountsCacheTime = DateTime.now();
-
-    return allAccounts;
-  }
-
-  /// Clear search cache
-  void clearSearchCache() {
-    _searchCache.clear();
-    _allAccountsCache = null;
-    _allAccountsCacheTime = null;
-  }
-
-  /// Preload accounts for search (call this when opening search)
-  Future<void> preloadAccountsForSearch() async {
-    await _getAccountsForSearch();
-  }
-
-  /// Search accounts with pagination for large result sets
-  Future<List<AccountDriftModelData>> searchAccountsWithPagination(
-    String query, {
-    int limit = 20,
-    int offset = 0,
-  }) async {
-    if (query.isEmpty) return <AccountDriftModelData>[];
-
-    final queryLower = query.toLowerCase().trim();
-    final cacheKey = '${queryLower}_${limit}_$offset';
-
-    // Check cache first
-    if (_searchCache.containsKey(cacheKey)) {
-      return _searchCache[cacheKey]!;
-    }
-
-    // Use database search with pagination
-    final searchResults = await _performDatabaseSearchWithPagination(
-      queryLower,
-      limit: limit,
-      offset: offset,
+  bool _matchesSearchQuery(AccountDriftModelData account, String query) {
+    final searchableContent = removeDiacritics(
+      "${account.title} ${account.username ?? ''} ${account.notes ?? ''}".toLowerCase(),
     );
-
-    // Cache the results
-    if (_searchCache.length >= _maxSearchCacheSize) {
-      final keysToRemove = _searchCache.keys.take(_searchCache.length - _maxSearchCacheSize + 1);
-      for (final key in keysToRemove) {
-        _searchCache.remove(key);
-      }
-    }
-    _searchCache[cacheKey] = searchResults;
-
-    return searchResults;
+    return _fuzzyMatch(searchableContent, query);
   }
 
-  /// Perform database search with pagination
-  Future<List<AccountDriftModelData>> _performDatabaseSearchWithPagination(
-    String query, {
-    int limit = 50,
-    int offset = 0,
-  }) async {
-    // Get all accounts first (for now, can be optimized later with database-level pagination)
-    final allAccounts = await DriffDbManager.instance.accountAdapter.getAllBasicInfo();
-
-    if (allAccounts.isEmpty) {
-      return [];
-    }
-
-    // Decrypt accounts in batches for better performance
-    final decryptedAccounts = await _getDecryptedBasicInfoMany(allAccounts);
-
-    // Filter by decrypted content
-    final filteredAccounts =
-        decryptedAccounts.where((account) {
-          final titleMatch = _smartFuzzyMatch(account.title, query);
-          final usernameMatch =
-              account.username != null ? _smartFuzzyMatch(account.username!, query) : false;
-          return titleMatch || usernameMatch;
-        }).toList();
-
-    // Apply pagination
-    final startIndex = offset;
-    final endIndex = math.min(startIndex + limit, filteredAccounts.length);
-
-    if (startIndex >= filteredAccounts.length) {
-      return [];
-    }
-
-    return filteredAccounts.sublist(startIndex, endIndex);
-  }
-
-  String _normalize(String input) {
-    return input
-        .toLowerCase()
-        .replaceAll(RegExp(r'https?://'), '')
-        .replaceAll(RegExp(r'^www\.'), '')
-        .replaceAll(RegExp(r'\.(com|net|org|vn|info|xyz|io)$'), '')
-        .replaceAll(RegExp(r'[^a-z0-9\s]'), ' ')
-        .trim();
-  }
-
-  bool _smartFuzzyMatch(String text, String query, {int threshold = 10}) {
-    final normalizedText = _normalize(text);
-    final normalizedQuery = _normalize(query);
-
-    final score = ratio(normalizedText, normalizedQuery);
-    return score >= threshold;
+  bool _fuzzyMatch(String text, String query) {
+    if (text.contains(query)) return true;
+    final queryWords = query.split(' ').where((word) => word.isNotEmpty).toList();
+    if (queryWords.isEmpty) return false;
+    return queryWords.every((word) => text.contains(word));
   }
 
   Future<void> handleChangeCategory({
@@ -537,20 +380,14 @@ class AccountProvider extends ChangeNotifier {
     // Update grouped accounts for all affected accounts
     await _updateGroupedAccountsAfterCategoryChange(accountSelected, category.id);
 
-    // Clear search cache when accounts change
-    clearSearchCache();
-
     notifyListeners();
   }
 
-  /// Process new accounts (parallel)
   Future<List<AccountDriftModelData>> _processNewAccounts(
     int categoryId,
     List<AccountDriftModelData> newAccounts,
   ) async {
     final decryptedAccounts = await _getDecryptedBasicInfoMany(newAccounts);
-
-    // Update cache (parallel)
     await Future.wait([
       Future.wait(
         newAccounts.map((account) async {
@@ -582,7 +419,6 @@ class AccountProvider extends ChangeNotifier {
       return _basicInfoCache[account.id]!;
     }
     final decryptedAccount = await AccountServices.instance.decryptBasicInfo(account);
-    // Cache the result
     _basicInfoCache[account.id] = decryptedAccount;
     return decryptedAccount;
   }
@@ -595,7 +431,7 @@ class AccountProvider extends ChangeNotifier {
     _accounts.clear();
     _groupedCategoryIdAccounts.clear();
     _basicInfoCache.clear();
-    clearSearchCache();
+    _decryptedAccountsCache = [];
   }
 
   /// Update grouped accounts after creating or updating an account
@@ -618,8 +454,8 @@ class AccountProvider extends ChangeNotifier {
     final actualCount = await DriffDbManager.instance.accountAdapter.countByCategory(categoryId);
     mapCategoryIdTotalAccount[categoryId] = actualCount;
 
-    // Clear search cache when accounts change
-    clearSearchCache();
+    // Refresh cache
+    await refreshDecryptedAccountsCache();
 
     notifyListeners();
   }
@@ -633,8 +469,8 @@ class AccountProvider extends ChangeNotifier {
     final actualCount = await DriffDbManager.instance.accountAdapter.countByCategory(categoryId);
     mapCategoryIdTotalAccount[categoryId] = actualCount;
 
-    // Clear search cache when accounts change
-    clearSearchCache();
+    // Refresh cache
+    await refreshDecryptedAccountsCache();
 
     notifyListeners();
   }
@@ -687,6 +523,9 @@ class AccountProvider extends ChangeNotifier {
         mapCategoryIdTotalAccount[oldCategoryId] = oldCategoryCount;
       }
     }
+
+    // Refresh cache
+    await refreshDecryptedAccountsCache();
 
     notifyListeners();
   }
