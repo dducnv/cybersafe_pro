@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/screens/settings/settings_locale.dart';
@@ -37,9 +38,13 @@ class _UseBiometricLoginState extends State<UseBiometricLogin> {
         setState(() {
           isOpenUseBiometric = false;
         });
+        if (mounted) showLoadingDialog(context: context);
         await SecureAppManager.disableBiometric();
+        hideLoadingDialog();
       } else {
+        if (mounted) showLoadingDialog(context: context);
         await SecureAppManager.enableBiometric();
+        hideLoadingDialog();
         setState(() {
           isOpenUseBiometric = true;
         });

@@ -298,7 +298,7 @@ packages:
     source: hosted
     version: "7.0.2"
   diacritic:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: diacritic
       sha256: "12981945ec38931748836cd76f2b38773118d0baef3c68404bdfde9566147876"
@@ -645,14 +645,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
-  fuzzywuzzy:
-    dependency: "direct main"
-    description:
-      name: fuzzywuzzy
-      sha256: "3004379ffd6e7f476a0c2091f38f16588dc45f67de7adf7c41aa85dec06b432c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.0"
   glob:
     dependency: transitive
     description:

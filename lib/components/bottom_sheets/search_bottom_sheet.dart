@@ -14,15 +14,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:provider/provider.dart';
 
-Future<void> showSearchBottomSheet(BuildContext context,{
+Future<void> showSearchBottomSheet(
+  BuildContext context, {
   Function(AccountDriftModelData)? onTapAccount,
 }) async {
   return showModalBottomSheet(
-    isScrollControlled: true, 
-    context: context, 
-    builder: (context) => SearchBottomSheet(
-      onTapAccount: onTapAccount,
-    )
+    isScrollControlled: true,
+    context: context,
+    builder: (context) => SearchBottomSheet(onTapAccount: onTapAccount),
   );
 }
 
@@ -45,17 +44,6 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
-    _preloadAccountsForSearch();
-  }
-
-  /// Preload accounts for search to improve performance
-  Future<void> _preloadAccountsForSearch() async {
-    try {
-      final accountProvider = context.read<AccountProvider>();
-      await accountProvider.preloadAccountsForSearch();
-    } catch (e) {
-      // Ignore errors, search will still work
-    }
   }
 
   @override
@@ -68,18 +56,18 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
   void _onSearchChanged() {
     // Hủy timer cũ nếu có
     _debounceTimer?.cancel();
-    
-      final query = _searchController.text.trim();
-    
+
+    final query = _searchController.text.trim();
+
     // Clear results immediately if query is empty
-      if (query.isEmpty) {
-        setState(() {
-          _searchResults = [];
-          _isLoading = false;
+    if (query.isEmpty) {
+      setState(() {
+        _searchResults = [];
+        _isLoading = false;
         _lastQuery = '';
-        });
-        return;
-      }
+      });
+      return;
+    }
 
     // Don't search if it's the same query
     if (query == _lastQuery) {
@@ -87,17 +75,17 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
     }
 
     // Show loading state
-      setState(() => _isLoading = true);
-    
+    setState(() => _isLoading = true);
+
     // Tạo timer mới để debounce
     _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
       if (!mounted) return;
-      
+
       try {
-      // Thực hiện tìm kiếm
-      final accountProvider = context.read<AccountProvider>();
+        // Thực hiện tìm kiếm
+        final accountProvider = context.read<AccountProvider>();
         final results = await accountProvider.searchAccounts(query);
-        
+
         if (mounted) {
           setState(() {
             _searchResults = results;
@@ -110,7 +98,7 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
           setState(() {
             _searchResults = [];
             _isLoading = false;
-      });
+          });
         }
       }
     });
@@ -127,11 +115,11 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                 Center(
+                Center(
                   child: Text(
                     context.trHome(HomeLocale.searchTitle),
-                    style: CustomTextStyle.regular(fontSize: 24, fontWeight: FontWeight.w700)
-                  )
+                    style: CustomTextStyle.regular(fontSize: 24, fontWeight: FontWeight.w700),
+                  ),
                 ),
                 Align(
                   alignment: Alignment.centerRight,
@@ -158,7 +146,7 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
           if (_isLoading)
             const Center(child: CircularProgressIndicator())
           else if (_searchResults.isEmpty && _searchController.text.isNotEmpty)
-             Padding(
+            Padding(
               padding: EdgeInsets.all(16),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -166,7 +154,14 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
                 children: [
                   Image.asset("assets/images/exclamation-mark.png", width: 60.w, height: 60.h),
                   const SizedBox(height: 10),
-                  Text(context.trHome(HomeLocale.searchNoResult), style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey[800])),
+                  Text(
+                    context.trHome(HomeLocale.searchNoResult),
+                    style: CustomTextStyle.regular(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[800],
+                    ),
+                  ),
                 ],
               ),
             )
@@ -198,7 +193,11 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
                                     account: account,
                                     width: 30,
                                     height: 30,
-                                    textStyle: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey[800]),
+                                    textStyle: CustomTextStyle.regular(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey[800],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -206,22 +205,25 @@ class _SearchBottomSheetState extends State<SearchBottomSheet> {
                             title: DecryptText(
                               value: account.title,
                               decryptTextType: DecryptTextType.info,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600
-                              ),
+                              style: const TextStyle(fontWeight: FontWeight.w600),
                             ),
-                            subtitle: account.username != null ? DecryptText(
-                              value: account.username!,
-                              decryptTextType: DecryptTextType.info,
-                              style: TextStyle(
-                                color: Colors.grey[600]
-                              ),
-                            ) : null,
+                            subtitle:
+                                account.username != null
+                                    ? DecryptText(
+                                      value: account.username!,
+                                      decryptTextType: DecryptTextType.info,
+                                      style: TextStyle(color: Colors.grey[600]),
+                                    )
+                                    : null,
                             onTap: () {
                               if (widget.onTapAccount != null) {
                                 widget.onTapAccount!(account);
                               } else {
-                                AppRoutes.navigateTo(context, AppRoutes.detailsAccount, arguments: {"accountId": account.id});
+                                AppRoutes.navigateTo(
+                                  context,
+                                  AppRoutes.detailsAccount,
+                                  arguments: {"accountId": account.id},
+                                );
                               }
                             },
                           ),
