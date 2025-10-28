@@ -9,6 +9,7 @@ class AccountDriftModel extends Table {
   TextColumn get password => text().nullable()();
   TextColumn get notes => text().nullable()();
   TextColumn get icon => text().nullable()();
+  IntColumn get openCount => integer().withDefault(const Constant(0))();
   IntColumn get categoryId => integer().references(CategoryDriftModel, #id)();
   IntColumn get iconCustomId => integer().nullable().references(IconCustomDriftModel, #id)();
   DateTimeColumn get passwordUpdatedAt => dateTime().nullable()();

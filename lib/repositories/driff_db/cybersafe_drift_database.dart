@@ -29,11 +29,10 @@ class DriftSqliteDatabase extends _$DriftSqliteDatabase {
   DriftSqliteDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   /// Mở kết nối với SQLCipher encryption
   static QueryExecutor _openConnection() {
-    print("openConnection");
     return LazyDatabase(() async {
       try {
         final dbFolder = await getApplicationDocumentsDirectory();
@@ -92,6 +91,9 @@ class DriftSqliteDatabase extends _$DriftSqliteDatabase {
     onUpgrade: (Migrator m, int from, int to) async {
       if (from == 1) {
         await m.addColumn(textNotesDriftModel, textNotesDriftModel.color);
+      }
+      if (from == 2) {
+        await m.addColumn(accountDriftModel, accountDriftModel.openCount);
       }
     },
   );
