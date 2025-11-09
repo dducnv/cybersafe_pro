@@ -130,30 +130,34 @@ class AccountProvider extends ChangeNotifier {
         notes: form.noteController.text.trim(),
         createdAt: now,
         updatedAt: now,
+        openCount: 0,
       ),
       category: form.selectedCategory!,
-      customFields:
-          form.dynamicTextFieldNotifier.map((e) {
-            return AccountCustomFieldDriftModelData(
+      customFields: form.dynamicTextFieldNotifier.map((e) {
+        return AccountCustomFieldDriftModelData(
+          id: 0,
+          accountId: form.accountId,
+          name: e.customField.key,
+          value: e.controller.text,
+          hintText: e.customField.hintText,
+          typeField: e.customField.typeField.type,
+        );
+      }).toList(),
+      totp: form.otpController.text.isNotEmpty
+          ? TOTPDriftModelData(
               id: 0,
               accountId: form.accountId,
-              name: e.customField.key,
-              value: e.controller.text,
-              hintText: e.customField.hintText,
-              typeField: e.customField.typeField.type,
-            );
-          }).toList(),
-      totp:
-          form.otpController.text.isNotEmpty
-              ? TOTPDriftModelData(
-                id: 0,
-                accountId: form.accountId,
-                secretKey: form.otpController.text.toUpperCase().trim(),
-                isShowToHome: false,
-                createdAt: now,
-                updatedAt: now,
-              )
-              : null,
+              secretKey: form.otpController.text
+                  .toUpperCase()
+                  .trim()
+                  .replaceAll(" ", "")
+                  .replaceAll("-", "")
+                  .replaceAll(" ", ""),
+              isShowToHome: false,
+              createdAt: now,
+              updatedAt: now,
+            )
+          : null,
     );
 
     final result = await createOrUpdateAccount(newAccountDrift, isUpdate: form.accountId != 0);
@@ -175,10 +179,9 @@ class AccountProvider extends ChangeNotifier {
 
     AccountDriftModelData? accountToSave;
     if (isUpdate) {
-      AccountDriftModelData? currentAccount =
-          accountDaoModel.account.id != 0
-              ? await DriffDbManager.instance.accountAdapter.getById(accountDaoModel.account.id)
-              : null;
+      AccountDriftModelData? currentAccount = accountDaoModel.account.id != 0
+          ? await DriffDbManager.instance.accountAdapter.getById(accountDaoModel.account.id)
+          : null;
       if (currentAccount == null) throw Exception('Account not found');
 
       String? newPassword;
@@ -230,11 +233,16 @@ class AccountProvider extends ChangeNotifier {
     required String appName,
     required String accountName,
   }) async {
-    if (!OTP.isKeyValid(secretKey)) {
+    if (!OTP.isKeyValid(secretKey.toUpperCase().trim())) {
       return false;
     }
     try {
-      final normalizedSecretKey = secretKey.toUpperCase().trim();
+      final normalizedSecretKey = secretKey
+          .toUpperCase()
+          .trim()
+          .replaceAll(" ", "")
+          .replaceAll("-", "")
+          .replaceAll(" ", "");
       final now = DateTime.now();
 
       final results = await Future.wait([_getOrCreateOtpCategory(), _findMatchingIcon(appName)]);
@@ -247,10 +255,11 @@ class AccountProvider extends ChangeNotifier {
           title: Value(appName),
           icon: Value(iconName),
           username: Value(accountName),
-          password: Value(normalizedSecretKey),
+          password: Value(""),
           categoryId: Value(categoryId),
           notes: const Value(""),
           createdAt: Value(now),
+          openCount: Value(0),
           updatedAt: Value(now),
         ),
         totp: TOTPDriftModelCompanion(
@@ -367,8 +376,9 @@ class AccountProvider extends ChangeNotifier {
         AccountDriftModelCompanion(categoryId: Value(category.id)),
       ),
     );
-    final updatedAccounts =
-        (await Future.wait(futures)).whereType<AccountDriftModelData>().toList();
+    final updatedAccounts = (await Future.wait(
+      futures,
+    )).whereType<AccountDriftModelData>().toList();
     await DriffDbManager.instance.accountAdapter.putMany(updatedAccounts);
 
     // Update local cache and grouped accounts

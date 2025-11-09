@@ -95,18 +95,48 @@ class _NoteEditorState extends State<NoteEditor> {
         child: Column(
           children: [
             Expanded(
-              child:
-                  _quillController == null
-                      ? Center(child: CircularProgressIndicator())
-                      : QuillEditor(
-                        controller: _quillController!,
-                        focusNode: _editorFocusNode,
-                        config: QuillEditorConfig(
-                          autoFocus: widget.noteId == null,
-                          padding: EdgeInsets.symmetric(horizontal: 8),
-                        ),
-                        scrollController: ScrollController(),
+              child: _quillController == null
+                  ? Center(child: CircularProgressIndicator())
+                  : QuillEditor(
+                      controller: _quillController!,
+                      focusNode: _editorFocusNode,
+                      config: QuillEditorConfig(
+                        autoFocus: widget.noteId == null,
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        textInputAction: TextInputAction.next,
+                        textCapitalization: TextCapitalization.sentences,
+                        enableAlwaysIndentOnTab: true,
+                        scrollBottomInset: 8,
+                        minHeight: 240,
+                        maxContentWidth: 800,
+                        keyboardAppearance: Theme.of(context).brightness,
+                        enableInteractiveSelection: true,
+                        onTapOutsideEnabled: true,
+                        onTapOutside: (event, focusNode) {
+                          focusNode.unfocus();
+                        },
+                        requestKeyboardFocusOnCheckListChanged: true,
+                        customLinkPrefixes: const ['http', 'https', 'mailto', 'tel'],
+                        onPerformAction: (action) {
+                          if (_quillController == null) return;
+                          // Handle common Samsung IME actions that may not send newline
+                          if (action == TextInputAction.newline ||
+                              action == TextInputAction.next ||
+                              action == TextInputAction.go) {
+                            final sel = _quillController!.selection;
+                            final start = sel.start;
+                            final len = sel.end - sel.start;
+                            _quillController!.replaceText(
+                              start,
+                              len,
+                              '\n',
+                              TextSelection.collapsed(offset: start + 1),
+                            );
+                          }
+                        },
                       ),
+                      scrollController: ScrollController(),
+                    ),
             ),
             if (_quillController != null)
               SafeArea(
@@ -115,6 +145,24 @@ class _NoteEditorState extends State<NoteEditor> {
                   config: QuillSimpleToolbarConfig(
                     multiRowsDisplay: false,
                     showAlignmentButtons: true,
+                    showFontFamily: true,
+                    showFontSize: true,
+                    showBoldButton: true,
+                    showItalicButton: true,
+                    showUnderLineButton: true,
+                    showStrikeThrough: true,
+                    showColorButton: true,
+                    showBackgroundColorButton: true,
+                    showClearFormat: true,
+                    showListNumbers: true,
+                    showListBullets: true,
+                    showListCheck: true,
+                    showQuote: true,
+                    showCodeBlock: true,
+                    showIndent: true,
+                    showUndo: true,
+                    showRedo: true,
+                    showSearchButton: true,
                     buttonOptions: QuillSimpleToolbarButtonOptions(
                       selectHeaderStyleDropdownButton:
                           QuillToolbarSelectHeaderStyleDropdownButtonOptions(

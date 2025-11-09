@@ -143,4 +143,18 @@ class OtpLocale extends BaseLocale {
     OtpText.secretKeyValidation: 'No puede estar vacío',
     OtpText.enterOldPin: 'Introducir PIN antiguo',
   };
+
+  @override
+  Map<String, String> get it => {
+    OtpText.title: 'Autenticazione a due fattori',
+    OtpText.scanQrCode: 'Scansiona codice QR',
+    OtpText.manualEntry: 'Inserisci manualmente',
+    OtpText.addAccount: 'Aggiungi Account',
+    OtpText.accountName: 'Nome Account',
+    OtpText.secretKey: 'Chiave Segreta',
+    OtpText.invalidSecretKey: 'Chiave segreta non valida',
+    OtpText.enterManually: 'Inserisci manualmente',
+    OtpText.secretKeyValidation: 'Non può essere vuoto',
+    OtpText.enterOldPin: 'Inserisci vecchio PIN',
+  };
 }

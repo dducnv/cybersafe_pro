@@ -33,6 +33,7 @@ class AccountAggregate {
       categoryId: accountDriftModelData.categoryId.value,
       createdAt: accountDriftModelData.createdAt.value,
       updatedAt: accountDriftModelData.updatedAt.value,
+      openCount: 0,
     );
   }
 
@@ -50,8 +51,8 @@ class AccountAggregate {
       categoryId: Value(
         json['category'] != null
             ? (json['category']['id'] is int
-                ? json['category']['id'] ?? 0
-                : int.tryParse(json['category']['id']?.toString() ?? '') ?? 0)
+                  ? json['category']['id'] ?? 0
+                  : int.tryParse(json['category']['id']?.toString() ?? '') ?? 0)
             : 0,
       ),
       createdAt: Value(
@@ -73,78 +74,66 @@ class AccountAggregate {
 
     final categoryJson = json['category'] as Map<String, dynamic>? ?? {};
     final category = CategoryDriftModelData(
-      id:
-          categoryJson['id'] is int
-              ? categoryJson['id'] ?? 0
-              : int.tryParse(categoryJson['id']?.toString() ?? '') ?? 0,
+      id: categoryJson['id'] is int
+          ? categoryJson['id'] ?? 0
+          : int.tryParse(categoryJson['id']?.toString() ?? '') ?? 0,
       categoryName: categoryJson['categoryName']?.toString() ?? '',
-      indexPos:
-          categoryJson['indexPos'] is int
-              ? categoryJson['indexPos'] ?? 0
-              : int.tryParse(categoryJson['indexPos']?.toString() ?? '') ?? 0,
-      createdAt:
-          categoryJson['createdAt'] != null
-              ? DateTime.tryParse(categoryJson['createdAt'].toString()) ?? DateTime.now()
-              : DateTime.now(),
-      updatedAt:
-          categoryJson['updatedAt'] != null
-              ? DateTime.tryParse(categoryJson['updatedAt'].toString()) ?? DateTime.now()
-              : DateTime.now(),
+      indexPos: categoryJson['indexPos'] is int
+          ? categoryJson['indexPos'] ?? 0
+          : int.tryParse(categoryJson['indexPos']?.toString() ?? '') ?? 0,
+      createdAt: categoryJson['createdAt'] != null
+          ? DateTime.tryParse(categoryJson['createdAt'].toString()) ?? DateTime.now()
+          : DateTime.now(),
+      updatedAt: categoryJson['updatedAt'] != null
+          ? DateTime.tryParse(categoryJson['updatedAt'].toString()) ?? DateTime.now()
+          : DateTime.now(),
     );
 
-    final customFieldsList =
-        (json['customFields'] as List<dynamic>? ?? []).map((fieldJson) {
-          final Map<String, dynamic> fieldData = Map<String, dynamic>.from(fieldJson as Map);
-          fieldData['accountId'] =
-              fieldData['accountId'] is int
-                  ? fieldData['accountId']
-                  : int.tryParse(fieldData['accountId']?.toString() ?? '') ??
-                      accountDriftModelCompanion.id.value ??
-                      0;
-          fieldData['name'] = fieldData['name']?.toString() ?? '';
-          fieldData['value'] = fieldData['value']?.toString() ?? '';
-          fieldData['hintText'] = fieldData['hintText']?.toString() ?? '';
-          fieldData['typeField'] = fieldData['typeField']?.toString() ?? '';
-          fieldData['id'] =
-              fieldData['id'] is int
-                  ? fieldData['id']
-                  : int.tryParse(fieldData['id']?.toString() ?? '') ?? 0;
-          return AccountCustomFieldDriftModelData.fromJson(fieldData);
-        }).toList();
+    final customFieldsList = (json['customFields'] as List<dynamic>? ?? []).map((fieldJson) {
+      final Map<String, dynamic> fieldData = Map<String, dynamic>.from(fieldJson as Map);
+      fieldData['accountId'] = fieldData['accountId'] is int
+          ? fieldData['accountId']
+          : int.tryParse(fieldData['accountId']?.toString() ?? '') ??
+                accountDriftModelCompanion.id.value ??
+                0;
+      fieldData['name'] = fieldData['name']?.toString() ?? '';
+      fieldData['value'] = fieldData['value']?.toString() ?? '';
+      fieldData['hintText'] = fieldData['hintText']?.toString() ?? '';
+      fieldData['typeField'] = fieldData['typeField']?.toString() ?? '';
+      fieldData['id'] = fieldData['id'] is int
+          ? fieldData['id']
+          : int.tryParse(fieldData['id']?.toString() ?? '') ?? 0;
+      return AccountCustomFieldDriftModelData.fromJson(fieldData);
+    }).toList();
 
     TOTPDriftModelData? totp;
     if (json['totp'] != null) {
       final totpJson = Map<String, dynamic>.from(json['totp']);
-      totpJson['accountId'] =
-          totpJson['accountId'] is int
-              ? totpJson['accountId']
-              : int.tryParse(totpJson['accountId']?.toString() ?? '') ??
-                  accountDriftModelCompanion.id.value ??
-                  0;
-      totpJson['id'] =
-          totpJson['id'] is int
-              ? totpJson['id']
-              : int.tryParse(totpJson['id']?.toString() ?? '') ?? 0;
+      totpJson['accountId'] = totpJson['accountId'] is int
+          ? totpJson['accountId']
+          : int.tryParse(totpJson['accountId']?.toString() ?? '') ??
+                accountDriftModelCompanion.id.value ??
+                0;
+      totpJson['id'] = totpJson['id'] is int
+          ? totpJson['id']
+          : int.tryParse(totpJson['id']?.toString() ?? '') ?? 0;
       totpJson['secretKey'] = totpJson['secretKey']?.toString() ?? '';
       totpJson['isShowToHome'] = totpJson['isShowToHome'] ?? false;
-      totpJson['createdAt'] =
-          totpJson['createdAt'] != null
-              ? totpJson['createdAt'].toString()
-              : DateTime.now().toIso8601String();
-      totpJson['updatedAt'] =
-          totpJson['updatedAt'] != null
-              ? totpJson['updatedAt'].toString()
-              : DateTime.now().toIso8601String();
+      totpJson['createdAt'] = totpJson['createdAt'] != null
+          ? totpJson['createdAt'].toString()
+          : DateTime.now().toIso8601String();
+      totpJson['updatedAt'] = totpJson['updatedAt'] != null
+          ? totpJson['updatedAt'].toString()
+          : DateTime.now().toIso8601String();
       totp = TOTPDriftModelData.fromJson(totpJson);
     }
 
     IconCustomDriftModelData? iconCustom;
     if (json['iconCustom'] != null) {
       final iconJson = Map<String, dynamic>.from(json['iconCustom']);
-      iconJson['id'] =
-          iconJson['id'] is int
-              ? iconJson['id'] ?? 0
-              : int.tryParse(iconJson['id']?.toString() ?? '') ?? 0;
+      iconJson['id'] = iconJson['id'] is int
+          ? iconJson['id'] ?? 0
+          : int.tryParse(iconJson['id']?.toString() ?? '') ?? 0;
       iconJson['name'] = iconJson['name']?.toString() ?? '';
       iconJson['imageBase64'] = iconJson['imageBase64']?.toString() ?? '';
       iconCustom = IconCustomDriftModelData.fromJson(iconJson);
@@ -152,26 +141,22 @@ class AccountAggregate {
 
     List<PasswordHistoryDriftModelData>? passwordHistories;
     if (json['passwordHistories'] != null) {
-      passwordHistories =
-          (json['passwordHistories'] as List<dynamic>).map((historyJson) {
-            final Map<String, dynamic> historyData = Map<String, dynamic>.from(historyJson as Map);
-            historyData['accountId'] =
-                historyData['accountId'] is int
-                    ? historyData['accountId']
-                    : int.tryParse(historyData['accountId']?.toString() ?? '') ??
-                        accountDriftModelCompanion.id.value ??
-                        0;
-            historyData['id'] =
-                historyData['id'] is int
-                    ? historyData['id']
-                    : int.tryParse(historyData['id']?.toString() ?? '') ?? 0;
-            historyData['password'] = historyData['password']?.toString() ?? '';
-            historyData['createdAt'] =
-                historyData['createdAt'] != null
-                    ? historyData['createdAt'].toString()
-                    : DateTime.now().toIso8601String();
-            return PasswordHistoryDriftModelData.fromJson(historyData);
-          }).toList();
+      passwordHistories = (json['passwordHistories'] as List<dynamic>).map((historyJson) {
+        final Map<String, dynamic> historyData = Map<String, dynamic>.from(historyJson as Map);
+        historyData['accountId'] = historyData['accountId'] is int
+            ? historyData['accountId']
+            : int.tryParse(historyData['accountId']?.toString() ?? '') ??
+                  accountDriftModelCompanion.id.value ??
+                  0;
+        historyData['id'] = historyData['id'] is int
+            ? historyData['id']
+            : int.tryParse(historyData['id']?.toString() ?? '') ?? 0;
+        historyData['password'] = historyData['password']?.toString() ?? '';
+        historyData['createdAt'] = historyData['createdAt'] != null
+            ? historyData['createdAt'].toString()
+            : DateTime.now().toIso8601String();
+        return PasswordHistoryDriftModelData.fromJson(historyData);
+      }).toList();
     }
 
     return AccountAggregate(
@@ -193,15 +178,14 @@ class AccountAggregate {
       final category = CategoryDriftModelData.fromJson(json['category'] as Map<String, dynamic>);
 
       // Chuyển đổi customFields từ JSON
-      final customFieldsList =
-          (json['customFields'] as List<dynamic>).map((fieldJson) {
-            // Đảm bảo accountId được thiết lập đúng
-            final Map<String, dynamic> fieldData = Map<String, dynamic>.from(fieldJson as Map);
-            if (!fieldData.containsKey('accountId')) {
-              fieldData['accountId'] = account.id;
-            }
-            return AccountCustomFieldDriftModelData.fromJson(fieldData);
-          }).toList();
+      final customFieldsList = (json['customFields'] as List<dynamic>).map((fieldJson) {
+        // Đảm bảo accountId được thiết lập đúng
+        final Map<String, dynamic> fieldData = Map<String, dynamic>.from(fieldJson as Map);
+        if (!fieldData.containsKey('accountId')) {
+          fieldData['accountId'] = account.id;
+        }
+        return AccountCustomFieldDriftModelData.fromJson(fieldData);
+      }).toList();
 
       // Chuyển đổi TOTP nếu có
       TOTPDriftModelData? totp;
@@ -222,16 +206,13 @@ class AccountAggregate {
       // Chuyển đổi passwordHistories nếu có
       List<PasswordHistoryDriftModelData>? passwordHistories;
       if (json['passwordHistories'] != null) {
-        passwordHistories =
-            (json['passwordHistories'] as List<dynamic>).map((historyJson) {
-              final Map<String, dynamic> historyData = Map<String, dynamic>.from(
-                historyJson as Map,
-              );
-              if (!historyData.containsKey('accountId')) {
-                historyData['accountId'] = account.id;
-              }
-              return PasswordHistoryDriftModelData.fromJson(historyData);
-            }).toList();
+        passwordHistories = (json['passwordHistories'] as List<dynamic>).map((historyJson) {
+          final Map<String, dynamic> historyData = Map<String, dynamic>.from(historyJson as Map);
+          if (!historyData.containsKey('accountId')) {
+            historyData['accountId'] = account.id;
+          }
+          return PasswordHistoryDriftModelData.fromJson(historyData);
+        }).toList();
       }
 
       return AccountAggregate(
@@ -252,17 +233,16 @@ class AccountAggregate {
       return AccountAggregate(
         account: AccountDriftModelData.fromJson(json['account']),
         category: CategoryDriftModelData.fromJson(json['category']),
-        customFields:
-            json['customFields'].map((e) => AccountCustomFieldDriftModelData.fromJson(e)).toList(),
+        customFields: json['customFields']
+            .map((e) => AccountCustomFieldDriftModelData.fromJson(e))
+            .toList(),
         totp: json['totp'] != null ? TOTPDriftModelData.fromJson(json['totp']) : null,
-        iconCustom:
-            json['iconCustom'] != null
-                ? IconCustomDriftModelData.fromJson(json['iconCustom'])
-                : null,
-        passwordHistories:
-            json['passwordHistories']
-                ?.map((e) => PasswordHistoryDriftModelData.fromJson(e))
-                .toList(),
+        iconCustom: json['iconCustom'] != null
+            ? IconCustomDriftModelData.fromJson(json['iconCustom'])
+            : null,
+        passwordHistories: json['passwordHistories']
+            ?.map((e) => PasswordHistoryDriftModelData.fromJson(e))
+            .toList(),
       );
     } catch (e) {
       throw Exception(e);

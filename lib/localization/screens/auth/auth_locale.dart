@@ -211,4 +211,23 @@ class AuthLocale extends BaseLocale {
     LoginText.cancel: 'Cancelar',
     LoginText.exit: 'Salir',
   };
+
+  @override
+  Map<String, String> get it => {
+    LoginText.createPinCode: 'Crea codice PIN',
+    LoginText.confirmPinCode: 'Conferma codice PIN',
+    LoginText.pinCodeNotMatch: 'Il codice PIN non corrisponde',
+    LoginText.pinCodeRequired: 'Inserisci tutte e 6 le cifre',
+    LoginText.enterPin: 'Inserisci PIN',
+    LoginText.enterAnyPin: 'Inserisci qualsiasi PIN',
+    LoginText.backupNote: 'Inserisci il PIN per confermare il backup',
+    LoginText.restoreNote: 'Inserisci il PIN per confermare il ripristino',
+    LoginText.loginLockDescription: 'Account bloccato',
+    LoginText.pleaseTryAgainLater: 'Riprova più tardi {0}',
+    LoginText.confirmExit: 'Conferma uscita',
+    LoginText.confirmExitMessage:
+        'Sei sicuro di voler uscire? Le operazioni in corso potrebbero essere interrotte.',
+    LoginText.cancel: 'Annulla',
+    LoginText.exit: 'Esci',
+  };
 }

@@ -1,8 +1,6 @@
 import 'package:cybersafe_pro/components/icon_show_component.dart';
-import 'package:cybersafe_pro/database/models/icon_custom_model.dart';
 import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
 import 'package:cybersafe_pro/services/data_secure_service.dart';
-import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
 import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
@@ -14,13 +12,20 @@ import 'package:flutter/material.dart';
 class TotpItem extends StatefulWidget {
   final AccountDriftModelData account;
   final String secretKey;
-  final IconCustomModel iconCustom;
   final String icon;
   final String title;
   final String email;
   final Function() onTap;
 
-  const TotpItem({super.key, required this.secretKey, required this.iconCustom, required this.title, required this.email, required this.icon, required this.onTap, required this.account});
+  const TotpItem({
+    super.key,
+    required this.secretKey,
+    required this.title,
+    required this.email,
+    required this.icon,
+    required this.onTap,
+    required this.account,
+  });
 
   @override
   State<TotpItem> createState() => _TotpItemState();
@@ -53,7 +58,16 @@ class _TotpItemState extends State<TotpItem> {
                             height: 50.h,
                             child: ColoredBox(
                               color: Colors.grey.withValues(alpha: 0.2),
-                              child: Center(child: Padding(padding: const EdgeInsets.all(8.0), child: IconShowComponent(account: widget.account, width: 45.w, height: 45.h))),
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: IconShowComponent(
+                                    account: widget.account,
+                                    width: 45.w,
+                                    height: 45.h,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -65,9 +79,21 @@ class _TotpItemState extends State<TotpItem> {
                               DecryptText(
                                 value: widget.title,
                                 decryptTextType: DecryptTextType.info,
-                                style: CustomTextStyle.regular(overflow: TextOverflow.ellipsis, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                                style: CustomTextStyle.regular(
+                                  overflow: TextOverflow.ellipsis,
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                              if (widget.email.isNotEmpty) DecryptText(value: widget.email, decryptTextType: DecryptTextType.info, style: CustomTextStyle.regular(color: Colors.grey, fontSize: 12.sp)),
+                              if (widget.email.isNotEmpty)
+                                DecryptText(
+                                  value: widget.email,
+                                  decryptTextType: DecryptTextType.info,
+                                  style: CustomTextStyle.regular(
+                                    color: Colors.grey,
+                                    fontSize: 12.sp,
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -79,7 +105,10 @@ class _TotpItemState extends State<TotpItem> {
                       if (widget.secretKey.isEmpty) return;
                       String secretKey = await DataSecureService.decryptTOTPKey(widget.secretKey);
                       if (!context.mounted) return;
-                      clipboardCustom(context: context, text: generateTOTPCode(keySecret: secretKey));
+                      clipboardCustom(
+                        context: context,
+                        text: generateTOTPCode(keySecret: secretKey),
+                      );
                     },
                     icon: Icon(Icons.copy, size: 20.sp),
                   ),

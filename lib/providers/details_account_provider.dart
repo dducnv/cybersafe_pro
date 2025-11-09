@@ -24,6 +24,7 @@ class DetailsAccountProvider extends ChangeNotifier {
         notifyListeners();
         return;
       }
+      DriffDbManager.instance.accountAdapter.incrementOpenCount(accountId, account);
       accountDriftModelData = account;
 
       // Load các dữ liệu khác song song

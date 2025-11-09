@@ -124,7 +124,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           onGenerateRoute: AppRoutes.onGenerateRoute,
           builder: (context, child) {
             return SecureApplication(
-              nativeRemoveDelay: 800,
+              nativeRemoveDelay: 300,
               secureApplicationController:
                   SecureApplicationUtil.instance.secureApplicationController,
               child: MediaQuery(
@@ -137,14 +137,17 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       child: AnnotatedRegion(
                         value: SystemUiOverlayStyle(
                           statusBarColor: Theme.of(context).colorScheme.surface,
-                          statusBarBrightness:
-                              !context.darkMode ? Brightness.light : Brightness.dark,
-                          statusBarIconBrightness:
-                              !context.darkMode ? Brightness.dark : Brightness.light,
+                          statusBarBrightness: !context.darkMode
+                              ? Brightness.light
+                              : Brightness.dark,
+                          statusBarIconBrightness: !context.darkMode
+                              ? Brightness.dark
+                              : Brightness.light,
                           systemNavigationBarColor: Theme.of(context).colorScheme.surface,
                           systemNavigationBarDividerColor: Theme.of(context).colorScheme.surface,
-                          systemNavigationBarIconBrightness:
-                              !context.darkMode ? Brightness.dark : Brightness.light,
+                          systemNavigationBarIconBrightness: !context.darkMode
+                              ? Brightness.dark
+                              : Brightness.light,
                         ),
                         child: _buildListenerWidget(child),
                       ),

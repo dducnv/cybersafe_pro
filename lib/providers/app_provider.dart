@@ -6,7 +6,6 @@ import 'package:cybersafe_pro/providers/home_provider.dart';
 import 'package:cybersafe_pro/providers/statistic_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/secure/encrypt/key_manager.dart';
-import 'package:cybersafe_pro/services/old_encrypt_method/data_manager_service_old.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
@@ -125,7 +124,7 @@ class AppProvider extends ChangeNotifier {
     stopTimer();
     logInfo("APP BACKGROUND");
     clearAppData(context);
-    if (_lockOnBackground && DataManagerServiceOld.canLockApp) {
+    if (_lockOnBackground) {
       try {
         _rootTimer?.cancel();
       } catch (e) {

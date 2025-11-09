@@ -484,6 +484,39 @@ class HomeLocale extends BaseLocale {
 
     migrationData: "Migrando datos. Por favor, espera unos minutos y no cierres la aplicación.",
   };
+
+  @override
+  Map<String, String> get it => {
+    home: 'Home',
+    accounts: 'Account', // "Account" trong tiếng Ý có thể vừa là số ít vừa là số nhiều
+    categories: 'Categorie',
+    settings: 'Impostazioni',
+    search: 'Cerca',
+    addAccount: 'Aggiungi Account',
+    noAccounts: 'Nessun account ancora',
+    click: 'Clicca',
+    toAddAccount: 'per aggiungere un account',
+    seeMore: 'Vedi altri {count} rimanenti',
+    seeMore10: 'Vedi altri 10 elementi',
+    items: 'elementi',
+    searchNoResult: 'Nessun risultato trovato',
+    searchTitle: 'Cerca account',
+    searchHint: 'Inserisci nome utente, email, nome app.',
+    passwordGenerator: 'Generatore di Password',
+    deleteAllAccount: 'Elimina tutti gli account selezionati',
+    delete: 'Elimina',
+    changeCategory: 'Cambia Categoria',
+    copySuccess: 'Copiato con successo',
+    selectAccount: 'Seleziona account',
+    unSelectAccount: 'Deseleziona account',
+    accountDetails: 'Dettagli account',
+    updateAccount: 'Aggiorna account',
+    copyUsername: 'Copia nome utente',
+    copyPassword: 'Copia password',
+    deleteAccount: 'Elimina account',
+
+    migrationData: "Migrazione dati in corso. Attendi qualche minuto e non chiudere l'app.",
+  };
 }
 
 //key

@@ -266,4 +266,33 @@ class AboutLocale extends BaseLocale {
     GeneralText.updateNowText: 'Actualizar ahora',
     GeneralText.notNowText: 'Más tarde',
   };
+
+  @override
+  Map<String, String> get it => {
+    GeneralText.aboutAppTitle: 'Informazioni sull\'applicazione',
+    GeneralText.appVersion: 'Versione corrente',
+    GeneralText.securityOfflineTitle: 'Sicurezza assoluta, completamente offline',
+    GeneralText.securityOfflineDesc:
+        'Le password sono memorizzate in modo sicuro sul tuo dispositivo, senza connessione a rete, crittografia standard AES-256.',
+    GeneralText.categoryOrganizeTitle: 'Gestione intelligente delle categorie',
+    GeneralText.categoryOrganizeDesc:
+        'Organizza facilmente le tue credenziali, cerca rapidamente e gestisci in modo efficiente.',
+    GeneralText.backupRestoreTitle: 'Backup & Ripristino Sicuro',
+    GeneralText.backupRestoreDesc:
+        'Crea backup cifrati dei tuoi dati e ripristinali quando necessario.',
+    GeneralText.privacyMaxTitle: 'Massima protezione della privacy',
+    GeneralText.privacyMaxDesc:
+        'Nessun raccolta di dati, nessun account registrazione necessaria, utilizzo completamente offline.',
+
+    GeneralText.proIntroTitle: 'Aggiorna a Pro per godere al massimo',
+    GeneralText.twoFactorAuthDesc:
+        'Sblocca la schermata per accedere rapidamente ai codici OTP (2FA)',
+    GeneralText.statisticsDuplicatePasswordDesc: 'Analizza e avvisa su password duplicate',
+    GeneralText.customThemeColorDesc: 'Personalizza i colori dell\'interfaccia come preferisci',
+    GeneralText.customIconDesc: 'Crea e utilizza icone personali illimitate',
+    GeneralText.passwordHistoryDetailDesc: 'Rivedi l\'istoria delle modifiche delle password',
+
+    GeneralText.updateNowText: 'Aggiorna ora',
+    GeneralText.notNowText: 'Più tardi',
+  };
 }

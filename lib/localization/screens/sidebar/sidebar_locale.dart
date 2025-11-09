@@ -153,4 +153,19 @@ class SidebarLocale extends BaseLocale {
     SidebarText.requestLanguage: 'Solicitar idioma',
     SidebarText.contact: 'Contacto',
   };
+
+  @override
+  Map<String, String> get it => {
+    SidebarText.appName: 'CyberSafe', // Tên thương hiệu giữ nguyên
+    SidebarText.categoryManager: 'Gestione Categorie',
+    SidebarText.about: 'Informazioni',
+    SidebarText.faqs: 'FAQ', // "Domande frequenti" (Câu hỏi thường gặp) thường được viết tắt là FAQ
+    SidebarText.featureRequest: 'Richiesta funzionalità',
+    SidebarText.privacyPolicy: 'Informativa sulla privacy',
+    SidebarText.termsOfService: 'Termini di servizio',
+    SidebarText.rateApp: 'Valuta l\'app',
+    SidebarText.support: 'Supporto',
+    SidebarText.requestLanguage: 'Richiedi lingua',
+    SidebarText.contact: 'Contatti',
+  };
 }

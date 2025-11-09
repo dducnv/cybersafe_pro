@@ -106,10 +106,9 @@ class DataManagerService {
       logWarning('isHasMetaData: ${decryptedDataJson is List}');
 
       final bool decryptedDataJsonIsList = decryptedDataJson is List;
-      final accountDecripted =
-          !decryptedDataJsonIsList
-              ? (decryptedDataJson['accounts'] as List<dynamic>)
-              : decryptedDataJson;
+      final accountDecripted = !decryptedDataJsonIsList
+          ? (decryptedDataJson['accounts'] as List<dynamic>)
+          : decryptedDataJson;
 
       final List<AccountAggregate> accountAggregates = [];
       final List<TextNotesDriftModelData> textNotes = [];
@@ -159,8 +158,10 @@ class DataManagerService {
           return <AccountAggregate>[];
         }
 
-        final iconCustomIds =
-            accounts.where((a) => a.iconCustomId != null).map((a) => a.iconCustomId!).toSet();
+        final iconCustomIds = accounts
+            .where((a) => a.iconCustomId != null)
+            .map((a) => a.iconCustomId!)
+            .toSet();
         final categoryIds = accounts.map((a) => a.categoryId).toSet();
         final accountIds = accounts.map((a) => a.id).toSet();
 
@@ -361,8 +362,9 @@ class DataManagerService {
         'categoryId': categoryId,
       });
 
-      final List<BranchLogo> branchLogos =
-          branchLogoCategories.expand((element) => element.branchLogos).toList();
+      final List<BranchLogo> branchLogos = branchLogoCategories
+          .expand((element) => element.branchLogos)
+          .toList();
 
       final accountCompanions = <AccountDriftModelCompanion>[];
       for (var row in mappedRows) {

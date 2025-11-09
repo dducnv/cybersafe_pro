@@ -241,4 +241,29 @@ class CategoryLocale extends BaseLocale {
     CategoryText.other: '🔍 Otro',
     CategoryText.updateCategory: 'Actualizar categoría',
   };
+
+  @override
+  Map<String, String> get it => {
+    CategoryText.title: 'Gestione Categorie',
+    CategoryText.deleteCategory: 'Elimina Categoria',
+    CategoryText.confirmDelete: 'Conferma Eliminazione',
+    CategoryText.cancelDelete: 'Annulla',
+    CategoryText.deleteConfirmation: 'Sei sicuro di voler eliminare questa categoria?',
+    CategoryText.deleteWarningWithAccounts:
+        'Questa categoria contiene già degli account. Se eliminata, tutti gli account in questa categoria verranno eliminati.',
+    CategoryText.deleteWarningEmpty: 'Sei sicuro di voler eliminare questa categoria?',
+    CategoryText.categoryCount: '{0} elementi',
+    CategoryText.createCategory: 'Crea Categoria',
+    CategoryText.editCategory: 'Modifica Categoria',
+    CategoryText.categoryName: 'Nome Categoria',
+    CategoryText.categoryIcon: 'Icona Categoria',
+    CategoryText.cancel: 'Annulla',
+    CategoryText.bank: '💰 Banca',
+    CategoryText.job: '💼 Lavoro',
+    CategoryText.study: '🎓 Studio',
+    CategoryText.shopping: '🛍️ Shopping',
+    CategoryText.entertainment: '🎮 Intrattenimento',
+    CategoryText.other: '🔍 Altro',
+    CategoryText.updateCategory: 'Aggiorna Categoria',
+  };
 }

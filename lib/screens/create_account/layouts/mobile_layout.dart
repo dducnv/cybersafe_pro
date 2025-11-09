@@ -111,84 +111,76 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout>
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      builder:
-          (context) => DefaultTabController(
-            length: 2,
-            child: Container(
-              height: MediaQuery.of(context).size.height * 0.8,
-              width: double.infinity,
-              padding: const EdgeInsets.only(top: 16),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          context.appLocale.createAccountLocale.getText(
-                            CreateAccountText.chooseIcon,
-                          ),
-                          style: CustomTextStyle.regular(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            _pickImageFromGallery(context, formProvider, tabController);
-                          },
-                          icon: Icon(Icons.add, size: 24.sp),
-                        ),
-                      ],
+      builder: (context) => DefaultTabController(
+        length: 2,
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.8,
+          width: double.infinity,
+          padding: const EdgeInsets.only(top: 16),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      context.appLocale.createAccountLocale.getText(CreateAccountText.chooseIcon),
+                      style: CustomTextStyle.regular(fontSize: 16.sp, fontWeight: FontWeight.w600),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  ListTile(
-                    selected: formProvider.branchLogoSelected == null,
-                    onTap: () {
-                      formProvider.resetIcon();
-                      Navigator.pop(context);
-                    },
-                    leading: Icon(Icons.cancel_outlined, color: Colors.blueAccent, size: 30.sp),
-                    title: Text(
-                      context.appLocale.createAccountLocale.getText(CreateAccountText.noSelect),
-                      style: CustomTextStyle.regular(fontSize: 16.sp),
+                    IconButton(
+                      onPressed: () {
+                        _pickImageFromGallery(context, formProvider, tabController);
+                      },
+                      icon: Icon(Icons.add, size: 24.sp),
                     ),
-                  ),
-                  const SizedBox(height: 10),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              ListTile(
+                selected: formProvider.branchLogoSelected == null,
+                onTap: () {
+                  formProvider.resetIcon();
+                  Navigator.pop(context);
+                },
+                leading: Icon(Icons.cancel_outlined, color: Colors.blueAccent, size: 30.sp),
+                title: Text(
+                  context.appLocale.createAccountLocale.getText(CreateAccountText.noSelect),
+                  style: CustomTextStyle.regular(fontSize: 16.sp),
+                ),
+              ),
+              const SizedBox(height: 10),
 
-                  TabBar(
-                    dividerColor: Colors.grey[500],
-                    controller: tabController,
-                    tabs: [
-                      Tab(
-                        text: context.appLocale.createAccountLocale.getText(
-                          CreateAccountText.iconApp,
-                        ),
-                      ),
-                      Tab(
-                        text: context.appLocale.createAccountLocale.getText(
-                          CreateAccountText.iconCustom,
-                        ),
-                      ),
-                    ],
+              TabBar(
+                dividerColor: Colors.grey[500],
+                controller: tabController,
+                tabs: [
+                  Tab(
+                    text: context.appLocale.createAccountLocale.getText(CreateAccountText.iconApp),
                   ),
-                  const SizedBox(height: 10),
-                  Expanded(
-                    child: TabBarView(
-                      controller: tabController,
-                      children: [
-                        _buildListIconsDefaultApp(context: context, formProvider: formProvider),
-                        _buildListIconsCustom(context: context, formProvider: formProvider),
-                      ],
+                  Tab(
+                    text: context.appLocale.createAccountLocale.getText(
+                      CreateAccountText.iconCustom,
                     ),
                   ),
                 ],
               ),
-            ),
+              const SizedBox(height: 10),
+              Expanded(
+                child: TabBarView(
+                  controller: tabController,
+                  children: [
+                    _buildListIconsDefaultApp(context: context, formProvider: formProvider),
+                    _buildListIconsCustom(context: context, formProvider: formProvider),
+                  ],
+                ),
+              ),
+            ],
           ),
+        ),
+      ),
     );
   }
 
@@ -197,15 +189,14 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout>
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder:
-          (context) => AddFieldBottomSheet(
-            controller: formProvider.txtFieldTitle,
-            onAddField: () {
-              Navigator.pop(context);
-              formProvider.handleAddField();
-            },
-            typeTextFields: typeTextFields,
-          ),
+      builder: (context) => AddFieldBottomSheet(
+        controller: formProvider.txtFieldTitle,
+        onAddField: () {
+          Navigator.pop(context);
+          formProvider.handleAddField();
+        },
+        typeTextFields: typeTextFields,
+      ),
     );
   }
 
@@ -228,35 +219,32 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout>
             ),
             const SizedBox(height: 10),
             Column(
-              children:
-                  branchLogoCategories[index].branchLogos
-                      .map(
-                        (e) => ListTile(
-                          selected: formProvider.branchLogoSelected == e,
-                          onTap: () {
-                            formProvider.pickIcon(
-                              isCustomIcon: false,
-                              iconCustomModel: null,
-                              branchLogo: e,
-                            );
-                            Navigator.pop(context);
-                          },
-                          leading: SizedBox(
-                            width: 40.h,
-                            height: 40.h,
-                            child: SvgPicture.asset(
-                              context.darkMode
-                                  ? e.branchLogoPathDarkMode!
-                                  : e.branchLogoPathLightMode!,
-                            ),
-                          ),
-                          title: Text(
-                            e.branchName ?? "",
-                            style: CustomTextStyle.regular(fontSize: 16.sp),
-                          ),
+              children: branchLogoCategories[index].branchLogos
+                  .map(
+                    (e) => ListTile(
+                      selected: formProvider.branchLogoSelected == e,
+                      onTap: () {
+                        formProvider.pickIcon(
+                          isCustomIcon: false,
+                          iconCustomModel: null,
+                          branchLogo: e,
+                        );
+                        Navigator.pop(context);
+                      },
+                      leading: SizedBox(
+                        width: 40.h,
+                        height: 40.h,
+                        child: SvgPicture.asset(
+                          context.darkMode ? e.branchLogoPathDarkMode! : e.branchLogoPathLightMode!,
                         ),
-                      )
-                      .toList(),
+                      ),
+                      title: Text(
+                        e.branchName ?? "",
+                        style: CustomTextStyle.regular(fontSize: 16.sp),
+                      ),
+                    ),
+                  )
+                  .toList(),
             ),
           ],
         );
@@ -274,47 +262,47 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout>
       builder: (context, listIconsCustom, child) {
         return listIconsCustom.isEmpty
             ? Center(
-              child: Image.asset("assets/images/exclamation-mark.png", width: 60.w, height: 60.h),
-            )
+                child: Image.asset("assets/images/exclamation-mark.png", width: 60.w, height: 60.h),
+              )
             : ListView.builder(
-              itemCount: listIconsCustom.length,
-              shrinkWrap: true,
-              itemBuilder: (context, index) {
-                return RequestPro(
-                  child: ListTile(
-                    onTap: () {
-                      formProvider.pickIcon(
-                        isCustomIcon: true,
-                        iconCustomModel: formProvider.listIconsCustom[index],
-                      );
-                      Navigator.pop(context);
-                    },
-                    leading: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.memory(
-                        base64Decode(formProvider.listIconsCustom[index].imageBase64),
-                        width: 40.h,
-                        height: 40.h,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                    title: Text(
-                      formProvider.listIconsCustom[index].name,
-                      style: CustomTextStyle.regular(fontSize: 16.sp),
-                    ),
-                    trailing: IconButton(
-                      onPressed: () {
-                        formProvider.deleteIconCustom(formProvider.listIconsCustom[index]);
+                itemCount: listIconsCustom.length,
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  return RequestPro(
+                    child: ListTile(
+                      onTap: () {
+                        formProvider.pickIcon(
+                          isCustomIcon: true,
+                          iconCustomModel: formProvider.listIconsCustom[index],
+                        );
+                        Navigator.pop(context);
                       },
-                      icon: IgnorePointer(
-                        ignoring: false,
-                        child: Icon(Icons.close, color: Colors.redAccent, size: 24.sp),
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.memory(
+                          base64Decode(formProvider.listIconsCustom[index].imageBase64),
+                          width: 40.h,
+                          height: 40.h,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      title: Text(
+                        formProvider.listIconsCustom[index].name,
+                        style: CustomTextStyle.regular(fontSize: 16.sp),
+                      ),
+                      trailing: IconButton(
+                        onPressed: () {
+                          formProvider.deleteIconCustom(formProvider.listIconsCustom[index]);
+                        },
+                        icon: IgnorePointer(
+                          ignoring: false,
+                          child: Icon(Icons.close, color: Colors.redAccent, size: 24.sp),
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-            );
+                  );
+                },
+              );
       },
     );
   }
@@ -329,18 +317,17 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout>
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
     if (image == null) return;
     if (!mounted) return;
-    final result =
-        Platform.isAndroid
-            ? await showMaterialImageCropper(
-              context,
-              imageProvider: FileImage(File(image.path)),
-              allowedAspectRatios: [CropAspectRatio(width: 1, height: 1)],
-            )
-            : await showCupertinoImageCropper(
-              context,
-              imageProvider: FileImage(File(image.path)),
-              allowedAspectRatios: [CropAspectRatio(width: 1, height: 1)],
-            );
+    final result = Platform.isAndroid
+        ? await showMaterialImageCropper(
+            context,
+            imageProvider: FileImage(File(image.path)),
+            allowedAspectRatios: [CropAspectRatio(width: 1, height: 1)],
+          )
+        : await showCupertinoImageCropper(
+            context,
+            imageProvider: FileImage(File(image.path)),
+            allowedAspectRatios: [CropAspectRatio(width: 1, height: 1)],
+          );
 
     if (result == null) {
       return;
@@ -348,10 +335,9 @@ class _CreateAccountMobileLayoutState extends State<CreateAccountMobileLayout>
 
     ui.Image imageCropped = result.uiImage;
     // Convert ui.Image to img.Image
-    final img.Image originalImage =
-        img.decodeImage(
-          (await imageCropped.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List(),
-        )!;
+    final img.Image originalImage = img.decodeImage(
+      (await imageCropped.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List(),
+    )!;
 
     // Resize the image to higher quality - 512x512 for better quality
     final img.Image resizedImage = img.copyResize(

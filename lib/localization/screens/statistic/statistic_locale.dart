@@ -180,4 +180,22 @@ class StatisticLocale extends BaseLocale {
     StatisticText.totalAccountPasswordWeak: 'Total de contraseñas débiles',
     StatisticText.totalAccountSamePassword: 'Total de contraseñas duplicadas',
   };
+
+  @override
+  Map<String, String> get it => {
+    StatisticText.title: 'Statistiche',
+    StatisticText.securityScore: 'Punteggio di sicurezza',
+    StatisticText.weakPasswords: 'Deboli',
+    StatisticText.duplicatePasswords: 'Duplicate',
+    StatisticText.strongPasswords: 'Forti',
+    StatisticText.securityCheck: 'Controllo sicurezza',
+    StatisticText.passwordAge: 'Età password',
+    StatisticText.passwordStrength: 'Robustezza password',
+    StatisticText.twoFactorEnabled: 'Autenticazione a due fattori',
+    StatisticText.accountsProtected: 'Account protetti',
+    StatisticText.totalAccount: 'Account totali',
+    StatisticText.totalAccountPasswordStrong: 'Totale password forti',
+    StatisticText.totalAccountPasswordWeak: 'Totale password deboli',
+    StatisticText.totalAccountSamePassword: 'Totale password duplicate',
+  };
 }

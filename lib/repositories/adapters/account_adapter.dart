@@ -18,26 +18,37 @@ class AccountAdapter {
       password: data.password.present ? Value(data.password.value) : const Value.absent(),
       notes: data.notes.present ? Value(data.notes.value) : const Value.absent(),
       categoryId: data.categoryId.value,
-      iconCustomId: data.iconCustomId.present ? Value(data.iconCustomId.value) : const Value.absent(),
+      openCount: Value(data.openCount.value),
+      iconCustomId: data.iconCustomId.present
+          ? Value(data.iconCustomId.value)
+          : const Value.absent(),
     );
     final id = await _database.accountDriftModel.insertOne(account);
     return id;
   }
 
   Future<void> updateAccount(int id, AccountDriftModelCompanion newData) async {
-    await (_database.update(_database.accountDriftModel)..where((tbl) => tbl.id.equals(id))).write(newData);
+    await (_database.update(
+      _database.accountDriftModel,
+    )..where((tbl) => tbl.id.equals(id))).write(newData);
   }
 
   Future<void> deleteAccount(int id) async {
     await _database.transaction(() async {
       // Delete related TOTP
-      await (_database.delete(_database.tOTPDriftModel)..where((tbl) => tbl.accountId.equals(id))).go();
+      await (_database.delete(
+        _database.tOTPDriftModel,
+      )..where((tbl) => tbl.accountId.equals(id))).go();
 
       // Delete related Custom Fields
-      await (_database.delete(_database.accountCustomFieldDriftModel)..where((tbl) => tbl.accountId.equals(id))).go();
+      await (_database.delete(
+        _database.accountCustomFieldDriftModel,
+      )..where((tbl) => tbl.accountId.equals(id))).go();
 
       // Delete Password History (optional)
-      await (_database.delete(_database.passwordHistoryDriftModel)..where((tbl) => tbl.accountId.equals(id))).go();
+      await (_database.delete(
+        _database.passwordHistoryDriftModel,
+      )..where((tbl) => tbl.accountId.equals(id))).go();
 
       // Delete Account itself
       await (_database.delete(_database.accountDriftModel)..where((tbl) => tbl.id.equals(id))).go();
@@ -57,17 +68,16 @@ class AccountAdapter {
 
   Future<List<AccountDriftModelData>> getAllBasicInfo() async {
     try {
-      final rows =
-          await _database
-              .customSelect(
-                '''
-                SELECT id, title, username, category_id, created_at, updated_at
+      final rows = await _database
+          .customSelect(
+            '''
+                SELECT id, title, username, category_id, created_at, updated_at, open_count
                 FROM account_drift_model
                 WHERE deleted_at IS NULL
                 ''',
-                readsFrom: {_database.accountDriftModel},
-              )
-              .get();
+            readsFrom: {_database.accountDriftModel},
+          )
+          .get();
 
       return rows.map((row) {
         return AccountDriftModelData(
@@ -77,6 +87,7 @@ class AccountAdapter {
           categoryId: row.read<int>('category_id'),
           createdAt: row.read<DateTime>('created_at'),
           updatedAt: row.read<DateTime>('updated_at'),
+          openCount: row.read<int?>('open_count') ?? 0,
         );
       }).toList();
     } catch (e) {
@@ -88,10 +99,9 @@ class AccountAdapter {
   /// Lấy tất cả tài khoản có giới hạn số lượng
   Future<List<AccountDriftModelData>> getAllWithLimit(int limit, int offset) async {
     try {
-      final query =
-          _database.select(_database.accountDriftModel)
-            ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])
-            ..limit(limit, offset: offset);
+      final query = _database.select(_database.accountDriftModel)
+        ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])
+        ..limit(limit, offset: offset);
 
       return await query.get();
     } catch (e) {
@@ -104,7 +114,6 @@ class AccountAdapter {
   Future<AccountDriftModelData?> getById(int id) async {
     try {
       final query = _database.select(_database.accountDriftModel)..where((t) => t.id.equals(id));
-
       return await query.getSingleOrNull();
     } catch (e) {
       logError('Error getting account by ID: $e');
@@ -112,13 +121,19 @@ class AccountAdapter {
     }
   }
 
+  //increment open count
+  Future<void> incrementOpenCount(int id, AccountDriftModelData account) async {
+    await (_database.update(_database.accountDriftModel)..where((t) => t.id.equals(id))).write(
+      AccountDriftModelCompanion(openCount: Value(account.openCount + 1)),
+    );
+  }
+
   /// Lấy tài khoản theo category
   Future<List<AccountDriftModelData>> getByCategory(int categoryId) async {
     try {
-      final query =
-          _database.select(_database.accountDriftModel)
-            ..where((t) => t.categoryId.equals(categoryId))
-            ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]);
+      final query = _database.select(_database.accountDriftModel)
+        ..where((t) => t.categoryId.equals(categoryId))
+        ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]);
 
       return await query.get();
     } catch (e) {
@@ -127,13 +142,19 @@ class AccountAdapter {
     }
   }
 
-  Future<Map<int, List<AccountDriftModelData>>> getByCategoriesWithLimit(List<CategoryDriftModelData> categories, int limitPerCategory) async {
+  Future<Map<int, List<AccountDriftModelData>>> getByCategoriesWithLimit(
+    List<CategoryDriftModelData> categories,
+    int limitPerCategory,
+  ) async {
     // Tạo danh sách các Future để thực hiện song song
-    final futures =
-        categories.map((category) async {
-          final accounts = await getBasicByCategoryWithLimit(categoryId: category.id, limit: limitPerCategory, offset: 0);
-          return MapEntry(category.id, accounts);
-        }).toList();
+    final futures = categories.map((category) async {
+      final accounts = await getBasicByCategoryWithLimit(
+        categoryId: category.id,
+        limit: limitPerCategory,
+        offset: 0,
+      );
+      return MapEntry(category.id, accounts);
+    }).toList();
 
     // Thực hiện tất cả queries song song
     final results = await Future.wait(futures);
@@ -143,16 +164,29 @@ class AccountAdapter {
   }
 
   /// Lấy tài khoản theo category có giới hạn số lượng
-  Future<List<AccountDriftModelData>> getBasicByCategoryWithLimit({required int categoryId, int? limit, int? offset}) async {
+  Future<List<AccountDriftModelData>> getBasicByCategoryWithLimit({
+    required int categoryId,
+    int? limit,
+    int? offset,
+  }) async {
     try {
       final buffer = StringBuffer();
       final variables = <Variable>[];
 
       buffer.write('''
-      SELECT id, icon, title, username, icon_custom_id, category_id, created_at, updated_at, icon
+      SELECT 
+        id, 
+        icon, 
+        title, 
+        username, 
+        icon_custom_id, 
+        category_id, 
+        created_at, 
+        updated_at, 
+        COALESCE(open_count, 0) AS open_count
       FROM account_drift_model
       WHERE category_id = ? AND deleted_at IS NULL
-      ORDER BY updated_at DESC
+      ORDER BY open_count DESC, updated_at DESC
     ''');
       variables.add(Variable.withInt(categoryId));
 
@@ -166,7 +200,13 @@ class AccountAdapter {
         variables.add(Variable.withInt(offset));
       }
 
-      final rows = await _database.customSelect(buffer.toString(), variables: variables, readsFrom: {_database.accountDriftModel}).get();
+      final rows = await _database
+          .customSelect(
+            buffer.toString(),
+            variables: variables,
+            readsFrom: {_database.accountDriftModel},
+          )
+          .get();
 
       return rows.map((row) {
         return AccountDriftModelData(
@@ -181,6 +221,7 @@ class AccountAdapter {
           passwordUpdatedAt: null,
           createdAt: row.read<DateTime>('created_at'),
           updatedAt: row.read<DateTime>('updated_at'),
+          openCount: row.read<int?>('open_count') ?? 0,
           deletedAt: null,
         );
       }).toList();
@@ -193,16 +234,15 @@ class AccountAdapter {
   /// Lấy tài khoản có TOTP
   Future<List<AccountDriftModelData>> getAllWithOTP() async {
     try {
-      final query =
-          _database.select(_database.accountDriftModel)
-            ..where(
-              (t) => t.id.isInQuery(
-                _database.selectOnly(_database.tOTPDriftModel)
-                  ..addColumns([_database.tOTPDriftModel.accountId])
-                  ..where(_database.tOTPDriftModel.secretKey.isNotNull()),
-              ),
-            )
-            ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]);
+      final query = _database.select(_database.accountDriftModel)
+        ..where(
+          (t) => t.id.isInQuery(
+            _database.selectOnly(_database.tOTPDriftModel)
+              ..addColumns([_database.tOTPDriftModel.accountId])
+              ..where(_database.tOTPDriftModel.secretKey.isNotNull()),
+          ),
+        )
+        ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]);
 
       return await query.get();
     } catch (e) {
@@ -214,10 +254,9 @@ class AccountAdapter {
   /// Tìm kiếm tài khoản theo title
   Future<List<AccountDriftModelData>> searchByTitle(String keyword) async {
     try {
-      final query =
-          _database.select(_database.accountDriftModel)
-            ..where((t) => t.title.contains(keyword))
-            ..orderBy([(t) => OrderingTerm.asc(t.title)]);
+      final query = _database.select(_database.accountDriftModel)
+        ..where((t) => t.title.contains(keyword))
+        ..orderBy([(t) => OrderingTerm.asc(t.title)]);
 
       return await query.get();
     } catch (e) {
@@ -229,11 +268,10 @@ class AccountAdapter {
   /// Tìm kiếm tài khoản theo title có giới hạn số lượng
   Future<List<AccountDriftModelData>> searchByTitleWithLimit(String keyword, int limit) async {
     try {
-      final query =
-          _database.select(_database.accountDriftModel)
-            ..where((t) => t.title.contains(keyword))
-            ..orderBy([(t) => OrderingTerm.asc(t.title)])
-            ..limit(limit);
+      final query = _database.select(_database.accountDriftModel)
+        ..where((t) => t.title.contains(keyword))
+        ..orderBy([(t) => OrderingTerm.asc(t.title)])
+        ..limit(limit);
 
       return await query.get();
     } catch (e) {
@@ -245,10 +283,9 @@ class AccountAdapter {
   /// Tìm kiếm tài khoản theo username
   Future<List<AccountDriftModelData>> searchByUsername(String username) async {
     try {
-      final query =
-          _database.select(_database.accountDriftModel)
-            ..where((t) => t.username.contains(username))
-            ..orderBy([(t) => OrderingTerm.asc(t.username)]);
+      final query = _database.select(_database.accountDriftModel)
+        ..where((t) => t.username.contains(username))
+        ..orderBy([(t) => OrderingTerm.asc(t.username)]);
 
       return await query.get();
     } catch (e) {
@@ -260,10 +297,9 @@ class AccountAdapter {
   /// Tìm kiếm tài khoản tổng quát
   Future<List<AccountDriftModelData>> searchAccounts(String query) async {
     try {
-      final queryBuilder =
-          _database.select(_database.accountDriftModel)
-            ..where((t) => t.title.contains(query) | t.username.contains(query))
-            ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]);
+      final queryBuilder = _database.select(_database.accountDriftModel)
+        ..where((t) => t.title.contains(query) | t.username.contains(query))
+        ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]);
 
       return await queryBuilder.get();
     } catch (e) {
@@ -275,10 +311,9 @@ class AccountAdapter {
   /// Lấy tài khoản được tạo gần đây
   Future<List<AccountDriftModelData>> getRecentAccounts({int limit = 10}) async {
     try {
-      final query =
-          _database.select(_database.accountDriftModel)
-            ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
-            ..limit(limit);
+      final query = _database.select(_database.accountDriftModel)
+        ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
+        ..limit(limit);
 
       return await query.get();
     } catch (e) {
@@ -290,10 +325,9 @@ class AccountAdapter {
   /// Lấy tài khoản được cập nhật gần đây
   Future<List<AccountDriftModelData>> getRecentlyUpdated({int limit = 10}) async {
     try {
-      final query =
-          _database.select(_database.accountDriftModel)
-            ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])
-            ..limit(limit);
+      final query = _database.select(_database.accountDriftModel)
+        ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])
+        ..limit(limit);
 
       return await query.get();
     } catch (e) {
@@ -305,7 +339,10 @@ class AccountAdapter {
   /// Đếm số lượng tài khoản
   Future<int> count() async {
     try {
-      return await _database.selectOnly(_database.accountDriftModel).get().then((rows) => rows.length);
+      return await _database
+          .selectOnly(_database.accountDriftModel)
+          .get()
+          .then((rows) => rows.length);
     } catch (e) {
       logError('Error counting accounts: $e');
       return 0;
@@ -315,10 +352,9 @@ class AccountAdapter {
   /// Đếm số lượng tài khoản theo category
   Future<int> countByCategory(int categoryId) async {
     try {
-      final query =
-          _database.selectOnly(_database.accountDriftModel)
-            ..addColumns([_database.accountDriftModel.id.count()])
-            ..where(_database.accountDriftModel.categoryId.equals(categoryId));
+      final query = _database.selectOnly(_database.accountDriftModel)
+        ..addColumns([_database.accountDriftModel.id.count()])
+        ..where(_database.accountDriftModel.categoryId.equals(categoryId));
 
       final row = await query.getSingleOrNull();
       return row?.read<int>(_database.accountDriftModel.id.count()) ?? 0;
@@ -372,10 +408,14 @@ class AccountAdapter {
   /// Thêm hoặc cập nhật nhiều tài khoản (song song)
   Future<List<int>> putMany(List<AccountDriftModelData> accounts) async {
     try {
-      final updatedAccounts = accounts.map((account) => account.copyWith(updatedAt: DateTime.now())).toList();
+      final updatedAccounts = accounts
+          .map((account) => account.copyWith(updatedAt: DateTime.now()))
+          .toList();
 
       // Thực hiện insert song song
-      final futures = updatedAccounts.map((account) => _database.into(_database.accountDriftModel).insert(account)).toList();
+      final futures = updatedAccounts
+          .map((account) => _database.into(_database.accountDriftModel).insert(account))
+          .toList();
 
       return await Future.wait(futures);
     } catch (e) {
@@ -389,16 +429,24 @@ class AccountAdapter {
     try {
       await _database.transaction(() async {
         // Delete related TOTP first
-        await (_database.delete(_database.tOTPDriftModel)..where((tbl) => tbl.accountId.equals(id))).go();
+        await (_database.delete(
+          _database.tOTPDriftModel,
+        )..where((tbl) => tbl.accountId.equals(id))).go();
 
         // Delete related Custom Fields
-        await (_database.delete(_database.accountCustomFieldDriftModel)..where((tbl) => tbl.accountId.equals(id))).go();
+        await (_database.delete(
+          _database.accountCustomFieldDriftModel,
+        )..where((tbl) => tbl.accountId.equals(id))).go();
 
         // Delete Password History
-        await (_database.delete(_database.passwordHistoryDriftModel)..where((tbl) => tbl.accountId.equals(id))).go();
+        await (_database.delete(
+          _database.passwordHistoryDriftModel,
+        )..where((tbl) => tbl.accountId.equals(id))).go();
 
         // Finally delete the account itself
-        await (_database.delete(_database.accountDriftModel)..where((tbl) => tbl.id.equals(id))).go();
+        await (_database.delete(
+          _database.accountDriftModel,
+        )..where((tbl) => tbl.id.equals(id))).go();
       });
 
       return true;
@@ -413,16 +461,24 @@ class AccountAdapter {
     try {
       await _database.transaction(() async {
         // Delete related TOTPs for all accounts
-        await (_database.delete(_database.tOTPDriftModel)..where((tbl) => tbl.accountId.isIn(ids))).go();
+        await (_database.delete(
+          _database.tOTPDriftModel,
+        )..where((tbl) => tbl.accountId.isIn(ids))).go();
 
         // Delete related Custom Fields for all accounts
-        await (_database.delete(_database.accountCustomFieldDriftModel)..where((tbl) => tbl.accountId.isIn(ids))).go();
+        await (_database.delete(
+          _database.accountCustomFieldDriftModel,
+        )..where((tbl) => tbl.accountId.isIn(ids))).go();
 
         // Delete Password History for all accounts
-        await (_database.delete(_database.passwordHistoryDriftModel)..where((tbl) => tbl.accountId.isIn(ids))).go();
+        await (_database.delete(
+          _database.passwordHistoryDriftModel,
+        )..where((tbl) => tbl.accountId.isIn(ids))).go();
 
         // Finally delete all accounts
-        await (_database.delete(_database.accountDriftModel)..where((tbl) => tbl.id.isIn(ids))).go();
+        await (_database.delete(
+          _database.accountDriftModel,
+        )..where((tbl) => tbl.id.isIn(ids))).go();
       });
 
       return ids.length; // Return the number of accounts that were supposed to be deleted
@@ -457,35 +513,33 @@ class AccountAdapter {
 
   /// Theo dõi thay đổi tất cả tài khoản
   Stream<List<AccountDriftModelData>> watchAll() {
-    final query = _database.select(_database.accountDriftModel)..orderBy([(t) => OrderingTerm.asc(t.title)]);
+    final query = _database.select(_database.accountDriftModel)
+      ..orderBy([(t) => OrderingTerm.asc(t.title)]);
     return query.watch();
   }
 
   /// Theo dõi thay đổi tất cả tài khoản có giới hạn số lượng
   Stream<List<AccountDriftModelData>> watchAllWithLimit(int limit) {
-    final query =
-        _database.select(_database.accountDriftModel)
-          ..orderBy([(t) => OrderingTerm.asc(t.title)])
-          ..limit(limit);
+    final query = _database.select(_database.accountDriftModel)
+      ..orderBy([(t) => OrderingTerm.asc(t.title)])
+      ..limit(limit);
     return query.watch();
   }
 
   /// Theo dõi thay đổi tài khoản theo category
   Stream<List<AccountDriftModelData>> watchByCategory(int categoryId) {
-    final query =
-        _database.select(_database.accountDriftModel)
-          ..where((t) => t.categoryId.equals(categoryId))
-          ..orderBy([(t) => OrderingTerm.asc(t.title)]);
+    final query = _database.select(_database.accountDriftModel)
+      ..where((t) => t.categoryId.equals(categoryId))
+      ..orderBy([(t) => OrderingTerm.asc(t.title)]);
     return query.watch();
   }
 
   /// Theo dõi thay đổi tài khoản theo category có giới hạn số lượng
   Stream<List<AccountDriftModelData>> watchByCategoryWithLimit(int categoryId, int limit) {
-    final query =
-        _database.select(_database.accountDriftModel)
-          ..where((t) => t.categoryId.equals(categoryId))
-          ..orderBy([(t) => OrderingTerm.asc(t.title)])
-          ..limit(limit);
+    final query = _database.select(_database.accountDriftModel)
+      ..where((t) => t.categoryId.equals(categoryId))
+      ..orderBy([(t) => OrderingTerm.asc(t.title)])
+      ..limit(limit);
     return query.watch();
   }
 
@@ -497,20 +551,21 @@ class AccountAdapter {
   // ==================== Parallel Operations ====================
 
   /// Lấy tài khoản với thông tin category theo categories (song song)
-  Future<Map<int, List<Map<String, dynamic>>>> getWithCategoryInfoByCategories(List<int> categoryIds) async {
+  Future<Map<int, List<Map<String, dynamic>>>> getWithCategoryInfoByCategories(
+    List<int> categoryIds,
+  ) async {
     try {
       // Tạo danh sách các Future để lấy song song
-      final futures =
-          categoryIds.map((categoryId) async {
-            final accounts = await getByCategory(categoryId);
-            final accountsWithCategory = await Future.wait(
-              accounts.map((account) async {
-                final category = await DriffDbManager.instance.categoryAdapter.getById(categoryId);
-                return {'account': account, 'category': category};
-              }),
-            );
-            return MapEntry(categoryId, accountsWithCategory);
-          }).toList();
+      final futures = categoryIds.map((categoryId) async {
+        final accounts = await getByCategory(categoryId);
+        final accountsWithCategory = await Future.wait(
+          accounts.map((account) async {
+            final category = await DriffDbManager.instance.categoryAdapter.getById(categoryId);
+            return {'account': account, 'category': category};
+          }),
+        );
+        return MapEntry(categoryId, accountsWithCategory);
+      }).toList();
 
       // Thực hiện tất cả queries song song
       final results = await Future.wait(futures);
@@ -537,14 +592,17 @@ class AccountAdapter {
   Future<Map<int, Map<String, dynamic>>> getStatisticsByCategories(List<int> categoryIds) async {
     try {
       // Tạo danh sách các Future để lấy thống kê song song
-      final futures =
-          categoryIds.map((categoryId) async {
-            final accounts = await getByCategory(categoryId);
-            final count = accounts.length;
-            final recentAccounts = accounts.take(5).toList(); // Lấy 5 accounts gần nhất
+      final futures = categoryIds.map((categoryId) async {
+        final accounts = await getByCategory(categoryId);
+        final count = accounts.length;
+        final recentAccounts = accounts.take(5).toList(); // Lấy 5 accounts gần nhất
 
-            return MapEntry(categoryId, {'count': count, 'recentAccounts': recentAccounts, 'lastUpdated': accounts.isNotEmpty ? accounts.first.updatedAt : null});
-          }).toList();
+        return MapEntry(categoryId, {
+          'count': count,
+          'recentAccounts': recentAccounts,
+          'lastUpdated': accounts.isNotEmpty ? accounts.first.updatedAt : null,
+        });
+      }).toList();
 
       // Thực hiện tất cả queries song song
       final results = await Future.wait(futures);
@@ -557,14 +615,15 @@ class AccountAdapter {
   }
 
   /// Tìm kiếm tài khoản theo nhiều keywords (song song)
-  Future<Map<String, List<AccountDriftModelData>>> searchByMultipleKeywords(List<String> keywords) async {
+  Future<Map<String, List<AccountDriftModelData>>> searchByMultipleKeywords(
+    List<String> keywords,
+  ) async {
     try {
       // Tạo danh sách các Future để tìm kiếm song song
-      final futures =
-          keywords.map((keyword) async {
-            final accounts = await searchAccounts(keyword);
-            return MapEntry(keyword, accounts);
-          }).toList();
+      final futures = keywords.map((keyword) async {
+        final accounts = await searchAccounts(keyword);
+        return MapEntry(keyword, accounts);
+      }).toList();
 
       // Thực hiện tất cả queries song song
       final results = await Future.wait(futures);

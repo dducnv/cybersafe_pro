@@ -58,8 +58,14 @@ class OTP {
   static int lastUsedCounter = 0;
 
   static bool isKeyValid(String secret) {
+    final normalizedSecretKey = secret
+        .toUpperCase()
+        .trim()
+        .replaceAll(" ", "")
+        .replaceAll("-", "")
+        .replaceAll(" ", "");
     try {
-      base32.decode(secret);
+      base32.decode(normalizedSecretKey);
       return true;
     } catch (e) {
       return false;
@@ -81,8 +87,9 @@ class OTP {
     if (u.queryParameters['issuer'] == null && !u.path.contains(':')) {
       throwAppError(ErrorText.missingIssuer, error: 'uri is missing issuer, uri: $uri');
     }
-    String issuer =
-        u.queryParameters['issuer'] != null ? u.queryParameters['issuer']! : u.path.split(':')[0];
+    String issuer = u.queryParameters['issuer'] != null
+        ? u.queryParameters['issuer']!
+        : u.path.split(':')[0];
 
     String accountName = u.path.contains(':') ? u.path.split(':')[1] : u.path;
 

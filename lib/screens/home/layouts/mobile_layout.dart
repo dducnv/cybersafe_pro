@@ -8,6 +8,7 @@ import 'package:cybersafe_pro/providers/account_provider.dart';
 import 'package:cybersafe_pro/providers/category_provider.dart';
 import 'package:cybersafe_pro/providers/home_provider.dart';
 import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
+import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 import 'package:cybersafe_pro/resources/size_text_icon.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/services/data_secure_service.dart';
@@ -191,10 +192,9 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                                 return AccountItemWidget(
                                   accountModel: account,
                                   isLastItem: itemIndex == accounts.length - 1,
-                                  onTap:
-                                      homeProvider.accountSelected.isNotEmpty
-                                          ? () => homeProvider.handleSelectAccount(account)
-                                          : null,
+                                  onTap: homeProvider.accountSelected.isNotEmpty
+                                      ? () => homeProvider.handleSelectAccount(account)
+                                      : null,
                                   onLongPress: () {
                                     homeProvider.handleSelectAccount(account);
                                   },
@@ -220,7 +220,10 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                 ),
               ),
             ),
-            Padding(padding: EdgeInsets.only(top: 16, bottom: 60.h), child: _buildCategory()),
+            Padding(
+              padding: EdgeInsets.only(top: 16, bottom: 60.h),
+              child: _buildCategory(),
+            ),
           ],
         ),
       ),
@@ -263,10 +266,9 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                             return Material(
                               child: Ink(
                                 decoration: BoxDecoration(
-                                  color:
-                                      isSelected
-                                          ? Theme.of(context).colorScheme.primary
-                                          : Colors.grey.withAlpha(50),
+                                  color: isSelected
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Colors.grey.withAlpha(50),
                                   borderRadius: BorderRadius.circular(25),
                                 ),
                                 child: InkWell(
@@ -289,10 +291,9 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                                               category.categoryName,
                                               style: CustomTextStyle.regular(
                                                 fontSize: 14.sp,
-                                                color:
-                                                    isSelected
-                                                        ? Theme.of(context).colorScheme.onPrimary
-                                                        : null,
+                                                color: isSelected
+                                                    ? Theme.of(context).colorScheme.onPrimary
+                                                    : null,
                                               ),
                                             ),
                                           ),
@@ -331,6 +332,8 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
     required HomeProvider viewModel,
     required AccountDriftModelData accountModel,
   }) async {
+    final account = await DriffDbManager.instance.accountAdapter.getById(accountModel.id);
+    if (!context.mounted) return;
     return showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -350,14 +353,13 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                   ),
 
                   Selector<HomeProvider, bool>(
-                    selector:
-                        (context, viewModel) => viewModel.accountSelected.contains(accountModel),
+                    selector: (context, viewModel) =>
+                        viewModel.accountSelected.contains(accountModel),
                     builder: (context, isSelected, child) {
                       return ListTile(
-                        leading:
-                            isSelected
-                                ? Icon(Icons.cancel_outlined, size: 24.sp)
-                                : Icon(Icons.check_circle_outline_rounded, size: 24.sp),
+                        leading: isSelected
+                            ? Icon(Icons.cancel_outlined, size: 24.sp)
+                            : Icon(Icons.check_circle_outline_rounded, size: 24.sp),
                         title: Text(
                           isSelected
                               ? context.trHome(HomeLocale.unSelectAccount)
@@ -413,7 +415,7 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                         clipboardCustom(context: context, text: accountModel.username ?? "");
                       },
                     ),
-                  if (accountModel.password != null && accountModel.password != "")
+                  if (account?.password != null && account?.password != "")
                     ListTile(
                       leading: Icon(Icons.password, size: 24.sp),
                       title: Text(
@@ -422,8 +424,13 @@ class _HomeMobileLayoutState extends State<HomeMobileLayout> {
                       ),
                       onTap: () async {
                         Navigator.pop(context);
+                        if (account == null &&
+                            account?.password == null &&
+                            account?.password == "") {
+                          return;
+                        }
                         String password = await DataSecureService.decryptPassword(
-                          accountModel.password ?? "",
+                          account?.password ?? "",
                         );
                         if (!context.mounted) return;
                         clipboardCustom(context: context, text: password);

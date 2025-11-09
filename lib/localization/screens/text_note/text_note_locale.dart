@@ -152,4 +152,20 @@ class TextNoteLocale extends BaseLocale {
     NoteText.selectNote: "Chọn ghi chú",
     NoteText.choseNoteColor: "Chọn màu ghi chú",
   };
+
+  @override
+  Map<String, String> get it => {
+    NoteText.title: "Titolo",
+    NoteText.notes: "Note", // "Note" (số nhiều)
+    NoteText.note: "Nota", // "Nota" (số ít)
+    NoteText.delete: "Elimina",
+    NoteText.deleteTitle: "Elimina nota",
+    NoteText.confirmDelete: "Elimina", // Nút xác nhận xóa
+    NoteText.cancelDelete: "Annulla",
+    NoteText.deleteConfirmation: "Sei sicuro di voler eliminare questa nota?",
+    NoteText.deleteManyConfirmation:
+        "Sei sicuro di voler eliminare [number] note?", // Giữ nguyên placeholder
+    NoteText.selectNote: "Seleziona Nota",
+    NoteText.choseNoteColor: "Scegli colore nota", // Dịch là "Choose note color" (Chọn màu ghi chú)
+  };
 }

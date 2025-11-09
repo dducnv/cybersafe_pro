@@ -24,6 +24,7 @@ abstract class BaseLocale {
   Map<String, String> get pt_BR => pt; // Fallback to default Portuguese
   Map<String, String> get tr;
   Map<String, String> get es;
+  Map<String, String> get it;
 
   // Helper method để lấy text theo key
   String getText(String key, {Map<String, String>? args}) {
@@ -41,9 +42,12 @@ abstract class BaseLocale {
       'en' => en,
       'tr' => tr,
       'es' => es,
+      'it' => it,
       _ => en_US, // fallback to English
     };
-    return translations[key] ?? key;
+    // Fallback to English if missing in current locale
+    final fallback = en;
+    return translations[key] ?? fallback[key] ?? key;
   }
 }
 
@@ -60,4 +64,5 @@ final supportedLocales = [
   const Locale('pt', 'BR'), // Tiếng Bồ Đào Nha (Brazil)
   const Locale('tr', 'TR'), // Tiếng Thổ Nhĩ Kỳ
   const Locale('es', 'ES'), // tây ban nha
+  const Locale('it', 'IT'), // Ý
 ];

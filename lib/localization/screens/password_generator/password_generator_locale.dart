@@ -135,4 +135,17 @@ class PasswordGeneratorLocale extends BaseLocale {
     PasswordGeneratorText.generatePassword: 'Generar contraseña',
     PasswordGeneratorText.copyPassword: 'Copiar contraseña',
   };
+
+  @override
+  Map<String, String> get it => {
+    PasswordGeneratorText.title: 'Generatore di Password',
+    PasswordGeneratorText.passwordCopied: 'Password copiata negli appunti',
+    PasswordGeneratorText.specialChars: 'Caratteri speciali (!@#,...)',
+    PasswordGeneratorText.numbers: 'Numeri (0-9)',
+    PasswordGeneratorText.uppercase: 'Lettere maiuscole (A-Z)',
+    PasswordGeneratorText.lowercase: 'Lettere minuscole (a-z)',
+    PasswordGeneratorText.passwordLength: 'Lunghezza password',
+    PasswordGeneratorText.generatePassword: 'Genera password',
+    PasswordGeneratorText.copyPassword: 'Copia password',
+  };
 }

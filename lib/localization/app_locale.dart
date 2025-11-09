@@ -56,6 +56,8 @@ class AppLocaleModel extends BaseLocale {
   Map<String, String> get id => {};
   @override
   Map<String, String> get tr => {};
+  @override
+  Map<String, String> get it => {};
 
   @override
   // TODO: implement es

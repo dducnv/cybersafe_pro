@@ -613,4 +613,62 @@ class ErrorLocale extends BaseLocale {
     ErrorText.tooManyRetries: 'Demasiados intentos',
     ErrorText.tryAgainLater: 'Por favor, inténtalo más tarde',
   };
+  @override
+  Map<String, String> get it => {
+    ErrorText.generalError: 'Si è verificato un errore',
+    ErrorText.networkError: 'Errore di rete',
+    ErrorText.unknownError: 'Errore sconosciuto',
+    ErrorText.operationFailed: 'Operazione fallita',
+    ErrorText.invalidData: 'Dati non validi',
+
+    // Authentication errors
+    ErrorText.pinTooShort: 'Il PIN deve essere almeno 6 caratteri',
+    ErrorText.pinIncorrect: 'PIN errato',
+    ErrorText.authenticationFailed: 'Autenticazione fallita',
+    ErrorText.deviceKeyMissing: 'Chiave del dispositivo non creata',
+    ErrorText.keyVerificationFailed: 'Verifica della chiave fallita',
+
+    // Account errors
+    ErrorText.accountEmpty: 'L\'account non può essere vuoto',
+    ErrorText.accountNotFound: 'Account non trovato',
+    ErrorText.accountNameRequired: 'Il nome dell\'account è obbligatorio',
+    ErrorText.cannotDeleteAccount: 'Non è possibile eliminare l\'account',
+    ErrorText.cannotDeleteSomeAccounts: 'Non è possibile eliminare alcuni account',
+
+    // Category errors
+    ErrorText.categoryNameEmpty: 'Il nome della categoria non può essere vuoto',
+    ErrorText.categoryExists: 'Questa categoria già esiste',
+    ErrorText.cannotDeleteCategory: 'Non è possibile eliminare la categoria',
+    ErrorText.categoryNotFound: 'Categoria non trovata',
+
+    // File operation errors
+    ErrorText.fileNotSelected: 'Nessun file selezionato',
+    ErrorText.fileNotFound: 'File non trovato',
+    ErrorText.cannotReadFile: 'Non è possibile leggere il file',
+    ErrorText.invalidFileFormat: 'Formato file non valido',
+    ErrorText.emptyCsvFile: 'Il file CSV è vuoto',
+    ErrorText.invalidCsvFormat:
+        'Formato file CSV non valido. Deve avere le colonne: name, url, username, password, note',
+    ErrorText.invalidBackupFile: 'File di backup non valido',
+    ErrorText.corruptedBackupFile: 'Il file di backup è danneggiato o non valido',
+    ErrorText.missingBackupField: 'Campo mancante nel file di backup',
+    ErrorText.backupTooLarge: 'Il file di backup è troppo grande',
+    ErrorText.restoreFailed: 'Ripristino fallito',
+
+    // Encryption errors
+    ErrorText.encryptionFailed: 'Crittografia fallita',
+    ErrorText.decryptionFailed: 'Decrittazione fallita',
+    ErrorText.dataEncryptionMismatch: 'I dati non corrispondono dopo la ricrittografia',
+    ErrorText.encryptionVerificationFailed: 'Verifica della crittografia fallita',
+    ErrorText.migrationFailed: 'Migrazione dei dati fallita',
+
+    // TOTP errors
+    ErrorText.emptySecretKey: 'Chiave segreta vuota',
+    ErrorText.invalidSecretKey: 'Chiave segreta non valida',
+    ErrorText.invalidOtpUri: 'URI OTP non valido',
+    ErrorText.missingOtpIssuer: 'Mancante il fornitore OTP',
+    ErrorText.missingOtpSecret: 'Mancante la chiave segreta OTP',
+    ErrorText.invalidUriScheme: 'Schema URI non valido',
+    ErrorText.missingIssuer: 'Mancante il fornitore',
+  };
 }

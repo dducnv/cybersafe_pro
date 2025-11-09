@@ -1,13 +1,14 @@
+import 'dart:async';
+
+import 'package:cybersafe_pro/localization/keys/error_text.dart';
 import 'package:cybersafe_pro/services/otp.dart';
+import 'package:cybersafe_pro/utils/app_error.dart';
 import 'package:cybersafe_pro/utils/refetch_totp.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/utils.dart';
-import 'package:cybersafe_pro/utils/app_error.dart';
-import 'package:cybersafe_pro/localization/keys/error_text.dart';
 import 'package:cybersafe_pro/widgets/circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
 
 class OtpTextWithCountdown extends StatefulWidget {
   final String keySecret;
@@ -39,7 +40,7 @@ class OtpTextWithCountdown extends StatefulWidget {
     if (key.isEmpty) {
       throwAppError(ErrorText.emptySecretKey);
     }
-    if (!OTP.isKeyValid(key)) {
+    if (!OTP.isKeyValid(key.toUpperCase().trim())) {
       throwAppError(ErrorText.invalidSecretKey);
     }
     return key.toUpperCase();
@@ -59,12 +60,19 @@ class OtpTextWithCountdownState extends State<OtpTextWithCountdown> {
   @override
   void initState() {
     super.initState();
+    if (!OTP.isKeyValid(widget.keySecret)) return;
+    final normalizedSecretKey = widget.keySecret
+        .toUpperCase()
+        .trim()
+        .replaceAll(" ", "")
+        .replaceAll("-", "")
+        .replaceAll(" ", "");
     _initializeCountDown();
-    totp = generateTOTPCode(keySecret: widget.keySecret);
+    totp = generateTOTPCode(keySecret: normalizedSecretKey);
 
     refetchTotp = RefetchTotp(
       refetchTotp: () {
-        totp = generateTOTPCode(keySecret: widget.keySecret);
+        totp = generateTOTPCode(keySecret: normalizedSecretKey);
         setState(() {});
       },
     );
@@ -103,7 +111,9 @@ class OtpTextWithCountdownState extends State<OtpTextWithCountdown> {
       backgroundColor: Colors.grey[300],
       controller: countDownController,
       strokeWidth: 5,
-      textStyle: widget.countDownTextStyle ?? CustomTextStyle.regular(fontSize: 10, color: Colors.black, fontWeight: FontWeight.w500),
+      textStyle:
+          widget.countDownTextStyle ??
+          CustomTextStyle.regular(fontSize: 10, color: Colors.black, fontWeight: FontWeight.w500),
       autoStart: true,
       isReverse: true,
       strokeCap: StrokeCap.round,
@@ -114,6 +124,7 @@ class OtpTextWithCountdownState extends State<OtpTextWithCountdown> {
 
   @override
   Widget build(BuildContext context) {
+    if (!OTP.isKeyValid(widget.keySecret)) return SizedBox.shrink();
     return Row(
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: widget.crossAxisAlignment ?? CrossAxisAlignment.center,
@@ -121,7 +132,16 @@ class OtpTextWithCountdownState extends State<OtpTextWithCountdown> {
       children: [
         if (!widget.isSubTimeCountDown) _buildCountDownTimer(),
         if (!widget.isSubTimeCountDown) const SizedBox(width: 10),
-        Text(totp, style: widget.otpTextStyle ?? CustomTextStyle.regular(fontSize: 14.sp, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.primary)),
+        Text(
+          totp,
+          style:
+              widget.otpTextStyle ??
+              CustomTextStyle.regular(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+        ),
         if (widget.isSubTimeCountDown) _buildCountDownTimer(),
       ],
     );

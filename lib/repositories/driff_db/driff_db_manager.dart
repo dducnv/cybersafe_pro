@@ -129,10 +129,9 @@ class DriffDbManager {
       const batchSize = 20;
 
       for (int i = 0; i < encryptedAccountsData.length; i += batchSize) {
-        final end =
-            (i + batchSize < encryptedAccountsData.length)
-                ? i + batchSize
-                : encryptedAccountsData.length;
+        final end = (i + batchSize < encryptedAccountsData.length)
+            ? i + batchSize
+            : encryptedAccountsData.length;
         final batch = encryptedAccountsData.sublist(i, end);
 
         final batchResults = await transaction(() async {
@@ -149,6 +148,7 @@ class DriffDbManager {
                 categoryId: accountData['categoryId'],
                 createdAt: Value(accountData['createdAt'] ?? DateTime.now()),
                 updatedAt: Value(accountData['updatedAt'] ?? DateTime.now()),
+                openCount: Value(accountData['openCount'] ?? 0),
                 passwordUpdatedAt: Value(accountData['passwordUpdatedAt'] ?? DateTime.now()),
               );
 
@@ -304,12 +304,11 @@ class DriffDbManager {
     required int accountId,
   }) async {
     bool isEncrypted = DataSecureService.isValueEncrypted(customField.value.value);
-    final encryptedValue =
-        isEncrypted
-            ? customField.value.value
-            : customField.typeField.value == 'password'
-            ? await DataSecureService.encryptPassword(customField.value.value)
-            : await DataSecureService.encryptInfo(customField.value.value);
+    final encryptedValue = isEncrypted
+        ? customField.value.value
+        : customField.typeField.value == 'password'
+        ? await DataSecureService.encryptPassword(customField.value.value)
+        : await DataSecureService.encryptInfo(customField.value.value);
 
     // Create new custom field without ID (let database auto-generate)
     final newCustomField = AccountCustomFieldDriftModelCompanion.insert(

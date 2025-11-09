@@ -24,11 +24,11 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     reviewApp();
-    loadData();
+    _loadData();
     // DeepLinkHandler().initialize();
   }
 
-  loadData() async {
+  void _loadData() async {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       showLoadingDialog(animationReverse: false);
       await context.read<HomeProvider>().initData();
@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  reviewApp() async {
+  Future<void> reviewApp() async {
     numberLogins = await SecureStorage.instance.readInt(SecureStorageKey.numberLogin) ?? 0;
     await SecureStorage.instance.saveInt(SecureStorageKey.numberLogin, numberLogins + 1);
     if (numberLogins != 0 && numberLogins % 2 == 0) {
