@@ -142,6 +142,13 @@ final List<AppLocaleModel> appLocales = [
     languageNativeName: 'Español',
     flagEmoji: '🇪🇸',
   ),
+  AppLocaleModel(
+    languageCode: 'it',
+    countryCode: 'IT',
+    languageName: 'Italian',
+    languageNativeName: 'Italiano',
+    flagEmoji: '🇮🇹',
+  ),
 ];
 
 class AppLocale extends ChangeNotifier {
