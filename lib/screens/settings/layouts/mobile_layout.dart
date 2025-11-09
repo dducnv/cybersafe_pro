@@ -462,8 +462,7 @@ class SettingMobileLayout extends StatelessWidget {
 
                       if (success && context.mounted) {
                         // Làm mới dữ liệu
-                        if (context.mounted) context.read<HomeProvider>().refreshData();
-                        Navigator.of(context).pop();
+                        if (context.mounted) await context.read<HomeProvider>().refreshData();
                         showToastSuccess("Delete data successfully", context: context);
                       } else {
                         if (context.mounted) {

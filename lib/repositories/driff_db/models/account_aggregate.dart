@@ -33,7 +33,7 @@ class AccountAggregate {
       categoryId: accountDriftModelData.categoryId.value,
       createdAt: accountDriftModelData.createdAt.value,
       updatedAt: accountDriftModelData.updatedAt.value,
-      openCount: 0,
+      openCount: accountDriftModelData.openCount.value,
     );
   }
 
@@ -48,6 +48,11 @@ class AccountAggregate {
       password: Value(json['password']?.toString() ?? ''),
       notes: Value(json['notes']?.toString() ?? ''),
       icon: Value(json['icon']?.toString() ?? 'account_circle'),
+      openCount: Value(
+        json['openCount'] is int
+            ? json['openCount'] ?? 0
+            : int.tryParse(json['openCount']?.toString() ?? '') ?? 0,
+      ),
       categoryId: Value(
         json['category'] != null
             ? (json['category']['id'] is int

@@ -956,7 +956,7 @@ class AccountDriftModelData extends DataClass implements Insertable<AccountDrift
       password: serializer.fromJson<String?>(json['password']),
       notes: serializer.fromJson<String?>(json['notes']),
       icon: serializer.fromJson<String?>(json['icon']),
-      openCount: serializer.fromJson<int>(json['openCount']),
+      openCount: serializer.fromJson<int>(json['openCount'] ?? 0),
       categoryId: serializer.fromJson<int>(json['categoryId']),
       iconCustomId: serializer.fromJson<int?>(json['iconCustomId']),
       passwordUpdatedAt: serializer.fromJson<DateTime?>(json['passwordUpdatedAt']),

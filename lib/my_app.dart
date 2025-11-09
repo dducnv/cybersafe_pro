@@ -33,6 +33,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  DateTime? _lastBackgroundAt;
   @override
   void initState() {
     super.initState();
@@ -52,6 +53,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused) {
       context.read<AppProvider>().handleAppBackground(context);
+      _lastBackgroundAt = DateTime.now();
     } else if (state == AppLifecycleState.resumed) {
       context.read<AppProvider>().handleAppResume(context);
       final deviceType = DeviceInfo.getDeviceType(context);
@@ -124,7 +126,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           onGenerateRoute: AppRoutes.onGenerateRoute,
           builder: (context, child) {
             return SecureApplication(
-              nativeRemoveDelay: 300,
+              nativeRemoveDelay: 800,
+              onNeedUnlock: (secure) {
+                final now = DateTime.now();
+                final elapsed = _lastBackgroundAt == null
+                    ? Duration.zero
+                    : now.difference(_lastBackgroundAt!);
+                if (elapsed.inSeconds <= 15) {
+                  secure?.authSuccess(unlock: true);
+                } else {
+                  secure?.authSuccess(unlock: false);
+                }
+                return null;
+              },
               secureApplicationController:
                   SecureApplicationUtil.instance.secureApplicationController,
               child: MediaQuery(

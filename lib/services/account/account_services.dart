@@ -256,6 +256,7 @@ class AccountServices {
           'icon': aggregate.account.icon ?? 'default',
           'categoryId': categoryId,
           'iconCustomId': iconId,
+          'openCount': aggregate.account.openCount,
           'createdAt': aggregate.account.createdAt.toIso8601String(),
           'updatedAt': aggregate.account.updatedAt.toIso8601String(),
           'passwordUpdatedAt': aggregate.account.passwordUpdatedAt?.toIso8601String(),
