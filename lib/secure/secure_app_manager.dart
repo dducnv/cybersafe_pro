@@ -151,7 +151,7 @@ class SecureAppManager {
 
   Future<bool> _savePIN(String pin) async {
     try {
-      if (pin.isEmpty || pin.length < 4) {
+      if (pin.isEmpty || pin.length < 6) {
         throw ArgumentError('PIN phải có ít nhất 4 ký tự');
       }
 

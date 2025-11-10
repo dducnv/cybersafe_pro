@@ -32,9 +32,9 @@ val keystoreProperties = Properties().apply {
 
 android {
     namespace ="com.example.cybersafe_pro"
-    compileSdk = 35
+    compileSdk = 36
 
-    ndkVersion = "28.0.12674087 rc2"
+    ndkVersion = "29.0.14206865"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -95,7 +95,7 @@ android {
     buildFeatures {
         buildConfig = true
     }
-    buildToolsVersion = "34"
+    buildToolsVersion = "36"
 }
 
 flutter {

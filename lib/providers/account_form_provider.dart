@@ -1,21 +1,23 @@
-import 'package:cybersafe_pro/repositories/driff_db/models/account_aggregate.dart';
-import 'package:cybersafe_pro/services/account/account_services.dart';
-import 'package:cybersafe_pro/services/data_secure_service.dart';
-import 'package:flutter/material.dart';
-
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
-import 'package:password_strength_checker/password_strength_checker.dart';
+import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
+import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
+import 'package:cybersafe_pro/repositories/driff_db/models/account_aggregate.dart';
 import 'package:cybersafe_pro/resources/brand_logo.dart';
+import 'package:cybersafe_pro/services/account/account_services.dart';
+import 'package:cybersafe_pro/services/data_secure_service.dart';
+import 'package:cybersafe_pro/services/otp.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/utils/type_text_field.dart';
 import 'package:cybersafe_pro/widgets/text_field/custom_text_field.dart';
+import 'package:flutter/material.dart';
+import 'package:password_strength_checker/password_strength_checker.dart';
 
-import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dart';
-import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
-
-final List<TypeTextField> typeTextFields = [TypeTextField(title: "Text", type: 'text'), TypeTextField(title: "Password", type: 'password')];
+final List<TypeTextField> typeTextFields = [
+  TypeTextField(title: "Text", type: 'text'),
+  TypeTextField(title: "Password", type: 'password'),
+];
 
 class AccountFormProvider extends ChangeNotifier {
   final formKey = GlobalKey<FormState>();
@@ -69,10 +71,15 @@ class AccountFormProvider extends ChangeNotifier {
       noteController.text = account.notes ?? '';
 
       if (account.icon != "default" && account.icon != null && account.icon != "") {
-        final branchLogo = allBranchLogos.firstWhere((element) => element.branchLogoSlug == account.icon, orElse: () => BranchLogo([], "default"));
+        final branchLogo = allBranchLogos.firstWhere(
+          (element) => element.branchLogoSlug == account.icon,
+          orElse: () => BranchLogo([], "default"),
+        );
         branchLogoSelected = branchLogo;
       } else if (account.iconCustomId != null) {
-        selectedIconCustom = listIconsCustom.firstWhere((element) => element.id == account.iconCustomId);
+        selectedIconCustom = listIconsCustom.firstWhere(
+          (element) => element.id == account.iconCustomId,
+        );
       } else {
         selectedIconCustom = null;
         branchLogoSelected = null;
@@ -96,7 +103,9 @@ class AccountFormProvider extends ChangeNotifier {
       // Convert and add custom fields
       if (customFields.isNotEmpty) {
         for (var field in customFields) {
-          final fieldValueDecrypted = field.typeField == "password" ? await DataSecureService.decryptPassword(field.value) : await DataSecureService.decryptInfo(field.value);
+          final fieldValueDecrypted = field.typeField == "password"
+              ? await DataSecureService.decryptPassword(field.value)
+              : await DataSecureService.decryptInfo(field.value);
           final controller = TextEditingController(text: fieldValueDecrypted);
           final key = field.name;
 
@@ -138,7 +147,16 @@ class AccountFormProvider extends ChangeNotifier {
 
           // Add to dynamic fields
           dynamicTextFieldNotifier.add(
-            DynamicTextField(key: key, controller: controller, customField: CustomField(key: field.name, hintText: field.hintText, typeField: fieldType), field: customField),
+            DynamicTextField(
+              key: key,
+              controller: controller,
+              customField: CustomField(
+                key: field.name,
+                hintText: field.hintText,
+                typeField: fieldType,
+              ),
+              field: customField,
+            ),
           );
           notifyListeners();
         }
@@ -170,7 +188,11 @@ class AccountFormProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void pickIcon({bool? isCustomIcon, IconCustomDriftModelData? iconCustomModel, BranchLogo? branchLogo}) {
+  void pickIcon({
+    bool? isCustomIcon,
+    IconCustomDriftModelData? iconCustomModel,
+    BranchLogo? branchLogo,
+  }) {
     if (isCustomIcon != null && isCustomIcon) {
       selectedIconCustom = null;
       selectedIconCustom = iconCustomModel;
@@ -187,7 +209,11 @@ class AccountFormProvider extends ChangeNotifier {
 
   Future<void> handleSaveIcon({required String imageBase64}) async {
     if (imageBase64.isNotEmpty) {
-      selectedIconCustom = IconCustomDriftModelData(id: 0, name: iconCustomName.text, imageBase64: imageBase64);
+      selectedIconCustom = IconCustomDriftModelData(
+        id: 0,
+        name: iconCustomName.text,
+        imageBase64: imageBase64,
+      );
       DriffDbManager.instance.iconCustomAdapter.put(selectedIconCustom!);
       listIconsCustom = await DriffDbManager.instance.iconCustomAdapter.getAll();
       notifyListeners();
@@ -229,12 +255,26 @@ class AccountFormProvider extends ChangeNotifier {
     return true;
   }
 
+  bool validateOTP() {
+    if (otpController.text.isEmpty) {
+      return true;
+    }
+    final context = GlobalKeys.appRootNavigatorKey.currentContext!;
+    if (!OTP.isKeyValid(otpController.text)) {
+      otpError = context.trSafe(CreateAccountText.otpError);
+      return false;
+    }
+    otpError = null;
+    return true;
+  }
+
   // Validate toàn bộ form
   bool validateForm() {
     bool isValid = true;
 
     if (!validateAppName()) isValid = false;
     if (!validateCategory()) isValid = false;
+    if (!validateOTP()) isValid = false;
 
     return isValid;
   }
@@ -263,7 +303,9 @@ class AccountFormProvider extends ChangeNotifier {
       return;
     }
     final controller = TextEditingController();
-    final key = txtFieldTitle.text.toLowerCase().trim().replaceAll(" ", "_") + DateTime.now().microsecondsSinceEpoch.toString();
+    final key =
+        txtFieldTitle.text.toLowerCase().trim().replaceAll(" ", "_") +
+        DateTime.now().microsecondsSinceEpoch.toString();
     final field = Padding(
       padding: const EdgeInsets.only(top: 10),
       child: Row(
@@ -298,7 +340,11 @@ class AccountFormProvider extends ChangeNotifier {
       DynamicTextField(
         key: key,
         controller: controller,
-        customField: CustomField(key: txtFieldTitle.text.toLowerCase().trim().replaceAll(" ", "_"), hintText: txtFieldTitle.text, typeField: typeTextFieldSelected),
+        customField: CustomField(
+          key: txtFieldTitle.text.toLowerCase().trim().replaceAll(" ", "_"),
+          hintText: txtFieldTitle.text,
+          typeField: typeTextFieldSelected,
+        ),
         field: field,
       ),
     );

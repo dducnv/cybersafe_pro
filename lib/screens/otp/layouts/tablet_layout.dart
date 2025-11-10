@@ -1,6 +1,5 @@
 import 'package:cybersafe_pro/components/dialog/loading_dialog.dart';
 import 'package:cybersafe_pro/components/icon_show_component.dart';
-import 'package:cybersafe_pro/database/models/icon_custom_model.dart';
 import 'package:cybersafe_pro/extensions/extension_build_context.dart';
 import 'package:cybersafe_pro/localization/keys/create_account_text.dart';
 import 'package:cybersafe_pro/localization/keys/otp_text.dart';
@@ -68,68 +67,64 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
         scrolledUnderElevation: 0,
         backgroundColor: Theme.of(context).colorScheme.surface,
       ),
-      body:
-          _isLoading
-              ? Center(child: CircularProgressIndicator())
-              : _otpAccounts.isEmpty
-              ? Center(
-                child: Image.asset("assets/images/exclamation-mark.png", width: 60.w, height: 60.h),
-              )
-              : AnimationLimiter(
-                child: ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _otpAccounts.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    final account = _otpAccounts[index];
-                    return AnimationConfiguration.staggeredList(
-                      position: index,
-                      duration: const Duration(milliseconds: 400),
-                      child: SlideAnimation(
-                        verticalOffset: 30.0,
-                        child: FadeInAnimation(
-                          child: TotpItem(
-                            account: account.key,
-                            secretKey: account.value.secretKey,
-                            iconCustom: IconCustomModel(name: '', imageBase64: ''),
-                            title: account.key.title,
-                            email: account.key.username ?? '',
-                            icon: account.key.icon ?? '',
-                            onTap: () async {
-                              // Giải mã trước khi mở bottom sheet
-                              final secretKeyEncrypted = account.value.secretKey;
-                              if (secretKeyEncrypted.isEmpty) {
-                                seeDetailTOTPBottomSheet(context, account.key, account.value, '');
-                                return;
-                              }
-                              showLoadingDialog(
-                                context: context,
-                              ); // Sửa lại truyền context đúng dạng
-                              String decryptedSecretKey = '';
-                              try {
-                                decryptedSecretKey = await DataSecureService.decryptTOTPKey(
-                                  secretKeyEncrypted,
-                                );
-                              } catch (e) {
-                                decryptedSecretKey = '';
-                              }
-                              hideLoadingDialog();
-                              if (context.mounted) {
-                                seeDetailTOTPBottomSheet(
-                                  context,
-                                  account.key,
-                                  account.value,
-                                  decryptedSecretKey,
-                                ); // Truyền trực tiếp
-                              }
-                            },
-                          ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _otpAccounts.isEmpty
+          ? Center(
+              child: Image.asset("assets/images/exclamation-mark.png", width: 60.w, height: 60.h),
+            )
+          : AnimationLimiter(
+              child: ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: _otpAccounts.length,
+                separatorBuilder: (context, index) => const SizedBox(height: 8),
+                itemBuilder: (context, index) {
+                  final account = _otpAccounts[index];
+                  return AnimationConfiguration.staggeredList(
+                    position: index,
+                    duration: const Duration(milliseconds: 400),
+                    child: SlideAnimation(
+                      verticalOffset: 30.0,
+                      child: FadeInAnimation(
+                        child: TotpItem(
+                          account: account.key,
+                          secretKey: account.value.secretKey,
+                          title: account.key.title,
+                          email: account.key.username ?? '',
+                          icon: account.key.icon ?? '',
+                          onTap: () async {
+                            // Giải mã trước khi mở bottom sheet
+                            final secretKeyEncrypted = account.value.secretKey;
+                            if (secretKeyEncrypted.isEmpty) {
+                              seeDetailTOTPBottomSheet(context, account.key, account.value, '');
+                              return;
+                            }
+                            showLoadingDialog(context: context); // Sửa lại truyền context đúng dạng
+                            String decryptedSecretKey = '';
+                            try {
+                              decryptedSecretKey = await DataSecureService.decryptTOTPKey(
+                                secretKeyEncrypted,
+                              );
+                            } catch (e) {
+                              decryptedSecretKey = '';
+                            }
+                            hideLoadingDialog();
+                            if (context.mounted) {
+                              seeDetailTOTPBottomSheet(
+                                context,
+                                account.key,
+                                account.value,
+                                decryptedSecretKey,
+                              ); // Truyền trực tiếp
+                            }
+                          },
                         ),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
+            ),
 
       floatingActionButton: SpeedDial(
         icon: Icons.add,
@@ -263,10 +258,9 @@ class _OtpMobileLayoutState extends State<OtpMobileLayout> {
                       Expanded(
                         child: CardCustomWidget(
                           padding: EdgeInsets.all(10),
-                          child:
-                              (decryptedSecretKey.isEmpty)
-                                  ? Text('Error', style: CustomTextStyle.regular(color: Colors.red))
-                                  : OtpTextWithCountdown(keySecret: decryptedSecretKey),
+                          child: (decryptedSecretKey.isEmpty)
+                              ? Text('Error', style: CustomTextStyle.regular(color: Colors.red))
+                              : OtpTextWithCountdown(keySecret: decryptedSecretKey),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -425,7 +419,7 @@ class _AddTOTPWithKeyboardBottomSheetState extends State<AddTOTPWithKeyboardBott
                   if (value?.isEmpty ?? true) {
                     return context.trSafe(OtpText.secretKeyValidation);
                   }
-                  if (!OTP.isKeyValid(value ?? '')) {
+                  if (!OTP.isKeyValid((value ?? '').toUpperCase().trim())) {
                     return context.trSafe(OtpText.invalidSecretKey);
                   }
                   return null;

@@ -1,4 +1,3 @@
-import 'package:cybersafe_pro/migrate_data/migrate_from_old_data.dart';
 import 'package:cybersafe_pro/providers/app_provider.dart';
 import 'package:cybersafe_pro/providers/local_auth_provider.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
@@ -76,7 +75,7 @@ class _LoginMasterPasswordState extends State<LoginMasterPassword> {
   }
 
   Future<void> _handleMigrateData() async {
-    await MigrateFromOldData.startMigrate(context);
+    // await MigrateFromOldData.startMigrate(context);
   }
 
   @override

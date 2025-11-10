@@ -530,4 +530,42 @@ class SettingsLocale extends BaseLocale {
     waitingNotification: "Por favor, espere, el proceso puede tomar unos minutos",
     decryptingData: "Descifrando datos...",
   };
+
+  @override
+  Map<String, String> get it => {
+    settings: 'Impostazioni',
+    general: 'Generali',
+    security: 'Sicurezza',
+    language: 'Lingua',
+    theme: 'Tema',
+    darkMode: 'Modalità scura',
+    biometric: 'Biometria',
+    autoLock: 'Blocco automatico',
+    changePin: 'Cambia PIN',
+    backup: 'Backup',
+    restore: 'Ripristino',
+    about: 'Informazioni',
+    chooseLanguage: 'Scegli Lingua',
+    importDataFromBrowser: 'Importa Dati dal Browser',
+    backupData: 'Esegui Backup', // Dịch là "Thực hiện Backup" (như một nút hành động)
+    deleteData: 'Elimina Dati',
+    deleteDataConfirmation: 'Conferma Eliminazione Dati',
+    confirm: 'Conferma',
+    lockOnBackground: 'Blocca in background',
+    dataIsEmpty: 'Nessun dato', // "Data is empty"
+    deleteDataQuestion: 'Sei sicuro di voler eliminare tutti i dati?',
+    cancel: 'Annulla',
+    appIsNotInstalled: 'App non installata',
+    appIsNotInstalledMessage:
+        'È necessario installare l\'app prima di trasferire i dati.', // "Please install the app before transferring data?" (dịch lại thành câu khẳng định)
+    installNow: 'Installa Ora',
+    transferData: 'Trasferisci dati alla versione Pro',
+    transferDataMessage: 'Vuoi trasferire i dati dalla versione Lite alla Pro?',
+
+    receiveData: 'Ricevi dati',
+    receiveDataMessage:
+        'Per continuare a ricevere dati dalla versione Lite, seleziona un file per aggiungere dati alla versione Pro!',
+    waitingNotification: "Attendere prego, il processo potrebbe richiedere alcuni minuti",
+    decryptingData: "Decrittazione dati in corso...",
+  };
 }

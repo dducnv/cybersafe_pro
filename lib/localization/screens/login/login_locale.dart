@@ -205,4 +205,25 @@ class LoginLocale extends BaseLocale {
     LoginText.pleaseTryAgainLater: 'Por favor, inténtalo de nuevo después de {0} minutos',
     LoginText.restoreNote: 'Introduce el PIN de respaldo para restaurar los datos.',
   };
+
+  @override
+  Map<String, String> get it => {
+    LoginText.enterPin: 'Inserisci PIN',
+    LoginText.forgotPin: 'PIN dimenticato?',
+    LoginText.useBiometric: 'Usa biometria',
+    LoginText.incorrectPin: 'PIN errato',
+    LoginText.pinCodeRequired: 'Inserisci tutte e 6 le cifre',
+    LoginText.resetApp: 'Reimposta app',
+    LoginText.confirmReset: 'Conferma reimpostazione',
+    LoginText.resetWarning:
+        'Attenzione: reimpostando l\'app eliminerai tutti i tuoi dati. Sei sicuro di voler continuare?',
+    LoginText.enterAnyPin: 'Inserisci un PIN qualsiasi',
+    LoginText.backupNote:
+        'Questo PIN verrà utilizzato per crittografare i file, ricordalo per il recupero dei dati.',
+    LoginText.changePinCode: 'Cambia PIN',
+    LoginText.loginLockDescription:
+        'Account bloccato a causa di troppi tentativi di inserimento password errati',
+    LoginText.pleaseTryAgainLater: 'Riprova tra {0} minuti',
+    LoginText.restoreNote: 'Inserisci il PIN di backup per ripristinare i dati.',
+  };
 }

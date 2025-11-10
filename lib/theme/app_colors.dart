@@ -85,7 +85,13 @@ class AppColors extends ThemeExtension<AppColors> {
   @override
   ThemeExtension<AppColors> lerp(ThemeExtension<AppColors>? other, double t) {
     if (other is! AppColors) return this;
-    return AppColors(colors: {for (var entry in colors.entries) entry.key: Color.lerp(entry.value, other.colors[entry.key] ?? entry.value, t) ?? entry.value});
+    return AppColors(
+      colors: {
+        for (var entry in colors.entries)
+          entry.key:
+              Color.lerp(entry.value, other.colors[entry.key] ?? entry.value, t) ?? entry.value,
+      },
+    );
   }
 }
 
@@ -95,7 +101,11 @@ Color getColor(BuildContext context, String colorName) {
 }
 
 // Tạo AppColors dựa trên brightness và accent color
-AppColors getAppColors({required Brightness brightness, required ThemeData themeData, required Color accentColor}) {
+AppColors getAppColors({
+  required Brightness brightness,
+  required ThemeData themeData,
+  required Color accentColor,
+}) {
   if (brightness == Brightness.light) {
     return AppColors(
       colors: {
@@ -199,10 +209,21 @@ SystemUiOverlayStyle getSystemUiOverlayStyle(AppColors? colors, Brightness brigh
 }
 
 // Tạo ThemeData với AppColors extension
-ThemeData generateThemeDataWithExtension({required ThemeData themeData, required Brightness brightness, required Color accentColor}) {
-  AppColors colors = getAppColors(accentColor: accentColor, brightness: brightness, themeData: themeData);
+ThemeData generateThemeDataWithExtension({
+  required ThemeData themeData,
+  required Brightness brightness,
+  required Color accentColor,
+}) {
+  AppColors colors = getAppColors(
+    accentColor: accentColor,
+    brightness: brightness,
+    themeData: themeData,
+  );
 
-  return themeData.copyWith(extensions: <ThemeExtension<dynamic>>[colors], appBarTheme: AppBarTheme(systemOverlayStyle: getSystemUiOverlayStyle(colors, brightness)));
+  return themeData.copyWith(
+    extensions: <ThemeExtension<dynamic>>[colors],
+    appBarTheme: AppBarTheme(systemOverlayStyle: getSystemUiOverlayStyle(colors, brightness)),
+  );
 }
 
 // Tạo light theme
@@ -219,7 +240,11 @@ ThemeData getLightTheme() {
     splashColor: Colors.transparent,
   );
 
-  return generateThemeDataWithExtension(themeData: themeData, brightness: brightness, accentColor: accentColor);
+  return generateThemeDataWithExtension(
+    themeData: themeData,
+    brightness: brightness,
+    accentColor: accentColor,
+  );
 }
 
 // Tạo dark theme
@@ -227,13 +252,26 @@ ThemeData getDarkTheme() {
   const brightness = Brightness.dark;
   const accentColor = Color(0xFF2D5BD3);
 
-  final themeData = ThemeData(fontFamily: 'Inter', colorScheme: getColorScheme(brightness), useMaterial3: true, typography: Typography.material2014(), splashColor: Colors.transparent);
+  final themeData = ThemeData(
+    fontFamily: 'Inter',
+    colorScheme: getColorScheme(brightness),
+    useMaterial3: true,
+    typography: Typography.material2014(),
+    splashColor: Colors.transparent,
+  );
 
-  return generateThemeDataWithExtension(themeData: themeData, brightness: brightness, accentColor: accentColor);
+  return generateThemeDataWithExtension(
+    themeData: themeData,
+    brightness: brightness,
+    accentColor: accentColor,
+  );
 }
 
 // Tạo AppColors cho Light theme
-AppColors getLightAppColors({Color accentColor = defaultAccentColor, Color backgroundColor = defaultLightBackground}) {
+AppColors getLightAppColors({
+  Color accentColor = defaultAccentColor,
+  Color backgroundColor = defaultLightBackground,
+}) {
   return AppColors(
     colors: {
       'accent': accentColor,
@@ -254,7 +292,10 @@ AppColors getLightAppColors({Color accentColor = defaultAccentColor, Color backg
 }
 
 // Tạo AppColors cho Dark theme
-AppColors getDarkAppColors({Color accentColor = defaultAccentColor, Color backgroundColor = defaultDarkBackground}) {
+AppColors getDarkAppColors({
+  Color accentColor = defaultAccentColor,
+  Color backgroundColor = defaultDarkBackground,
+}) {
   return AppColors(
     colors: {
       'accent': accentColor,
@@ -275,7 +316,10 @@ AppColors getDarkAppColors({Color accentColor = defaultAccentColor, Color backgr
 }
 
 // Tạo ColorScheme cho Light theme
-ColorScheme getLightColorScheme({Color primary = defaultAccentColor, Color background = defaultLightBackground}) {
+ColorScheme getLightColorScheme({
+  Color primary = defaultAccentColor,
+  Color background = defaultLightBackground,
+}) {
   return ColorScheme(
     brightness: Brightness.light,
     primary: primary,
@@ -298,7 +342,10 @@ ColorScheme getLightColorScheme({Color primary = defaultAccentColor, Color backg
 }
 
 // Tạo ColorScheme cho Dark theme
-ColorScheme getDarkColorScheme({Color primary = defaultAccentColor, Color background = defaultDarkBackground}) {
+ColorScheme getDarkColorScheme({
+  Color primary = defaultAccentColor,
+  Color background = defaultDarkBackground,
+}) {
   return ColorScheme(
     brightness: Brightness.dark,
     primary: primary,
@@ -343,11 +390,23 @@ class LightColors {
         elevation: 0,
         systemOverlayStyle: getSystemUiOverlayStyle(colors, Brightness.light),
         iconTheme: const IconThemeData(color: Colors.black),
-        titleTextStyle: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+        titleTextStyle: const TextStyle(
+          color: Colors.black,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       drawerTheme: DrawerThemeData(backgroundColor: background),
-      cardTheme: CardTheme(elevation: 2, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), color: colors.colors['card']),
-      navigationRailTheme: NavigationRailThemeData(backgroundColor: background, selectedIconTheme: IconThemeData(color: primary), unselectedIconTheme: const IconThemeData(color: Colors.black54)),
+      cardTheme: CardThemeData(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        color: colors.colors['card'],
+      ),
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: background,
+        selectedIconTheme: IconThemeData(color: primary),
+        unselectedIconTheme: const IconThemeData(color: Colors.black54),
+      ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: background,
         selectedItemColor: primary,
@@ -382,11 +441,23 @@ class DarkColors {
         elevation: 0,
         systemOverlayStyle: getSystemUiOverlayStyle(colors, Brightness.dark),
         iconTheme: const IconThemeData(color: Colors.white),
-        titleTextStyle: CustomTextStyle.regular(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+        titleTextStyle: CustomTextStyle.regular(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       drawerTheme: DrawerThemeData(backgroundColor: background),
-      cardTheme: CardTheme(elevation: 2, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), color: colors.colors['card']),
-      navigationRailTheme: NavigationRailThemeData(backgroundColor: background, selectedIconTheme: IconThemeData(color: primary), unselectedIconTheme: const IconThemeData(color: Colors.white70)),
+      cardTheme: CardThemeData(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        color: colors.colors['card'],
+      ),
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: background,
+        selectedIconTheme: IconThemeData(color: primary),
+        unselectedIconTheme: const IconThemeData(color: Colors.white70),
+      ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: background,
         selectedItemColor: primary,

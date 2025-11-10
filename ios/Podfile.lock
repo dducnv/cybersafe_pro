@@ -54,10 +54,6 @@ PODS:
     - Flutter
     - FlutterMacOS
   - MTBBarcodeScanner (5.0.11)
-  - ObjectBox (4.1.0)
-  - objectbox_flutter_libs (0.0.1):
-    - Flutter
-    - ObjectBox (= 4.1.0)
   - package_info_plus (0.4.5):
     - Flutter
   - path_provider_foundation (0.0.1):
@@ -104,7 +100,6 @@ DEPENDENCIES:
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - in_app_review (from `.symlinks/plugins/in_app_review/ios`)
   - local_auth_darwin (from `.symlinks/plugins/local_auth_darwin/darwin`)
-  - objectbox_flutter_libs (from `.symlinks/plugins/objectbox_flutter_libs/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
@@ -121,7 +116,6 @@ SPEC REPOS:
     - DKImagePickerController
     - DKPhotoGallery
     - MTBBarcodeScanner
-    - ObjectBox
     - SDWebImage
     - SQLCipher
     - SwiftyGif
@@ -149,8 +143,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/in_app_review/ios"
   local_auth_darwin:
     :path: ".symlinks/plugins/local_auth_darwin/darwin"
-  objectbox_flutter_libs:
-    :path: ".symlinks/plugins/objectbox_flutter_libs/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_foundation:
@@ -179,18 +171,16 @@ SPEC CHECKSUMS:
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
   downloadsfolder: 7d5c7b5d23e3c4dded522ff2a2ef14a56846378a
   file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
-  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  flutter_keyboard_visibility_temp_fork: 95b2d534bacf6ac62e7fcbe5c2a9e2c2a17ce06f
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_keyboard_visibility_temp_fork: b8c3574e96b2d85c7330ce4faece5c5a14b54dab
   flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf
   flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
-  image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
-  in_app_review: 5596fe56fab799e8edb3561c03d053363ab13457
-  local_auth_darwin: 553ce4f9b16d3fdfeafce9cf042e7c9f77c1c391
+  image_picker_ios: e0ece4aa2a75771a7de3fa735d26d90817041326
+  in_app_review: 7dd1ea365263f834b8464673f9df72c80c17c937
+  local_auth_darwin: c3ee6cce0a8d56be34c8ccb66ba31f7f180aaebb
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
-  ObjectBox: bf3d4b51075d52868422d5d1f2f2141b1d630d30
-  objectbox_flutter_libs: e912f15beff5699f1e184dbd2ff6aa5657464e73
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
-  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
+  path_provider_foundation: 608fcb11be570ce83519b076ab6a1fffe2474f05
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   qr_code_scanner_plus: 7e087021bc69873140e0754750eb87d867bed755
   quill_native_bridge_ios: f47af4b14e7757968486641656c5d23250cee521
@@ -201,7 +191,7 @@ SPEC CHECKSUMS:
   SQLCipher: 31878d8ebd27e5c96db0b7cb695c96e9f8ad77da
   sqlcipher_flutter_libs: 1113000114375a0e57c0a367c586aceee78cd23b
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
-  url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
+  url_launcher_ios: a1c1f2bf89969cb13cce46d0333c7257d346e169
 
 PODFILE CHECKSUM: 7600a18ad322e5f2e89430abc452cb7a73bccaa1
 

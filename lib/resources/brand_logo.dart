@@ -180,7 +180,7 @@ BranchLogo mAadhaar = BranchLogo(
   'mAadhaar',
   branchName: 'mAadhaar',
   branchLogoPathLightMode: 'assets/icons/brand_icons/mAadhaar.svg',
-  branchLogoPathDarkMode: 'assets/icons/brand_icons/mAadhaar.svg',
+  branchLogoPathDarkMode: 'assets/icons/brand_icons/mAadhaar_dark.svg',
 );
 
 BranchLogo gitlab = BranchLogo(

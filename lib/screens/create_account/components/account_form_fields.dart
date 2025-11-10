@@ -52,45 +52,41 @@ class AccountFormFields extends StatelessWidget {
         _buildCategoryField(context),
         const SizedBox(height: 10),
         Selector<AccountFormProvider, bool>(
-          builder:
-              (context, value, child) =>
-                  !value
-                      ? _buildTOTPField(context)
-                      : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 5, bottom: 5),
-                            child: Text(
-                              context.appLocale.createAccountLocale.getText(
-                                CreateAccountText.twoFactorAuth,
-                              ),
-                              style: CustomTextStyle.regular(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: CardCustomWidget(
-                                  child: OtpTextWithCountdown(
-                                    keySecret: formProvider.otpController.text,
-                                  ),
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: () {
-                                  formProvider.handleDeleteTOTP();
-                                },
-                                icon: const Icon(Icons.close),
-                              ),
-                            ],
-                          ),
-                        ],
+          builder: (context, value, child) => !value
+              ? _buildTOTPField(context)
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 5, bottom: 5),
+                      child: Text(
+                        context.appLocale.createAccountLocale.getText(
+                          CreateAccountText.twoFactorAuth,
+                        ),
+                        style: CustomTextStyle.regular(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[600],
+                        ),
                       ),
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: CardCustomWidget(
+                            child: OtpTextWithCountdown(keySecret: formProvider.otpController.text),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            formProvider.handleDeleteTOTP();
+                          },
+                          icon: const Icon(Icons.close),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
           selector: (context, provider) => provider.isAddedTOTP,
         ),
         const SizedBox(height: 10),
@@ -240,7 +236,7 @@ class AccountFormFields extends StatelessWidget {
                 textInputType: TextInputType.text,
                 onTapUpOutside: (event) {
                   if (formProvider.otpController.text.isNotEmpty) {
-                    final bool isValid = OTP.isKeyValid(formProvider.otpController.text);
+                    final bool isValid = OTP.isKeyValid(formProvider.otpController.text.trim());
                     if (isValid) {
                       formProvider.handleAddTOTP();
                     } else {
@@ -250,7 +246,7 @@ class AccountFormFields extends StatelessWidget {
                 },
                 onFieldSubmitted: (value) {
                   if (value.isNotEmpty) {
-                    if (OTP.isKeyValid(value)) {
+                    if (OTP.isKeyValid(value.trim())) {
                       formProvider.handleAddTOTP();
                     } else {
                       formProvider.otpError = context.trSafe(CreateAccountText.otpError);

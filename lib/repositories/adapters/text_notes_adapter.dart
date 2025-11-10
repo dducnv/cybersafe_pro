@@ -60,17 +60,17 @@ class TextNotesAdapter {
   }
 
   Future<int> update(TextNotesDriftModelData data) async {
-    return await (_database.update(_database.textNotesDriftModel)
-      ..where((tbl) => tbl.id.equals(data.id))).write(data);
+    return await (_database.update(
+      _database.textNotesDriftModel,
+    )..where((tbl) => tbl.id.equals(data.id))).write(data);
   }
 
   Future<int> _getNextIndexPos() async {
     try {
-      final query =
-          _database.selectOnly(_database.textNotesDriftModel)
-            ..addColumns([_database.textNotesDriftModel.indexPos])
-            ..orderBy([OrderingTerm.desc(_database.textNotesDriftModel.indexPos)])
-            ..limit(1);
+      final query = _database.selectOnly(_database.textNotesDriftModel)
+        ..addColumns([_database.textNotesDriftModel.indexPos])
+        ..orderBy([OrderingTerm.desc(_database.textNotesDriftModel.indexPos)])
+        ..limit(1);
 
       final rows = await query.get();
       if (rows.isEmpty) return 0;
@@ -94,14 +94,14 @@ class TextNotesAdapter {
   }
 
   Future<void> updateColor(int id, String? color) async {
-    final note = await getById(id);
-    if (note == null) return;
-    await update(note.copyWith(color: Value(color)));
+    await (_database.update(_database.textNotesDriftModel)..where((tbl) => tbl.id.equals(id)))
+        .write(TextNotesDriftModelCompanion(color: Value(color), updatedAt: Value(DateTime.now())));
   }
 
   Future<int> delete(int id) async {
-    return await (_database.delete(_database.textNotesDriftModel)
-      ..where((tbl) => tbl.id.equals(id))).go();
+    return await (_database.delete(
+      _database.textNotesDriftModel,
+    )..where((tbl) => tbl.id.equals(id))).go();
   }
 
   Future<void> deleteAll() async {

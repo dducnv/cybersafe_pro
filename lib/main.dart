@@ -10,7 +10,6 @@ import 'package:cybersafe_pro/resources/shared_preferences/shared_preferences_he
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/secure/secure_app_manager.dart';
 import 'package:cybersafe_pro/services/local_auth_service.dart';
-import 'package:cybersafe_pro/services/old_encrypt_method/encrypt_app_data_service.dart';
 import 'package:cybersafe_pro/utils/device_type.dart';
 import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
@@ -88,10 +87,8 @@ Future<void> initApp() async {
   await clearSecureStorageOnReinstall();
 
   LocalAuthConfig.instance.init();
-  final encryptService = EncryptAppDataService.instance;
   final themeProvider = ThemeProvider();
   await themeProvider.initTheme();
-  await encryptService.initialize();
   packageInfo = await PackageInfo.fromPlatform();
   // Xác định route ban đầu
   final initialRoute = await _determineInitialRoute();

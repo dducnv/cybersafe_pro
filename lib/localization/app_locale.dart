@@ -56,6 +56,8 @@ class AppLocaleModel extends BaseLocale {
   Map<String, String> get id => {};
   @override
   Map<String, String> get tr => {};
+  @override
+  Map<String, String> get it => {};
 
   @override
   // TODO: implement es
@@ -139,6 +141,13 @@ final List<AppLocaleModel> appLocales = [
     languageName: 'Spanish',
     languageNativeName: 'Español',
     flagEmoji: '🇪🇸',
+  ),
+  AppLocaleModel(
+    languageCode: 'it',
+    countryCode: 'IT',
+    languageName: 'Italian',
+    languageNativeName: 'Italiano',
+    flagEmoji: '🇮🇹',
   ),
 ];
 

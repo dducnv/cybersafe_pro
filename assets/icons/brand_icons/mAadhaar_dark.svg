@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="800px" height="800px" viewBox="0 0 48 48" id="a">
   <defs>
-    <style>.q{fill:none;stroke:#000000;stroke-linecap:round;stroke-linejoin:round;}</style>
+    <style>.q{fill:none;stroke:#fff;stroke-linecap:round;stroke-linejoin:round;}</style>
   </defs>
   <path id="b" class="q" d="M19.2026,34.1655c1.8189-1.5852,2.1868-1.0391,2.2191,0" />
   <path id="c" class="q" d="M15.1448,34.1443c4.7172-5.2784,9.0961-5.7751,9.1088,.0423" />

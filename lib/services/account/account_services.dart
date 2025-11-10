@@ -53,8 +53,9 @@ class AccountServices {
             ),
         customFields: accountAggregate.customFields.map((e) => e.toCompanion(true)).toList(),
         totp: accountAggregate.totp?.toCompanion(true),
-        passwordHistories:
-            accountAggregate.passwordHistories?.map((e) => e.toCompanion(true)).toList(),
+        passwordHistories: accountAggregate.passwordHistories
+            ?.map((e) => e.toCompanion(true))
+            .toList(),
       );
 
       return true;
@@ -87,6 +88,7 @@ class AccountServices {
       categoryId: account.categoryId,
       createdAt: account.createdAt,
       updatedAt: account.updatedAt,
+      openCount: account.openCount,
     );
     return decryptedAccount;
   }
@@ -124,10 +126,9 @@ class AccountServices {
     return {
       ...accountCustomField.toJson(),
       'name': accountCustomField.name,
-      'value':
-          accountCustomField.typeField == 'password'
-              ? await DataSecureService.decryptPassword(accountCustomField.value)
-              : await DataSecureService.decryptInfo(accountCustomField.value),
+      'value': accountCustomField.typeField == 'password'
+          ? await DataSecureService.decryptPassword(accountCustomField.value)
+          : await DataSecureService.decryptInfo(accountCustomField.value),
       'hintText': accountCustomField.hintText,
       'typeField': accountCustomField.typeField,
     };
@@ -255,6 +256,7 @@ class AccountServices {
           'icon': aggregate.account.icon ?? 'default',
           'categoryId': categoryId,
           'iconCustomId': iconId,
+          'openCount': aggregate.account.openCount,
           'createdAt': aggregate.account.createdAt.toIso8601String(),
           'updatedAt': aggregate.account.updatedAt.toIso8601String(),
           'passwordUpdatedAt': aggregate.account.passwordUpdatedAt?.toIso8601String(),
@@ -262,17 +264,16 @@ class AccountServices {
 
         // Add custom fields
         if (aggregate.customFields.isNotEmpty) {
-          accountData['customFields'] =
-              aggregate.customFields
-                  .map(
-                    (field) => {
-                      'name': field.name,
-                      'value': field.value,
-                      'hintText': field.hintText,
-                      'typeField': field.typeField,
-                    },
-                  )
-                  .toList();
+          accountData['customFields'] = aggregate.customFields
+              .map(
+                (field) => {
+                  'name': field.name,
+                  'value': field.value,
+                  'hintText': field.hintText,
+                  'typeField': field.typeField,
+                },
+              )
+              .toList();
         }
 
         // Add TOTP
@@ -285,15 +286,14 @@ class AccountServices {
 
         // Add password histories
         if (aggregate.passwordHistories != null && aggregate.passwordHistories!.isNotEmpty) {
-          accountData['passwordHistories'] =
-              aggregate.passwordHistories!
-                  .map(
-                    (history) => {
-                      'password': history.password,
-                      'createdAt': history.createdAt.toIso8601String(),
-                    },
-                  )
-                  .toList();
+          accountData['passwordHistories'] = aggregate.passwordHistories!
+              .map(
+                (history) => {
+                  'password': history.password,
+                  'createdAt': history.createdAt.toIso8601String(),
+                },
+              )
+              .toList();
         }
 
         accountsData.add(accountData);

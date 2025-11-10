@@ -127,14 +127,10 @@ class LocalAuthConfig {
     bool authenticated = false;
     try {
       _isAuthenticating = true;
-      final String reason =
-          Platform.isIOS
-              ? 'Kindly use Face ID for authentication'
-              : 'Kindly scan your fingerprint for authentication';
-      authenticated = await auth.authenticate(
-        localizedReason: reason,
-        options: const AuthenticationOptions(stickyAuth: true, biometricOnly: true),
-      );
+      final String reason = Platform.isIOS
+          ? 'Kindly use Face ID for authentication'
+          : 'Kindly scan your fingerprint for authentication';
+      authenticated = await auth.authenticate(localizedReason: reason, biometricOnly: true);
     } on PlatformException catch (e) {
       logError("error authenticate: $e");
       if (e.code == 'auth_in_progress') {

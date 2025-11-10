@@ -358,4 +358,43 @@ class CreateAccountLocale extends BaseLocale {
     CreateAccountText.noteValidation: 'La nota no puede estar vacía',
     CreateAccountText.categoryValidation: 'La categoría no puede estar vacía',
   };
+
+  @override
+  Map<String, String> get it => {
+    CreateAccountText.title: 'Crea Account',
+    CreateAccountText.updateAccount: 'Aggiorna Account',
+    CreateAccountText.chooseIcon: 'Scegli icona',
+    CreateAccountText.noSelect: 'Nessuna selezione',
+    CreateAccountText.twoFactorAuth: 'Autenticazione a due fattori',
+    CreateAccountText.password: 'Password',
+    CreateAccountText.overwritePassword: 'Sovrascrivi password',
+    CreateAccountText.overwritePasswordMessage:
+        'La vecchia password verrà sovrascritta dalla nuova password!',
+    CreateAccountText.cancel: 'Annulla',
+    CreateAccountText.confirm:
+        'Conferma', // "Agree" (Đồng ý) dịch là "Conferma" (Xác nhận) trong ngữ cảnh này.
+    CreateAccountText.addField: 'Aggiungi campo informativo',
+    CreateAccountText.customFields: 'Informazioni aggiuntive',
+    CreateAccountText.chooseFieldType: 'Scegli tipo di informazione',
+
+    CreateAccountText.appName: 'Nome app',
+    CreateAccountText.username: 'Nome account',
+    CreateAccountText.confirmPassword: 'Conferma password',
+    CreateAccountText.note: 'Nota',
+    CreateAccountText.category: 'Categoria',
+    CreateAccountText.chooseCategory: 'Scegli categoria',
+    CreateAccountText.enterKey: 'Inserisci codice di autenticazione a due fattori',
+    CreateAccountText.otpError: 'Codice di autenticazione non valido',
+    CreateAccountText.titleField: 'Nome campo informativo',
+    CreateAccountText.fieldType: 'Tipo di informazione',
+    CreateAccountText.iconApp: 'Icona predefinita',
+    CreateAccountText.iconCustom: 'Icona personalizzata',
+
+    CreateAccountText.appNameValidation: 'Il nome dell\'app non può essere vuoto',
+    CreateAccountText.usernameValidation: 'Il nome dell\'account non può essere vuoto',
+    CreateAccountText.passwordValidation: 'La password non può essere vuota',
+    CreateAccountText.confirmPasswordValidation: 'La conferma password non può essere vuota',
+    CreateAccountText.noteValidation: 'La nota non può essere vuota',
+    CreateAccountText.categoryValidation: 'La categoria non può essere vuota',
+  };
 }

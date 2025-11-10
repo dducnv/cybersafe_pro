@@ -35,7 +35,7 @@ CyberSafe hiện đã có mặt trên Google Play Store với hai phiên bản:
 
 ## ⚙️ Hướng dẫn thiết lập & chạy mã nguồn
 
-**Yêu cầu:** Flutter 3.29.3
+**Yêu cầu:** Flutter 3.35.7
 
 1. **Thiết lập môi trường:**
 

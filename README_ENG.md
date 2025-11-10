@@ -35,7 +35,7 @@ CyberSafe is available on Google Play Store in two versions:
 
 ## ⚙️ Setup & Running from Source
 
-**Requirement:** Flutter 3.29.3
+**Requirement:** Flutter 3.35.7
 
 1. **Environment setup:**
 

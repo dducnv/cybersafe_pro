@@ -17,9 +17,8 @@ class CategoryAdapter {
   }
 
   Future<int> updateCategory(int id, String newName) async {
-    return await (_database.update(_database.categoryDriftModel)..where(
-      (tbl) => tbl.id.equals(id),
-    )).write(CategoryDriftModelCompanion(categoryName: Value(newName)));
+    return await (_database.update(_database.categoryDriftModel)..where((tbl) => tbl.id.equals(id)))
+        .write(CategoryDriftModelCompanion(categoryName: Value(newName)));
   }
 
   /// Lấy tất cả categories
@@ -96,10 +95,9 @@ class CategoryAdapter {
   /// Tìm kiếm categories theo tên
   Future<List<CategoryDriftModelData>> searchByName(String keyword) async {
     try {
-      final query =
-          _database.select(_database.categoryDriftModel)
-            ..where((t) => t.categoryName.contains(keyword))
-            ..orderBy([(t) => OrderingTerm.asc(t.categoryName)]);
+      final query = _database.select(_database.categoryDriftModel)
+        ..where((t) => t.categoryName.contains(keyword))
+        ..orderBy([(t) => OrderingTerm.asc(t.categoryName)]);
 
       return await query.get();
     } catch (e) {
@@ -157,8 +155,9 @@ class CategoryAdapter {
   /// Thêm hoặc cập nhật nhiều categories
   Future<List<int>> putMany(List<CategoryDriftModelData> categories) async {
     try {
-      final updatedCategories =
-          categories.map((category) => category.copyWith(updatedAt: DateTime.now())).toList();
+      final updatedCategories = categories
+          .map((category) => category.copyWith(updatedAt: DateTime.now()))
+          .toList();
 
       final ids = <int>[];
       for (final category in updatedCategories) {
@@ -273,11 +272,10 @@ class CategoryAdapter {
   /// Lấy indexPos tiếp theo
   Future<int> _getNextIndexPos() async {
     try {
-      final query =
-          _database.selectOnly(_database.categoryDriftModel)
-            ..addColumns([_database.categoryDriftModel.indexPos])
-            ..orderBy([OrderingTerm.desc(_database.categoryDriftModel.indexPos)])
-            ..limit(1);
+      final query = _database.selectOnly(_database.categoryDriftModel)
+        ..addColumns([_database.categoryDriftModel.indexPos])
+        ..orderBy([OrderingTerm.desc(_database.categoryDriftModel.indexPos)])
+        ..limit(1);
 
       final rows = await query.get();
       if (rows.isEmpty) return 0;
@@ -357,10 +355,9 @@ class CategoryAdapter {
   /// Lấy category đầu tiên
   Future<CategoryDriftModelData?> getFirst() async {
     try {
-      final query =
-          _database.select(_database.categoryDriftModel)
-            ..orderBy([(t) => OrderingTerm.asc(t.indexPos)])
-            ..limit(1);
+      final query = _database.select(_database.categoryDriftModel)
+        ..orderBy([(t) => OrderingTerm.asc(t.indexPos)])
+        ..limit(1);
 
       return await query.getSingleOrNull();
     } catch (e) {
@@ -372,10 +369,9 @@ class CategoryAdapter {
   /// Lấy category cuối cùng
   Future<CategoryDriftModelData?> getLast() async {
     try {
-      final query =
-          _database.select(_database.categoryDriftModel)
-            ..orderBy([(t) => OrderingTerm.desc(t.indexPos)])
-            ..limit(1);
+      final query = _database.select(_database.categoryDriftModel)
+        ..orderBy([(t) => OrderingTerm.desc(t.indexPos)])
+        ..limit(1);
 
       return await query.getSingleOrNull();
     } catch (e) {
@@ -398,20 +394,24 @@ class CategoryAdapter {
 
         await _database.transaction(() async {
           // Delete related TOTPs for all accounts in category
-          await (_database.delete(_database.tOTPDriftModel)
-            ..where((tbl) => tbl.accountId.isIn(accountIds))).go();
+          await (_database.delete(
+            _database.tOTPDriftModel,
+          )..where((tbl) => tbl.accountId.isIn(accountIds))).go();
 
           // Delete related Custom Fields for all accounts in category
-          await (_database.delete(_database.accountCustomFieldDriftModel)
-            ..where((tbl) => tbl.accountId.isIn(accountIds))).go();
+          await (_database.delete(
+            _database.accountCustomFieldDriftModel,
+          )..where((tbl) => tbl.accountId.isIn(accountIds))).go();
 
           // Delete Password History for all accounts in category
-          await (_database.delete(_database.passwordHistoryDriftModel)
-            ..where((tbl) => tbl.accountId.isIn(accountIds))).go();
+          await (_database.delete(
+            _database.passwordHistoryDriftModel,
+          )..where((tbl) => tbl.accountId.isIn(accountIds))).go();
 
           // Finally delete all accounts in category
-          await (_database.delete(_database.accountDriftModel)
-            ..where((tbl) => tbl.id.isIn(accountIds))).go();
+          await (_database.delete(
+            _database.accountDriftModel,
+          )..where((tbl) => tbl.id.isIn(accountIds))).go();
         });
 
         logInfo('Deleted ${accounts.length} accounts and related data from category $categoryId');

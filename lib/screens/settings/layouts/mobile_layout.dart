@@ -14,7 +14,6 @@ import 'package:cybersafe_pro/screens/settings/widgets/set_theme_color.dart';
 import 'package:cybersafe_pro/screens/settings/widgets/set_theme_mode_widget.dart';
 import 'package:cybersafe_pro/screens/settings/widgets/use_biometric_login.dart';
 import 'package:cybersafe_pro/services/data_manager_service.dart';
-import 'package:cybersafe_pro/services/old_encrypt_method/data_manager_service_old.dart';
 import 'package:cybersafe_pro/utils/global_keys.dart';
 import 'package:cybersafe_pro/utils/scale_utils.dart';
 import 'package:cybersafe_pro/utils/toast_noti.dart';
@@ -82,12 +81,12 @@ class SettingMobileLayout extends StatelessWidget {
                   onTap: () {
                     Navigator.of(GlobalKeys.appRootNavigatorKey.currentContext!).push(
                       MaterialPageRoute(
-                        builder:
-                            (context) => LoginMasterPassword(
-                              showBiometric: false,
-                              isFromDeleteData: true,
-                              title: context.trSafe(OtpText.enterOldPin),
-                              callBackLoginCallback: ({
+                        builder: (context) => LoginMasterPassword(
+                          showBiometric: false,
+                          isFromDeleteData: true,
+                          title: context.trSafe(OtpText.enterOldPin),
+                          callBackLoginCallback:
+                              ({
                                 bool? isLoginSuccess,
                                 String? pin,
                                 GlobalKey<AppPinCodeFieldsState>? appPinCodeKey,
@@ -100,7 +99,7 @@ class SettingMobileLayout extends StatelessWidget {
                                   );
                                 }
                               },
-                            ),
+                        ),
                       ),
                     );
                   },
@@ -147,11 +146,13 @@ class SettingMobileLayout extends StatelessWidget {
                   title: context.appLocale.settingsLocale.getText(SettingsLocale.backupData),
                   icon: Icons.upload_file,
                   onTap: () async {
-                    if (!DataManagerServiceOld.checkData(context)) {
+                    if ((await DataManagerService.checkData())) {
+                      if (!context.mounted) return;
+                      _handleBackupData(context);
+                    } else {
+                      if (!context.mounted) return;
                       showToast(context.trSafe(SettingsLocale.dataIsEmpty), context: context);
-                      return;
                     }
-                    _handleBackupData(context);
                   },
                 ),
                 const SizedBox(height: 5),
@@ -267,10 +268,10 @@ class SettingMobileLayout extends StatelessWidget {
                           provider.isOpenAutoLock
                               ? SizedBox(height: 70.h, width: double.infinity)
                               : SizedBox(
-                                height: 70.h,
-                                width: double.infinity,
-                                child: const ModalBarrier(dismissible: true),
-                              ),
+                                  height: 70.h,
+                                  width: double.infinity,
+                                  child: const ModalBarrier(dismissible: true),
+                                ),
                         ],
                       );
                     },
@@ -307,50 +308,53 @@ class SettingMobileLayout extends StatelessWidget {
           return LoginMasterPassword(
             showBiometric: false,
             isFromRestore: true,
-            callBackLoginCallback: ({
-              bool? isLoginSuccess,
-              String? pin,
-              GlobalKey<AppPinCodeFieldsState>? appPinCodeKey,
-            }) async {
-              if (isLoginSuccess == true &&
-                  pin != null &&
-                  GlobalKeys.appRootNavigatorKey.currentContext != null) {
-                try {
-                  showLoadingDialog(
-                    context: GlobalKeys.appRootNavigatorKey.currentContext!,
-                    loadingText: ValueNotifier(context.trSafe(SettingsLocale.waitingNotification)),
-                  );
-                  await Future.delayed(const Duration(milliseconds: 50));
-                  if (!context.mounted) return;
-                  final result = await DataManagerService.restoreBackup(
-                    context: context,
-                    pin: pin,
-                    filePath: filePath,
-                  );
-                  if (!context.mounted) return;
-                  if (result) {
-                    hideLoadingDialog();
-                    Navigator.of(context).pop(true);
-                    showToastSuccess("Data restore successfully", context: context);
-                    context.read<HomeProvider>().refreshData();
-                  }
-                } catch (e) {
-                  if (!context.mounted) return;
-                  if (e.toString().contains("KEY_INVALID")) {
-                    showToastError("Data restore failed, pin is incorrect", context: context);
+            callBackLoginCallback:
+                ({
+                  bool? isLoginSuccess,
+                  String? pin,
+                  GlobalKey<AppPinCodeFieldsState>? appPinCodeKey,
+                }) async {
+                  if (isLoginSuccess == true &&
+                      pin != null &&
+                      GlobalKeys.appRootNavigatorKey.currentContext != null) {
+                    try {
+                      showLoadingDialog(
+                        context: GlobalKeys.appRootNavigatorKey.currentContext!,
+                        loadingText: ValueNotifier(
+                          context.trSafe(SettingsLocale.waitingNotification),
+                        ),
+                      );
+                      await Future.delayed(const Duration(milliseconds: 50));
+                      if (!context.mounted) return;
+                      final result = await DataManagerService.restoreBackup(
+                        context: context,
+                        pin: pin,
+                        filePath: filePath,
+                      );
+                      if (!context.mounted) return;
+                      if (result) {
+                        hideLoadingDialog();
+                        Navigator.of(context).pop(true);
+                        showToastSuccess("Data restore successfully", context: context);
+                        context.read<HomeProvider>().refreshData();
+                      }
+                    } catch (e) {
+                      if (!context.mounted) return;
+                      if (e.toString().contains("KEY_INVALID")) {
+                        showToastError("Data restore failed, pin is incorrect", context: context);
+                      } else {
+                        showToastError("Data restore failed, file is not valid", context: context);
+                      }
+                    } finally {
+                      hideLoadingDialog();
+                    }
                   } else {
-                    showToastError("Data restore failed, file is not valid", context: context);
+                    // Trường hợp không nhập PIN hoặc hủy
+                    if (context.mounted) {
+                      showToastWarning("Data restore canceled", context: context);
+                    }
                   }
-                } finally {
-                  hideLoadingDialog();
-                }
-              } else {
-                // Trường hợp không nhập PIN hoặc hủy
-                if (context.mounted) {
-                  showToastWarning("Data restore canceled", context: context);
-                }
-              }
-            },
+                },
           );
         },
       ),
@@ -368,16 +372,17 @@ class SettingMobileLayout extends StatelessWidget {
           return LoginMasterPassword(
             isFromBackup: true,
             showBiometric: false,
-            callBackLoginCallback: ({
-              bool? isLoginSuccess,
-              String? pin,
-              GlobalKey<AppPinCodeFieldsState>? appPinCodeKey,
-            }) async {
-              if (isLoginSuccess == true && pin != null) {
-                Navigator.of(context).pop();
-                _onBackUp(context, pin);
-              }
-            },
+            callBackLoginCallback:
+                ({
+                  bool? isLoginSuccess,
+                  String? pin,
+                  GlobalKey<AppPinCodeFieldsState>? appPinCodeKey,
+                }) async {
+                  if (isLoginSuccess == true && pin != null) {
+                    Navigator.of(context).pop();
+                    _onBackUp(context, pin);
+                  }
+                },
           );
         },
       ),
@@ -442,11 +447,11 @@ class SettingMobileLayout extends StatelessWidget {
     if (result == true) {
       Navigator.of(GlobalKeys.appRootNavigatorKey.currentContext!).push(
         MaterialPageRoute(
-          builder:
-              (context) => LoginMasterPassword(
-                showBiometric: false,
-                isFromDeleteData: true,
-                callBackLoginCallback: ({
+          builder: (context) => LoginMasterPassword(
+            showBiometric: false,
+            isFromDeleteData: true,
+            callBackLoginCallback:
+                ({
                   bool? isLoginSuccess,
                   String? pin,
                   GlobalKey<AppPinCodeFieldsState>? appPinCodeKey,
@@ -457,8 +462,7 @@ class SettingMobileLayout extends StatelessWidget {
 
                       if (success && context.mounted) {
                         // Làm mới dữ liệu
-                        if (context.mounted) context.read<HomeProvider>().refreshData();
-                        Navigator.of(context).pop();
+                        if (context.mounted) await context.read<HomeProvider>().refreshData();
                         showToastSuccess("Delete data successfully", context: context);
                       } else {
                         if (context.mounted) {
@@ -479,7 +483,7 @@ class SettingMobileLayout extends StatelessWidget {
                     }
                   }
                 },
-              ),
+          ),
         ),
       );
     }

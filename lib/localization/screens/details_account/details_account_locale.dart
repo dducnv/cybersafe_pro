@@ -252,4 +252,31 @@ class DetailsAccountLocale extends BaseLocale {
     DetailsAccountText.passwordHistoryDetail: 'Detalles',
     DetailsAccountText.passwordHistoryTitle: 'Historial de contraseñas',
   };
+
+  @override
+  Map<String, String> get it => {
+    DetailsAccountText.editAccount: "Modifica Account",
+    DetailsAccountText.deleteAccount: "Elimina Account",
+    DetailsAccountText.copy: "Copia",
+    DetailsAccountText.show: "Mostra",
+    DetailsAccountText.hide: "Nascondi",
+    DetailsAccountText.copied: "Copiato",
+    DetailsAccountText.deleteConfirmation:
+        "Elimina Account", // Thường là tiêu đề của hộp thoại xác nhận
+    DetailsAccountText.deleteAccountQuestion: "Sei sicuro di voler eliminare questo account?",
+    DetailsAccountText.otpCode: "Codice di autenticazione",
+    DetailsAccountText.baseInfo: "Informazioni Account",
+    DetailsAccountText.category: "Categoria",
+    DetailsAccountText.note: "Nota",
+    DetailsAccountText.customFields: "Informazioni Aggiuntive",
+    DetailsAccountText.passwordHistory: "Cronologia Modifiche Password",
+    DetailsAccountText.updatedAt: "Ultimo Aggiornamento",
+    DetailsAccountText.cancel: "Annulla",
+    DetailsAccountText.confirm: "Conferma",
+    DetailsAccountText.username: "Nome Account",
+    DetailsAccountText.password: "Password",
+    DetailsAccountText.email: "Email",
+    DetailsAccountText.passwordHistoryDetail: "Dettagli",
+    DetailsAccountText.passwordHistoryTitle: "Cronologia Modifiche Password",
+  };
 }

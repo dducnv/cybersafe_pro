@@ -197,4 +197,25 @@ class OnboardingLocale extends BaseLocale {
 
     OnboardingText.initDatabase: 'Inicializando la base de datos...',
   };
+
+  @override
+  Map<String, String> get it => {
+    OnboardingText.welcome: 'Benvenuto',
+    OnboardingText.selectLanguage: 'Seleziona lingua',
+    OnboardingText.getStarted: 'Inizia', // Hoặc 'Comincia'
+    OnboardingText.termsAndConditions: 'Accetta l\'informativa e i termini',
+    OnboardingText.agree: 'Accetta', // "Agree" (Đồng ý)
+    OnboardingText.createMasterPassword: 'Crea password principale',
+    OnboardingText.welcomeDescription:
+        'Benvenuto in CyberSafe Pro, un\'applicazione sicura per la gestione delle password.',
+    OnboardingText.terms: 'Termini di utilizzo',
+    OnboardingText.policy: 'Informativa sulla privacy', // Đây là thuật ngữ pháp lý phổ biến ở Ý
+    OnboardingText.continueText: 'Continua',
+    OnboardingText.agreeRedirectLink: 'Accetta e vai al link',
+    OnboardingText.doNotAgreeRedirectLink:
+        'Accetti di andare al link?', // Dịch theo câu tiếng Anh "Do you agree to go to the link?"
+    OnboardingText.showLink: 'Mostra link',
+
+    OnboardingText.initDatabase: 'Inizializzazione database...',
+  };
 }
