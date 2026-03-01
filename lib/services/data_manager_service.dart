@@ -20,6 +20,7 @@ import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:pointycastle/export.dart' as pc;
 
 class DataManagerService {
@@ -81,14 +82,9 @@ class DataManagerService {
       final decryptedData = EncryptBaseInfo.decryptDataBytes(encryptedData: encryptedBytes, key: keyEncryptFile);
       final decryptedUtf8Decode = utf8.decode(decryptedData);
 
-      String decryptedDataResult;
-      try {
-        decryptedDataResult = DataSecureService.decryptData(value: decryptedUtf8Decode, key: keyEncryptData);
-      } catch (e) {
-        throw Exception('KEY_INVALID');
-      }
+      final decryptedDataResult = await compute<Map<String, dynamic>, String>(_decryptDataInIsolate, {'value': decryptedUtf8Decode, 'key': keyEncryptData});
 
-      final decryptedDataJson = jsonDecode(decryptedDataResult);
+      final decryptedDataJson = await compute<String, dynamic>(_jsonDecodeInIsolate, decryptedDataResult);
 
       if (decryptedDataJson == null) {
         throw Exception('Data is null');
@@ -195,16 +191,17 @@ class DataManagerService {
       final keyEncryptFile = await _generateBackupKey(Env.backupFileEncryptKey);
       final keyEncryptData = await _generateBackupKey(pin);
 
-      // Mã hóa dữ liệu
-      final encryptedData = DataSecureService.encryptData(value: jsonEncode(backupData), key: keyEncryptData);
+      // Mã hóa dữ liệu trong Isolate
+      final jsonString = await compute<Map<String, dynamic>, String>(_jsonEncodeInIsolate, backupData);
+      final encryptedData = await compute<Map<String, String>, String>(_encryptDataInIsolate, {'value': jsonString, 'key': keyEncryptData});
 
       final backupJsonBytes = await compute<String, List<int>>(_encodeBackupInIsolate, encryptedData);
 
-      List<int> encryptedDataBytes = EncryptBaseInfo.encryptDataBytes(data: backupJsonBytes, key: keyEncryptFile);
+      final encryptedDataBytes = await compute<Map<String, dynamic>, List<int>>(_encryptBytesInIsolate, {'data': backupJsonBytes, 'key': keyEncryptFile});
 
-      final dateTime = DateTime.now().toString().replaceAll(RegExp(r'[:\s]'), '-');
-      final backupName = 'cybersafe_backup_$dateTime';
-      final fileName = "$backupName.enc";
+      final now = DateTime.now();
+      final formattedDate = DateFormat('yyyy-MM-dd_HH-mm-ss').format(now);
+      final fileName = "cybersafe_backup_$formattedDate.enc";
       final filePath = await FilePickerUtils.saveFileBackup(dialogTitle: 'Save Backup File', fileName: fileName, bytes: Uint8List.fromList(encryptedDataBytes));
       return filePath != null;
     } catch (e) {
@@ -215,6 +212,30 @@ class DataManagerService {
 
   static List<int> _encodeBackupInIsolate(String encryptedData) {
     return utf8.encode(encryptedData);
+  }
+
+  static dynamic _jsonDecodeInIsolate(String source) {
+    return jsonDecode(source);
+  }
+
+  static String _jsonEncodeInIsolate(Map<String, dynamic> data) {
+    return jsonEncode(data);
+  }
+
+  static String _encryptDataInIsolate(Map<String, String> args) {
+    return DataSecureService.encryptData(value: args['value']!, key: args['key']!);
+  }
+
+  static String _decryptDataInIsolate(Map<String, dynamic> args) {
+    try {
+      return DataSecureService.decryptData(value: args['value'], key: args['key']);
+    } catch (e) {
+      throw Exception('KEY_INVALID');
+    }
+  }
+
+  static List<int> _encryptBytesInIsolate(Map<String, dynamic> args) {
+    return EncryptBaseInfo.encryptDataBytes(data: args['data'], key: args['key']);
   }
 
   static const int BACKUP_PBKDF2_ITERATIONS = 50000; // Giảm số vòng lặp cho backup/restore
