@@ -19,6 +19,7 @@ class _NoteEditorState extends State<NoteEditor> {
   QuillController? _quillController;
   final TextEditingController _titleController = TextEditingController();
   final FocusNode _editorFocusNode = FocusNode();
+  bool _isEditing = false;
 
   @override
   void initState() {
@@ -30,6 +31,7 @@ class _NoteEditorState extends State<NoteEditor> {
     final noteProvider = context.read<NoteProvider>();
     QuillController controller;
     if (widget.noteId == null) {
+      _isEditing = true;
       _titleController.text = "";
       noteProvider.clearValue();
       controller = QuillController.basic(config: QuillControllerConfig());
@@ -39,10 +41,7 @@ class _NoteEditorState extends State<NoteEditor> {
         _titleController.text = await noteProvider.decryptTitle(note.title);
         final content = await noteProvider.decryptContent(note.content);
         if (content.isNotEmpty) {
-          controller = QuillController(
-            document: Document.fromJson(jsonDecode(content)),
-            selection: const TextSelection.collapsed(offset: 0),
-          );
+          controller = QuillController(document: Document.fromJson(jsonDecode(content)), selection: const TextSelection.collapsed(offset: 0));
         } else {
           controller = QuillController.basic();
         }
@@ -57,12 +56,20 @@ class _NoteEditorState extends State<NoteEditor> {
     });
   }
 
+  void _enableEditing() {
+    if (!_isEditing) {
+      setState(() {
+        _isEditing = true;
+      });
+      Future.delayed(const Duration(milliseconds: 100), () {
+        _editorFocusNode.requestFocus();
+      });
+    }
+  }
+
   void _saveNote() {
     if (_quillController == null) return;
-    context.read<NoteProvider>().onContentChanged(
-      title: _titleController.text,
-      content: jsonEncode(_quillController!.document.toDelta().toJson()),
-    );
+    context.read<NoteProvider>().markAsDirty(title: _titleController.text, getQuillDocument: () => _quillController!.document);
   }
 
   @override
@@ -82,12 +89,26 @@ class _NoteEditorState extends State<NoteEditor> {
         title: TextField(
           controller: _titleController,
           style: theme.textTheme.titleLarge,
-          decoration: InputDecoration(
-            hintText: context.trNote(NoteText.title),
-            border: InputBorder.none,
-          ),
+          readOnly: !_isEditing,
+          decoration: InputDecoration(hintText: context.trNote(NoteText.title), border: InputBorder.none),
           onChanged: (_) => _saveNote(),
         ),
+        actions: [
+          if (!_isEditing) IconButton(icon: const Icon(Icons.edit), onPressed: _enableEditing),
+          Consumer<NoteProvider>(
+            builder: (context, noteProvider, child) {
+              if (noteProvider.isSaving) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        ],
         backgroundColor: theme.colorScheme.surface,
         elevation: 0,
       ),
@@ -111,6 +132,13 @@ class _NoteEditorState extends State<NoteEditor> {
                         maxContentWidth: 800,
                         keyboardAppearance: Theme.of(context).brightness,
                         enableInteractiveSelection: true,
+                        onTapUp: (event, p1) {
+                          if (!_isEditing) {
+                            _enableEditing();
+                            return true;
+                          }
+                          return false;
+                        },
                         onTapOutsideEnabled: true,
                         onTapOutside: (event, focusNode) {
                           focusNode.unfocus();
@@ -120,25 +148,18 @@ class _NoteEditorState extends State<NoteEditor> {
                         onPerformAction: (action) {
                           if (_quillController == null) return;
                           // Handle common Samsung IME actions that may not send newline
-                          if (action == TextInputAction.newline ||
-                              action == TextInputAction.next ||
-                              action == TextInputAction.go) {
+                          if (action == TextInputAction.newline || action == TextInputAction.next || action == TextInputAction.go) {
                             final sel = _quillController!.selection;
                             final start = sel.start;
                             final len = sel.end - sel.start;
-                            _quillController!.replaceText(
-                              start,
-                              len,
-                              '\n',
-                              TextSelection.collapsed(offset: start + 1),
-                            );
+                            _quillController!.replaceText(start, len, '\n', TextSelection.collapsed(offset: start + 1));
                           }
                         },
                       ),
                       scrollController: ScrollController(),
                     ),
             ),
-            if (_quillController != null)
+            if (_quillController != null && _isEditing)
               SafeArea(
                 child: QuillSimpleToolbar(
                   controller: _quillController!,
@@ -164,12 +185,11 @@ class _NoteEditorState extends State<NoteEditor> {
                     showRedo: true,
                     showSearchButton: true,
                     buttonOptions: QuillSimpleToolbarButtonOptions(
-                      selectHeaderStyleDropdownButton:
-                          QuillToolbarSelectHeaderStyleDropdownButtonOptions(
-                            afterButtonPressed: () {
-                              _editorFocusNode.unfocus();
-                            },
-                          ),
+                      selectHeaderStyleDropdownButton: QuillToolbarSelectHeaderStyleDropdownButtonOptions(
+                        afterButtonPressed: () {
+                          _editorFocusNode.unfocus();
+                        },
+                      ),
                       fontSize: QuillToolbarFontSizeButtonOptions(
                         afterButtonPressed: () {
                           _editorFocusNode.unfocus();

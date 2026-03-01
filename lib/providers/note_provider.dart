@@ -21,6 +21,9 @@ class NoteProvider extends ChangeNotifier {
   bool _isRefreshing = false;
   bool get isRefreshing => _isRefreshing;
 
+  bool _isSaving = false;
+  bool get isSaving => _isSaving;
+
   int _currentFilterYear = DateTime.now().year;
   int get currentFilterYear => _currentFilterYear;
 
@@ -77,13 +80,8 @@ class NoteProvider extends ChangeNotifier {
       _groupedByDay.clear();
       // Không xóa toàn bộ cache để tận dụng dữ liệu đã giải mã
 
-      final notes = await DriffDbManager.instance.textNotesAdapter.getByYearAndMonth(
-        _currentFilterYear,
-        _currentFilterMonth,
-      );
-      notes.sort(
-        (a, b) => b.createdAt.day.compareTo(a.createdAt.day),
-      ); // Sort by createdAt descending
+      final notes = await DriffDbManager.instance.textNotesAdapter.getByYearAndMonth(_currentFilterYear, _currentFilterMonth);
+      notes.sort((a, b) => b.createdAt.day.compareTo(a.createdAt.day)); // Sort by createdAt descending
       for (final note in notes) {
         final day = note.updatedAt.day;
         _groupedByDay.putIfAbsent(day, () => <TextNotesDriftModelData>[]);
@@ -128,33 +126,41 @@ class NoteProvider extends ChangeNotifier {
     await init(isRefresh: true);
   }
 
-  // Lấy nội dung preview từ chuỗi đã giải mã
+  // Lấy nội dung preview từ chuỗi Delta JSON thô (chưa mã hoá)
   String getPlainText(String content) {
     if (content.isEmpty) return '';
     try {
       final document = Document.fromJson(jsonDecode(content));
-      String plainText = document.toPlainText().trim();
+      String plainText = document.toPlainText().replaceAll('\n', ' ').trim();
       return plainText.length > 150 ? '${plainText.substring(0, 150)}...' : plainText;
     } catch (e) {
-      return content.length > 150 ? '${content.substring(0, 150)}...' : content;
+      String plainText = content.replaceAll('\n', ' ').trim();
+      return plainText.length > 150 ? '${plainText.substring(0, 150)}...' : plainText;
     }
   }
 
   // Lấy preview nội dung đã giải mã từ cache hoặc giải mã mới
-  Future<String> getDecryptedPreview(int noteId, String? encryptedContent) async {
+  Future<String> getDecryptedPreview(int noteId, String? encryptedPreview, String? encryptedContent) async {
     // Kiểm tra cache trước
     if (_decryptedPreviewCache.containsKey(noteId)) {
       return _decryptedPreviewCache[noteId]!;
     }
 
-    // Giải mã và tạo preview
+    // Ưu tiên giải mã trường previewContent trước vì nó ngắn
+    if (encryptedPreview != null && encryptedPreview.isNotEmpty) {
+      final preview = await DataSecureService.decryptInfo(encryptedPreview);
+      _addToCache(_decryptedPreviewCache, noteId, preview);
+      return preview;
+    }
+
+    // Fallback cho người dùng cũ: Tải nội dung content, giải mã và trích xuất
     if (encryptedContent == null || encryptedContent.isEmpty) return '';
     final decryptedContent = await DataSecureService.decryptNote(encryptedContent);
-    final preview = getPlainText(decryptedContent);
+    final previewFallback = getPlainText(decryptedContent);
 
     // Lưu vào cache
-    _addToCache(_decryptedPreviewCache, noteId, preview);
-    return preview;
+    _addToCache(_decryptedPreviewCache, noteId, previewFallback);
+    return previewFallback;
   }
 
   // Lấy tiêu đề đã giải mã từ cache hoặc giải mã mới
@@ -175,7 +181,7 @@ class NoteProvider extends ChangeNotifier {
   /// Convert note thành NoteCardData với nội dung đã giải mã
   Future<NoteCardData> convertToNoteCard(TextNotesDriftModelData note) async {
     final title = await getDecryptedTitle(note.id, note.title);
-    final preview = await getDecryptedPreview(note.id, note.content);
+    final preview = await getDecryptedPreview(note.id, note.previewContent, note.content);
     return NoteCardData(
       id: note.id,
       title: title,
@@ -183,18 +189,20 @@ class NoteProvider extends ChangeNotifier {
       time: DateFormat('HH:mm').format(note.updatedAt),
       updatedAt: note.updatedAt,
       color: getColorFromHex(note.color), // Thêm màu sắc của ghi chú
+      isPinned: note.isPinned,
     );
   }
 
   /// Lấy danh sách NoteCardData đã giải mã cho một nhóm ghi chú
   Future<List<NoteCardData>> getDecryptedNoteCards(List<TextNotesDriftModelData> notes) async {
-    final noteCards = await Future.wait(
-      notes.map((note) => convertToNoteCard(note)),
-      eagerError: true,
-    );
+    final noteCards = await Future.wait(notes.map((note) => convertToNoteCard(note)), eagerError: true);
 
-    // Sắp xếp theo thời gian cập nhật mới nhất
-    noteCards.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    // Sắp xếp: Pinned trước, sau đó theo thời gian cập nhật mới nhất
+    noteCards.sort((a, b) {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      return b.updatedAt.compareTo(a.updatedAt);
+    });
     return noteCards;
   }
 
@@ -214,103 +222,75 @@ class NoteProvider extends ChangeNotifier {
     return DriffDbManager.instance.textNotesAdapter.getAll();
   }
 
-  String? _lastSavedContent;
   String? _lastSavedTitle;
-  DateTime _lastSaveTime = DateTime.now();
   bool _hasSignificantChanges = false;
 
-  bool _hasContentChangedSignificantly(String oldContent, String newContent) {
-    if (oldContent.isEmpty || newContent.isEmpty) return true;
-
-    if ((oldContent.length - newContent.length).abs() > oldContent.length * 0.2) {
-      return true;
-    }
-
-    try {
-      final oldDoc = Document.fromJson(jsonDecode(oldContent));
-      final newDoc = Document.fromJson(jsonDecode(newContent));
-
-      final oldLines = oldDoc.toPlainText().split('\n').length;
-      final newLines = newDoc.toPlainText().split('\n').length;
-      if ((oldLines - newLines).abs() >= 3) {
-        return true;
-      }
-
-      if (DateTime.now().difference(_lastSaveTime).inMinutes >= 1) {
-        return true;
-      }
-
-      return false;
-    } catch (e) {
-      return true;
-    }
-  }
-
-  void onContentChanged({String? title, required String content}) {
-    final titleChanged = title != null && title != _lastSavedTitle;
-
-    if (_lastSavedContent != null) {
-      _hasSignificantChanges =
-          _hasContentChangedSignificantly(_lastSavedContent!, content) || titleChanged;
-    } else {
-      _hasSignificantChanges = true;
-    }
+  /// Gọi hàm này từ _NoteEditorState khi Quill thay đổi. KHÔNG được truyền content đã jsonEncode để tránh lag UI!
+  void markAsDirty({String? title, required Document Function() getQuillDocument}) {
+    // Chỉ đánh dấu cơ bản để gọi debounce, chưa encode JSON vội.
+    _hasSignificantChanges = true;
 
     _debounce?.cancel();
 
-    final debounceTime =
-        _hasSignificantChanges ? const Duration(milliseconds: 1500) : const Duration(seconds: 5);
+    // Hiện indicator "Đang lưu..."
+    _isSaving = true;
+    notifyListeners();
 
-    _debounce = Timer(debounceTime, () async {
-      if (noteId == null) {
-        final titleSave = (title != null && title.isNotEmpty) ? title : titleDefault;
-        final titleEncrypt = await DataSecureService.encryptInfo(titleSave);
-        final contentEncrypt = await DataSecureService.encryptNote(content);
-        noteId = await insertNote(title: titleEncrypt, content: contentEncrypt);
-        if (noteId != null) {
-          textNotesDriftModelData = await findById(noteId!);
-
-          _lastSavedContent = content;
-          _lastSavedTitle = title;
-          _lastSaveTime = DateTime.now();
-        }
-      } else if (_hasSignificantChanges || titleChanged) {
-        await updateNote(title: title, content: content);
-
-        _lastSavedContent = content;
-        _lastSavedTitle = title;
-        _lastSaveTime = DateTime.now();
-        _hasSignificantChanges = false;
-      }
-
-      if (_hasSignificantChanges || titleChanged) {
-        await init();
-        notifyListeners();
-      }
+    _debounce = Timer(const Duration(milliseconds: 1500), () async {
+      await _executeSave(title: title, document: getQuillDocument());
     });
   }
 
-  Future<int> insertNote({required String title, required String content}) async {
-    final id = await DriffDbManager.instance.textNotesAdapter.insertNote(
-      TextNotesDriftModelCompanion.insert(title: title, content: Value(content)),
-    );
+  Future<void> _executeSave({String? title, required Document document}) async {
+    final titleChanged = title != null && title != _lastSavedTitle;
+
+    // Ngay lúc timer chạy, tiến hành Extract và JSON Serialize ngoài UI build loop
+    final String contentRawJSON = jsonEncode(document.toDelta().toJson());
+    final String plainTextChunk = document.toPlainText().replaceAll('\n', ' ').trim();
+    final String parsedPreview = plainTextChunk.length > 150 ? '${plainTextChunk.substring(0, 150)}...' : plainTextChunk;
+
+    if (noteId == null) {
+      final titleSave = (title != null && title.isNotEmpty) ? title : titleDefault;
+      final titleEncrypt = await DataSecureService.encryptInfo(titleSave);
+      final previewEncrypt = await DataSecureService.encryptInfo(parsedPreview);
+      final contentEncrypt = await DataSecureService.encryptNote(contentRawJSON);
+      noteId = await insertNote(title: titleEncrypt, content: contentEncrypt, previewContent: previewEncrypt);
+
+      if (noteId != null) {
+        textNotesDriftModelData = await findById(noteId!);
+        _lastSavedTitle = title;
+      }
+    } else if (_hasSignificantChanges || titleChanged) {
+      await updateNote(title: title, contentRawJSON: contentRawJSON, parsedPreview: parsedPreview);
+
+      _lastSavedTitle = title;
+      _hasSignificantChanges = false;
+    }
+
+    _isSaving = false;
+
+    if (_hasSignificantChanges || titleChanged || noteId != null) {
+      await init();
+      notifyListeners();
+    } else {
+      notifyListeners();
+    }
+  }
+
+  Future<int> insertNote({required String title, required String content, required String previewContent}) async {
+    final id = await DriffDbManager.instance.textNotesAdapter.insertNote(TextNotesDriftModelCompanion.insert(title: title, content: Value(content), previewContent: Value(previewContent)));
     return id;
   }
 
-  Future<void> updateNote({String? title, required String content}) async {
+  Future<void> updateNote({String? title, required String contentRawJSON, required String parsedPreview}) async {
     if (textNotesDriftModelData == null) return;
     final titleSave = (title != null && title.isNotEmpty) ? title : titleDefault;
-    final titleEncrypt =
-        title != null
-            ? await DataSecureService.encryptInfo(titleSave)
-            : textNotesDriftModelData!.title;
-    final contentEncrypt = await DataSecureService.encryptNote(content);
+    final titleEncrypt = title != null ? await DataSecureService.encryptInfo(titleSave) : textNotesDriftModelData!.title;
 
-    textNotesDriftModelData = textNotesDriftModelData!.copyWith(
-      title: titleEncrypt,
-      content: Value(contentEncrypt),
-      updatedAt: DateTime.now(),
-    );
+    final previewEncrypt = await DataSecureService.encryptInfo(parsedPreview);
+    final contentEncrypt = await DataSecureService.encryptNote(contentRawJSON);
+
+    textNotesDriftModelData = textNotesDriftModelData!.copyWith(title: titleEncrypt, content: Value(contentEncrypt), previewContent: Value(previewEncrypt), updatedAt: DateTime.now());
     await DriffDbManager.instance.textNotesAdapter.update(textNotesDriftModelData!);
   }
 
@@ -346,6 +326,33 @@ class NoteProvider extends ChangeNotifier {
       debugPrint('Updated color for note $id to $color');
     } catch (e) {
       debugPrint('Error updating note color: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> togglePinNote(int id) async {
+    try {
+      final note = await DriffDbManager.instance.textNotesAdapter.getById(id);
+      if (note != null) {
+        final newIsPinned = !note.isPinned;
+        final updatedNote = note.copyWith(isPinned: newIsPinned);
+        await DriffDbManager.instance.textNotesAdapter.update(updatedNote);
+
+        if (_groupedByDay.isNotEmpty) {
+          for (final dayNotes in _groupedByDay.values) {
+            final noteIndex = dayNotes.indexWhere((n) => n.id == id);
+            if (noteIndex != -1) {
+              dayNotes[noteIndex] = updatedNote;
+              break;
+            }
+          }
+        }
+
+        clearNoteCache(id);
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('Error toggling note pin status: $e');
       rethrow;
     }
   }

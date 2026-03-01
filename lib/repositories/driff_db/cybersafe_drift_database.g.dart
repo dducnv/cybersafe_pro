@@ -18,9 +18,13 @@ class $CategoryDriftModelTable extends CategoryDriftModel
     hasAutoIncrement: true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'),
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
   );
-  static const VerificationMeta _categoryNameMeta = const VerificationMeta('categoryName');
+  static const VerificationMeta _categoryNameMeta = const VerificationMeta(
+    'categoryName',
+  );
   @override
   late final GeneratedColumn<String> categoryName = GeneratedColumn<String>(
     'category_name',
@@ -29,7 +33,9 @@ class $CategoryDriftModelTable extends CategoryDriftModel
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _indexPosMeta = const VerificationMeta('indexPos');
+  static const VerificationMeta _indexPosMeta = const VerificationMeta(
+    'indexPos',
+  );
   @override
   late final GeneratedColumn<int> indexPos = GeneratedColumn<int>(
     'index_pos',
@@ -39,7 +45,9 @@ class $CategoryDriftModelTable extends CategoryDriftModel
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
   @override
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
     'created_at',
@@ -49,7 +57,9 @@ class $CategoryDriftModelTable extends CategoryDriftModel
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
   @override
   late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
     'updated_at',
@@ -60,7 +70,13 @@ class $CategoryDriftModelTable extends CategoryDriftModel
     defaultValue: currentDateAndTime,
   );
   @override
-  List<GeneratedColumn> get $columns => [id, categoryName, indexPos, createdAt, updatedAt];
+  List<GeneratedColumn> get $columns => [
+    id,
+    categoryName,
+    indexPos,
+    createdAt,
+    updatedAt,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -79,7 +95,10 @@ class $CategoryDriftModelTable extends CategoryDriftModel
     if (data.containsKey('category_name')) {
       context.handle(
         _categoryNameMeta,
-        categoryName.isAcceptableOrUnknown(data['category_name']!, _categoryNameMeta),
+        categoryName.isAcceptableOrUnknown(
+          data['category_name']!,
+          _categoryNameMeta,
+        ),
       );
     } else if (isInserting) {
       context.missing(_categoryNameMeta);
@@ -111,7 +130,10 @@ class $CategoryDriftModelTable extends CategoryDriftModel
   CategoryDriftModelData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return CategoryDriftModelData(
-      id: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
       categoryName: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}category_name'],
@@ -137,7 +159,8 @@ class $CategoryDriftModelTable extends CategoryDriftModel
   }
 }
 
-class CategoryDriftModelData extends DataClass implements Insertable<CategoryDriftModelData> {
+class CategoryDriftModelData extends DataClass
+    implements Insertable<CategoryDriftModelData> {
   final int id;
   final String categoryName;
   final int indexPos;
@@ -212,7 +235,9 @@ class CategoryDriftModelData extends DataClass implements Insertable<CategoryDri
   CategoryDriftModelData copyWithCompanion(CategoryDriftModelCompanion data) {
     return CategoryDriftModelData(
       id: data.id.present ? data.id.value : this.id,
-      categoryName: data.categoryName.present ? data.categoryName.value : this.categoryName,
+      categoryName: data.categoryName.present
+          ? data.categoryName.value
+          : this.categoryName,
       indexPos: data.indexPos.present ? data.indexPos.value : this.indexPos,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -232,7 +257,8 @@ class CategoryDriftModelData extends DataClass implements Insertable<CategoryDri
   }
 
   @override
-  int get hashCode => Object.hash(id, categoryName, indexPos, createdAt, updatedAt);
+  int get hashCode =>
+      Object.hash(id, categoryName, indexPos, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -244,7 +270,8 @@ class CategoryDriftModelData extends DataClass implements Insertable<CategoryDri
           other.updatedAt == this.updatedAt);
 }
 
-class CategoryDriftModelCompanion extends UpdateCompanion<CategoryDriftModelData> {
+class CategoryDriftModelCompanion
+    extends UpdateCompanion<CategoryDriftModelData> {
   final Value<int> id;
   final Value<String> categoryName;
   final Value<int> indexPos;
@@ -345,7 +372,9 @@ class $IconCustomDriftModelTable extends IconCustomDriftModel
     hasAutoIncrement: true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'),
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
   );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
@@ -356,7 +385,9 @@ class $IconCustomDriftModelTable extends IconCustomDriftModel
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _imageBase64Meta = const VerificationMeta('imageBase64');
+  static const VerificationMeta _imageBase64Meta = const VerificationMeta(
+    'imageBase64',
+  );
   @override
   late final GeneratedColumn<String> imageBase64 = GeneratedColumn<String>(
     'image_base64',
@@ -383,14 +414,20 @@ class $IconCustomDriftModelTable extends IconCustomDriftModel
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
     if (data.containsKey('name')) {
-      context.handle(_nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
     if (data.containsKey('image_base64')) {
       context.handle(
         _imageBase64Meta,
-        imageBase64.isAcceptableOrUnknown(data['image_base64']!, _imageBase64Meta),
+        imageBase64.isAcceptableOrUnknown(
+          data['image_base64']!,
+          _imageBase64Meta,
+        ),
       );
     } else if (isInserting) {
       context.missing(_imageBase64Meta);
@@ -401,11 +438,20 @@ class $IconCustomDriftModelTable extends IconCustomDriftModel
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  IconCustomDriftModelData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  IconCustomDriftModelData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return IconCustomDriftModelData(
-      id: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      name: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
       imageBase64: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}image_base64'],
@@ -419,11 +465,16 @@ class $IconCustomDriftModelTable extends IconCustomDriftModel
   }
 }
 
-class IconCustomDriftModelData extends DataClass implements Insertable<IconCustomDriftModelData> {
+class IconCustomDriftModelData extends DataClass
+    implements Insertable<IconCustomDriftModelData> {
   final int id;
   final String name;
   final String imageBase64;
-  const IconCustomDriftModelData({required this.id, required this.name, required this.imageBase64});
+  const IconCustomDriftModelData({
+    required this.id,
+    required this.name,
+    required this.imageBase64,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -462,17 +513,24 @@ class IconCustomDriftModelData extends DataClass implements Insertable<IconCusto
     };
   }
 
-  IconCustomDriftModelData copyWith({int? id, String? name, String? imageBase64}) =>
-      IconCustomDriftModelData(
-        id: id ?? this.id,
-        name: name ?? this.name,
-        imageBase64: imageBase64 ?? this.imageBase64,
-      );
-  IconCustomDriftModelData copyWithCompanion(IconCustomDriftModelCompanion data) {
+  IconCustomDriftModelData copyWith({
+    int? id,
+    String? name,
+    String? imageBase64,
+  }) => IconCustomDriftModelData(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    imageBase64: imageBase64 ?? this.imageBase64,
+  );
+  IconCustomDriftModelData copyWithCompanion(
+    IconCustomDriftModelCompanion data,
+  ) {
     return IconCustomDriftModelData(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
-      imageBase64: data.imageBase64.present ? data.imageBase64.value : this.imageBase64,
+      imageBase64: data.imageBase64.present
+          ? data.imageBase64.value
+          : this.imageBase64,
     );
   }
 
@@ -497,7 +555,8 @@ class IconCustomDriftModelData extends DataClass implements Insertable<IconCusto
           other.imageBase64 == this.imageBase64);
 }
 
-class IconCustomDriftModelCompanion extends UpdateCompanion<IconCustomDriftModelData> {
+class IconCustomDriftModelCompanion
+    extends UpdateCompanion<IconCustomDriftModelData> {
   final Value<int> id;
   final Value<String> name;
   final Value<String> imageBase64;
@@ -577,7 +636,9 @@ class $AccountDriftModelTable extends AccountDriftModel
     hasAutoIncrement: true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'),
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
   );
   static const VerificationMeta _titleMeta = const VerificationMeta('title');
   @override
@@ -588,7 +649,9 @@ class $AccountDriftModelTable extends AccountDriftModel
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _usernameMeta = const VerificationMeta('username');
+  static const VerificationMeta _usernameMeta = const VerificationMeta(
+    'username',
+  );
   @override
   late final GeneratedColumn<String> username = GeneratedColumn<String>(
     'username',
@@ -597,7 +660,9 @@ class $AccountDriftModelTable extends AccountDriftModel
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _passwordMeta = const VerificationMeta('password');
+  static const VerificationMeta _passwordMeta = const VerificationMeta(
+    'password',
+  );
   @override
   late final GeneratedColumn<String> password = GeneratedColumn<String>(
     'password',
@@ -624,7 +689,9 @@ class $AccountDriftModelTable extends AccountDriftModel
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _openCountMeta = const VerificationMeta('openCount');
+  static const VerificationMeta _openCountMeta = const VerificationMeta(
+    'openCount',
+  );
   @override
   late final GeneratedColumn<int> openCount = GeneratedColumn<int>(
     'open_count',
@@ -634,7 +701,9 @@ class $AccountDriftModelTable extends AccountDriftModel
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
-  static const VerificationMeta _categoryIdMeta = const VerificationMeta('categoryId');
+  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
+    'categoryId',
+  );
   @override
   late final GeneratedColumn<int> categoryId = GeneratedColumn<int>(
     'category_id',
@@ -642,9 +711,13 @@ class $AccountDriftModelTable extends AccountDriftModel
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('REFERENCES category_drift_model (id)'),
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES category_drift_model (id)',
+    ),
   );
-  static const VerificationMeta _iconCustomIdMeta = const VerificationMeta('iconCustomId');
+  static const VerificationMeta _iconCustomIdMeta = const VerificationMeta(
+    'iconCustomId',
+  );
   @override
   late final GeneratedColumn<int> iconCustomId = GeneratedColumn<int>(
     'icon_custom_id',
@@ -660,14 +733,17 @@ class $AccountDriftModelTable extends AccountDriftModel
     'passwordUpdatedAt',
   );
   @override
-  late final GeneratedColumn<DateTime> passwordUpdatedAt = GeneratedColumn<DateTime>(
-    'password_updated_at',
-    aliasedName,
-    true,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
+  late final GeneratedColumn<DateTime> passwordUpdatedAt =
+      GeneratedColumn<DateTime>(
+        'password_updated_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   @override
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
     'created_at',
@@ -677,7 +753,9 @@ class $AccountDriftModelTable extends AccountDriftModel
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
   @override
   late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
     'updated_at',
@@ -687,7 +765,9 @@ class $AccountDriftModelTable extends AccountDriftModel
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
-  static const VerificationMeta _deletedAtMeta = const VerificationMeta('deletedAt');
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
   @override
   late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
     'deleted_at',
@@ -728,7 +808,10 @@ class $AccountDriftModelTable extends AccountDriftModel
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
     if (data.containsKey('title')) {
-      context.handle(_titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
     } else if (isInserting) {
       context.missing(_titleMeta);
     }
@@ -745,10 +828,16 @@ class $AccountDriftModelTable extends AccountDriftModel
       );
     }
     if (data.containsKey('notes')) {
-      context.handle(_notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
     }
     if (data.containsKey('icon')) {
-      context.handle(_iconMeta, icon.isAcceptableOrUnknown(data['icon']!, _iconMeta));
+      context.handle(
+        _iconMeta,
+        icon.isAcceptableOrUnknown(data['icon']!, _iconMeta),
+      );
     }
     if (data.containsKey('open_count')) {
       context.handle(
@@ -767,7 +856,10 @@ class $AccountDriftModelTable extends AccountDriftModel
     if (data.containsKey('icon_custom_id')) {
       context.handle(
         _iconCustomIdMeta,
-        iconCustomId.isAcceptableOrUnknown(data['icon_custom_id']!, _iconCustomIdMeta),
+        iconCustomId.isAcceptableOrUnknown(
+          data['icon_custom_id']!,
+          _iconCustomIdMeta,
+        ),
       );
     }
     if (data.containsKey('password_updated_at')) {
@@ -806,7 +898,10 @@ class $AccountDriftModelTable extends AccountDriftModel
   AccountDriftModelData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return AccountDriftModelData(
-      id: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
       title: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}title'],
@@ -823,7 +918,10 @@ class $AccountDriftModelTable extends AccountDriftModel
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
       ),
-      icon: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}icon']),
+      icon: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}icon'],
+      ),
       openCount: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}open_count'],
@@ -861,7 +959,8 @@ class $AccountDriftModelTable extends AccountDriftModel
   }
 }
 
-class AccountDriftModelData extends DataClass implements Insertable<AccountDriftModelData> {
+class AccountDriftModelData extends DataClass
+    implements Insertable<AccountDriftModelData> {
   final int id;
   final String title;
   final String? username;
@@ -907,9 +1006,7 @@ class AccountDriftModelData extends DataClass implements Insertable<AccountDrift
     if (!nullToAbsent || icon != null) {
       map['icon'] = Variable<String>(icon);
     }
-    if (!nullToAbsent || openCount != null) {
-      map['open_count'] = Variable<int>(openCount);
-    }
+    map['open_count'] = Variable<int>(openCount);
     map['category_id'] = Variable<int>(categoryId);
     if (!nullToAbsent || iconCustomId != null) {
       map['icon_custom_id'] = Variable<int>(iconCustomId);
@@ -929,9 +1026,15 @@ class AccountDriftModelData extends DataClass implements Insertable<AccountDrift
     return AccountDriftModelCompanion(
       id: Value(id),
       title: Value(title),
-      username: username == null && nullToAbsent ? const Value.absent() : Value(username),
-      password: password == null && nullToAbsent ? const Value.absent() : Value(password),
-      notes: notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+      username: username == null && nullToAbsent
+          ? const Value.absent()
+          : Value(username),
+      password: password == null && nullToAbsent
+          ? const Value.absent()
+          : Value(password),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
       icon: icon == null && nullToAbsent ? const Value.absent() : Value(icon),
       openCount: Value(openCount),
       categoryId: Value(categoryId),
@@ -943,11 +1046,16 @@ class AccountDriftModelData extends DataClass implements Insertable<AccountDrift
           : Value(passwordUpdatedAt),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
-      deletedAt: deletedAt == null && nullToAbsent ? const Value.absent() : Value(deletedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
     );
   }
 
-  factory AccountDriftModelData.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+  factory AccountDriftModelData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return AccountDriftModelData(
       id: serializer.fromJson<int>(json['id']),
@@ -956,10 +1064,12 @@ class AccountDriftModelData extends DataClass implements Insertable<AccountDrift
       password: serializer.fromJson<String?>(json['password']),
       notes: serializer.fromJson<String?>(json['notes']),
       icon: serializer.fromJson<String?>(json['icon']),
-      openCount: serializer.fromJson<int>(json['openCount'] ?? 0),
+      openCount: serializer.fromJson<int>(json['openCount']),
       categoryId: serializer.fromJson<int>(json['categoryId']),
       iconCustomId: serializer.fromJson<int?>(json['iconCustomId']),
-      passwordUpdatedAt: serializer.fromJson<DateTime?>(json['passwordUpdatedAt']),
+      passwordUpdatedAt: serializer.fromJson<DateTime?>(
+        json['passwordUpdatedAt'],
+      ),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -1009,7 +1119,9 @@ class AccountDriftModelData extends DataClass implements Insertable<AccountDrift
     openCount: openCount ?? this.openCount,
     categoryId: categoryId ?? this.categoryId,
     iconCustomId: iconCustomId.present ? iconCustomId.value : this.iconCustomId,
-    passwordUpdatedAt: passwordUpdatedAt.present ? passwordUpdatedAt.value : this.passwordUpdatedAt,
+    passwordUpdatedAt: passwordUpdatedAt.present
+        ? passwordUpdatedAt.value
+        : this.passwordUpdatedAt,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -1023,8 +1135,12 @@ class AccountDriftModelData extends DataClass implements Insertable<AccountDrift
       notes: data.notes.present ? data.notes.value : this.notes,
       icon: data.icon.present ? data.icon.value : this.icon,
       openCount: data.openCount.present ? data.openCount.value : this.openCount,
-      categoryId: data.categoryId.present ? data.categoryId.value : this.categoryId,
-      iconCustomId: data.iconCustomId.present ? data.iconCustomId.value : this.iconCustomId,
+      categoryId: data.categoryId.present
+          ? data.categoryId.value
+          : this.categoryId,
+      iconCustomId: data.iconCustomId.present
+          ? data.iconCustomId.value
+          : this.iconCustomId,
       passwordUpdatedAt: data.passwordUpdatedAt.present
           ? data.passwordUpdatedAt.value
           : this.passwordUpdatedAt,
@@ -1089,7 +1205,8 @@ class AccountDriftModelData extends DataClass implements Insertable<AccountDrift
           other.deletedAt == this.deletedAt);
 }
 
-class AccountDriftModelCompanion extends UpdateCompanion<AccountDriftModelData> {
+class AccountDriftModelCompanion
+    extends UpdateCompanion<AccountDriftModelData> {
   final Value<int> id;
   final Value<String> title;
   final Value<String?> username;
@@ -1279,9 +1396,13 @@ class $TOTPDriftModelTable extends TOTPDriftModel
     hasAutoIncrement: true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'),
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
   );
-  static const VerificationMeta _accountIdMeta = const VerificationMeta('accountId');
+  static const VerificationMeta _accountIdMeta = const VerificationMeta(
+    'accountId',
+  );
   @override
   late final GeneratedColumn<int> accountId = GeneratedColumn<int>(
     'account_id',
@@ -1289,9 +1410,13 @@ class $TOTPDriftModelTable extends TOTPDriftModel
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('REFERENCES account_drift_model (id)'),
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES account_drift_model (id)',
+    ),
   );
-  static const VerificationMeta _secretKeyMeta = const VerificationMeta('secretKey');
+  static const VerificationMeta _secretKeyMeta = const VerificationMeta(
+    'secretKey',
+  );
   @override
   late final GeneratedColumn<String> secretKey = GeneratedColumn<String>(
     'secret_key',
@@ -1300,7 +1425,9 @@ class $TOTPDriftModelTable extends TOTPDriftModel
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _isShowToHomeMeta = const VerificationMeta('isShowToHome');
+  static const VerificationMeta _isShowToHomeMeta = const VerificationMeta(
+    'isShowToHome',
+  );
   @override
   late final GeneratedColumn<bool> isShowToHome = GeneratedColumn<bool>(
     'is_show_to_home',
@@ -1308,10 +1435,14 @@ class $TOTPDriftModelTable extends TOTPDriftModel
     false,
     type: DriftSqlType.bool,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("is_show_to_home" IN (0, 1))'),
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_show_to_home" IN (0, 1))',
+    ),
     defaultValue: const Constant(false),
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
   @override
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
     'created_at',
@@ -1321,7 +1452,9 @@ class $TOTPDriftModelTable extends TOTPDriftModel
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
   @override
   late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
     'updated_at',
@@ -1374,7 +1507,10 @@ class $TOTPDriftModelTable extends TOTPDriftModel
     if (data.containsKey('is_show_to_home')) {
       context.handle(
         _isShowToHomeMeta,
-        isShowToHome.isAcceptableOrUnknown(data['is_show_to_home']!, _isShowToHomeMeta),
+        isShowToHome.isAcceptableOrUnknown(
+          data['is_show_to_home']!,
+          _isShowToHomeMeta,
+        ),
       );
     }
     if (data.containsKey('created_at')) {
@@ -1398,7 +1534,10 @@ class $TOTPDriftModelTable extends TOTPDriftModel
   TOTPDriftModelData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return TOTPDriftModelData(
-      id: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
       accountId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}account_id'],
@@ -1428,7 +1567,8 @@ class $TOTPDriftModelTable extends TOTPDriftModel
   }
 }
 
-class TOTPDriftModelData extends DataClass implements Insertable<TOTPDriftModelData> {
+class TOTPDriftModelData extends DataClass
+    implements Insertable<TOTPDriftModelData> {
   final int id;
   final int accountId;
   final String secretKey;
@@ -1466,7 +1606,10 @@ class TOTPDriftModelData extends DataClass implements Insertable<TOTPDriftModelD
     );
   }
 
-  factory TOTPDriftModelData.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
+  factory TOTPDriftModelData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return TOTPDriftModelData(
       id: serializer.fromJson<int>(json['id']),
@@ -1510,7 +1653,9 @@ class TOTPDriftModelData extends DataClass implements Insertable<TOTPDriftModelD
       id: data.id.present ? data.id.value : this.id,
       accountId: data.accountId.present ? data.accountId.value : this.accountId,
       secretKey: data.secretKey.present ? data.secretKey.value : this.secretKey,
-      isShowToHome: data.isShowToHome.present ? data.isShowToHome.value : this.isShowToHome,
+      isShowToHome: data.isShowToHome.present
+          ? data.isShowToHome.value
+          : this.isShowToHome,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -1530,7 +1675,8 @@ class TOTPDriftModelData extends DataClass implements Insertable<TOTPDriftModelD
   }
 
   @override
-  int get hashCode => Object.hash(id, accountId, secretKey, isShowToHome, createdAt, updatedAt);
+  int get hashCode =>
+      Object.hash(id, accountId, secretKey, isShowToHome, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1642,7 +1788,11 @@ class TOTPDriftModelCompanion extends UpdateCompanion<TOTPDriftModelData> {
 }
 
 class $PasswordHistoryDriftModelTable extends PasswordHistoryDriftModel
-    with TableInfo<$PasswordHistoryDriftModelTable, PasswordHistoryDriftModelData> {
+    with
+        TableInfo<
+          $PasswordHistoryDriftModelTable,
+          PasswordHistoryDriftModelData
+        > {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -1656,9 +1806,13 @@ class $PasswordHistoryDriftModelTable extends PasswordHistoryDriftModel
     hasAutoIncrement: true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'),
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
   );
-  static const VerificationMeta _accountIdMeta = const VerificationMeta('accountId');
+  static const VerificationMeta _accountIdMeta = const VerificationMeta(
+    'accountId',
+  );
   @override
   late final GeneratedColumn<int> accountId = GeneratedColumn<int>(
     'account_id',
@@ -1666,9 +1820,13 @@ class $PasswordHistoryDriftModelTable extends PasswordHistoryDriftModel
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('REFERENCES account_drift_model (id)'),
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES account_drift_model (id)',
+    ),
   );
-  static const VerificationMeta _passwordMeta = const VerificationMeta('password');
+  static const VerificationMeta _passwordMeta = const VerificationMeta(
+    'password',
+  );
   @override
   late final GeneratedColumn<String> password = GeneratedColumn<String>(
     'password',
@@ -1677,7 +1835,9 @@ class $PasswordHistoryDriftModelTable extends PasswordHistoryDriftModel
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
   @override
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
     'created_at',
@@ -1732,10 +1892,16 @@ class $PasswordHistoryDriftModelTable extends PasswordHistoryDriftModel
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  PasswordHistoryDriftModelData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  PasswordHistoryDriftModelData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return PasswordHistoryDriftModelData(
-      id: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
       accountId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}account_id'],
@@ -1822,7 +1988,9 @@ class PasswordHistoryDriftModelData extends DataClass
     password: password ?? this.password,
     createdAt: createdAt ?? this.createdAt,
   );
-  PasswordHistoryDriftModelData copyWithCompanion(PasswordHistoryDriftModelCompanion data) {
+  PasswordHistoryDriftModelData copyWithCompanion(
+    PasswordHistoryDriftModelCompanion data,
+  ) {
     return PasswordHistoryDriftModelData(
       id: data.id.present ? data.id.value : this.id,
       accountId: data.accountId.present ? data.accountId.value : this.accountId,
@@ -1854,7 +2022,8 @@ class PasswordHistoryDriftModelData extends DataClass
           other.createdAt == this.createdAt);
 }
 
-class PasswordHistoryDriftModelCompanion extends UpdateCompanion<PasswordHistoryDriftModelData> {
+class PasswordHistoryDriftModelCompanion
+    extends UpdateCompanion<PasswordHistoryDriftModelData> {
   final Value<int> id;
   final Value<int> accountId;
   final Value<String> password;
@@ -1931,7 +2100,11 @@ class PasswordHistoryDriftModelCompanion extends UpdateCompanion<PasswordHistory
 }
 
 class $AccountCustomFieldDriftModelTable extends AccountCustomFieldDriftModel
-    with TableInfo<$AccountCustomFieldDriftModelTable, AccountCustomFieldDriftModelData> {
+    with
+        TableInfo<
+          $AccountCustomFieldDriftModelTable,
+          AccountCustomFieldDriftModelData
+        > {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -1945,9 +2118,13 @@ class $AccountCustomFieldDriftModelTable extends AccountCustomFieldDriftModel
     hasAutoIncrement: true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'),
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
   );
-  static const VerificationMeta _accountIdMeta = const VerificationMeta('accountId');
+  static const VerificationMeta _accountIdMeta = const VerificationMeta(
+    'accountId',
+  );
   @override
   late final GeneratedColumn<int> accountId = GeneratedColumn<int>(
     'account_id',
@@ -1955,7 +2132,9 @@ class $AccountCustomFieldDriftModelTable extends AccountCustomFieldDriftModel
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('REFERENCES account_drift_model (id)'),
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES account_drift_model (id)',
+    ),
   );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
@@ -1975,7 +2154,9 @@ class $AccountCustomFieldDriftModelTable extends AccountCustomFieldDriftModel
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _hintTextMeta = const VerificationMeta('hintText');
+  static const VerificationMeta _hintTextMeta = const VerificationMeta(
+    'hintText',
+  );
   @override
   late final GeneratedColumn<String> hintText = GeneratedColumn<String>(
     'hint_text',
@@ -1984,7 +2165,9 @@ class $AccountCustomFieldDriftModelTable extends AccountCustomFieldDriftModel
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _typeFieldMeta = const VerificationMeta('typeField');
+  static const VerificationMeta _typeFieldMeta = const VerificationMeta(
+    'typeField',
+  );
   @override
   late final GeneratedColumn<String> typeField = GeneratedColumn<String>(
     'type_field',
@@ -1994,7 +2177,14 @@ class $AccountCustomFieldDriftModelTable extends AccountCustomFieldDriftModel
     requiredDuringInsert: true,
   );
   @override
-  List<GeneratedColumn> get $columns => [id, accountId, name, value, hintText, typeField];
+  List<GeneratedColumn> get $columns => [
+    id,
+    accountId,
+    name,
+    value,
+    hintText,
+    typeField,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2019,12 +2209,18 @@ class $AccountCustomFieldDriftModelTable extends AccountCustomFieldDriftModel
       context.missing(_accountIdMeta);
     }
     if (data.containsKey('name')) {
-      context.handle(_nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
     if (data.containsKey('value')) {
-      context.handle(_valueMeta, value.isAcceptableOrUnknown(data['value']!, _valueMeta));
+      context.handle(
+        _valueMeta,
+        value.isAcceptableOrUnknown(data['value']!, _valueMeta),
+      );
     } else if (isInserting) {
       context.missing(_valueMeta);
     }
@@ -2050,15 +2246,24 @@ class $AccountCustomFieldDriftModelTable extends AccountCustomFieldDriftModel
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  AccountCustomFieldDriftModelData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  AccountCustomFieldDriftModelData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return AccountCustomFieldDriftModelData(
-      id: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
       accountId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}account_id'],
       )!,
-      name: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
       value: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}value'],
@@ -2161,7 +2366,9 @@ class AccountCustomFieldDriftModelData extends DataClass
     hintText: hintText ?? this.hintText,
     typeField: typeField ?? this.typeField,
   );
-  AccountCustomFieldDriftModelData copyWithCompanion(AccountCustomFieldDriftModelCompanion data) {
+  AccountCustomFieldDriftModelData copyWithCompanion(
+    AccountCustomFieldDriftModelCompanion data,
+  ) {
     return AccountCustomFieldDriftModelData(
       id: data.id.present ? data.id.value : this.id,
       accountId: data.accountId.present ? data.accountId.value : this.accountId,
@@ -2186,7 +2393,8 @@ class AccountCustomFieldDriftModelData extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(id, accountId, name, value, hintText, typeField);
+  int get hashCode =>
+      Object.hash(id, accountId, name, value, hintText, typeField);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2316,7 +2524,9 @@ class $TextNotesDriftModelTable extends TextNotesDriftModel
     hasAutoIncrement: true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'),
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
   );
   static const VerificationMeta _titleMeta = const VerificationMeta('title');
   @override
@@ -2327,10 +2537,23 @@ class $TextNotesDriftModelTable extends TextNotesDriftModel
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _contentMeta = const VerificationMeta('content');
+  static const VerificationMeta _contentMeta = const VerificationMeta(
+    'content',
+  );
   @override
   late final GeneratedColumn<String> content = GeneratedColumn<String>(
     'content',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _previewContentMeta = const VerificationMeta(
+    'previewContent',
+  );
+  @override
+  late final GeneratedColumn<String> previewContent = GeneratedColumn<String>(
+    'preview_content',
     aliasedName,
     true,
     type: DriftSqlType.string,
@@ -2345,7 +2568,9 @@ class $TextNotesDriftModelTable extends TextNotesDriftModel
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _isFavoriteMeta = const VerificationMeta('isFavorite');
+  static const VerificationMeta _isFavoriteMeta = const VerificationMeta(
+    'isFavorite',
+  );
   @override
   late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
     'is_favorite',
@@ -2353,10 +2578,14 @@ class $TextNotesDriftModelTable extends TextNotesDriftModel
     false,
     type: DriftSqlType.bool,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("is_favorite" IN (0, 1))'),
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_favorite" IN (0, 1))',
+    ),
     defaultValue: const Constant(false),
   );
-  static const VerificationMeta _isPinnedMeta = const VerificationMeta('isPinned');
+  static const VerificationMeta _isPinnedMeta = const VerificationMeta(
+    'isPinned',
+  );
   @override
   late final GeneratedColumn<bool> isPinned = GeneratedColumn<bool>(
     'is_pinned',
@@ -2364,10 +2593,14 @@ class $TextNotesDriftModelTable extends TextNotesDriftModel
     false,
     type: DriftSqlType.bool,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('CHECK ("is_pinned" IN (0, 1))'),
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_pinned" IN (0, 1))',
+    ),
     defaultValue: const Constant(false),
   );
-  static const VerificationMeta _indexPosMeta = const VerificationMeta('indexPos');
+  static const VerificationMeta _indexPosMeta = const VerificationMeta(
+    'indexPos',
+  );
   @override
   late final GeneratedColumn<int> indexPos = GeneratedColumn<int>(
     'index_pos',
@@ -2377,7 +2610,9 @@ class $TextNotesDriftModelTable extends TextNotesDriftModel
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
   @override
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
     'created_at',
@@ -2387,7 +2622,9 @@ class $TextNotesDriftModelTable extends TextNotesDriftModel
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
   @override
   late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
     'updated_at',
@@ -2402,6 +2639,7 @@ class $TextNotesDriftModelTable extends TextNotesDriftModel
     id,
     title,
     content,
+    previewContent,
     color,
     isFavorite,
     isPinned,
@@ -2425,15 +2663,33 @@ class $TextNotesDriftModelTable extends TextNotesDriftModel
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
     if (data.containsKey('title')) {
-      context.handle(_titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
     } else if (isInserting) {
       context.missing(_titleMeta);
     }
     if (data.containsKey('content')) {
-      context.handle(_contentMeta, content.isAcceptableOrUnknown(data['content']!, _contentMeta));
+      context.handle(
+        _contentMeta,
+        content.isAcceptableOrUnknown(data['content']!, _contentMeta),
+      );
+    }
+    if (data.containsKey('preview_content')) {
+      context.handle(
+        _previewContentMeta,
+        previewContent.isAcceptableOrUnknown(
+          data['preview_content']!,
+          _previewContentMeta,
+        ),
+      );
     }
     if (data.containsKey('color')) {
-      context.handle(_colorMeta, color.isAcceptableOrUnknown(data['color']!, _colorMeta));
+      context.handle(
+        _colorMeta,
+        color.isAcceptableOrUnknown(data['color']!, _colorMeta),
+      );
     }
     if (data.containsKey('is_favorite')) {
       context.handle(
@@ -2471,10 +2727,16 @@ class $TextNotesDriftModelTable extends TextNotesDriftModel
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  TextNotesDriftModelData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  TextNotesDriftModelData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return TextNotesDriftModelData(
-      id: attachedDatabase.typeMapping.read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
       title: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}title'],
@@ -2482,6 +2744,10 @@ class $TextNotesDriftModelTable extends TextNotesDriftModel
       content: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}content'],
+      ),
+      previewContent: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}preview_content'],
       ),
       color: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -2516,10 +2782,12 @@ class $TextNotesDriftModelTable extends TextNotesDriftModel
   }
 }
 
-class TextNotesDriftModelData extends DataClass implements Insertable<TextNotesDriftModelData> {
+class TextNotesDriftModelData extends DataClass
+    implements Insertable<TextNotesDriftModelData> {
   final int id;
   final String title;
   final String? content;
+  final String? previewContent;
   final String? color;
   final bool isFavorite;
   final bool isPinned;
@@ -2530,6 +2798,7 @@ class TextNotesDriftModelData extends DataClass implements Insertable<TextNotesD
     required this.id,
     required this.title,
     this.content,
+    this.previewContent,
     this.color,
     required this.isFavorite,
     required this.isPinned,
@@ -2544,6 +2813,9 @@ class TextNotesDriftModelData extends DataClass implements Insertable<TextNotesD
     map['title'] = Variable<String>(title);
     if (!nullToAbsent || content != null) {
       map['content'] = Variable<String>(content);
+    }
+    if (!nullToAbsent || previewContent != null) {
+      map['preview_content'] = Variable<String>(previewContent);
     }
     if (!nullToAbsent || color != null) {
       map['color'] = Variable<String>(color);
@@ -2560,8 +2832,15 @@ class TextNotesDriftModelData extends DataClass implements Insertable<TextNotesD
     return TextNotesDriftModelCompanion(
       id: Value(id),
       title: Value(title),
-      content: content == null && nullToAbsent ? const Value.absent() : Value(content),
-      color: color == null && nullToAbsent ? const Value.absent() : Value(color),
+      content: content == null && nullToAbsent
+          ? const Value.absent()
+          : Value(content),
+      previewContent: previewContent == null && nullToAbsent
+          ? const Value.absent()
+          : Value(previewContent),
+      color: color == null && nullToAbsent
+          ? const Value.absent()
+          : Value(color),
       isFavorite: Value(isFavorite),
       isPinned: Value(isPinned),
       indexPos: Value(indexPos),
@@ -2579,6 +2858,7 @@ class TextNotesDriftModelData extends DataClass implements Insertable<TextNotesD
       id: serializer.fromJson<int>(json['id']),
       title: serializer.fromJson<String>(json['title']),
       content: serializer.fromJson<String?>(json['content']),
+      previewContent: serializer.fromJson<String?>(json['previewContent']),
       color: serializer.fromJson<String?>(json['color']),
       isFavorite: serializer.fromJson<bool>(json['isFavorite']),
       isPinned: serializer.fromJson<bool>(json['isPinned']),
@@ -2594,6 +2874,7 @@ class TextNotesDriftModelData extends DataClass implements Insertable<TextNotesD
       'id': serializer.toJson<int>(id),
       'title': serializer.toJson<String>(title),
       'content': serializer.toJson<String?>(content),
+      'previewContent': serializer.toJson<String?>(previewContent),
       'color': serializer.toJson<String?>(color),
       'isFavorite': serializer.toJson<bool>(isFavorite),
       'isPinned': serializer.toJson<bool>(isPinned),
@@ -2607,6 +2888,7 @@ class TextNotesDriftModelData extends DataClass implements Insertable<TextNotesD
     int? id,
     String? title,
     Value<String?> content = const Value.absent(),
+    Value<String?> previewContent = const Value.absent(),
     Value<String?> color = const Value.absent(),
     bool? isFavorite,
     bool? isPinned,
@@ -2617,6 +2899,9 @@ class TextNotesDriftModelData extends DataClass implements Insertable<TextNotesD
     id: id ?? this.id,
     title: title ?? this.title,
     content: content.present ? content.value : this.content,
+    previewContent: previewContent.present
+        ? previewContent.value
+        : this.previewContent,
     color: color.present ? color.value : this.color,
     isFavorite: isFavorite ?? this.isFavorite,
     isPinned: isPinned ?? this.isPinned,
@@ -2629,8 +2914,13 @@ class TextNotesDriftModelData extends DataClass implements Insertable<TextNotesD
       id: data.id.present ? data.id.value : this.id,
       title: data.title.present ? data.title.value : this.title,
       content: data.content.present ? data.content.value : this.content,
+      previewContent: data.previewContent.present
+          ? data.previewContent.value
+          : this.previewContent,
       color: data.color.present ? data.color.value : this.color,
-      isFavorite: data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
+      isFavorite: data.isFavorite.present
+          ? data.isFavorite.value
+          : this.isFavorite,
       isPinned: data.isPinned.present ? data.isPinned.value : this.isPinned,
       indexPos: data.indexPos.present ? data.indexPos.value : this.indexPos,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -2644,6 +2934,7 @@ class TextNotesDriftModelData extends DataClass implements Insertable<TextNotesD
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('content: $content, ')
+          ..write('previewContent: $previewContent, ')
           ..write('color: $color, ')
           ..write('isFavorite: $isFavorite, ')
           ..write('isPinned: $isPinned, ')
@@ -2655,8 +2946,18 @@ class TextNotesDriftModelData extends DataClass implements Insertable<TextNotesD
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, title, content, color, isFavorite, isPinned, indexPos, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+    id,
+    title,
+    content,
+    previewContent,
+    color,
+    isFavorite,
+    isPinned,
+    indexPos,
+    createdAt,
+    updatedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2664,6 +2965,7 @@ class TextNotesDriftModelData extends DataClass implements Insertable<TextNotesD
           other.id == this.id &&
           other.title == this.title &&
           other.content == this.content &&
+          other.previewContent == this.previewContent &&
           other.color == this.color &&
           other.isFavorite == this.isFavorite &&
           other.isPinned == this.isPinned &&
@@ -2672,10 +2974,12 @@ class TextNotesDriftModelData extends DataClass implements Insertable<TextNotesD
           other.updatedAt == this.updatedAt);
 }
 
-class TextNotesDriftModelCompanion extends UpdateCompanion<TextNotesDriftModelData> {
+class TextNotesDriftModelCompanion
+    extends UpdateCompanion<TextNotesDriftModelData> {
   final Value<int> id;
   final Value<String> title;
   final Value<String?> content;
+  final Value<String?> previewContent;
   final Value<String?> color;
   final Value<bool> isFavorite;
   final Value<bool> isPinned;
@@ -2686,6 +2990,7 @@ class TextNotesDriftModelCompanion extends UpdateCompanion<TextNotesDriftModelDa
     this.id = const Value.absent(),
     this.title = const Value.absent(),
     this.content = const Value.absent(),
+    this.previewContent = const Value.absent(),
     this.color = const Value.absent(),
     this.isFavorite = const Value.absent(),
     this.isPinned = const Value.absent(),
@@ -2697,6 +3002,7 @@ class TextNotesDriftModelCompanion extends UpdateCompanion<TextNotesDriftModelDa
     this.id = const Value.absent(),
     required String title,
     this.content = const Value.absent(),
+    this.previewContent = const Value.absent(),
     this.color = const Value.absent(),
     this.isFavorite = const Value.absent(),
     this.isPinned = const Value.absent(),
@@ -2708,6 +3014,7 @@ class TextNotesDriftModelCompanion extends UpdateCompanion<TextNotesDriftModelDa
     Expression<int>? id,
     Expression<String>? title,
     Expression<String>? content,
+    Expression<String>? previewContent,
     Expression<String>? color,
     Expression<bool>? isFavorite,
     Expression<bool>? isPinned,
@@ -2719,6 +3026,7 @@ class TextNotesDriftModelCompanion extends UpdateCompanion<TextNotesDriftModelDa
       if (id != null) 'id': id,
       if (title != null) 'title': title,
       if (content != null) 'content': content,
+      if (previewContent != null) 'preview_content': previewContent,
       if (color != null) 'color': color,
       if (isFavorite != null) 'is_favorite': isFavorite,
       if (isPinned != null) 'is_pinned': isPinned,
@@ -2732,6 +3040,7 @@ class TextNotesDriftModelCompanion extends UpdateCompanion<TextNotesDriftModelDa
     Value<int>? id,
     Value<String>? title,
     Value<String?>? content,
+    Value<String?>? previewContent,
     Value<String?>? color,
     Value<bool>? isFavorite,
     Value<bool>? isPinned,
@@ -2743,6 +3052,7 @@ class TextNotesDriftModelCompanion extends UpdateCompanion<TextNotesDriftModelDa
       id: id ?? this.id,
       title: title ?? this.title,
       content: content ?? this.content,
+      previewContent: previewContent ?? this.previewContent,
       color: color ?? this.color,
       isFavorite: isFavorite ?? this.isFavorite,
       isPinned: isPinned ?? this.isPinned,
@@ -2763,6 +3073,9 @@ class TextNotesDriftModelCompanion extends UpdateCompanion<TextNotesDriftModelDa
     }
     if (content.present) {
       map['content'] = Variable<String>(content.value);
+    }
+    if (previewContent.present) {
+      map['preview_content'] = Variable<String>(previewContent.value);
     }
     if (color.present) {
       map['color'] = Variable<String>(color.value);
@@ -2791,6 +3104,7 @@ class TextNotesDriftModelCompanion extends UpdateCompanion<TextNotesDriftModelDa
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('content: $content, ')
+          ..write('previewContent: $previewContent, ')
           ..write('color: $color, ')
           ..write('isFavorite: $isFavorite, ')
           ..write('isPinned: $isPinned, ')
@@ -2805,15 +3119,19 @@ class TextNotesDriftModelCompanion extends UpdateCompanion<TextNotesDriftModelDa
 abstract class _$DriftSqliteDatabase extends GeneratedDatabase {
   _$DriftSqliteDatabase(QueryExecutor e) : super(e);
   $DriftSqliteDatabaseManager get managers => $DriftSqliteDatabaseManager(this);
-  late final $CategoryDriftModelTable categoryDriftModel = $CategoryDriftModelTable(this);
-  late final $IconCustomDriftModelTable iconCustomDriftModel = $IconCustomDriftModelTable(this);
-  late final $AccountDriftModelTable accountDriftModel = $AccountDriftModelTable(this);
+  late final $CategoryDriftModelTable categoryDriftModel =
+      $CategoryDriftModelTable(this);
+  late final $IconCustomDriftModelTable iconCustomDriftModel =
+      $IconCustomDriftModelTable(this);
+  late final $AccountDriftModelTable accountDriftModel =
+      $AccountDriftModelTable(this);
   late final $TOTPDriftModelTable tOTPDriftModel = $TOTPDriftModelTable(this);
   late final $PasswordHistoryDriftModelTable passwordHistoryDriftModel =
       $PasswordHistoryDriftModelTable(this);
   late final $AccountCustomFieldDriftModelTable accountCustomFieldDriftModel =
       $AccountCustomFieldDriftModelTable(this);
-  late final $TextNotesDriftModelTable textNotesDriftModel = $TextNotesDriftModelTable(this);
+  late final $TextNotesDriftModelTable textNotesDriftModel =
+      $TextNotesDriftModelTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2848,14 +3166,29 @@ typedef $$CategoryDriftModelTableUpdateCompanionBuilder =
 
 final class $$CategoryDriftModelTableReferences
     extends
-        BaseReferences<_$DriftSqliteDatabase, $CategoryDriftModelTable, CategoryDriftModelData> {
-  $$CategoryDriftModelTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static MultiTypedResultKey<$AccountDriftModelTable, List<AccountDriftModelData>>
-  _accountDriftModelRefsTable(_$DriftSqliteDatabase db) => MultiTypedResultKey.fromTable(
-    db.accountDriftModel,
-    aliasName: $_aliasNameGenerator(db.categoryDriftModel.id, db.accountDriftModel.categoryId),
+        BaseReferences<
+          _$DriftSqliteDatabase,
+          $CategoryDriftModelTable,
+          CategoryDriftModelData
+        > {
+  $$CategoryDriftModelTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
   );
+
+  static MultiTypedResultKey<
+    $AccountDriftModelTable,
+    List<AccountDriftModelData>
+  >
+  _accountDriftModelRefsTable(_$DriftSqliteDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.accountDriftModel,
+        aliasName: $_aliasNameGenerator(
+          db.categoryDriftModel.id,
+          db.accountDriftModel.categoryId,
+        ),
+      );
 
   $$AccountDriftModelTableProcessedTableManager get accountDriftModelRefs {
     final manager = $$AccountDriftModelTableTableManager(
@@ -2863,8 +3196,12 @@ final class $$CategoryDriftModelTableReferences
       $_db.accountDriftModel,
     ).filter((f) => f.categoryId.id.sqlEquals($_itemColumn<int>('id')!));
 
-    final cache = $_typedResult.readTableOrNull(_accountDriftModelRefsTable($_db));
-    return ProcessedTableManager(manager.$state.copyWith(prefetchedData: cache));
+    final cache = $_typedResult.readTableOrNull(
+      _accountDriftModelRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
   }
 }
 
@@ -2877,20 +3214,30 @@ class $$CategoryDriftModelTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => ColumnFilters(column));
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<String> get categoryName =>
-      $composableBuilder(column: $table.categoryName, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get categoryName => $composableBuilder(
+    column: $table.categoryName,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<int> get indexPos =>
-      $composableBuilder(column: $table.indexPos, builder: (column) => ColumnFilters(column));
+  ColumnFilters<int> get indexPos => $composableBuilder(
+    column: $table.indexPos,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => ColumnFilters(column));
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 
   Expression<bool> accountDriftModelRefs(
     Expression<bool> Function($$AccountDriftModelTableFilterComposer f) f,
@@ -2900,13 +3247,18 @@ class $$CategoryDriftModelTableFilterComposer
       getCurrentColumn: (t) => t.id,
       referencedTable: $db.accountDriftModel,
       getReferencedColumn: (t) => t.categoryId,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$AccountDriftModelTableFilterComposer(
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountDriftModelTableFilterComposer(
             $db: $db,
             $table: $db.accountDriftModel,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -2922,20 +3274,30 @@ class $$CategoryDriftModelTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<String> get categoryName =>
-      $composableBuilder(column: $table.categoryName, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get categoryName => $composableBuilder(
+    column: $table.categoryName,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<int> get indexPos =>
-      $composableBuilder(column: $table.indexPos, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get indexPos => $composableBuilder(
+    column: $table.indexPos,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CategoryDriftModelTableAnnotationComposer
@@ -2947,10 +3309,13 @@ class $$CategoryDriftModelTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get categoryName =>
-      $composableBuilder(column: $table.categoryName, builder: (column) => column);
+  GeneratedColumn<String> get categoryName => $composableBuilder(
+    column: $table.categoryName,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get indexPos =>
       $composableBuilder(column: $table.indexPos, builder: (column) => column);
@@ -2964,20 +3329,26 @@ class $$CategoryDriftModelTableAnnotationComposer
   Expression<T> accountDriftModelRefs<T extends Object>(
     Expression<T> Function($$AccountDriftModelTableAnnotationComposer a) f,
   ) {
-    final $$AccountDriftModelTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.accountDriftModel,
-      getReferencedColumn: (t) => t.categoryId,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$AccountDriftModelTableAnnotationComposer(
-            $db: $db,
-            $table: $db.accountDriftModel,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
-          ),
-    );
+    final $$AccountDriftModelTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.accountDriftModel,
+          getReferencedColumn: (t) => t.categoryId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AccountDriftModelTableAnnotationComposer(
+                $db: $db,
+                $table: $db.accountDriftModel,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 }
@@ -2997,8 +3368,10 @@ class $$CategoryDriftModelTableTableManager
           CategoryDriftModelData,
           PrefetchHooks Function({bool accountDriftModelRefs})
         > {
-  $$CategoryDriftModelTableTableManager(_$DriftSqliteDatabase db, $CategoryDriftModelTable table)
-    : super(
+  $$CategoryDriftModelTableTableManager(
+    _$DriftSqliteDatabase db,
+    $CategoryDriftModelTable table,
+  ) : super(
         TableManagerState(
           db: db,
           table: table,
@@ -3007,7 +3380,10 @@ class $$CategoryDriftModelTableTableManager
           createOrderingComposer: () =>
               $$CategoryDriftModelTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$CategoryDriftModelTableAnnotationComposer($db: db, $table: table),
+              $$CategoryDriftModelTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -3037,12 +3413,19 @@ class $$CategoryDriftModelTableTableManager
                 updatedAt: updatedAt,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), $$CategoryDriftModelTableReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CategoryDriftModelTableReferences(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: ({accountDriftModelRefs = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [if (accountDriftModelRefs) db.accountDriftModel],
+              explicitlyWatchedTables: [
+                if (accountDriftModelRefs) db.accountDriftModel,
+              ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
                 return [
@@ -3056,7 +3439,11 @@ class $$CategoryDriftModelTableTableManager
                       referencedTable: $$CategoryDriftModelTableReferences
                           ._accountDriftModelRefsTable(db),
                       managerFromTypedResult: (p0) =>
-                          $$CategoryDriftModelTableReferences(db, table, p0).accountDriftModelRefs,
+                          $$CategoryDriftModelTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).accountDriftModelRefs,
                       referencedItemsForCurrentItem: (item, referencedItems) =>
                           referencedItems.where((e) => e.categoryId == item.id),
                       typedResults: items,
@@ -3103,13 +3490,24 @@ final class $$IconCustomDriftModelTableReferences
           $IconCustomDriftModelTable,
           IconCustomDriftModelData
         > {
-  $$IconCustomDriftModelTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static MultiTypedResultKey<$AccountDriftModelTable, List<AccountDriftModelData>>
-  _accountDriftModelRefsTable(_$DriftSqliteDatabase db) => MultiTypedResultKey.fromTable(
-    db.accountDriftModel,
-    aliasName: $_aliasNameGenerator(db.iconCustomDriftModel.id, db.accountDriftModel.iconCustomId),
+  $$IconCustomDriftModelTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
   );
+
+  static MultiTypedResultKey<
+    $AccountDriftModelTable,
+    List<AccountDriftModelData>
+  >
+  _accountDriftModelRefsTable(_$DriftSqliteDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.accountDriftModel,
+        aliasName: $_aliasNameGenerator(
+          db.iconCustomDriftModel.id,
+          db.accountDriftModel.iconCustomId,
+        ),
+      );
 
   $$AccountDriftModelTableProcessedTableManager get accountDriftModelRefs {
     final manager = $$AccountDriftModelTableTableManager(
@@ -3117,8 +3515,12 @@ final class $$IconCustomDriftModelTableReferences
       $_db.accountDriftModel,
     ).filter((f) => f.iconCustomId.id.sqlEquals($_itemColumn<int>('id')!));
 
-    final cache = $_typedResult.readTableOrNull(_accountDriftModelRefsTable($_db));
-    return ProcessedTableManager(manager.$state.copyWith(prefetchedData: cache));
+    final cache = $_typedResult.readTableOrNull(
+      _accountDriftModelRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
   }
 }
 
@@ -3131,14 +3533,20 @@ class $$IconCustomDriftModelTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => ColumnFilters(column));
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<String> get name =>
-      $composableBuilder(column: $table.name, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<String> get imageBase64 =>
-      $composableBuilder(column: $table.imageBase64, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get imageBase64 => $composableBuilder(
+    column: $table.imageBase64,
+    builder: (column) => ColumnFilters(column),
+  );
 
   Expression<bool> accountDriftModelRefs(
     Expression<bool> Function($$AccountDriftModelTableFilterComposer f) f,
@@ -3148,13 +3556,18 @@ class $$IconCustomDriftModelTableFilterComposer
       getCurrentColumn: (t) => t.id,
       referencedTable: $db.accountDriftModel,
       getReferencedColumn: (t) => t.iconCustomId,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$AccountDriftModelTableFilterComposer(
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountDriftModelTableFilterComposer(
             $db: $db,
             $table: $db.accountDriftModel,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
@@ -3170,14 +3583,20 @@ class $$IconCustomDriftModelTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<String> get name =>
-      $composableBuilder(column: $table.name, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<String> get imageBase64 =>
-      $composableBuilder(column: $table.imageBase64, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get imageBase64 => $composableBuilder(
+    column: $table.imageBase64,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$IconCustomDriftModelTableAnnotationComposer
@@ -3189,31 +3608,40 @@ class $$IconCustomDriftModelTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumn<String> get imageBase64 =>
-      $composableBuilder(column: $table.imageBase64, builder: (column) => column);
+  GeneratedColumn<String> get imageBase64 => $composableBuilder(
+    column: $table.imageBase64,
+    builder: (column) => column,
+  );
 
   Expression<T> accountDriftModelRefs<T extends Object>(
     Expression<T> Function($$AccountDriftModelTableAnnotationComposer a) f,
   ) {
-    final $$AccountDriftModelTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.accountDriftModel,
-      getReferencedColumn: (t) => t.iconCustomId,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$AccountDriftModelTableAnnotationComposer(
-            $db: $db,
-            $table: $db.accountDriftModel,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
-          ),
-    );
+    final $$AccountDriftModelTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.accountDriftModel,
+          getReferencedColumn: (t) => t.iconCustomId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AccountDriftModelTableAnnotationComposer(
+                $db: $db,
+                $table: $db.accountDriftModel,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 }
@@ -3243,15 +3671,25 @@ class $$IconCustomDriftModelTableTableManager
           createFilteringComposer: () =>
               $$IconCustomDriftModelTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$IconCustomDriftModelTableOrderingComposer($db: db, $table: table),
+              $$IconCustomDriftModelTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
           createComputedFieldComposer: () =>
-              $$IconCustomDriftModelTableAnnotationComposer($db: db, $table: table),
+              $$IconCustomDriftModelTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String> imageBase64 = const Value.absent(),
-              }) => IconCustomDriftModelCompanion(id: id, name: name, imageBase64: imageBase64),
+              }) => IconCustomDriftModelCompanion(
+                id: id,
+                name: name,
+                imageBase64: imageBase64,
+              ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -3263,12 +3701,19 @@ class $$IconCustomDriftModelTableTableManager
                 imageBase64: imageBase64,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), $$IconCustomDriftModelTableReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$IconCustomDriftModelTableReferences(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: ({accountDriftModelRefs = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [if (accountDriftModelRefs) db.accountDriftModel],
+              explicitlyWatchedTables: [
+                if (accountDriftModelRefs) db.accountDriftModel,
+              ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
                 return [
@@ -3281,13 +3726,16 @@ class $$IconCustomDriftModelTableTableManager
                       currentTable: table,
                       referencedTable: $$IconCustomDriftModelTableReferences
                           ._accountDriftModelRefsTable(db),
-                      managerFromTypedResult: (p0) => $$IconCustomDriftModelTableReferences(
-                        db,
-                        table,
-                        p0,
-                      ).accountDriftModelRefs,
+                      managerFromTypedResult: (p0) =>
+                          $$IconCustomDriftModelTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).accountDriftModelRefs,
                       referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.iconCustomId == item.id),
+                          referencedItems.where(
+                            (e) => e.iconCustomId == item.id,
+                          ),
                       typedResults: items,
                     ),
                 ];
@@ -3346,12 +3794,25 @@ typedef $$AccountDriftModelTableUpdateCompanionBuilder =
     });
 
 final class $$AccountDriftModelTableReferences
-    extends BaseReferences<_$DriftSqliteDatabase, $AccountDriftModelTable, AccountDriftModelData> {
-  $$AccountDriftModelTableReferences(super.$_db, super.$_table, super.$_typedResult);
+    extends
+        BaseReferences<
+          _$DriftSqliteDatabase,
+          $AccountDriftModelTable,
+          AccountDriftModelData
+        > {
+  $$AccountDriftModelTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
 
-  static $CategoryDriftModelTable _categoryIdTable(_$DriftSqliteDatabase db) => db
-      .categoryDriftModel
-      .createAlias($_aliasNameGenerator(db.accountDriftModel.categoryId, db.categoryDriftModel.id));
+  static $CategoryDriftModelTable _categoryIdTable(_$DriftSqliteDatabase db) =>
+      db.categoryDriftModel.createAlias(
+        $_aliasNameGenerator(
+          db.accountDriftModel.categoryId,
+          db.categoryDriftModel.id,
+        ),
+      );
 
   $$CategoryDriftModelTableProcessedTableManager get categoryId {
     final $_column = $_itemColumn<int>('category_id')!;
@@ -3362,13 +3823,19 @@ final class $$AccountDriftModelTableReferences
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_categoryIdTable($_db));
     if (item == null) return manager;
-    return ProcessedTableManager(manager.$state.copyWith(prefetchedData: [item]));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
   }
 
-  static $IconCustomDriftModelTable _iconCustomIdTable(_$DriftSqliteDatabase db) =>
-      db.iconCustomDriftModel.createAlias(
-        $_aliasNameGenerator(db.accountDriftModel.iconCustomId, db.iconCustomDriftModel.id),
-      );
+  static $IconCustomDriftModelTable _iconCustomIdTable(
+    _$DriftSqliteDatabase db,
+  ) => db.iconCustomDriftModel.createAlias(
+    $_aliasNameGenerator(
+      db.accountDriftModel.iconCustomId,
+      db.iconCustomDriftModel.id,
+    ),
+  );
 
   $$IconCustomDriftModelTableProcessedTableManager? get iconCustomId {
     final $_column = $_itemColumn<int>('icon_custom_id');
@@ -3379,14 +3846,20 @@ final class $$AccountDriftModelTableReferences
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_iconCustomIdTable($_db));
     if (item == null) return manager;
-    return ProcessedTableManager(manager.$state.copyWith(prefetchedData: [item]));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
   }
 
   static MultiTypedResultKey<$TOTPDriftModelTable, List<TOTPDriftModelData>>
-  _tOTPDriftModelRefsTable(_$DriftSqliteDatabase db) => MultiTypedResultKey.fromTable(
-    db.tOTPDriftModel,
-    aliasName: $_aliasNameGenerator(db.accountDriftModel.id, db.tOTPDriftModel.accountId),
-  );
+  _tOTPDriftModelRefsTable(_$DriftSqliteDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.tOTPDriftModel,
+        aliasName: $_aliasNameGenerator(
+          db.accountDriftModel.id,
+          db.tOTPDriftModel.accountId,
+        ),
+      );
 
   $$TOTPDriftModelTableProcessedTableManager get tOTPDriftModelRefs {
     final manager = $$TOTPDriftModelTableTableManager(
@@ -3395,48 +3868,65 @@ final class $$AccountDriftModelTableReferences
     ).filter((f) => f.accountId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_tOTPDriftModelRefsTable($_db));
-    return ProcessedTableManager(manager.$state.copyWith(prefetchedData: cache));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
   }
 
-  static MultiTypedResultKey<$PasswordHistoryDriftModelTable, List<PasswordHistoryDriftModelData>>
-  _passwordHistoryDriftModelRefsTable(_$DriftSqliteDatabase db) => MultiTypedResultKey.fromTable(
-    db.passwordHistoryDriftModel,
-    aliasName: $_aliasNameGenerator(
-      db.accountDriftModel.id,
-      db.passwordHistoryDriftModel.accountId,
-    ),
-  );
+  static MultiTypedResultKey<
+    $PasswordHistoryDriftModelTable,
+    List<PasswordHistoryDriftModelData>
+  >
+  _passwordHistoryDriftModelRefsTable(_$DriftSqliteDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.passwordHistoryDriftModel,
+        aliasName: $_aliasNameGenerator(
+          db.accountDriftModel.id,
+          db.passwordHistoryDriftModel.accountId,
+        ),
+      );
 
-  $$PasswordHistoryDriftModelTableProcessedTableManager get passwordHistoryDriftModelRefs {
+  $$PasswordHistoryDriftModelTableProcessedTableManager
+  get passwordHistoryDriftModelRefs {
     final manager = $$PasswordHistoryDriftModelTableTableManager(
       $_db,
       $_db.passwordHistoryDriftModel,
     ).filter((f) => f.accountId.id.sqlEquals($_itemColumn<int>('id')!));
 
-    final cache = $_typedResult.readTableOrNull(_passwordHistoryDriftModelRefsTable($_db));
-    return ProcessedTableManager(manager.$state.copyWith(prefetchedData: cache));
+    final cache = $_typedResult.readTableOrNull(
+      _passwordHistoryDriftModelRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
   }
 
   static MultiTypedResultKey<
     $AccountCustomFieldDriftModelTable,
     List<AccountCustomFieldDriftModelData>
   >
-  _accountCustomFieldDriftModelRefsTable(_$DriftSqliteDatabase db) => MultiTypedResultKey.fromTable(
-    db.accountCustomFieldDriftModel,
-    aliasName: $_aliasNameGenerator(
-      db.accountDriftModel.id,
-      db.accountCustomFieldDriftModel.accountId,
-    ),
-  );
+  _accountCustomFieldDriftModelRefsTable(_$DriftSqliteDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.accountCustomFieldDriftModel,
+        aliasName: $_aliasNameGenerator(
+          db.accountDriftModel.id,
+          db.accountCustomFieldDriftModel.accountId,
+        ),
+      );
 
-  $$AccountCustomFieldDriftModelTableProcessedTableManager get accountCustomFieldDriftModelRefs {
+  $$AccountCustomFieldDriftModelTableProcessedTableManager
+  get accountCustomFieldDriftModelRefs {
     final manager = $$AccountCustomFieldDriftModelTableTableManager(
       $_db,
       $_db.accountCustomFieldDriftModel,
     ).filter((f) => f.accountId.id.sqlEquals($_itemColumn<int>('id')!));
 
-    final cache = $_typedResult.readTableOrNull(_accountCustomFieldDriftModelRefsTable($_db));
-    return ProcessedTableManager(manager.$state.copyWith(prefetchedData: cache));
+    final cache = $_typedResult.readTableOrNull(
+      _accountCustomFieldDriftModelRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
   }
 }
 
@@ -3449,40 +3939,60 @@ class $$AccountDriftModelTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => ColumnFilters(column));
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<String> get title =>
-      $composableBuilder(column: $table.title, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<String> get username =>
-      $composableBuilder(column: $table.username, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get username => $composableBuilder(
+    column: $table.username,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<String> get password =>
-      $composableBuilder(column: $table.password, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get password => $composableBuilder(
+    column: $table.password,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<String> get notes =>
-      $composableBuilder(column: $table.notes, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<String> get icon =>
-      $composableBuilder(column: $table.icon, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get icon => $composableBuilder(
+    column: $table.icon,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<int> get openCount =>
-      $composableBuilder(column: $table.openCount, builder: (column) => ColumnFilters(column));
+  ColumnFilters<int> get openCount => $composableBuilder(
+    column: $table.openCount,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<DateTime> get passwordUpdatedAt => $composableBuilder(
     column: $table.passwordUpdatedAt,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => ColumnFilters(column));
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<DateTime> get deletedAt =>
-      $composableBuilder(column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 
   $$CategoryDriftModelTableFilterComposer get categoryId {
     final $$CategoryDriftModelTableFilterComposer composer = $composerBuilder(
@@ -3490,13 +4000,18 @@ class $$AccountDriftModelTableFilterComposer
       getCurrentColumn: (t) => t.categoryId,
       referencedTable: $db.categoryDriftModel,
       getReferencedColumn: (t) => t.id,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$CategoryDriftModelTableFilterComposer(
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoryDriftModelTableFilterComposer(
             $db: $db,
             $table: $db.categoryDriftModel,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -3508,13 +4023,18 @@ class $$AccountDriftModelTableFilterComposer
       getCurrentColumn: (t) => t.iconCustomId,
       referencedTable: $db.iconCustomDriftModel,
       getReferencedColumn: (t) => t.id,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$IconCustomDriftModelTableFilterComposer(
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$IconCustomDriftModelTableFilterComposer(
             $db: $db,
             $table: $db.iconCustomDriftModel,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -3528,55 +4048,76 @@ class $$AccountDriftModelTableFilterComposer
       getCurrentColumn: (t) => t.id,
       referencedTable: $db.tOTPDriftModel,
       getReferencedColumn: (t) => t.accountId,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$TOTPDriftModelTableFilterComposer(
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TOTPDriftModelTableFilterComposer(
             $db: $db,
             $table: $db.tOTPDriftModel,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
   }
 
   Expression<bool> passwordHistoryDriftModelRefs(
-    Expression<bool> Function($$PasswordHistoryDriftModelTableFilterComposer f) f,
+    Expression<bool> Function($$PasswordHistoryDriftModelTableFilterComposer f)
+    f,
   ) {
-    final $$PasswordHistoryDriftModelTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.passwordHistoryDriftModel,
-      getReferencedColumn: (t) => t.accountId,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$PasswordHistoryDriftModelTableFilterComposer(
-            $db: $db,
-            $table: $db.passwordHistoryDriftModel,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
-          ),
-    );
+    final $$PasswordHistoryDriftModelTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.passwordHistoryDriftModel,
+          getReferencedColumn: (t) => t.accountId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PasswordHistoryDriftModelTableFilterComposer(
+                $db: $db,
+                $table: $db.passwordHistoryDriftModel,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 
   Expression<bool> accountCustomFieldDriftModelRefs(
-    Expression<bool> Function($$AccountCustomFieldDriftModelTableFilterComposer f) f,
+    Expression<bool> Function(
+      $$AccountCustomFieldDriftModelTableFilterComposer f,
+    )
+    f,
   ) {
-    final $$AccountCustomFieldDriftModelTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.accountCustomFieldDriftModel,
-      getReferencedColumn: (t) => t.accountId,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$AccountCustomFieldDriftModelTableFilterComposer(
-            $db: $db,
-            $table: $db.accountCustomFieldDriftModel,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
-          ),
-    );
+    final $$AccountCustomFieldDriftModelTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.accountCustomFieldDriftModel,
+          getReferencedColumn: (t) => t.accountId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AccountCustomFieldDriftModelTableFilterComposer(
+                $db: $db,
+                $table: $db.accountCustomFieldDriftModel,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 }
@@ -3590,40 +4131,60 @@ class $$AccountDriftModelTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<String> get title =>
-      $composableBuilder(column: $table.title, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<String> get username =>
-      $composableBuilder(column: $table.username, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get username => $composableBuilder(
+    column: $table.username,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<String> get password =>
-      $composableBuilder(column: $table.password, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get password => $composableBuilder(
+    column: $table.password,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<String> get notes =>
-      $composableBuilder(column: $table.notes, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<String> get icon =>
-      $composableBuilder(column: $table.icon, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get icon => $composableBuilder(
+    column: $table.icon,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<int> get openCount =>
-      $composableBuilder(column: $table.openCount, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get openCount => $composableBuilder(
+    column: $table.openCount,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<DateTime> get passwordUpdatedAt => $composableBuilder(
     column: $table.passwordUpdatedAt,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<DateTime> get deletedAt =>
-      $composableBuilder(column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   $$CategoryDriftModelTableOrderingComposer get categoryId {
     final $$CategoryDriftModelTableOrderingComposer composer = $composerBuilder(
@@ -3631,33 +4192,44 @@ class $$AccountDriftModelTableOrderingComposer
       getCurrentColumn: (t) => t.categoryId,
       referencedTable: $db.categoryDriftModel,
       getReferencedColumn: (t) => t.id,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$CategoryDriftModelTableOrderingComposer(
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CategoryDriftModelTableOrderingComposer(
             $db: $db,
             $table: $db.categoryDriftModel,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
   }
 
   $$IconCustomDriftModelTableOrderingComposer get iconCustomId {
-    final $$IconCustomDriftModelTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.iconCustomId,
-      referencedTable: $db.iconCustomDriftModel,
-      getReferencedColumn: (t) => t.id,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$IconCustomDriftModelTableOrderingComposer(
-            $db: $db,
-            $table: $db.iconCustomDriftModel,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
-          ),
-    );
+    final $$IconCustomDriftModelTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.iconCustomId,
+          referencedTable: $db.iconCustomDriftModel,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$IconCustomDriftModelTableOrderingComposer(
+                $db: $db,
+                $table: $db.iconCustomDriftModel,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return composer;
   }
 }
@@ -3671,7 +4243,8 @@ class $$AccountDriftModelTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get title =>
       $composableBuilder(column: $table.title, builder: (column) => column);
@@ -3691,8 +4264,10 @@ class $$AccountDriftModelTableAnnotationComposer
   GeneratedColumn<int> get openCount =>
       $composableBuilder(column: $table.openCount, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get passwordUpdatedAt =>
-      $composableBuilder(column: $table.passwordUpdatedAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get passwordUpdatedAt => $composableBuilder(
+    column: $table.passwordUpdatedAt,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -3704,38 +4279,50 @@ class $$AccountDriftModelTableAnnotationComposer
       $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 
   $$CategoryDriftModelTableAnnotationComposer get categoryId {
-    final $$CategoryDriftModelTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.categoryId,
-      referencedTable: $db.categoryDriftModel,
-      getReferencedColumn: (t) => t.id,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$CategoryDriftModelTableAnnotationComposer(
-            $db: $db,
-            $table: $db.categoryDriftModel,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
-          ),
-    );
+    final $$CategoryDriftModelTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.categoryId,
+          referencedTable: $db.categoryDriftModel,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CategoryDriftModelTableAnnotationComposer(
+                $db: $db,
+                $table: $db.categoryDriftModel,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return composer;
   }
 
   $$IconCustomDriftModelTableAnnotationComposer get iconCustomId {
-    final $$IconCustomDriftModelTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.iconCustomId,
-      referencedTable: $db.iconCustomDriftModel,
-      getReferencedColumn: (t) => t.id,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$IconCustomDriftModelTableAnnotationComposer(
-            $db: $db,
-            $table: $db.iconCustomDriftModel,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
-          ),
-    );
+    final $$IconCustomDriftModelTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.iconCustomId,
+          referencedTable: $db.iconCustomDriftModel,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$IconCustomDriftModelTableAnnotationComposer(
+                $db: $db,
+                $table: $db.iconCustomDriftModel,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return composer;
   }
 
@@ -3747,55 +4334,76 @@ class $$AccountDriftModelTableAnnotationComposer
       getCurrentColumn: (t) => t.id,
       referencedTable: $db.tOTPDriftModel,
       getReferencedColumn: (t) => t.accountId,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$TOTPDriftModelTableAnnotationComposer(
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TOTPDriftModelTableAnnotationComposer(
             $db: $db,
             $table: $db.tOTPDriftModel,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
           ),
     );
     return f(composer);
   }
 
   Expression<T> passwordHistoryDriftModelRefs<T extends Object>(
-    Expression<T> Function($$PasswordHistoryDriftModelTableAnnotationComposer a) f,
+    Expression<T> Function($$PasswordHistoryDriftModelTableAnnotationComposer a)
+    f,
   ) {
-    final $$PasswordHistoryDriftModelTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.passwordHistoryDriftModel,
-      getReferencedColumn: (t) => t.accountId,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$PasswordHistoryDriftModelTableAnnotationComposer(
-            $db: $db,
-            $table: $db.passwordHistoryDriftModel,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
-          ),
-    );
+    final $$PasswordHistoryDriftModelTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.passwordHistoryDriftModel,
+          getReferencedColumn: (t) => t.accountId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$PasswordHistoryDriftModelTableAnnotationComposer(
+                $db: $db,
+                $table: $db.passwordHistoryDriftModel,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 
   Expression<T> accountCustomFieldDriftModelRefs<T extends Object>(
-    Expression<T> Function($$AccountCustomFieldDriftModelTableAnnotationComposer a) f,
+    Expression<T> Function(
+      $$AccountCustomFieldDriftModelTableAnnotationComposer a,
+    )
+    f,
   ) {
-    final $$AccountCustomFieldDriftModelTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.id,
-      referencedTable: $db.accountCustomFieldDriftModel,
-      getReferencedColumn: (t) => t.accountId,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$AccountCustomFieldDriftModelTableAnnotationComposer(
-            $db: $db,
-            $table: $db.accountCustomFieldDriftModel,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
-          ),
-    );
+    final $$AccountCustomFieldDriftModelTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.accountCustomFieldDriftModel,
+          getReferencedColumn: (t) => t.accountId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AccountCustomFieldDriftModelTableAnnotationComposer(
+                $db: $db,
+                $table: $db.accountCustomFieldDriftModel,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return f(composer);
   }
 }
@@ -3821,8 +4429,10 @@ class $$AccountDriftModelTableTableManager
             bool accountCustomFieldDriftModelRefs,
           })
         > {
-  $$AccountDriftModelTableTableManager(_$DriftSqliteDatabase db, $AccountDriftModelTable table)
-    : super(
+  $$AccountDriftModelTableTableManager(
+    _$DriftSqliteDatabase db,
+    $AccountDriftModelTable table,
+  ) : super(
         TableManagerState(
           db: db,
           table: table,
@@ -3831,7 +4441,10 @@ class $$AccountDriftModelTableTableManager
           createOrderingComposer: () =>
               $$AccountDriftModelTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$AccountDriftModelTableAnnotationComposer($db: db, $table: table),
+              $$AccountDriftModelTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -3893,7 +4506,12 @@ class $$AccountDriftModelTableTableManager
                 deletedAt: deletedAt,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), $$AccountDriftModelTableReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$AccountDriftModelTableReferences(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback:
               ({
@@ -3907,8 +4525,10 @@ class $$AccountDriftModelTableTableManager
                   db: db,
                   explicitlyWatchedTables: [
                     if (tOTPDriftModelRefs) db.tOTPDriftModel,
-                    if (passwordHistoryDriftModelRefs) db.passwordHistoryDriftModel,
-                    if (accountCustomFieldDriftModelRefs) db.accountCustomFieldDriftModel,
+                    if (passwordHistoryDriftModelRefs)
+                      db.passwordHistoryDriftModel,
+                    if (accountCustomFieldDriftModelRefs)
+                      db.accountCustomFieldDriftModel,
                   ],
                   addJoins:
                       <
@@ -3931,11 +4551,13 @@ class $$AccountDriftModelTableTableManager
                               state.withJoin(
                                     currentTable: table,
                                     currentColumn: table.categoryId,
-                                    referencedTable: $$AccountDriftModelTableReferences
-                                        ._categoryIdTable(db),
-                                    referencedColumn: $$AccountDriftModelTableReferences
-                                        ._categoryIdTable(db)
-                                        .id,
+                                    referencedTable:
+                                        $$AccountDriftModelTableReferences
+                                            ._categoryIdTable(db),
+                                    referencedColumn:
+                                        $$AccountDriftModelTableReferences
+                                            ._categoryIdTable(db)
+                                            .id,
                                   )
                                   as T;
                         }
@@ -3944,11 +4566,13 @@ class $$AccountDriftModelTableTableManager
                               state.withJoin(
                                     currentTable: table,
                                     currentColumn: table.iconCustomId,
-                                    referencedTable: $$AccountDriftModelTableReferences
-                                        ._iconCustomIdTable(db),
-                                    referencedColumn: $$AccountDriftModelTableReferences
-                                        ._iconCustomIdTable(db)
-                                        .id,
+                                    referencedTable:
+                                        $$AccountDriftModelTableReferences
+                                            ._iconCustomIdTable(db),
+                                    referencedColumn:
+                                        $$AccountDriftModelTableReferences
+                                            ._iconCustomIdTable(db)
+                                            .id,
                                   )
                                   as T;
                         }
@@ -3967,9 +4591,15 @@ class $$AccountDriftModelTableTableManager
                           referencedTable: $$AccountDriftModelTableReferences
                               ._tOTPDriftModelRefsTable(db),
                           managerFromTypedResult: (p0) =>
-                              $$AccountDriftModelTableReferences(db, table, p0).tOTPDriftModelRefs,
-                          referencedItemsForCurrentItem: (item, referencedItems) =>
-                              referencedItems.where((e) => e.accountId == item.id),
+                              $$AccountDriftModelTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).tOTPDriftModelRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.accountId == item.id,
+                              ),
                           typedResults: items,
                         ),
                       if (passwordHistoryDriftModelRefs)
@@ -3981,13 +4611,16 @@ class $$AccountDriftModelTableTableManager
                           currentTable: table,
                           referencedTable: $$AccountDriftModelTableReferences
                               ._passwordHistoryDriftModelRefsTable(db),
-                          managerFromTypedResult: (p0) => $$AccountDriftModelTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).passwordHistoryDriftModelRefs,
-                          referencedItemsForCurrentItem: (item, referencedItems) =>
-                              referencedItems.where((e) => e.accountId == item.id),
+                          managerFromTypedResult: (p0) =>
+                              $$AccountDriftModelTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).passwordHistoryDriftModelRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.accountId == item.id,
+                              ),
                           typedResults: items,
                         ),
                       if (accountCustomFieldDriftModelRefs)
@@ -3999,13 +4632,16 @@ class $$AccountDriftModelTableTableManager
                           currentTable: table,
                           referencedTable: $$AccountDriftModelTableReferences
                               ._accountCustomFieldDriftModelRefsTable(db),
-                          managerFromTypedResult: (p0) => $$AccountDriftModelTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).accountCustomFieldDriftModelRefs,
-                          referencedItemsForCurrentItem: (item, referencedItems) =>
-                              referencedItems.where((e) => e.accountId == item.id),
+                          managerFromTypedResult: (p0) =>
+                              $$AccountDriftModelTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).accountCustomFieldDriftModelRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.accountId == item.id,
+                              ),
                           typedResults: items,
                         ),
                     ];
@@ -4056,11 +4692,25 @@ typedef $$TOTPDriftModelTableUpdateCompanionBuilder =
     });
 
 final class $$TOTPDriftModelTableReferences
-    extends BaseReferences<_$DriftSqliteDatabase, $TOTPDriftModelTable, TOTPDriftModelData> {
-  $$TOTPDriftModelTableReferences(super.$_db, super.$_table, super.$_typedResult);
+    extends
+        BaseReferences<
+          _$DriftSqliteDatabase,
+          $TOTPDriftModelTable,
+          TOTPDriftModelData
+        > {
+  $$TOTPDriftModelTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
 
-  static $AccountDriftModelTable _accountIdTable(_$DriftSqliteDatabase db) => db.accountDriftModel
-      .createAlias($_aliasNameGenerator(db.tOTPDriftModel.accountId, db.accountDriftModel.id));
+  static $AccountDriftModelTable _accountIdTable(_$DriftSqliteDatabase db) =>
+      db.accountDriftModel.createAlias(
+        $_aliasNameGenerator(
+          db.tOTPDriftModel.accountId,
+          db.accountDriftModel.id,
+        ),
+      );
 
   $$AccountDriftModelTableProcessedTableManager get accountId {
     final $_column = $_itemColumn<int>('account_id')!;
@@ -4071,7 +4721,9 @@ final class $$TOTPDriftModelTableReferences
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_accountIdTable($_db));
     if (item == null) return manager;
-    return ProcessedTableManager(manager.$state.copyWith(prefetchedData: [item]));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
   }
 }
 
@@ -4084,20 +4736,30 @@ class $$TOTPDriftModelTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => ColumnFilters(column));
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<String> get secretKey =>
-      $composableBuilder(column: $table.secretKey, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get secretKey => $composableBuilder(
+    column: $table.secretKey,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<bool> get isShowToHome =>
-      $composableBuilder(column: $table.isShowToHome, builder: (column) => ColumnFilters(column));
+  ColumnFilters<bool> get isShowToHome => $composableBuilder(
+    column: $table.isShowToHome,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => ColumnFilters(column));
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 
   $$AccountDriftModelTableFilterComposer get accountId {
     final $$AccountDriftModelTableFilterComposer composer = $composerBuilder(
@@ -4105,13 +4767,18 @@ class $$TOTPDriftModelTableFilterComposer
       getCurrentColumn: (t) => t.accountId,
       referencedTable: $db.accountDriftModel,
       getReferencedColumn: (t) => t.id,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$AccountDriftModelTableFilterComposer(
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountDriftModelTableFilterComposer(
             $db: $db,
             $table: $db.accountDriftModel,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -4127,20 +4794,30 @@ class $$TOTPDriftModelTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<String> get secretKey =>
-      $composableBuilder(column: $table.secretKey, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get secretKey => $composableBuilder(
+    column: $table.secretKey,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<bool> get isShowToHome =>
-      $composableBuilder(column: $table.isShowToHome, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<bool> get isShowToHome => $composableBuilder(
+    column: $table.isShowToHome,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   $$AccountDriftModelTableOrderingComposer get accountId {
     final $$AccountDriftModelTableOrderingComposer composer = $composerBuilder(
@@ -4148,13 +4825,18 @@ class $$TOTPDriftModelTableOrderingComposer
       getCurrentColumn: (t) => t.accountId,
       referencedTable: $db.accountDriftModel,
       getReferencedColumn: (t) => t.id,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$AccountDriftModelTableOrderingComposer(
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountDriftModelTableOrderingComposer(
             $db: $db,
             $table: $db.accountDriftModel,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -4170,13 +4852,16 @@ class $$TOTPDriftModelTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get secretKey =>
       $composableBuilder(column: $table.secretKey, builder: (column) => column);
 
-  GeneratedColumn<bool> get isShowToHome =>
-      $composableBuilder(column: $table.isShowToHome, builder: (column) => column);
+  GeneratedColumn<bool> get isShowToHome => $composableBuilder(
+    column: $table.isShowToHome,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -4185,20 +4870,26 @@ class $$TOTPDriftModelTableAnnotationComposer
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
   $$AccountDriftModelTableAnnotationComposer get accountId {
-    final $$AccountDriftModelTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.accountId,
-      referencedTable: $db.accountDriftModel,
-      getReferencedColumn: (t) => t.id,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$AccountDriftModelTableAnnotationComposer(
-            $db: $db,
-            $table: $db.accountDriftModel,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
-          ),
-    );
+    final $$AccountDriftModelTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.accountId,
+          referencedTable: $db.accountDriftModel,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AccountDriftModelTableAnnotationComposer(
+                $db: $db,
+                $table: $db.accountDriftModel,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return composer;
   }
 }
@@ -4218,8 +4909,10 @@ class $$TOTPDriftModelTableTableManager
           TOTPDriftModelData,
           PrefetchHooks Function({bool accountId})
         > {
-  $$TOTPDriftModelTableTableManager(_$DriftSqliteDatabase db, $TOTPDriftModelTable table)
-    : super(
+  $$TOTPDriftModelTableTableManager(
+    _$DriftSqliteDatabase db,
+    $TOTPDriftModelTable table,
+  ) : super(
         TableManagerState(
           db: db,
           table: table,
@@ -4262,7 +4955,12 @@ class $$TOTPDriftModelTableTableManager
                 updatedAt: updatedAt,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), $$TOTPDriftModelTableReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$TOTPDriftModelTableReferences(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: ({accountId = false}) {
             return PrefetchHooks(
@@ -4289,12 +4987,12 @@ class $$TOTPDriftModelTableTableManager
                           state.withJoin(
                                 currentTable: table,
                                 currentColumn: table.accountId,
-                                referencedTable: $$TOTPDriftModelTableReferences._accountIdTable(
-                                  db,
-                                ),
-                                referencedColumn: $$TOTPDriftModelTableReferences
-                                    ._accountIdTable(db)
-                                    .id,
+                                referencedTable: $$TOTPDriftModelTableReferences
+                                    ._accountIdTable(db),
+                                referencedColumn:
+                                    $$TOTPDriftModelTableReferences
+                                        ._accountIdTable(db)
+                                        .id,
                               )
                               as T;
                     }
@@ -4346,11 +5044,18 @@ final class $$PasswordHistoryDriftModelTableReferences
           $PasswordHistoryDriftModelTable,
           PasswordHistoryDriftModelData
         > {
-  $$PasswordHistoryDriftModelTableReferences(super.$_db, super.$_table, super.$_typedResult);
+  $$PasswordHistoryDriftModelTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
 
   static $AccountDriftModelTable _accountIdTable(_$DriftSqliteDatabase db) =>
       db.accountDriftModel.createAlias(
-        $_aliasNameGenerator(db.passwordHistoryDriftModel.accountId, db.accountDriftModel.id),
+        $_aliasNameGenerator(
+          db.passwordHistoryDriftModel.accountId,
+          db.accountDriftModel.id,
+        ),
       );
 
   $$AccountDriftModelTableProcessedTableManager get accountId {
@@ -4362,7 +5067,9 @@ final class $$PasswordHistoryDriftModelTableReferences
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_accountIdTable($_db));
     if (item == null) return manager;
-    return ProcessedTableManager(manager.$state.copyWith(prefetchedData: [item]));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
   }
 }
 
@@ -4375,14 +5082,20 @@ class $$PasswordHistoryDriftModelTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => ColumnFilters(column));
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<String> get password =>
-      $composableBuilder(column: $table.password, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get password => $composableBuilder(
+    column: $table.password,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => ColumnFilters(column));
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
 
   $$AccountDriftModelTableFilterComposer get accountId {
     final $$AccountDriftModelTableFilterComposer composer = $composerBuilder(
@@ -4390,13 +5103,18 @@ class $$PasswordHistoryDriftModelTableFilterComposer
       getCurrentColumn: (t) => t.accountId,
       referencedTable: $db.accountDriftModel,
       getReferencedColumn: (t) => t.id,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$AccountDriftModelTableFilterComposer(
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountDriftModelTableFilterComposer(
             $db: $db,
             $table: $db.accountDriftModel,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -4412,14 +5130,20 @@ class $$PasswordHistoryDriftModelTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<String> get password =>
-      $composableBuilder(column: $table.password, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get password => $composableBuilder(
+    column: $table.password,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   $$AccountDriftModelTableOrderingComposer get accountId {
     final $$AccountDriftModelTableOrderingComposer composer = $composerBuilder(
@@ -4427,13 +5151,18 @@ class $$PasswordHistoryDriftModelTableOrderingComposer
       getCurrentColumn: (t) => t.accountId,
       referencedTable: $db.accountDriftModel,
       getReferencedColumn: (t) => t.id,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$AccountDriftModelTableOrderingComposer(
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountDriftModelTableOrderingComposer(
             $db: $db,
             $table: $db.accountDriftModel,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -4449,7 +5178,8 @@ class $$PasswordHistoryDriftModelTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get password =>
       $composableBuilder(column: $table.password, builder: (column) => column);
@@ -4458,20 +5188,26 @@ class $$PasswordHistoryDriftModelTableAnnotationComposer
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
   $$AccountDriftModelTableAnnotationComposer get accountId {
-    final $$AccountDriftModelTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.accountId,
-      referencedTable: $db.accountDriftModel,
-      getReferencedColumn: (t) => t.id,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$AccountDriftModelTableAnnotationComposer(
-            $db: $db,
-            $table: $db.accountDriftModel,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
-          ),
-    );
+    final $$AccountDriftModelTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.accountId,
+          referencedTable: $db.accountDriftModel,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AccountDriftModelTableAnnotationComposer(
+                $db: $db,
+                $table: $db.accountDriftModel,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return composer;
   }
 }
@@ -4487,7 +5223,10 @@ class $$PasswordHistoryDriftModelTableTableManager
           $$PasswordHistoryDriftModelTableAnnotationComposer,
           $$PasswordHistoryDriftModelTableCreateCompanionBuilder,
           $$PasswordHistoryDriftModelTableUpdateCompanionBuilder,
-          (PasswordHistoryDriftModelData, $$PasswordHistoryDriftModelTableReferences),
+          (
+            PasswordHistoryDriftModelData,
+            $$PasswordHistoryDriftModelTableReferences,
+          ),
           PasswordHistoryDriftModelData,
           PrefetchHooks Function({bool accountId})
         > {
@@ -4499,11 +5238,20 @@ class $$PasswordHistoryDriftModelTableTableManager
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$PasswordHistoryDriftModelTableFilterComposer($db: db, $table: table),
+              $$PasswordHistoryDriftModelTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
           createOrderingComposer: () =>
-              $$PasswordHistoryDriftModelTableOrderingComposer($db: db, $table: table),
+              $$PasswordHistoryDriftModelTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
           createComputedFieldComposer: () =>
-              $$PasswordHistoryDriftModelTableAnnotationComposer($db: db, $table: table),
+              $$PasswordHistoryDriftModelTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -4530,8 +5278,10 @@ class $$PasswordHistoryDriftModelTableTableManager
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) =>
-                    (e.readTable(table), $$PasswordHistoryDriftModelTableReferences(db, table, e)),
+                (e) => (
+                  e.readTable(table),
+                  $$PasswordHistoryDriftModelTableReferences(db, table, e),
+                ),
               )
               .toList(),
           prefetchHooksCallback: ({accountId = false}) {
@@ -4559,11 +5309,13 @@ class $$PasswordHistoryDriftModelTableTableManager
                           state.withJoin(
                                 currentTable: table,
                                 currentColumn: table.accountId,
-                                referencedTable: $$PasswordHistoryDriftModelTableReferences
-                                    ._accountIdTable(db),
-                                referencedColumn: $$PasswordHistoryDriftModelTableReferences
-                                    ._accountIdTable(db)
-                                    .id,
+                                referencedTable:
+                                    $$PasswordHistoryDriftModelTableReferences
+                                        ._accountIdTable(db),
+                                referencedColumn:
+                                    $$PasswordHistoryDriftModelTableReferences
+                                        ._accountIdTable(db)
+                                        .id,
                               )
                               as T;
                     }
@@ -4589,7 +5341,10 @@ typedef $$PasswordHistoryDriftModelTableProcessedTableManager =
       $$PasswordHistoryDriftModelTableAnnotationComposer,
       $$PasswordHistoryDriftModelTableCreateCompanionBuilder,
       $$PasswordHistoryDriftModelTableUpdateCompanionBuilder,
-      (PasswordHistoryDriftModelData, $$PasswordHistoryDriftModelTableReferences),
+      (
+        PasswordHistoryDriftModelData,
+        $$PasswordHistoryDriftModelTableReferences,
+      ),
       PasswordHistoryDriftModelData,
       PrefetchHooks Function({bool accountId})
     >;
@@ -4619,11 +5374,18 @@ final class $$AccountCustomFieldDriftModelTableReferences
           $AccountCustomFieldDriftModelTable,
           AccountCustomFieldDriftModelData
         > {
-  $$AccountCustomFieldDriftModelTableReferences(super.$_db, super.$_table, super.$_typedResult);
+  $$AccountCustomFieldDriftModelTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
 
   static $AccountDriftModelTable _accountIdTable(_$DriftSqliteDatabase db) =>
       db.accountDriftModel.createAlias(
-        $_aliasNameGenerator(db.accountCustomFieldDriftModel.accountId, db.accountDriftModel.id),
+        $_aliasNameGenerator(
+          db.accountCustomFieldDriftModel.accountId,
+          db.accountDriftModel.id,
+        ),
       );
 
   $$AccountDriftModelTableProcessedTableManager get accountId {
@@ -4635,12 +5397,15 @@ final class $$AccountCustomFieldDriftModelTableReferences
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_accountIdTable($_db));
     if (item == null) return manager;
-    return ProcessedTableManager(manager.$state.copyWith(prefetchedData: [item]));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
   }
 }
 
 class $$AccountCustomFieldDriftModelTableFilterComposer
-    extends Composer<_$DriftSqliteDatabase, $AccountCustomFieldDriftModelTable> {
+    extends
+        Composer<_$DriftSqliteDatabase, $AccountCustomFieldDriftModelTable> {
   $$AccountCustomFieldDriftModelTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -4648,20 +5413,30 @@ class $$AccountCustomFieldDriftModelTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => ColumnFilters(column));
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<String> get name =>
-      $composableBuilder(column: $table.name, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<String> get value =>
-      $composableBuilder(column: $table.value, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<String> get hintText =>
-      $composableBuilder(column: $table.hintText, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get hintText => $composableBuilder(
+    column: $table.hintText,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<String> get typeField =>
-      $composableBuilder(column: $table.typeField, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get typeField => $composableBuilder(
+    column: $table.typeField,
+    builder: (column) => ColumnFilters(column),
+  );
 
   $$AccountDriftModelTableFilterComposer get accountId {
     final $$AccountDriftModelTableFilterComposer composer = $composerBuilder(
@@ -4669,13 +5444,18 @@ class $$AccountCustomFieldDriftModelTableFilterComposer
       getCurrentColumn: (t) => t.accountId,
       referencedTable: $db.accountDriftModel,
       getReferencedColumn: (t) => t.id,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$AccountDriftModelTableFilterComposer(
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountDriftModelTableFilterComposer(
             $db: $db,
             $table: $db.accountDriftModel,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -4683,7 +5463,8 @@ class $$AccountCustomFieldDriftModelTableFilterComposer
 }
 
 class $$AccountCustomFieldDriftModelTableOrderingComposer
-    extends Composer<_$DriftSqliteDatabase, $AccountCustomFieldDriftModelTable> {
+    extends
+        Composer<_$DriftSqliteDatabase, $AccountCustomFieldDriftModelTable> {
   $$AccountCustomFieldDriftModelTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -4691,20 +5472,30 @@ class $$AccountCustomFieldDriftModelTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<String> get name =>
-      $composableBuilder(column: $table.name, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<String> get value =>
-      $composableBuilder(column: $table.value, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<String> get hintText =>
-      $composableBuilder(column: $table.hintText, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get hintText => $composableBuilder(
+    column: $table.hintText,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<String> get typeField =>
-      $composableBuilder(column: $table.typeField, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get typeField => $composableBuilder(
+    column: $table.typeField,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   $$AccountDriftModelTableOrderingComposer get accountId {
     final $$AccountDriftModelTableOrderingComposer composer = $composerBuilder(
@@ -4712,13 +5503,18 @@ class $$AccountCustomFieldDriftModelTableOrderingComposer
       getCurrentColumn: (t) => t.accountId,
       referencedTable: $db.accountDriftModel,
       getReferencedColumn: (t) => t.id,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$AccountDriftModelTableOrderingComposer(
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AccountDriftModelTableOrderingComposer(
             $db: $db,
             $table: $db.accountDriftModel,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
           ),
     );
     return composer;
@@ -4726,7 +5522,8 @@ class $$AccountCustomFieldDriftModelTableOrderingComposer
 }
 
 class $$AccountCustomFieldDriftModelTableAnnotationComposer
-    extends Composer<_$DriftSqliteDatabase, $AccountCustomFieldDriftModelTable> {
+    extends
+        Composer<_$DriftSqliteDatabase, $AccountCustomFieldDriftModelTable> {
   $$AccountCustomFieldDriftModelTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -4734,7 +5531,8 @@ class $$AccountCustomFieldDriftModelTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
@@ -4749,20 +5547,26 @@ class $$AccountCustomFieldDriftModelTableAnnotationComposer
       $composableBuilder(column: $table.typeField, builder: (column) => column);
 
   $$AccountDriftModelTableAnnotationComposer get accountId {
-    final $$AccountDriftModelTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.accountId,
-      referencedTable: $db.accountDriftModel,
-      getReferencedColumn: (t) => t.id,
-      builder: (joinBuilder, {$addJoinBuilderToRootComposer, $removeJoinBuilderFromRootComposer}) =>
-          $$AccountDriftModelTableAnnotationComposer(
-            $db: $db,
-            $table: $db.accountDriftModel,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer: $removeJoinBuilderFromRootComposer,
-          ),
-    );
+    final $$AccountDriftModelTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.accountId,
+          referencedTable: $db.accountDriftModel,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$AccountDriftModelTableAnnotationComposer(
+                $db: $db,
+                $table: $db.accountDriftModel,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
     return composer;
   }
 }
@@ -4778,7 +5582,10 @@ class $$AccountCustomFieldDriftModelTableTableManager
           $$AccountCustomFieldDriftModelTableAnnotationComposer,
           $$AccountCustomFieldDriftModelTableCreateCompanionBuilder,
           $$AccountCustomFieldDriftModelTableUpdateCompanionBuilder,
-          (AccountCustomFieldDriftModelData, $$AccountCustomFieldDriftModelTableReferences),
+          (
+            AccountCustomFieldDriftModelData,
+            $$AccountCustomFieldDriftModelTableReferences,
+          ),
           AccountCustomFieldDriftModelData,
           PrefetchHooks Function({bool accountId})
         > {
@@ -4790,11 +5597,20 @@ class $$AccountCustomFieldDriftModelTableTableManager
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$AccountCustomFieldDriftModelTableFilterComposer($db: db, $table: table),
+              $$AccountCustomFieldDriftModelTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
           createOrderingComposer: () =>
-              $$AccountCustomFieldDriftModelTableOrderingComposer($db: db, $table: table),
+              $$AccountCustomFieldDriftModelTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
           createComputedFieldComposer: () =>
-              $$AccountCustomFieldDriftModelTableAnnotationComposer($db: db, $table: table),
+              $$AccountCustomFieldDriftModelTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
@@ -4860,11 +5676,13 @@ class $$AccountCustomFieldDriftModelTableTableManager
                           state.withJoin(
                                 currentTable: table,
                                 currentColumn: table.accountId,
-                                referencedTable: $$AccountCustomFieldDriftModelTableReferences
-                                    ._accountIdTable(db),
-                                referencedColumn: $$AccountCustomFieldDriftModelTableReferences
-                                    ._accountIdTable(db)
-                                    .id,
+                                referencedTable:
+                                    $$AccountCustomFieldDriftModelTableReferences
+                                        ._accountIdTable(db),
+                                referencedColumn:
+                                    $$AccountCustomFieldDriftModelTableReferences
+                                        ._accountIdTable(db)
+                                        .id,
                               )
                               as T;
                     }
@@ -4890,7 +5708,10 @@ typedef $$AccountCustomFieldDriftModelTableProcessedTableManager =
       $$AccountCustomFieldDriftModelTableAnnotationComposer,
       $$AccountCustomFieldDriftModelTableCreateCompanionBuilder,
       $$AccountCustomFieldDriftModelTableUpdateCompanionBuilder,
-      (AccountCustomFieldDriftModelData, $$AccountCustomFieldDriftModelTableReferences),
+      (
+        AccountCustomFieldDriftModelData,
+        $$AccountCustomFieldDriftModelTableReferences,
+      ),
       AccountCustomFieldDriftModelData,
       PrefetchHooks Function({bool accountId})
     >;
@@ -4899,6 +5720,7 @@ typedef $$TextNotesDriftModelTableCreateCompanionBuilder =
       Value<int> id,
       required String title,
       Value<String?> content,
+      Value<String?> previewContent,
       Value<String?> color,
       Value<bool> isFavorite,
       Value<bool> isPinned,
@@ -4911,6 +5733,7 @@ typedef $$TextNotesDriftModelTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> title,
       Value<String?> content,
+      Value<String?> previewContent,
       Value<String?> color,
       Value<bool> isFavorite,
       Value<bool> isPinned,
@@ -4928,32 +5751,55 @@ class $$TextNotesDriftModelTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => ColumnFilters(column));
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<String> get title =>
-      $composableBuilder(column: $table.title, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<String> get content =>
-      $composableBuilder(column: $table.content, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<String> get color =>
-      $composableBuilder(column: $table.color, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get previewContent => $composableBuilder(
+    column: $table.previewContent,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<bool> get isFavorite =>
-      $composableBuilder(column: $table.isFavorite, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<bool> get isPinned =>
-      $composableBuilder(column: $table.isPinned, builder: (column) => ColumnFilters(column));
+  ColumnFilters<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<int> get indexPos =>
-      $composableBuilder(column: $table.indexPos, builder: (column) => ColumnFilters(column));
+  ColumnFilters<bool> get isPinned => $composableBuilder(
+    column: $table.isPinned,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => ColumnFilters(column));
+  ColumnFilters<int> get indexPos => $composableBuilder(
+    column: $table.indexPos,
+    builder: (column) => ColumnFilters(column),
+  );
 
-  ColumnFilters<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$TextNotesDriftModelTableOrderingComposer
@@ -4965,32 +5811,55 @@ class $$TextNotesDriftModelTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<String> get title =>
-      $composableBuilder(column: $table.title, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<String> get content =>
-      $composableBuilder(column: $table.content, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get content => $composableBuilder(
+    column: $table.content,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<String> get color =>
-      $composableBuilder(column: $table.color, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get previewContent => $composableBuilder(
+    column: $table.previewContent,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<bool> get isFavorite =>
-      $composableBuilder(column: $table.isFavorite, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<bool> get isPinned =>
-      $composableBuilder(column: $table.isPinned, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<int> get indexPos =>
-      $composableBuilder(column: $table.indexPos, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<bool> get isPinned => $composableBuilder(
+    column: $table.isPinned,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<int> get indexPos => $composableBuilder(
+    column: $table.indexPos,
+    builder: (column) => ColumnOrderings(column),
+  );
 
-  ColumnOrderings<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TextNotesDriftModelTableAnnotationComposer
@@ -5002,7 +5871,8 @@ class $$TextNotesDriftModelTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get id => $composableBuilder(column: $table.id, builder: (column) => column);
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get title =>
       $composableBuilder(column: $table.title, builder: (column) => column);
@@ -5010,11 +5880,18 @@ class $$TextNotesDriftModelTableAnnotationComposer
   GeneratedColumn<String> get content =>
       $composableBuilder(column: $table.content, builder: (column) => column);
 
+  GeneratedColumn<String> get previewContent => $composableBuilder(
+    column: $table.previewContent,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get color =>
       $composableBuilder(column: $table.color, builder: (column) => column);
 
-  GeneratedColumn<bool> get isFavorite =>
-      $composableBuilder(column: $table.isFavorite, builder: (column) => column);
+  GeneratedColumn<bool> get isFavorite => $composableBuilder(
+    column: $table.isFavorite,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<bool> get isPinned =>
       $composableBuilder(column: $table.isPinned, builder: (column) => column);
@@ -5051,22 +5928,31 @@ class $$TextNotesDriftModelTableTableManager
           TextNotesDriftModelData,
           PrefetchHooks Function()
         > {
-  $$TextNotesDriftModelTableTableManager(_$DriftSqliteDatabase db, $TextNotesDriftModelTable table)
-    : super(
+  $$TextNotesDriftModelTableTableManager(
+    _$DriftSqliteDatabase db,
+    $TextNotesDriftModelTable table,
+  ) : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
               $$TextNotesDriftModelTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$TextNotesDriftModelTableOrderingComposer($db: db, $table: table),
+              $$TextNotesDriftModelTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
           createComputedFieldComposer: () =>
-              $$TextNotesDriftModelTableAnnotationComposer($db: db, $table: table),
+              $$TextNotesDriftModelTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> title = const Value.absent(),
                 Value<String?> content = const Value.absent(),
+                Value<String?> previewContent = const Value.absent(),
                 Value<String?> color = const Value.absent(),
                 Value<bool> isFavorite = const Value.absent(),
                 Value<bool> isPinned = const Value.absent(),
@@ -5077,6 +5963,7 @@ class $$TextNotesDriftModelTableTableManager
                 id: id,
                 title: title,
                 content: content,
+                previewContent: previewContent,
                 color: color,
                 isFavorite: isFavorite,
                 isPinned: isPinned,
@@ -5089,6 +5976,7 @@ class $$TextNotesDriftModelTableTableManager
                 Value<int> id = const Value.absent(),
                 required String title,
                 Value<String?> content = const Value.absent(),
+                Value<String?> previewContent = const Value.absent(),
                 Value<String?> color = const Value.absent(),
                 Value<bool> isFavorite = const Value.absent(),
                 Value<bool> isPinned = const Value.absent(),
@@ -5099,6 +5987,7 @@ class $$TextNotesDriftModelTableTableManager
                 id: id,
                 title: title,
                 content: content,
+                previewContent: previewContent,
                 color: color,
                 isFavorite: isFavorite,
                 isPinned: isPinned,
@@ -5106,8 +5995,9 @@ class $$TextNotesDriftModelTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
-          withReferenceMapper: (p0) =>
-              p0.map((e) => (e.readTable(table), BaseReferences(db, table, e))).toList(),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
           prefetchHooksCallback: null,
         ),
       );
@@ -5125,7 +6015,11 @@ typedef $$TextNotesDriftModelTableProcessedTableManager =
       $$TextNotesDriftModelTableUpdateCompanionBuilder,
       (
         TextNotesDriftModelData,
-        BaseReferences<_$DriftSqliteDatabase, $TextNotesDriftModelTable, TextNotesDriftModelData>,
+        BaseReferences<
+          _$DriftSqliteDatabase,
+          $TextNotesDriftModelTable,
+          TextNotesDriftModelData
+        >,
       ),
       TextNotesDriftModelData,
       PrefetchHooks Function()
@@ -5143,9 +6037,16 @@ class $DriftSqliteDatabaseManager {
   $$TOTPDriftModelTableTableManager get tOTPDriftModel =>
       $$TOTPDriftModelTableTableManager(_db, _db.tOTPDriftModel);
   $$PasswordHistoryDriftModelTableTableManager get passwordHistoryDriftModel =>
-      $$PasswordHistoryDriftModelTableTableManager(_db, _db.passwordHistoryDriftModel);
-  $$AccountCustomFieldDriftModelTableTableManager get accountCustomFieldDriftModel =>
-      $$AccountCustomFieldDriftModelTableTableManager(_db, _db.accountCustomFieldDriftModel);
+      $$PasswordHistoryDriftModelTableTableManager(
+        _db,
+        _db.passwordHistoryDriftModel,
+      );
+  $$AccountCustomFieldDriftModelTableTableManager
+  get accountCustomFieldDriftModel =>
+      $$AccountCustomFieldDriftModelTableTableManager(
+        _db,
+        _db.accountCustomFieldDriftModel,
+      );
   $$TextNotesDriftModelTableTableManager get textNotesDriftModel =>
       $$TextNotesDriftModelTableTableManager(_db, _db.textNotesDriftModel);
 }

@@ -76,14 +76,6 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - SQLCipher (4.9.0):
-    - SQLCipher/standard (= 4.9.0)
-  - SQLCipher/common (4.9.0)
-  - SQLCipher/standard (4.9.0):
-    - SQLCipher/common
-  - sqlcipher_flutter_libs (0.0.1):
-    - Flutter
-    - SQLCipher (~> 4.9.0)
   - SwiftyGif (5.4.5)
   - url_launcher_ios (0.0.1):
     - Flutter
@@ -108,7 +100,6 @@ DEPENDENCIES:
   - secure_application (from `.symlinks/plugins/secure_application/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
-  - sqlcipher_flutter_libs (from `.symlinks/plugins/sqlcipher_flutter_libs/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
 SPEC REPOS:
@@ -117,7 +108,6 @@ SPEC REPOS:
     - DKPhotoGallery
     - MTBBarcodeScanner
     - SDWebImage
-    - SQLCipher
     - SwiftyGif
 
 EXTERNAL SOURCES:
@@ -159,8 +149,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/share_plus/ios"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
-  sqlcipher_flutter_libs:
-    :path: ".symlinks/plugins/sqlcipher_flutter_libs/ios"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
@@ -188,8 +176,6 @@ SPEC CHECKSUMS:
   secure_application: 1b94e9be54ff82c3a2598e75e4ba559d5e14e2d3
   share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
-  SQLCipher: 31878d8ebd27e5c96db0b7cb695c96e9f8ad77da
-  sqlcipher_flutter_libs: 1113000114375a0e57c0a367c586aceee78cd23b
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
   url_launcher_ios: a1c1f2bf89969cb13cce46d0333c7257d346e169
 

@@ -34,9 +34,7 @@ class EncryptionConfig {
   static DateTime? _performanceTestTime;
 
   static DevicePerformance get devicePerformance {
-    if (_cachedPerformance != null &&
-        _performanceTestTime != null &&
-        DateTime.now().difference(_performanceTestTime!).inHours < 1) {
+    if (_cachedPerformance != null && _performanceTestTime != null && DateTime.now().difference(_performanceTestTime!).inHours < 1) {
       return _cachedPerformance!;
     }
     _cachedPerformance = _detectDevicePerformance();
@@ -60,9 +58,9 @@ class EncryptionConfig {
     }
   }
 
-  static int memoryPowerOf2 = 15;
-  static int iterations = 2;
-  static int parallelism = 1;
+  static const int memoryPowerOf2 = 15; // 32 KB
+  static const int iterations = 2;
+  static const int parallelism = 1;
 
   static const int saltLength = 32;
   static const int rmkLength = 32;

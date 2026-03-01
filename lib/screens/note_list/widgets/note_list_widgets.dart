@@ -1,10 +1,12 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:provider/provider.dart';
+
 import 'package:cybersafe_pro/models/note_models.dart';
 import 'package:cybersafe_pro/providers/note_provider.dart';
 import 'package:cybersafe_pro/routes/app_routes.dart';
 import 'package:cybersafe_pro/widgets/card/card_custom_widget.dart';
 import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class NoteCard extends StatefulWidget {
   final NoteCardData note;
@@ -24,10 +26,7 @@ class _NoteCardState extends State<NoteCard> with SingleTickerProviderStateMixin
   void initState() {
     super.initState();
     _controller = AnimationController(duration: const Duration(milliseconds: 150), vsync: this);
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -64,94 +63,98 @@ class _NoteCardState extends State<NoteCard> with SingleTickerProviderStateMixin
         if (context.read<NoteProvider>().selectedNotes.isNotEmpty) {
           context.read<NoteProvider>().addSelectedNote(widget.note.id);
         } else {
-          await AppRoutes.navigateTo(
-            context,
-            AppRoutes.noteEditor,
-            arguments: {"noteId": widget.note.id},
-          );
+          await AppRoutes.navigateTo(context, AppRoutes.noteEditor, arguments: {"noteId": widget.note.id});
         }
       },
       child: AnimatedBuilder(
         animation: _scaleAnimation,
-        builder:
-            (context, child) => Transform.scale(
-              scale: _scaleAnimation.value,
-              child: CardCustomWidget(
-                border: Border(
-                  left: BorderSide(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    width: 6,
-                  ),
-                  right: BorderSide(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    width: 1.4,
-                  ),
-                  bottom: BorderSide(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    width: 1.4,
-                  ),
-                  top: BorderSide(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    width: 1.4,
-                  ),
+        builder: (context, child) => Transform.scale(
+          scale: _scaleAnimation.value,
+          child: Slidable(
+            key: ValueKey(widget.note.id),
+            startActionPane: ActionPane(
+              motion: const ScrollMotion(),
+              children: [
+                SlidableAction(
+                  onPressed: (context) async {
+                    await context.read<NoteProvider>().togglePinNote(widget.note.id);
+                  },
+                  backgroundColor: const Color(0xFF21B7CA),
+                  foregroundColor: Colors.white,
+                  icon: widget.note.isPinned ? Icons.push_pin_outlined : Icons.push_pin,
+                  label: widget.note.isPinned ? 'Unpin' : 'Pin',
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                borderRadius: 12,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        _buildSelectedNote(context),
-
-                        Expanded(
-                          child: Text(
-                            widget.note.title,
-                            style: CustomTextStyle.regular(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 18,
-                              color: Theme.of(context).colorScheme.onSurface,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          widget.note.time,
-                          style: CustomTextStyle.regular(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                            color: Theme.of(context).colorScheme.primary,
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Consumer<NoteProvider>(
-                            builder:
-                                (context, noteProvider, child) => Text(
-                                  noteProvider.getPlainText(widget.note.content),
-                                  style: CustomTextStyle.regular(
-                                    fontSize: 14,
-                                    height: 1.3,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurface.withValues(alpha: .8),
-                                  ),
-                                  maxLines: 3,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+              ],
+            ),
+            endActionPane: ActionPane(
+              motion: const ScrollMotion(),
+              children: [
+                SlidableAction(
+                  onPressed: (context) async {
+                    await context.read<NoteProvider>().deleteNote(widget.note.id);
+                  },
+                  backgroundColor: const Color(0xFFFE4A49),
+                  foregroundColor: Colors.white,
+                  icon: Icons.delete,
+                  label: 'Delete',
+                  borderRadius: BorderRadius.circular(12),
                 ),
+              ],
+            ),
+            child: CardCustomWidget(
+              border: Border(
+                left: BorderSide(color: Theme.of(context).colorScheme.surfaceContainerHighest, width: 6),
+                right: BorderSide(color: Theme.of(context).colorScheme.surfaceContainerHighest, width: 1.4),
+                bottom: BorderSide(color: Theme.of(context).colorScheme.surfaceContainerHighest, width: 1.4),
+                top: BorderSide(color: Theme.of(context).colorScheme.surfaceContainerHighest, width: 1.4),
+              ),
+              borderRadius: 12,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSelectedNote(context),
+                      Expanded(
+                        child: Text(
+                          widget.note.title,
+                          style: CustomTextStyle.regular(fontWeight: FontWeight.w600, fontSize: 18, color: Theme.of(context).colorScheme.onSurface, letterSpacing: -0.3),
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      if (widget.note.isPinned)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 6, top: 2),
+                          child: Icon(Icons.push_pin, size: 16, color: Theme.of(context).colorScheme.primary),
+                        ),
+                      Text(
+                        widget.note.time,
+                        style: CustomTextStyle.regular(fontWeight: FontWeight.w600, fontSize: 14, color: Theme.of(context).colorScheme.primary, letterSpacing: -0.3),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Consumer<NoteProvider>(
+                          builder: (context, noteProvider, child) => Text(
+                            widget.note.content,
+                            style: CustomTextStyle.regular(fontSize: 14, height: 1.3, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: .8)),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
+          ),
+        ),
       ),
     );
   }
@@ -168,11 +171,7 @@ class _NoteCardState extends State<NoteCard> with SingleTickerProviderStateMixin
                 padding: const EdgeInsets.only(right: 8),
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 200),
-                  child: Icon(
-                    Icons.check_circle,
-                    key: const ValueKey('selected'),
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                  child: Icon(Icons.check_circle, key: const ValueKey('selected'), color: Theme.of(context).colorScheme.primary),
                 ),
               );
             } else if (isSelectionMode) {
@@ -180,11 +179,7 @@ class _NoteCardState extends State<NoteCard> with SingleTickerProviderStateMixin
                 padding: const EdgeInsets.only(right: 8.0),
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 200),
-                  child: Icon(
-                    Icons.circle_outlined,
-                    key: const ValueKey('unselected'),
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                  child: Icon(Icons.circle_outlined, key: const ValueKey('unselected'), color: Theme.of(context).colorScheme.primary),
                 ),
               );
             } else if (widget.note.color != null) {

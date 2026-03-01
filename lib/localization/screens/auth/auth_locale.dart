@@ -23,7 +23,7 @@ class AuthLocale extends BaseLocale {
     LoginText.createPinCode: 'Tạo mã PIN',
     LoginText.confirmPinCode: 'Xác nhận mã PIN',
     LoginText.pinCodeNotMatch: 'Mã PIN không khớp',
-    LoginText.pinCodeRequired: 'Vui lòng nhập đủ 6 số',
+    LoginText.pinCodeRequired: 'Vui lòng nhập ít nhất 6 ký tự',
     LoginText.enterPin: 'Nhập mã PIN',
     LoginText.enterAnyPin: 'Nhập mã PIN bất kỳ',
     LoginText.backupNote: 'Vui lòng nhập mã PIN để xác nhận sao lưu',
@@ -31,8 +31,7 @@ class AuthLocale extends BaseLocale {
     LoginText.loginLockDescription: 'Tài khoản đã bị khóa',
     LoginText.pleaseTryAgainLater: 'Vui lòng thử lại sau {0}',
     LoginText.confirmExit: 'Xác nhận thoát',
-    LoginText.confirmExitMessage:
-        'Bạn có chắc chắn muốn thoát? Các thao tác đang thực hiện có thể bị gián đoạn.',
+    LoginText.confirmExitMessage: 'Bạn có chắc chắn muốn thoát? Các thao tác đang thực hiện có thể bị gián đoạn.',
     LoginText.cancel: 'Hủy',
     LoginText.exit: 'Thoát',
   };
@@ -42,7 +41,7 @@ class AuthLocale extends BaseLocale {
     LoginText.createPinCode: 'Create PIN code',
     LoginText.confirmPinCode: 'Confirm PIN code',
     LoginText.pinCodeNotMatch: 'PIN codes do not match',
-    LoginText.pinCodeRequired: 'Please enter all 6 digits',
+    LoginText.pinCodeRequired: 'Please enter at least 6 characters',
     LoginText.enterPin: 'Enter PIN code',
     LoginText.enterAnyPin: 'Enter any PIN code',
     LoginText.backupNote: 'Please enter your PIN to confirm backup',
@@ -52,8 +51,7 @@ class AuthLocale extends BaseLocale {
 
     // Thêm các text đã dịch cho dialog xác nhận thoát
     LoginText.confirmExit: 'Confirm exit',
-    LoginText.confirmExitMessage:
-        'Are you sure you want to exit? Current operations may be interrupted.',
+    LoginText.confirmExitMessage: 'Are you sure you want to exit? Current operations may be interrupted.',
     LoginText.cancel: 'Cancel',
     LoginText.exit: 'Exit',
   };
@@ -63,7 +61,7 @@ class AuthLocale extends BaseLocale {
     LoginText.createPinCode: 'PIN कोड बनाएं',
     LoginText.confirmPinCode: 'PIN कोड की पुष्टि करें',
     LoginText.pinCodeNotMatch: 'PIN कोड मेल नहीं खाते',
-    LoginText.pinCodeRequired: 'कृपया सभी 6 अंक दर्ज करें',
+    LoginText.pinCodeRequired: 'कृपया कम से कम 6 अंक दर्ज करें',
     LoginText.enterPin: 'PIN कोड दर्ज करें',
     LoginText.enterAnyPin: 'कोई भी PIN कोड दर्ज करें',
     LoginText.backupNote: 'कृपया बैकअप की पुष्टि के लिए PIN दर्ज करें',
@@ -71,8 +69,7 @@ class AuthLocale extends BaseLocale {
     LoginText.loginLockDescription: 'खाता लॉक है',
     LoginText.pleaseTryAgainLater: 'कृपया {0} बाद पुनः प्रयास करें',
     LoginText.confirmExit: 'बाहर निकलने की पुष्टि करें',
-    LoginText.confirmExitMessage:
-        'क्या आप वाकई बाहर निकलना चाहते हैं? वर्तमान प्रक्रियाएं बाधित हो सकती हैं।',
+    LoginText.confirmExitMessage: 'क्या आप वाकई बाहर निकलना चाहते हैं? वर्तमान प्रक्रियाएं बाधित हो सकती हैं।',
     LoginText.cancel: 'रद्द करें',
     LoginText.exit: 'बाहर निकलें',
   };
@@ -82,7 +79,7 @@ class AuthLocale extends BaseLocale {
     LoginText.createPinCode: 'PINコードを作成',
     LoginText.confirmPinCode: 'PINコードを確認',
     LoginText.pinCodeNotMatch: 'PINコードが一致しません',
-    LoginText.pinCodeRequired: '6桁すべてを入力してください',
+    LoginText.pinCodeRequired: '少なくとも6桁の数字を入力してください',
     LoginText.enterPin: 'PINコードを入力',
     LoginText.enterAnyPin: '任意のPINコードを入力',
     LoginText.backupNote: 'バックアップを確認するにはPINコードを入力してください',
@@ -100,7 +97,7 @@ class AuthLocale extends BaseLocale {
     LoginText.createPinCode: 'Создать PIN-код',
     LoginText.confirmPinCode: 'Подтвердите PIN-код',
     LoginText.pinCodeNotMatch: 'PIN-коды не совпадают',
-    LoginText.pinCodeRequired: 'Пожалуйста, введите все 6 цифр',
+    LoginText.pinCodeRequired: 'Пожалуйста, введите не менее 6 цифр',
     LoginText.enterPin: 'Введите PIN-код',
     LoginText.enterAnyPin: 'Введите любой PIN-код',
     LoginText.backupNote: 'Пожалуйста, введите PIN-код для подтверждения резервного копирования',
@@ -108,8 +105,7 @@ class AuthLocale extends BaseLocale {
     LoginText.loginLockDescription: 'Аккаунт заблокирован',
     LoginText.pleaseTryAgainLater: 'Пожалуйста, попробуйте снова через {0}',
     LoginText.confirmExit: 'Подтвердить выход',
-    LoginText.confirmExitMessage:
-        'Вы уверены, что хотите выйти? Текущие операции могут быть прерваны.',
+    LoginText.confirmExitMessage: 'Вы уверены, что хотите выйти? Текущие операции могут быть прерваны.',
     LoginText.cancel: 'Отмена',
     LoginText.exit: 'Выйти',
   };
@@ -119,7 +115,7 @@ class AuthLocale extends BaseLocale {
     LoginText.createPinCode: 'Buat Kode PIN',
     LoginText.confirmPinCode: 'Konfirmasi Kode PIN',
     LoginText.pinCodeNotMatch: 'Kode PIN tidak cocok',
-    LoginText.pinCodeRequired: 'Silakan masukkan semua 6 digit',
+    LoginText.pinCodeRequired: 'Silakan masukkan setidaknya 6 karakter',
     LoginText.enterPin: 'Masukkan Kode PIN',
     LoginText.enterAnyPin: 'Masukkan Kode PIN apa saja',
     LoginText.backupNote: 'Silakan masukkan PIN untuk konfirmasi backup',
@@ -127,8 +123,7 @@ class AuthLocale extends BaseLocale {
     LoginText.loginLockDescription: 'Akun terkunci',
     LoginText.pleaseTryAgainLater: 'Silakan coba lagi dalam {0}',
     LoginText.confirmExit: 'Konfirmasi Keluar',
-    LoginText.confirmExitMessage:
-        'Apakah Anda yakin ingin keluar? Proses yang sedang berjalan mungkin akan terganggu.',
+    LoginText.confirmExitMessage: 'Apakah Anda yakin ingin keluar? Proses yang sedang berjalan mungkin akan terganggu.',
     LoginText.cancel: 'Batal',
     LoginText.exit: 'Keluar',
   };
@@ -138,7 +133,7 @@ class AuthLocale extends BaseLocale {
     LoginText.createPinCode: 'Criar código PIN',
     LoginText.confirmPinCode: 'Confirmar código PIN',
     LoginText.pinCodeNotMatch: 'Os códigos PIN não coincidem',
-    LoginText.pinCodeRequired: 'Por favor, insira todos os 6 dígitos',
+    LoginText.pinCodeRequired: 'Por favor, insira pelo menos 6 caracteres',
     LoginText.enterPin: 'Digite o código PIN',
     LoginText.enterAnyPin: 'Digite qualquer código PIN',
     LoginText.backupNote: 'Por favor, insira o PIN para confirmar o backup',
@@ -146,8 +141,7 @@ class AuthLocale extends BaseLocale {
     LoginText.loginLockDescription: 'Conta bloqueada',
     LoginText.pleaseTryAgainLater: 'Por favor, tente novamente em {0}',
     LoginText.confirmExit: 'Confirmar saída',
-    LoginText.confirmExitMessage:
-        'Tem certeza de que deseja sair? As operações em andamento podem ser interrompidas.',
+    LoginText.confirmExitMessage: 'Tem certeza de que deseja sair? As operações em andamento podem ser interrompidas.',
     LoginText.cancel: 'Cancelar',
     LoginText.exit: 'Sair',
   };
@@ -157,7 +151,7 @@ class AuthLocale extends BaseLocale {
     LoginText.createPinCode: 'PIN Kodu Oluştur',
     LoginText.confirmPinCode: 'PIN Kodunu Onayla',
     LoginText.pinCodeNotMatch: 'PIN kodları eşleşmiyor',
-    LoginText.pinCodeRequired: 'Lütfen tüm 6 haneyi girin',
+    LoginText.pinCodeRequired: 'Lütfen en az 6 karakter girin',
     LoginText.enterPin: 'PIN kodunu girin',
     LoginText.enterAnyPin: 'Herhangi bir PIN kodu girin',
     LoginText.backupNote: 'Yedeklemeyi onaylamak için lütfen PIN kodunu girin',
@@ -165,8 +159,7 @@ class AuthLocale extends BaseLocale {
     LoginText.loginLockDescription: 'Hesap kilitlendi',
     LoginText.pleaseTryAgainLater: 'Lütfen {0} sonra tekrar deneyin',
     LoginText.confirmExit: 'Çıkışı Onayla',
-    LoginText.confirmExitMessage:
-        'Çıkmak istediğinizden emin misiniz? Mevcut işlemler kesintiye uğrayabilir.',
+    LoginText.confirmExitMessage: 'Çıkmak istediğinizden emin misiniz? Mevcut işlemler kesintiye uğrayabilir.',
     LoginText.cancel: 'İptal',
     LoginText.exit: 'Çıkış',
   };
@@ -176,7 +169,7 @@ class AuthLocale extends BaseLocale {
     LoginText.createPinCode: 'Criar código PIN',
     LoginText.confirmPinCode: 'Confirmar código PIN',
     LoginText.pinCodeNotMatch: 'Os códigos PIN não coincidem',
-    LoginText.pinCodeRequired: 'Por favor, insira todos os 6 dígitos',
+    LoginText.pinCodeRequired: 'Por favor, insira pelo menos 6 caracteres',
     LoginText.enterPin: 'Digite o código PIN',
     LoginText.enterAnyPin: 'Digite qualquer código PIN',
     LoginText.backupNote: 'Por favor, insira o PIN para confirmar o backup',
@@ -184,8 +177,7 @@ class AuthLocale extends BaseLocale {
     LoginText.loginLockDescription: 'Conta bloqueada',
     LoginText.pleaseTryAgainLater: 'Por favor, tente novamente em {0}',
     LoginText.confirmExit: 'Confirmar saída',
-    LoginText.confirmExitMessage:
-        'Tem certeza de que deseja sair? As operações em andamento podem ser interrompidas.',
+    LoginText.confirmExitMessage: 'Tem certeza de que deseja sair? As operações em andamento podem ser interrompidas.',
     LoginText.cancel: 'Cancelar',
     LoginText.exit: 'Sair',
   };
@@ -196,7 +188,7 @@ class AuthLocale extends BaseLocale {
     LoginText.createPinCode: 'Crear código PIN',
     LoginText.confirmPinCode: 'Confirmar código PIN',
     LoginText.pinCodeNotMatch: 'Los códigos PIN no coinciden',
-    LoginText.pinCodeRequired: 'Por favor, introduce los 6 dígitos',
+    LoginText.pinCodeRequired: 'Por favor, introduce al menos 6 caracteres',
     LoginText.enterPin: 'Introducir código PIN',
     LoginText.enterAnyPin: 'Introducir cualquier código PIN',
     LoginText.backupNote: 'Por favor, introduce tu PIN para confirmar la copia de seguridad',
@@ -206,8 +198,7 @@ class AuthLocale extends BaseLocale {
 
     // Textos para el diálogo de confirmación de salida
     LoginText.confirmExit: 'Confirmar salida',
-    LoginText.confirmExitMessage:
-        '¿Estás seguro de que deseas salir? Las operaciones actuales podrían interrumpirse.',
+    LoginText.confirmExitMessage: '¿Estás seguro de que deseas salir? Las operaciones actuales podrían interrumpirse.',
     LoginText.cancel: 'Cancelar',
     LoginText.exit: 'Salir',
   };
@@ -217,7 +208,7 @@ class AuthLocale extends BaseLocale {
     LoginText.createPinCode: 'Crea codice PIN',
     LoginText.confirmPinCode: 'Conferma codice PIN',
     LoginText.pinCodeNotMatch: 'Il codice PIN non corrisponde',
-    LoginText.pinCodeRequired: 'Inserisci tutte e 6 le cifre',
+    LoginText.pinCodeRequired: 'Inserisci almeno 6 caratteri',
     LoginText.enterPin: 'Inserisci PIN',
     LoginText.enterAnyPin: 'Inserisci qualsiasi PIN',
     LoginText.backupNote: 'Inserisci il PIN per confermare il backup',
@@ -225,8 +216,7 @@ class AuthLocale extends BaseLocale {
     LoginText.loginLockDescription: 'Account bloccato',
     LoginText.pleaseTryAgainLater: 'Riprova più tardi {0}',
     LoginText.confirmExit: 'Conferma uscita',
-    LoginText.confirmExitMessage:
-        'Sei sicuro di voler uscire? Le operazioni in corso potrebbero essere interrotte.',
+    LoginText.confirmExitMessage: 'Sei sicuro di voler uscire? Le operazioni in corso potrebbero essere interrotte.',
     LoginText.cancel: 'Annulla',
     LoginText.exit: 'Esci',
   };

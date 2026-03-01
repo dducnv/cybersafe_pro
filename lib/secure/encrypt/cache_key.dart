@@ -23,9 +23,7 @@ class CachedKey {
   static const String _cipherAlgorithm = 'AES-256-GCM'; // 🔐 Upgraded from XOR
   static const String _version = '1.0';
 
-  CachedKey(String value, {Duration? customDuration})
-    : expiresAt = DateTime.now().add(customDuration ?? KeyManager.MAX_CACHE_DURATION),
-      _encryptedValue = _encryptValueAES(value);
+  CachedKey(String value, {Duration? customDuration}) : expiresAt = DateTime.now().add(customDuration ?? KeyManager.MAX_CACHE_DURATION), _encryptedValue = _encryptValueAES(value);
 
   bool get isExpired => DateTime.now().isAfter(expiresAt);
 
@@ -102,9 +100,7 @@ class CachedKey {
       // Validate algorithm version
       final algorithm = package['algorithm'] as String?;
       if (algorithm != _cipherAlgorithm) {
-        throw Exception(
-          'Unsupported encryption algorithm: $algorithm (expected: $_cipherAlgorithm)',
-        );
+        throw Exception('Unsupported encryption algorithm: $algorithm (expected: $_cipherAlgorithm)');
       }
 
       // Extract components
@@ -218,12 +214,7 @@ class CachedKey {
     try {
       final packageJson = utf8.decode(base64.decode(encryptedValue));
       final package = json.decode(packageJson) as Map<String, dynamic>;
-      return {
-        'algorithm': package['algorithm'],
-        'version': package['version'],
-        'timestamp': package['timestamp'],
-        'isValid': _isValidPackage(package),
-      };
+      return {'algorithm': package['algorithm'], 'version': package['version'], 'timestamp': package['timestamp'], 'isValid': _isValidPackage(package)};
     } catch (e) {
       return {'error': e.toString(), 'isValid': false};
     }

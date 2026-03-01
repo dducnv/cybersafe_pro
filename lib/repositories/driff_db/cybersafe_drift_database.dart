@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:cybersafe_pro/secure/encrypt/key_manager.dart';
@@ -7,31 +6,20 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
-import 'package:sqlite3/open.dart';
 
 import 'models/models.dart';
 
 part 'cybersafe_drift_database.g.dart';
 
-@DriftDatabase(
-  tables: [
-    AccountDriftModel,
-    CategoryDriftModel,
-    TOTPDriftModel,
-    PasswordHistoryDriftModel,
-    AccountCustomFieldDriftModel,
-    IconCustomDriftModel,
-    TextNotesDriftModel,
-  ],
-)
+@DriftDatabase(tables: [AccountDriftModel, CategoryDriftModel, TOTPDriftModel, PasswordHistoryDriftModel, AccountCustomFieldDriftModel, IconCustomDriftModel, TextNotesDriftModel])
 class DriftSqliteDatabase extends _$DriftSqliteDatabase {
   DriftSqliteDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
-  /// Mở kết nối với SQLCipher encryption
+  /// Mở kết nối với SQLite3MultipleCiphers encryption
+  /// Hỗ trợ migration kdf_iter từ 64000 → 256000
   static QueryExecutor _openConnection() {
     return LazyDatabase(() async {
       try {
@@ -40,19 +28,15 @@ class DriftSqliteDatabase extends _$DriftSqliteDatabase {
 
         // Lấy password từ KeyManager
         final password = await KeyManager.getKey(KeyType.database);
-
-        logInfo('Opening Drift database with encryption at: ${file.path}');
-
         return NativeDatabase.createInBackground(
           file,
-          isolateSetup: () async {
-            open
-              ..overrideFor(OperatingSystem.android, openCipherOnAndroid)
-              ..overrideFor(OperatingSystem.linux, () => DynamicLibrary.open('libsqlcipher.so'))
-              ..overrideFor(OperatingSystem.windows, () => DynamicLibrary.open('sqlcipher.dll'));
-          },
           setup: (database) {
-            // Cấu hình SQLCipher
+            // Kiểm tra SQLite3MultipleCiphers đã được load
+            assert(database.select('PRAGMA cipher;').isNotEmpty, 'SQLite3MultipleCiphers is not available! Check build hooks config.');
+
+            // Cấu hình SQLCipher compatibility
+            database.execute("PRAGMA cipher = 'sqlcipher'");
+            database.execute('PRAGMA legacy = 4');
             database.execute('PRAGMA key = "$password"');
             database.execute('PRAGMA cipher_page_size = 4096');
             database.execute('PRAGMA kdf_iter = 64000');
@@ -94,6 +78,9 @@ class DriftSqliteDatabase extends _$DriftSqliteDatabase {
       }
       if (from == 2) {
         await m.addColumn(accountDriftModel, accountDriftModel.openCount);
+      }
+      if (from <= 3) {
+        await m.addColumn(textNotesDriftModel, textNotesDriftModel.previewContent);
       }
     },
   );

@@ -3,8 +3,7 @@ import 'dart:io';
 import 'package:cybersafe_pro/screens/about_app/about_app_screen.dart';
 import 'package:cybersafe_pro/screens/category_manager/category_manager_screen.dart';
 import 'package:cybersafe_pro/screens/create_account/create_account_screen.dart';
-import 'package:cybersafe_pro/screens/details_account/details_account_screen.dart'
-    show DetailsAccountScreen;
+import 'package:cybersafe_pro/screens/details_account/details_account_screen.dart' show DetailsAccountScreen;
 import 'package:cybersafe_pro/screens/home/home_screen.dart';
 import 'package:cybersafe_pro/screens/login_master_password/login_master_password.dart';
 import 'package:cybersafe_pro/screens/note_editor/note_editor.dart';
@@ -71,11 +70,7 @@ class AppRoutes {
     return Navigator.pushNamed<T>(context, routeName, arguments: arguments);
   }
 
-  static Future<T?> navigateToReplacement<T>(
-    BuildContext context,
-    String routeName, {
-    Object? arguments,
-  }) {
+  static Future<T?> navigateToReplacement<T>(BuildContext context, String routeName, {Object? arguments}) {
     // Cập nhật màn hình hiện tại để desktop mode có thể xử lý
     DeviceInfo.currentScreen.value = routeName;
     final deviceType = DeviceInfo.getDeviceType(context);
@@ -87,11 +82,7 @@ class AppRoutes {
     return Navigator.pushReplacementNamed<T, dynamic>(context, routeName, arguments: arguments);
   }
 
-  static Future<T?> navigateAndRemoveUntil<T>(
-    BuildContext context,
-    String routeName, {
-    Object? arguments,
-  }) {
+  static Future<T?> navigateAndRemoveUntil<T>(BuildContext context, String routeName, {Object? arguments}) {
     // Cập nhật màn hình hiện tại để desktop mode có thể xử lý
     DeviceInfo.currentScreen.value = routeName;
     final deviceType = DeviceInfo.getDeviceType(context);
@@ -166,8 +157,7 @@ class AppRoutes {
     return SecureGate(
       blurr: 60,
       opacity: 0.8,
-      lockedBuilder:
-          (context, controller) => LoginMasterPassword(secureApplicationController: controller),
+      lockedBuilder: (context, controller) => LoginMasterPassword(secureApplicationController: controller),
       child: child,
     );
   }

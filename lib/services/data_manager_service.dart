@@ -10,7 +10,7 @@ import 'package:cybersafe_pro/repositories/driff_db/cybersafe_drift_database.dar
 import 'package:cybersafe_pro/repositories/driff_db/driff_db_manager.dart';
 import 'package:cybersafe_pro/repositories/driff_db/models/account_aggregate.dart';
 import 'package:cybersafe_pro/resources/brand_logo.dart';
-import 'package:cybersafe_pro/secure/encrypt/encrypt_v1/encrypt_v1.dart';
+import 'package:cybersafe_pro/secure/encrypt/encrypt_base_info/encrypt_base_info.dart';
 import 'package:cybersafe_pro/services/account/account_services.dart';
 import 'package:cybersafe_pro/services/data_secure_service.dart';
 import 'package:cybersafe_pro/services/text_note/text_note_service.dart';
@@ -20,6 +20,7 @@ import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:pointycastle/export.dart' as pc;
 
 class DataManagerService {
@@ -61,11 +62,7 @@ class DataManagerService {
     return filePath;
   }
 
-  static Future<bool> restoreBackup({
-    required BuildContext context,
-    required String pin,
-    required String filePath,
-  }) async {
+  static Future<bool> restoreBackup({required BuildContext context, required String pin, required String filePath}) async {
     try {
       if (filePath.isEmpty) return throw Exception('File not found');
       File file = File(filePath);
@@ -82,23 +79,12 @@ class DataManagerService {
       final keyEncryptFile = await _generateBackupKey(Env.backupFileEncryptKey);
       final keyEncryptData = await _generateBackupKey(pin);
 
-      final decryptedData = EncryptV1.decryptDataBytes(
-        encryptedData: encryptedBytes,
-        key: keyEncryptFile,
-      );
+      final decryptedData = EncryptBaseInfo.decryptDataBytes(encryptedData: encryptedBytes, key: keyEncryptFile);
       final decryptedUtf8Decode = utf8.decode(decryptedData);
 
-      String decryptedDataResult;
-      try {
-        decryptedDataResult = DataSecureService.decryptData(
-          value: decryptedUtf8Decode,
-          key: keyEncryptData,
-        );
-      } catch (e) {
-        throw Exception('KEY_INVALID');
-      }
+      final decryptedDataResult = await compute<Map<String, dynamic>, String>(_decryptDataInIsolate, {'value': decryptedUtf8Decode, 'key': keyEncryptData});
 
-      final decryptedDataJson = jsonDecode(decryptedDataResult);
+      final decryptedDataJson = await compute<String, dynamic>(_jsonDecodeInIsolate, decryptedDataResult);
 
       if (decryptedDataJson == null) {
         throw Exception('Data is null');
@@ -106,9 +92,7 @@ class DataManagerService {
       logWarning('isHasMetaData: ${decryptedDataJson is List}');
 
       final bool decryptedDataJsonIsList = decryptedDataJson is List;
-      final accountDecripted = !decryptedDataJsonIsList
-          ? (decryptedDataJson['accounts'] as List<dynamic>)
-          : decryptedDataJson;
+      final accountDecripted = !decryptedDataJsonIsList ? (decryptedDataJson['accounts'] as List<dynamic>) : decryptedDataJson;
 
       final List<AccountAggregate> accountAggregates = [];
       final List<TextNotesDriftModelData> textNotes = [];
@@ -120,17 +104,12 @@ class DataManagerService {
             logWarning('item: ${item.toString()}');
             accountAggregates.add(AccountAggregate.fromBackupJson(item));
           } catch (e) {
-            logError(
-              'Error restoring backup: $e',
-              functionName: 'DataManagerServiceNew.accountDecripted',
-            );
+            logError('Error restoring backup: $e', functionName: 'DataManagerServiceNew.accountDecripted');
           }
         }
       }
 
-      if (!decryptedDataJsonIsList &&
-          decryptedDataJson['textNotes'] != null &&
-          decryptedDataJson['textNotes'] is List<dynamic>) {
+      if (!decryptedDataJsonIsList && decryptedDataJson['textNotes'] != null && decryptedDataJson['textNotes'] is List<dynamic>) {
         final textNotesDecripted = decryptedDataJson['textNotes'] as List<dynamic>;
         textNotes.addAll(await TextNoteService.instance.toEncryptedList(textNotesDecripted));
       }
@@ -158,10 +137,7 @@ class DataManagerService {
           return <AccountAggregate>[];
         }
 
-        final iconCustomIds = accounts
-            .where((a) => a.iconCustomId != null)
-            .map((a) => a.iconCustomId!)
-            .toSet();
+        final iconCustomIds = accounts.where((a) => a.iconCustomId != null).map((a) => a.iconCustomId!).toSet();
         final categoryIds = accounts.map((a) => a.categoryId).toSet();
         final accountIds = accounts.map((a) => a.id).toSet();
 
@@ -173,12 +149,8 @@ class DataManagerService {
           db.accountCustomFieldAdapter.getByAccountIds(accountIds.toList()),
         ]);
 
-        final iconCustomMap = {
-          for (var icon in results[0] as List<IconCustomDriftModelData>) icon.id: icon,
-        };
-        final categoryMap = {
-          for (var cat in results[1] as List<CategoryDriftModelData>) cat.id: cat,
-        };
+        final iconCustomMap = {for (var icon in results[0] as List<IconCustomDriftModelData>) icon.id: icon};
+        final categoryMap = {for (var cat in results[1] as List<CategoryDriftModelData>) cat.id: cat};
         final totpMap = {for (var t in results[2] as List<TOTPDriftModelData>) t.accountId: t};
 
         final passwordHistoriesMap = <int, List<PasswordHistoryDriftModelData>>{};
@@ -207,17 +179,11 @@ class DataManagerService {
         throw Exception('Không có dữ liệu để backup');
       }
 
-      final accountAggregates = await AccountServices.instance.toDataDecryptedList(
-        listAccountAggregates,
-      );
+      final accountAggregates = await AccountServices.instance.toDataDecryptedList(listAccountAggregates);
       final textNotesEncrypted = await TextNoteService.instance.toDataDecryptedListJson(textNotes);
 
       final backupData = {
-        'metadata': {
-          'version': '1.0',
-          'timestamp': DateTime.now().toIso8601String(),
-          'count': accountAggregates.length,
-        },
+        'metadata': {'version': '1.0', 'timestamp': DateTime.now().toIso8601String(), 'count': accountAggregates.length},
         'accounts': accountAggregates,
         'textNotes': textNotesEncrypted,
       };
@@ -225,30 +191,18 @@ class DataManagerService {
       final keyEncryptFile = await _generateBackupKey(Env.backupFileEncryptKey);
       final keyEncryptData = await _generateBackupKey(pin);
 
-      // Mã hóa dữ liệu
-      final encryptedData = DataSecureService.encryptData(
-        value: jsonEncode(backupData),
-        key: keyEncryptData,
-      );
+      // Mã hóa dữ liệu trong Isolate
+      final jsonString = await compute<Map<String, dynamic>, String>(_jsonEncodeInIsolate, backupData);
+      final encryptedData = await compute<Map<String, String>, String>(_encryptDataInIsolate, {'value': jsonString, 'key': keyEncryptData});
 
-      final backupJsonBytes = await compute<String, List<int>>(
-        _encodeBackupInIsolate,
-        encryptedData,
-      );
+      final backupJsonBytes = await compute<String, List<int>>(_encodeBackupInIsolate, encryptedData);
 
-      List<int> encryptedDataBytes = EncryptV1.encryptDataBytes(
-        data: backupJsonBytes,
-        key: keyEncryptFile,
-      );
+      final encryptedDataBytes = await compute<Map<String, dynamic>, List<int>>(_encryptBytesInIsolate, {'data': backupJsonBytes, 'key': keyEncryptFile});
 
-      final dateTime = DateTime.now().toString().replaceAll(RegExp(r'[:\s]'), '-');
-      final backupName = 'cybersafe_backup_$dateTime';
-      final fileName = "$backupName.enc";
-      final filePath = await FilePickerUtils.saveFileBackup(
-        dialogTitle: 'Save Backup File',
-        fileName: fileName,
-        bytes: Uint8List.fromList(encryptedDataBytes),
-      );
+      final now = DateTime.now();
+      final formattedDate = DateFormat('yyyy-MM-dd_HH-mm-ss').format(now);
+      final fileName = "cybersafe_backup_$formattedDate.enc";
+      final filePath = await FilePickerUtils.saveFileBackup(dialogTitle: 'Save Backup File', fileName: fileName, bytes: Uint8List.fromList(encryptedDataBytes));
       return filePath != null;
     } catch (e) {
       logError('Error backing up data: $e', functionName: 'DataManagerServiceNew.backupData');
@@ -260,13 +214,34 @@ class DataManagerService {
     return utf8.encode(encryptedData);
   }
 
+  static dynamic _jsonDecodeInIsolate(String source) {
+    return jsonDecode(source);
+  }
+
+  static String _jsonEncodeInIsolate(Map<String, dynamic> data) {
+    return jsonEncode(data);
+  }
+
+  static String _encryptDataInIsolate(Map<String, String> args) {
+    return DataSecureService.encryptData(value: args['value']!, key: args['key']!);
+  }
+
+  static String _decryptDataInIsolate(Map<String, dynamic> args) {
+    try {
+      return DataSecureService.decryptData(value: args['value'], key: args['key']);
+    } catch (e) {
+      throw Exception('KEY_INVALID');
+    }
+  }
+
+  static List<int> _encryptBytesInIsolate(Map<String, dynamic> args) {
+    return EncryptBaseInfo.encryptDataBytes(data: args['data'], key: args['key']);
+  }
+
   static const int BACKUP_PBKDF2_ITERATIONS = 50000; // Giảm số vòng lặp cho backup/restore
 
   static Future<String> _generateBackupKey(String pin) async {
-    return compute<Map<String, dynamic>, String>(_generateKeyInIsolate, {
-      'pin': pin,
-      'salt': Env.appSignatureKey,
-    });
+    return compute<Map<String, dynamic>, String>(_generateKeyInIsolate, {'pin': pin, 'salt': Env.appSignatureKey});
   }
 
   static String _generateKeyInIsolate(Map<String, dynamic> params) {
@@ -314,11 +289,7 @@ class DataManagerService {
         throw Exception("File CSV is empty");
       }
 
-      final csvConverter = CsvToListConverter(
-        shouldParseNumbers: false,
-        fieldDelimiter: ',',
-        eol: '\n',
-      );
+      final csvConverter = CsvToListConverter(shouldParseNumbers: false, fieldDelimiter: ',', eol: '\n');
 
       final csvTable = csvConverter.convert(csvString, shouldParseNumbers: false);
 
@@ -330,9 +301,7 @@ class DataManagerService {
       final requiredColumns = ['name', 'url', 'username', 'password', 'note'];
 
       if (!requiredColumns.every((col) => header.contains(col))) {
-        throw Exception(
-          "File CSV is not in the correct format. Need columns: name, url, username, password, note",
-        );
+        throw Exception("File CSV is not in the correct format. Need columns: name, url, username, password, note");
       }
 
       final nameIndex = header.indexOf('name');
@@ -362,9 +331,7 @@ class DataManagerService {
         'categoryId': categoryId,
       });
 
-      final List<BranchLogo> branchLogos = branchLogoCategories
-          .expand((element) => element.branchLogos)
-          .toList();
+      final List<BranchLogo> branchLogos = branchLogoCategories.expand((element) => element.branchLogos).toList();
 
       final accountCompanions = <AccountDriftModelCompanion>[];
       for (var row in mappedRows) {
@@ -372,24 +339,13 @@ class DataManagerService {
           String iconSlug = "account_circle";
           try {
             final title = row['title'].toString().toLowerCase();
-            var matchingIcons = branchLogos.where(
-              (element) => element.branchName?.toLowerCase().contains(title) ?? false,
-            );
+            var matchingIcons = branchLogos.where((element) => element.branchName?.toLowerCase().contains(title) ?? false);
 
             if (matchingIcons.isEmpty && (title.contains('.') || title.contains('/'))) {
-              final urlParts = title
-                  .replaceAll('http://', '')
-                  .replaceAll('https://', '')
-                  .replaceAll('www.', '')
-                  .split('.');
+              final urlParts = title.replaceAll('http://', '').replaceAll('https://', '').replaceAll('www.', '').split('.');
               for (final part in urlParts) {
                 if (part.isNotEmpty) {
-                  final partMatches = branchLogos.where(
-                    (element) =>
-                        element.branchName?.toLowerCase() == part ||
-                        (element.keyWords?.any((keyword) => keyword.toLowerCase() == part) ??
-                            false),
-                  );
+                  final partMatches = branchLogos.where((element) => element.branchName?.toLowerCase() == part || (element.keyWords?.any((keyword) => keyword.toLowerCase() == part) ?? false));
 
                   if (partMatches.isNotEmpty) {
                     matchingIcons = partMatches;
@@ -403,10 +359,7 @@ class DataManagerService {
               iconSlug = matchingIcons.first.branchLogoSlug ?? "account_circle";
             }
           } catch (e) {
-            logError(
-              'Error finding icon: $e',
-              functionName: 'DataManagerServiceNew.importDataFromBrowser',
-            );
+            logError('Error finding icon: $e', functionName: 'DataManagerServiceNew.importDataFromBrowser');
           }
 
           accountCompanions.add(
@@ -420,10 +373,7 @@ class DataManagerService {
             ),
           );
         } catch (e) {
-          logError(
-            'Error preparing account data: $e',
-            functionName: 'DataManagerServiceNew.importDataFromBrowser',
-          );
+          logError('Error preparing account data: $e', functionName: 'DataManagerServiceNew.importDataFromBrowser');
         }
       }
 
@@ -438,10 +388,7 @@ class DataManagerService {
             await DriffDbManager.instance.createAccountWithEncriptData(account: account);
             successCount++;
           } catch (e) {
-            logError(
-              'Error creating account: $e',
-              functionName: 'DataManagerServiceNew.importDataFromBrowser',
-            );
+            logError('Error creating account: $e', functionName: 'DataManagerServiceNew.importDataFromBrowser');
           }
         }
       });
@@ -479,14 +426,7 @@ class DataManagerService {
 
       final importNote = note.isEmpty ? url : note;
 
-      result.add({
-        'title': title,
-        'email': username,
-        'password': password,
-        'notes': importNote,
-        'categoryName': categoryName,
-        'categoryId': categoryId,
-      });
+      result.add({'title': title, 'email': username, 'password': password, 'notes': importNote, 'categoryName': categoryName, 'categoryId': categoryId});
     }
 
     return result;
