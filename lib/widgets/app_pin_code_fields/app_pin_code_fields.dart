@@ -1,11 +1,11 @@
-import 'dart:async';
+//
+import 'dart:math';
 
-import 'package:cybersafe_pro/utils/device_type.dart';
+//
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:cybersafe_pro/widgets/text_style/custom_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pin_code_fields/pin_code_fields.dart';
 
 class AppPinCodeFields extends StatefulWidget {
   final FormFieldValidator<String>? validator;
@@ -37,13 +37,58 @@ class AppPinCodeFields extends StatefulWidget {
   State<AppPinCodeFields> createState() => AppPinCodeFieldsState();
 }
 
-class AppPinCodeFieldsState extends State<AppPinCodeFields> {
-  late StreamController<ErrorAnimationType> errorController;
+class ObscuringTextEditingController extends TextEditingController {
+  ObscuringTextEditingController({super.text});
+
+  @override
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
+    var displayValue = '●' * value.text.length;
+    if (!withComposing) {
+      return TextSpan(style: style, text: displayValue);
+    }
+    final composingRegion = value.composing;
+    if (composingRegion.isValid) {
+      return TextSpan(
+        style: style,
+        children: <TextSpan>[
+          TextSpan(text: displayValue.substring(0, composingRegion.start)),
+          TextSpan(
+            style: style?.merge(const TextStyle(decoration: TextDecoration.underline)),
+            text: displayValue.substring(composingRegion.start, composingRegion.end),
+          ),
+          TextSpan(text: displayValue.substring(composingRegion.end)),
+        ],
+      );
+    }
+    return TextSpan(style: style, text: displayValue);
+  }
+}
+
+class AppPinCodeFieldsState extends State<AppPinCodeFields> with SingleTickerProviderStateMixin {
+  late AnimationController _shakeController;
+  late ObscuringTextEditingController _obscuringController;
+  late FocusNode _internalFocusNode;
 
   @override
   void initState() {
-    errorController = StreamController<ErrorAnimationType>();
     super.initState();
+    _shakeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
+    _obscuringController = ObscuringTextEditingController(text: widget.textEditingController?.text);
+    _internalFocusNode = widget.focusNode ?? FocusNode();
+
+    if (widget.textEditingController != null) {
+      _obscuringController.addListener(() {
+        if (widget.textEditingController!.text != _obscuringController.text) {
+          widget.textEditingController!.text = _obscuringController.text;
+        }
+      });
+      widget.textEditingController!.addListener(() {
+        if (_obscuringController.text != widget.textEditingController!.text) {
+          _obscuringController.text = widget.textEditingController!.text;
+        }
+      });
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.textEditingController?.clear();
       HardwareKeyboard.instance.addHandler((event) => _keyboardCallback(event));
@@ -60,9 +105,23 @@ class AppPinCodeFieldsState extends State<AppPinCodeFields> {
 
   @override
   void dispose() {
-    errorController.close();
+    _shakeController.dispose();
+    _obscuringController.dispose();
     HardwareKeyboard.instance.removeHandler(_keyboardCallback);
+    if (widget.focusNode == null) {
+      _internalFocusNode.dispose();
+    }
     super.dispose();
+  }
+
+  void requestFocus() {
+    try {
+      if (mounted) {
+        _internalFocusNode.requestFocus();
+      }
+    } catch (e) {
+      logError('Error requesting focus: $e', functionName: "AppPinCodeFieldsState.requestFocus");
+    }
   }
 
   void triggerErrorAnimation() {
@@ -70,13 +129,10 @@ class AppPinCodeFieldsState extends State<AppPinCodeFields> {
       if (mounted) {
         widget.textEditingController?.clear();
         widget.focusNode?.requestFocus();
-        errorController.add(ErrorAnimationType.shake);
+        _shakeController.forward(from: 0.0);
       }
     } catch (e) {
-      logError(
-        'Error triggering animation: $e',
-        functionName: "AppPinCodeFieldsState.triggerErrorAnimation",
-      );
+      logError('Error triggering animation: $e', functionName: "AppPinCodeFieldsState.triggerErrorAnimation");
     }
   }
 
@@ -86,52 +142,57 @@ class AppPinCodeFieldsState extends State<AppPinCodeFields> {
       return const SizedBox.shrink();
     }
 
-    return Form(
-      key: widget.formKey,
-      child: PinCodeTextField(
-        appContext: context,
-        focusNode: widget.focusNode,
-        pastedTextStyle: CustomTextStyle.regular(
-          color: Theme.of(context).colorScheme.primary,
-          fontWeight: FontWeight.bold,
+    final Animation<double> offsetAnimation = Tween(begin: 0.0, end: 1.0).chain(CurveTween(curve: Curves.elasticIn)).animate(_shakeController);
+
+    return AnimatedBuilder(
+      animation: offsetAnimation,
+      builder: (context, child) {
+        final sineValue = sin(offsetAnimation.value * pi * 4);
+        return Transform.translate(offset: Offset(sineValue * 10, 0), child: child);
+      },
+      child: Form(
+        key: widget.formKey,
+        child: TextFormField(
+          focusNode: _internalFocusNode,
+          controller: _obscuringController,
+          autofocus: widget.autoFocus ?? false,
+          obscureText: false,
+          keyboardType: TextInputType.visiblePassword,
+          enableSuggestions: false,
+          autocorrect: false,
+          inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\x20-\x7E]'))],
+          style: CustomTextStyle.regular(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 24, letterSpacing: 8.0),
+          cursorColor: Theme.of(context).colorScheme.primary,
+          textAlign: TextAlign.center,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant, width: 2),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: 2),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(20),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: 2),
+            ),
+          ),
+          validator: widget.validator,
+          onFieldSubmitted: (value) {
+            widget.onSubmitted(value);
+            widget.onCompleted(value, this);
+          },
+          onChanged: widget.onChanged,
         ),
-        length: 6,
-        autoFocus: widget.autoFocus ?? false,
-        obscureText: true,
-        obscuringCharacter: '*',
-        blinkWhenObscuring: false,
-        showCursor: true,
-        animationType: AnimationType.fade,
-        autoDismissKeyboard: DeviceInfo.isMobile(context),
-        validator: widget.validator,
-        onSubmitted: (value) {
-          widget.onSubmitted(value);
-        },
-        pinTheme: PinTheme(
-          shape: PinCodeFieldShape.underline,
-          borderRadius: BorderRadius.circular(5),
-          fieldHeight: 60,
-          fieldWidth: 40,
-          borderWidth: 10,
-          inactiveFillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-          selectedColor: Theme.of(context).colorScheme.primary,
-          selectedFillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-          activeFillColor: Theme.of(context).colorScheme.surface,
-          activeColor: Theme.of(context).colorScheme.primary,
-        ),
-        cursorColor: Theme.of(context).colorScheme.primary,
-        animationDuration: const Duration(milliseconds: 300),
-        enableActiveFill: true,
-        errorAnimationController: errorController,
-        controller: widget.textEditingController,
-        keyboardType: TextInputType.number,
-        errorTextMargin: const EdgeInsets.only(top: 10),
-        boxShadows: const [BoxShadow(offset: Offset(0, 1), color: Colors.black12, blurRadius: 10)],
-        onCompleted: (v) {
-          widget.onCompleted(v, this);
-        },
-        onChanged: widget.onChanged,
-        autoDisposeControllers: false,
       ),
     );
   }

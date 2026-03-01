@@ -30,12 +30,7 @@ class MobileLayout extends StatefulWidget {
   final bool isFromDeleteData;
   final String? title;
   final SecureApplicationController? secureApplicationController;
-  final Function({
-    bool? isLoginSuccess,
-    String? pin,
-    GlobalKey<AppPinCodeFieldsState>? appPinCodeKey,
-  })?
-  callBackLoginCallback;
+  final Function({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey})? callBackLoginCallback;
 
   const MobileLayout({
     super.key,
@@ -59,7 +54,7 @@ class _MobileLayoutState extends State<MobileLayout> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   // Constants để dễ bảo trì và tái sử dụng
-  static const double _maxWidth = 300.0;
+  static const double _maxWidth = 350.0;
   static const double _spacing = 20.0;
   static const double _buttonSize = 75.0;
   static const double _iconSize = 24.0;
@@ -102,9 +97,7 @@ class _MobileLayoutState extends State<MobileLayout> {
   }
 
   void _setupLockStatusCheck() {
-    _lockStatusSubscription = Stream.periodic(const Duration(seconds: 1), (count) => count).listen((
-      _,
-    ) {
+    _lockStatusSubscription = Stream.periodic(const Duration(seconds: 1), (count) => count).listen((_) {
       if (mounted) {
         final provider = context.read<LocalAuthProvider>();
         // Cập nhật trạng thái lock
@@ -131,7 +124,7 @@ class _MobileLayoutState extends State<MobileLayout> {
       appBar: _buildAppBar(),
       body: Consumer<LocalAuthProvider>(
         builder: (context, provider, child) {
-          final isCurrentlyLocked = provider.isLocked;
+          final isCurrentlyLocked = provider.isLocked && !widget.isFromBackup && !widget.isFromRestore && !widget.isFromDeleteData;
           final isLoading = provider.isLoading;
 
           // Đảm bảo timer được khởi động lại khi widget rebuild
@@ -173,9 +166,7 @@ class _MobileLayoutState extends State<MobileLayout> {
   }
 
   void _handleKeyboardEvent(KeyEvent event, bool isCurrentlyLocked, LocalAuthProvider provider) {
-    if (event is KeyDownEvent &&
-        event.logicalKey == LogicalKeyboardKey.enter &&
-        !isCurrentlyLocked) {
+    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.enter && !isCurrentlyLocked) {
       handleLogin(provider);
     }
   }
@@ -193,7 +184,7 @@ class _MobileLayoutState extends State<MobileLayout> {
             _buildNoteText(),
             if (isCurrentlyLocked) _buildLockedStatus(provider),
             if (!isCurrentlyLocked) _buildPinCodeFields(provider),
-            _buildBiometricButton(provider),
+            if (!isCurrentlyLocked) _buildBiometricButton(provider),
             _buildLoginButton(provider, isCurrentlyLocked, isLoading),
           ],
         ),
@@ -229,9 +220,7 @@ class _MobileLayoutState extends State<MobileLayout> {
 
   Widget _buildNoteContainer(String text) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: _horizontalPadding,
-      ).copyWith(bottom: _smallSpacing),
+      padding: const EdgeInsets.symmetric(horizontal: _horizontalPadding).copyWith(bottom: _smallSpacing),
       child: Text(
         text,
         textAlign: TextAlign.center,
@@ -241,9 +230,7 @@ class _MobileLayoutState extends State<MobileLayout> {
   }
 
   Widget _buildBiometricButton(LocalAuthProvider provider) {
-    if (!widget.showBiometric ||
-        !LocalAuthConfig.instance.isAvailableBiometrics ||
-        !LocalAuthConfig.instance.isOpenUseBiometric) {
+    if (!widget.showBiometric || !LocalAuthConfig.instance.isAvailableBiometrics || !LocalAuthConfig.instance.isOpenUseBiometric) {
       return const SizedBox(height: _spacing);
     }
 
@@ -255,12 +242,7 @@ class _MobileLayoutState extends State<MobileLayout> {
 
   Widget _buildBiometricIcon() {
     if (Platform.isIOS) {
-      return SvgPicture.asset(
-        'assets/icons/face_id.svg',
-        width: 20.w,
-        height: 20.h,
-        color: Theme.of(context).colorScheme.primary,
-      );
+      return SvgPicture.asset('assets/icons/face_id.svg', width: 20.w, height: 20.h, color: Theme.of(context).colorScheme.primary);
     }
     return const Icon(Icons.fingerprint);
   }
@@ -280,29 +262,15 @@ class _MobileLayoutState extends State<MobileLayout> {
 
   Widget _buildButtonContent(bool isLoading, bool isDisabled) {
     if (isLoading) {
-      return const SizedBox(
-        width: 20,
-        height: 20,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-        ),
-      );
+      return const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)));
     }
 
-    return Icon(
-      Icons.arrow_forward,
-      size: _iconSize,
-      color: isDisabled ? Colors.grey : Colors.white,
-    );
+    return Icon(Icons.arrow_forward, size: _iconSize, color: isDisabled ? Colors.grey : Colors.white);
   }
 
   Widget _buildLockedStatus(LocalAuthProvider provider) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: _smallSpacing,
-        vertical: _smallSpacing,
-      ).copyWith(bottom: _countdownMargin),
+      padding: const EdgeInsets.symmetric(horizontal: _smallSpacing, vertical: _smallSpacing).copyWith(bottom: _countdownMargin),
       child: Column(
         children: [
           Text(
@@ -312,9 +280,7 @@ class _MobileLayoutState extends State<MobileLayout> {
           ),
           const SizedBox(height: _smallSpacing),
           Text(
-            context
-                .trLogin(LoginText.pleaseTryAgainLater)
-                .replaceAll("{0}", provider.formattedRemainingTime),
+            context.trLogin(LoginText.pleaseTryAgainLater).replaceAll("{0}", provider.formattedRemainingTime),
             textAlign: TextAlign.center,
             style: CustomTextStyle.regular(fontWeight: FontWeight.w500),
           ),
@@ -329,17 +295,10 @@ class _MobileLayoutState extends State<MobileLayout> {
     return Container(
       margin: const EdgeInsets.only(top: _smallSpacing),
       padding: const EdgeInsets.symmetric(horizontal: _countdownPadding, vertical: 8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(_borderRadius),
-      ),
+      decoration: BoxDecoration(color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(_borderRadius)),
       child: Text(
         provider.formattedRemainingTime,
-        style: CustomTextStyle.regular(
-          fontWeight: FontWeight.bold,
-          fontSize: _countdownFontSize,
-          color: Theme.of(context).colorScheme.error,
-        ),
+        style: CustomTextStyle.regular(fontWeight: FontWeight.bold, fontSize: _countdownFontSize, color: Theme.of(context).colorScheme.error),
       ),
     );
   }
@@ -371,33 +330,32 @@ class _MobileLayoutState extends State<MobileLayout> {
     if (value == null || value.isEmpty) {
       return context.trSafe(LoginText.pinCodeRequired);
     }
-    if (value.length < 6) {
-      return context.trSafe(LoginText.pinCodeRequired);
-    }
     return null;
   }
 
   Future<void> handleLogin(LocalAuthProvider provider) async {
     if (!mounted) return;
 
+    final currentPin = provider.textEditingController.text;
+
     if (widget.secureApplicationController != null) {
-      await _handleSecureApplicationLogin(provider);
+      await _handleSecureApplicationLogin(provider, currentPin);
       return;
     }
 
-    if (widget.isFromBackup || widget.isFromRestore) {
-      await _handleBackupRestoreLogin(provider);
+    if (widget.isFromBackup || widget.isFromRestore || widget.isFromDeleteData) {
+      await _handleBackupRestoreLogin(provider, currentPin);
       return;
     }
 
-    await _handleNormalLogin(provider);
+    await _handleNormalLogin(provider, currentPin);
   }
 
-  Future<void> _handleSecureApplicationLogin(LocalAuthProvider provider) async {
+  Future<void> _handleSecureApplicationLogin(LocalAuthProvider provider, String pin) async {
     final isLoginSuccess = await provider.handleLogin();
 
     if (isLoginSuccess) {
-      _callLoginCallback(provider);
+      _callLoginCallback(isLoginSuccess: true, pin: pin);
       provider.textEditingController.clear();
       SecureApplicationUtil.instance.authSuccess();
     } else {
@@ -405,17 +363,17 @@ class _MobileLayoutState extends State<MobileLayout> {
     }
   }
 
-  Future<void> _handleBackupRestoreLogin(LocalAuthProvider provider) async {
-    _callLoginCallback(provider);
+  Future<void> _handleBackupRestoreLogin(LocalAuthProvider provider, String pin) async {
+    _callLoginCallback(isLoginSuccess: true, pin: pin);
     provider.textEditingController.clear();
     SecureApplicationUtil.instance.unpause();
   }
 
-  Future<void> _handleNormalLogin(LocalAuthProvider provider) async {
+  Future<void> _handleNormalLogin(LocalAuthProvider provider, String pin) async {
     final isLoginSuccess = await provider.handleLogin();
 
     if (isLoginSuccess && mounted) {
-      _callLoginCallback(provider);
+      _callLoginCallback(isLoginSuccess: true, pin: pin);
       provider.textEditingController.clear();
       await _navigateToHome();
     } else {
@@ -423,13 +381,9 @@ class _MobileLayoutState extends State<MobileLayout> {
     }
   }
 
-  void _callLoginCallback(LocalAuthProvider provider) {
+  void _callLoginCallback({required bool isLoginSuccess, required String pin}) {
     if (widget.callBackLoginCallback != null) {
-      widget.callBackLoginCallback!(
-        isLoginSuccess: true,
-        pin: provider.textEditingController.text,
-        appPinCodeKey: _pinCodeKey,
-      );
+      widget.callBackLoginCallback!(isLoginSuccess: isLoginSuccess, pin: pin, appPinCodeKey: _pinCodeKey);
     }
   }
 
@@ -454,10 +408,6 @@ class _MobileLayoutState extends State<MobileLayout> {
   void _showErrorToast() {
     if (!mounted) return;
 
-    showToastError(
-      context.trSafe(LoginText.incorrectPin),
-      context: context,
-      position: StyledToastPosition.top,
-    );
+    showToastError(context.trSafe(LoginText.incorrectPin), context: context, position: StyledToastPosition.top);
   }
 }

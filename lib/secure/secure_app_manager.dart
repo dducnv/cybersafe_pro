@@ -51,10 +51,7 @@ class SecureAppManager {
       logInfo('Người dùng mới đã được khởi tạo thành công');
       return true;
     } catch (e, stackTrace) {
-      logError(
-        'Lỗi khởi tạo người dùng mới: $e\n$stackTrace',
-        functionName: 'SecureAppManager.initializeNewUser',
-      );
+      logError('Lỗi khởi tạo người dùng mới: $e\n$stackTrace', functionName: 'SecureAppManager.initializeNewUser');
       return false;
     }
   }
@@ -66,23 +63,22 @@ class SecureAppManager {
         logError('Xác thực thất bại', functionName: 'SecureAppManager.authenticateUser');
         return false;
       }
-      final sessionInitialized = await instance._initializeSession(
-        pin: authResult.usedPIN,
-        usedBiometric: authResult.usedBiometric,
-      );
+      final sessionInitialized = await instance._initializeSession(pin: authResult.usedPIN, usedBiometric: authResult.usedBiometric);
       if (!sessionInitialized) {
         logError('Không thể khởi tạo session', functionName: 'SecureAppManager.authenticateUser');
         return false;
+      }
+
+      // Migrate Argon2 params if authenticated via PIN and not yet migrated
+      if (authResult.usedPIN != null && !authResult.usedBiometric) {
+        await instance._migrateArgon2ParamsIfNeeded(authResult.usedPIN!);
       }
 
       logInfo('Người dùng đã được xác thực thành công');
       await DriffDbManager.instance.init();
       return true;
     } catch (e, stackTrace) {
-      logError(
-        'Lỗi xác thực người dùng: $e\n$stackTrace',
-        functionName: 'SecureAppManager.authenticateUser',
-      );
+      logError('Lỗi xác thực người dùng: $e\n$stackTrace', functionName: 'SecureAppManager.authenticateUser');
       return false;
     }
   }
@@ -91,10 +87,7 @@ class SecureAppManager {
     try {
       return await instance._enableBiometric();
     } catch (e, stackTrace) {
-      logError(
-        'Lỗi bật biometric: $e\n$stackTrace',
-        functionName: 'SecureAppManager.enableBiometric',
-      );
+      logError('Lỗi bật biometric: $e\n$stackTrace', functionName: 'SecureAppManager.enableBiometric');
       return false;
     }
   }
@@ -103,10 +96,7 @@ class SecureAppManager {
     try {
       return await instance._disableBiometric();
     } catch (e, stackTrace) {
-      logError(
-        'Lỗi tắt biometric: $e\n$stackTrace',
-        functionName: 'SecureAppManager.disableBiometric',
-      );
+      logError('Lỗi tắt biometric: $e\n$stackTrace', functionName: 'SecureAppManager.disableBiometric');
       return false;
     }
   }
@@ -152,7 +142,7 @@ class SecureAppManager {
   Future<bool> _savePIN(String pin) async {
     try {
       if (pin.isEmpty || pin.length < 6) {
-        throw ArgumentError('PIN phải có ít nhất 4 ký tự');
+        throw ArgumentError('PIN phải có ít nhất 6 ký tự');
       }
 
       final pinSalt = _generateSecureRandomBytes(EncryptionConfig.saltLength);
@@ -166,19 +156,25 @@ class SecureAppManager {
         'desiredLength': EncryptionConfig.pinHashLength,
       });
 
+      // Generate random derivation salt for new user
+      final derivationSalt = _generateSecureRandomBytes(EncryptionConfig.saltLength);
+      await SecureStorage.instance.save(key: SecureStorageKey.pinDerivationSaltKey, value: base64.encode(derivationSalt));
+
       final success = await _generateAndSaveRootMasterKey(pin);
       if (!success) {
         throw Exception('Không thể tạo Root Master Key');
       }
 
-      await SecureStorage.instance.save(
-        key: SecureStorageKey.pinSaltKey,
-        value: base64.encode(pinSalt),
-      );
+      await SecureStorage.instance.save(key: SecureStorageKey.pinSaltKey, value: base64.encode(pinSalt));
       await SecureStorage.instance.save(key: SecureStorageKey.pinHashKey, value: pinHash);
-      _secureWipe(pinSalt);
 
-      logInfo('PIN đã được lưu an toàn với Argon2id hash');
+      // New users start with v2 migration
+      await SecureStorage.instance.save(key: SecureStorageKey.argon2MigrationVersion, value: 'v2');
+
+      _secureWipe(pinSalt);
+      _secureWipe(derivationSalt);
+
+      logInfo('PIN đã được lưu an toàn với Argon2id hash (v2)');
       return true;
     } catch (e, stackTrace) {
       logError('Lỗi khi lưu PIN: $e\n$stackTrace', functionName: 'SecureAppManager._savePIN');
@@ -227,13 +223,15 @@ class SecureAppManager {
         logError('PIN chưa được thiết lập', functionName: 'SecureAppManager._verifyPIN');
         return false;
       }
+      final migrationVersion = await SecureStorage.instance.read(key: SecureStorageKey.argon2MigrationVersion);
+      final isArgon2V2 = migrationVersion == 'v2';
 
       final computedHash = await compute(_hashPINInIsolate, {
         'pin': pin,
         'salt': saltBase64,
-        'memoryPowerOf2': EncryptionConfig.memoryPowerOf2,
-        'iterations': EncryptionConfig.iterations,
-        'parallelism': EncryptionConfig.parallelism,
+        'memoryPowerOf2': isArgon2V2 ? EncryptionConfig.memoryPowerOf2 : EncryptionConfig.oldMemoryPowerOf2,
+        'iterations': isArgon2V2 ? EncryptionConfig.iterations : EncryptionConfig.oldIterations,
+        'parallelism': isArgon2V2 ? EncryptionConfig.parallelism : EncryptionConfig.oldParallelism,
         'desiredLength': EncryptionConfig.pinHashLength,
       });
 
@@ -245,10 +243,7 @@ class SecureAppManager {
 
       return isValid;
     } catch (e, stackTrace) {
-      logError(
-        'Lỗi khi xác thực PIN: $e\n$stackTrace',
-        functionName: 'SecureAppManager._verifyPIN',
-      );
+      logError('Lỗi khi xác thực PIN: $e\n$stackTrace', functionName: 'SecureAppManager._verifyPIN');
       return false;
     }
   }
@@ -264,10 +259,7 @@ class SecureAppManager {
       }
 
       if (rmk == null) {
-        logError(
-          'Không thể lấy Root Master Key',
-          functionName: 'SecureAppManager._initializeSession',
-        );
+        logError('Không thể lấy Root Master Key', functionName: 'SecureAppManager._initializeSession');
         return false;
       }
 
@@ -278,10 +270,7 @@ class SecureAppManager {
       logInfo('Session đã được khởi tạo thành công');
       return true;
     } catch (e, stackTrace) {
-      logError(
-        'Lỗi khởi tạo session: $e\n$stackTrace',
-        functionName: 'SecureAppManager._initializeSession',
-      );
+      logError('Lỗi khởi tạo session: $e\n$stackTrace', functionName: 'SecureAppManager._initializeSession');
       return false;
     }
   }
@@ -305,18 +294,12 @@ class SecureAppManager {
   Future<bool> _enableBiometric() async {
     try {
       if (!_isBiometricAvailable()) {
-        logError(
-          'Thiết bị không hỗ trợ biometric',
-          functionName: 'SecureAppManager._enableBiometric',
-        );
+        logError('Thiết bị không hỗ trợ biometric', functionName: 'SecureAppManager._enableBiometric');
         return false;
       }
 
       final biometricSalt = _generateSecureRandomBytes(32);
-      await SecureStorage.instance.save(
-        key: SecureStorageKey.biometricSaltKey,
-        value: base64.encode(biometricSalt),
-      );
+      await SecureStorage.instance.save(key: SecureStorageKey.biometricSaltKey, value: base64.encode(biometricSalt));
 
       final biometricKey = _generateSecureRandomBytes(EncryptionConfig.biometricKeyLength);
       final biometricKeyHash = await compute(_hashBiometricKeyInIsolate, {
@@ -327,20 +310,14 @@ class SecureAppManager {
         'desiredLength': EncryptionConfig.biometricKeyLength,
       });
 
-      await SecureStorage.instance.save(
-        key: SecureStorageKey.biometricKeyKey,
-        value: biometricKeyHash,
-      );
+      await SecureStorage.instance.save(key: SecureStorageKey.biometricKeyKey, value: biometricKeyHash);
       await SecureStorage.instance.save(key: SecureStorageKey.biometricEnabledKey, value: 'true');
 
       await LocalAuthConfig.instance.setUseBiometric(true);
 
       final biometricDerivedKey = await _deriveBiometricKey();
       final wrappedRMKByBiometric = await _wrapKey(_rootMasterKey!, biometricDerivedKey);
-      await SecureStorage.instance.save(
-        key: SecureStorageKey.wrappedRmkBiometricKey,
-        value: wrappedRMKByBiometric,
-      );
+      await SecureStorage.instance.save(key: SecureStorageKey.wrappedRmkBiometricKey, value: wrappedRMKByBiometric);
 
       _secureWipe(biometricKey);
       _secureWipe(biometricSalt);
@@ -349,10 +326,7 @@ class SecureAppManager {
       logInfo('Biometric authentication đã được bật');
       return true;
     } catch (e, stackTrace) {
-      logError(
-        'Lỗi khi bật biometric: $e\n$stackTrace',
-        functionName: 'SecureAppManager._enableBiometric',
-      );
+      logError('Lỗi khi bật biometric: $e\n$stackTrace', functionName: 'SecureAppManager._enableBiometric');
       return false;
     }
   }
@@ -370,10 +344,7 @@ class SecureAppManager {
       logInfo('Biometric authentication đã được tắt');
       return true;
     } catch (e, stackTrace) {
-      logError(
-        'Lỗi khi tắt biometric: $e\n$stackTrace',
-        functionName: 'SecureAppManager._disableBiometric',
-      );
+      logError('Lỗi khi tắt biometric: $e\n$stackTrace', functionName: 'SecureAppManager._disableBiometric');
       return false;
     }
   }
@@ -391,6 +362,10 @@ class SecureAppManager {
         return false;
       }
 
+      // Generate new random derivation salt for new PIN
+      final newDerivationSalt = _generateSecureRandomBytes(EncryptionConfig.saltLength);
+      await SecureStorage.instance.save(key: SecureStorageKey.pinDerivationSaltKey, value: base64.encode(newDerivationSalt));
+
       final newPinDerivedKey = await _deriveKeyFromPIN(newPIN);
       final newWrappedRMK = await _wrapKey(rmk, newPinDerivedKey);
 
@@ -404,16 +379,17 @@ class SecureAppManager {
         'desiredLength': EncryptionConfig.pinHashLength,
       });
 
-      await SecureStorage.instance.save(
-        key: SecureStorageKey.pinSaltKey,
-        value: base64.encode(newPinSalt),
-      );
+      await SecureStorage.instance.save(key: SecureStorageKey.pinSaltKey, value: base64.encode(newPinSalt));
       await SecureStorage.instance.save(key: SecureStorageKey.pinHashKey, value: newPinHash);
       await SecureStorage.instance.save(key: SecureStorageKey.wrappedRmkKey, value: newWrappedRMK);
+
+      // Ensure migration flag is set (changePIN always uses v2 params)
+      await SecureStorage.instance.save(key: SecureStorageKey.argon2MigrationVersion, value: 'v2');
 
       _secureWipe(rmk);
       _secureWipe(newPinDerivedKey);
       _secureWipe(newPinSalt);
+      _secureWipe(newDerivationSalt);
 
       logInfo('PIN đã được thay đổi thành công');
       return true;
@@ -458,10 +434,7 @@ class SecureAppManager {
     try {
       return await checkLocalAuth();
     } catch (e) {
-      logError(
-        'Lỗi xác thực biometric: $e',
-        functionName: 'SecureAppManager._authenticateWithBiometric',
-      );
+      logError('Lỗi xác thực biometric: $e', functionName: 'SecureAppManager._authenticateWithBiometric');
       return false;
     }
   }
@@ -474,14 +447,9 @@ class SecureAppManager {
         return null;
       }
 
-      final wrappedRMKBase64 = await SecureStorage.instance.read(
-        key: SecureStorageKey.wrappedRmkKey,
-      );
+      final wrappedRMKBase64 = await SecureStorage.instance.read(key: SecureStorageKey.wrappedRmkKey);
       if (wrappedRMKBase64 == null) {
-        logError(
-          'Wrapped RMK không tồn tại',
-          functionName: 'SecureAppManager._getRootMasterKeyWithPIN',
-        );
+        logError('Wrapped RMK không tồn tại', functionName: 'SecureAppManager._getRootMasterKeyWithPIN');
         return null;
       }
 
@@ -491,19 +459,14 @@ class SecureAppManager {
 
       return rmk;
     } catch (e, stackTrace) {
-      logError(
-        'Lỗi khi lấy RMK với PIN: $e\n$stackTrace',
-        functionName: 'SecureAppManager._getRootMasterKeyWithPIN',
-      );
+      logError('Lỗi khi lấy RMK với PIN: $e\n$stackTrace', functionName: 'SecureAppManager._getRootMasterKeyWithPIN');
       return null;
     }
   }
 
   Future<Uint8List?> _getRootMasterKeyWithBiometric() async {
     try {
-      final wrappedRMKBase64 = await SecureStorage.instance.read(
-        key: SecureStorageKey.wrappedRmkBiometricKey,
-      );
+      final wrappedRMKBase64 = await SecureStorage.instance.read(key: SecureStorageKey.wrappedRmkBiometricKey);
       if (wrappedRMKBase64 == null) {
         return null;
       }
@@ -514,10 +477,7 @@ class SecureAppManager {
 
       return rmk;
     } catch (e, stackTrace) {
-      logError(
-        'Lỗi khi lấy RMK với biometric: $e\n$stackTrace',
-        functionName: 'SecureAppManager._getRootMasterKeyWithBiometric',
-      );
+      logError('Lỗi khi lấy RMK với biometric: $e\n$stackTrace', functionName: 'SecureAppManager._getRootMasterKeyWithBiometric');
       return null;
     }
   }
@@ -529,41 +489,106 @@ class SecureAppManager {
       final pinDerivedKey = await _deriveKeyFromPIN(pin);
       final wrappedRMKByPIN = await _wrapKey(rmk, pinDerivedKey);
 
-      await SecureStorage.instance.save(
-        key: SecureStorageKey.wrappedRmkKey,
-        value: wrappedRMKByPIN,
-      );
-      await SecureStorage.instance.save(
-        key: SecureStorageKey.rmkCreatedAtKey,
-        value: DateTime.now().toIso8601String(),
-      );
+      await SecureStorage.instance.save(key: SecureStorageKey.wrappedRmkKey, value: wrappedRMKByPIN);
+      await SecureStorage.instance.save(key: SecureStorageKey.rmkCreatedAtKey, value: DateTime.now().toIso8601String());
 
       _secureWipe(rmk);
       _secureWipe(pinDerivedKey);
 
       return true;
     } catch (e, stackTrace) {
-      logError(
-        'Lỗi tạo RMK: $e\n$stackTrace',
-        functionName: 'SecureAppManager._generateAndSaveRootMasterKey',
-      );
+      logError('Lỗi tạo RMK: $e\n$stackTrace', functionName: 'SecureAppManager._generateAndSaveRootMasterKey');
       return false;
     }
   }
 
   /// Tạo khóa dẫn xuất từ PIN
-  Future<Uint8List> _deriveKeyFromPIN(String pin) async {
-    final derivationSalt = _generateDeterministicSalt('pin_key_derivation_v2');
+  /// Nếu đã migrate → dùng random salt (stored), Argon2 v2 params
+  /// Nếu chưa migrate → dùng deterministic salt, Argon2 v1 params
+  Future<Uint8List> _deriveKeyFromPIN(String pin, {bool useOldParams = false}) async {
+    Uint8List derivationSalt;
+
+    if (useOldParams) {
+      // Old: deterministic salt + old Argon2 params
+      derivationSalt = _generateDeterministicSalt('pin_key_derivation_v2');
+    } else {
+      // New: random salt from secure storage
+      final storedSalt = await SecureStorage.instance.read(key: SecureStorageKey.pinDerivationSaltKey);
+      if (storedSalt != null) {
+        derivationSalt = base64.decode(storedSalt);
+      } else {
+        // Fallback to old deterministic salt (pre-migration)
+        derivationSalt = _generateDeterministicSalt('pin_key_derivation_v2');
+        useOldParams = true;
+      }
+    }
+
     final argon2Output = await compute(_deriveKeyInIsolate, {
       'pin': pin,
       'salt': base64.encode(derivationSalt),
-      'memoryPowerOf2': EncryptionConfig.memoryPowerOf2,
-      'iterations': EncryptionConfig.iterations,
-      'parallelism': EncryptionConfig.parallelism,
+      'memoryPowerOf2': useOldParams ? EncryptionConfig.oldMemoryPowerOf2 : EncryptionConfig.memoryPowerOf2,
+      'iterations': useOldParams ? EncryptionConfig.oldIterations : EncryptionConfig.iterations,
+      'parallelism': useOldParams ? EncryptionConfig.oldParallelism : EncryptionConfig.parallelism,
       'desiredLength': 32,
     });
 
+    _secureWipe(derivationSalt);
     return base64.decode(argon2Output);
+  }
+
+  /// Migrate Argon2 params from v1 → v2 (stronger params + random salt)
+  Future<void> _migrateArgon2ParamsIfNeeded(String pin) async {
+    try {
+      final migrationVersion = await SecureStorage.instance.read(key: SecureStorageKey.argon2MigrationVersion);
+      if (migrationVersion == 'v2') return; // Already migrated
+
+      logInfo('Starting Argon2 migration v1 → v2...');
+
+      // 1. Get RMK using old params (already in memory from auth)
+      final rmk = _rootMasterKey;
+      if (rmk == null) {
+        logError('RMK not available for migration', functionName: '_migrateArgon2ParamsIfNeeded');
+        return;
+      }
+
+      // 2. Re-hash PIN with new Argon2 params + new random hash salt
+      final newPinSalt = _generateSecureRandomBytes(EncryptionConfig.saltLength);
+      final newPinHash = await compute(_hashPINInIsolate, {
+        'pin': pin,
+        'salt': base64.encode(newPinSalt),
+        'memoryPowerOf2': EncryptionConfig.memoryPowerOf2,
+        'iterations': EncryptionConfig.iterations,
+        'parallelism': EncryptionConfig.parallelism,
+        'desiredLength': EncryptionConfig.pinHashLength,
+      });
+
+      // 3. Generate random derivation salt + re-derive key with new params
+      final newDerivationSalt = _generateSecureRandomBytes(EncryptionConfig.saltLength);
+      await SecureStorage.instance.save(key: SecureStorageKey.pinDerivationSaltKey, value: base64.encode(newDerivationSalt));
+
+      // 4. Re-derive PIN key with new Argon2 params + random salt
+      final newPinDerivedKey = await _deriveKeyFromPIN(pin);
+
+      // 5. Re-wrap RMK with new key
+      final newWrappedRMK = await _wrapKey(rmk, newPinDerivedKey);
+
+      // 6. Save all new values atomically (as much as possible)
+      await SecureStorage.instance.save(key: SecureStorageKey.pinSaltKey, value: base64.encode(newPinSalt));
+      await SecureStorage.instance.save(key: SecureStorageKey.pinHashKey, value: newPinHash);
+      await SecureStorage.instance.save(key: SecureStorageKey.wrappedRmkKey, value: newWrappedRMK);
+
+      // 7. Set migration flag LAST (so partial failure retries)
+      await SecureStorage.instance.save(key: SecureStorageKey.argon2MigrationVersion, value: 'v2');
+
+      _secureWipe(newPinSalt);
+      _secureWipe(newDerivationSalt);
+      _secureWipe(newPinDerivedKey);
+
+      logInfo('Argon2 migration v1 → v2 complete');
+    } catch (e, stackTrace) {
+      // Migration failure is non-fatal — old params still work
+      logError('Argon2 migration failed (will retry next login): $e\n$stackTrace', functionName: '_migrateArgon2ParamsIfNeeded');
+    }
   }
 
   Future<Uint8List> _deriveBiometricKey() async {
@@ -602,13 +627,7 @@ class SecureAppManager {
 
       final salt = base64.decode(saltBase64);
 
-      final argon2Params = pc.Argon2Parameters(
-        pc.Argon2Parameters.ARGON2_id,
-        salt,
-        iterations: iterations,
-        memoryPowerOf2: memoryPowerOf2,
-        desiredKeyLength: desiredLength,
-      );
+      final argon2Params = pc.Argon2Parameters(pc.Argon2Parameters.ARGON2_id, salt, iterations: iterations, memoryPowerOf2: memoryPowerOf2, desiredKeyLength: desiredLength);
 
       final generator = pc.Argon2BytesGenerator();
       generator.init(argon2Params);
@@ -631,13 +650,7 @@ class SecureAppManager {
       final key = base64.decode(keyBase64);
       final salt = base64.decode(saltBase64);
 
-      final argon2Params = pc.Argon2Parameters(
-        pc.Argon2Parameters.ARGON2_id,
-        salt,
-        iterations: iterations,
-        memoryPowerOf2: memoryPowerOf2,
-        desiredKeyLength: desiredLength,
-      );
+      final argon2Params = pc.Argon2Parameters(pc.Argon2Parameters.ARGON2_id, salt, iterations: iterations, memoryPowerOf2: memoryPowerOf2, desiredKeyLength: desiredLength);
 
       final generator = pc.Argon2BytesGenerator();
       generator.init(argon2Params);
@@ -659,13 +672,7 @@ class SecureAppManager {
 
       final salt = base64.decode(saltBase64);
 
-      final argon2Params = pc.Argon2Parameters(
-        pc.Argon2Parameters.ARGON2_id,
-        salt,
-        iterations: iterations,
-        memoryPowerOf2: memoryPowerOf2,
-        desiredKeyLength: desiredLength,
-      );
+      final argon2Params = pc.Argon2Parameters(pc.Argon2Parameters.ARGON2_id, salt, iterations: iterations, memoryPowerOf2: memoryPowerOf2, desiredKeyLength: desiredLength);
 
       final generator = pc.Argon2BytesGenerator();
       generator.init(argon2Params);
@@ -684,14 +691,7 @@ class SecureAppManager {
 
       final encrypted = encrypter.encrypt(String.fromCharCodes(keyToWrap), iv: enc.IV(iv));
 
-      final package = {
-        'iv': base64.encode(iv),
-        'data': encrypted.base64,
-        'algorithm': 'AES-256-GCM',
-        'version': '2.0',
-        'type': 'WRAP',
-        'timestamp': DateTime.now().toIso8601String(),
-      };
+      final package = {'iv': base64.encode(iv), 'data': encrypted.base64, 'algorithm': 'AES-256-GCM', 'version': '2.0', 'type': 'WRAP', 'timestamp': DateTime.now().toIso8601String()};
 
       return json.encode(package);
     } catch (e) {
@@ -729,11 +729,12 @@ class SecureAppManager {
   }
 
   bool _constantTimeEquals(String a, String b) {
-    if (a.length != b.length) return false;
-
-    var result = 0;
-    for (int i = 0; i < a.length; i++) {
-      result |= a.codeUnitAt(i) ^ b.codeUnitAt(i);
+    final maxLen = a.length > b.length ? a.length : b.length;
+    var result = a.length ^ b.length; // penalize length mismatch
+    for (int i = 0; i < maxLen; i++) {
+      final ca = i < a.length ? a.codeUnitAt(i) : 0;
+      final cb = i < b.length ? b.codeUnitAt(i) : 0;
+      result |= ca ^ cb;
     }
     return result == 0;
   }

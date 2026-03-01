@@ -34,9 +34,7 @@ class EncryptionConfig {
   static DateTime? _performanceTestTime;
 
   static DevicePerformance get devicePerformance {
-    if (_cachedPerformance != null &&
-        _performanceTestTime != null &&
-        DateTime.now().difference(_performanceTestTime!).inHours < 1) {
+    if (_cachedPerformance != null && _performanceTestTime != null && DateTime.now().difference(_performanceTestTime!).inHours < 1) {
       return _cachedPerformance!;
     }
     _cachedPerformance = _detectDevicePerformance();
@@ -60,9 +58,15 @@ class EncryptionConfig {
     }
   }
 
-  static int memoryPowerOf2 = 15;
-  static int iterations = 2;
+  // Argon2 params — CURRENT (v2)
+  static int memoryPowerOf2 = 16; // 64 KB
+  static int iterations = 3;
   static int parallelism = 1;
+
+  // Argon2 params — OLD (v1, frozen for migration)
+  static const int oldMemoryPowerOf2 = 15; // 32 KB
+  static const int oldIterations = 2;
+  static const int oldParallelism = 1;
 
   static const int saltLength = 32;
   static const int rmkLength = 32;

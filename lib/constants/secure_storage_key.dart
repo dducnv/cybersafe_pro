@@ -47,4 +47,11 @@ class SecureStorageKey {
   static const String biometricKeyKey = '@biometric_key_v2';
   static const String biometricSaltKey = '@biometric_salt_v2';
   static const String authVersionKey = '@auth_version_v2';
+
+  // Database migration keys
+  static const String dbKdfMigrated = '@db_kdf_migrated_256k';
+
+  // Argon2 migration keys
+  static const String argon2MigrationVersion = '@argon2_migration_version';
+  static const String pinDerivationSaltKey = '@pin_derivation_salt_v2';
 }

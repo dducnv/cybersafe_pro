@@ -11,10 +11,11 @@ import 'package:provider/provider.dart';
 
 class CreatePinCodeWidget extends StatefulWidget {
   final GlobalKey<AppPinCodeFieldsState> appPinCodeCreateKey;
+  final GlobalKey<AppPinCodeFieldsState>? appPinCodeConfirmKey;
   final GlobalKey<FormState> formCreateKey;
   final PageController pageController;
   final bool isChangePin;
-  const CreatePinCodeWidget({super.key, required this.appPinCodeCreateKey, required this.formCreateKey, required this.pageController, this.isChangePin = false});
+  const CreatePinCodeWidget({super.key, required this.appPinCodeCreateKey, this.appPinCodeConfirmKey, required this.formCreateKey, required this.pageController, this.isChangePin = false});
 
   @override
   State<CreatePinCodeWidget> createState() => _CreatePinCodeWidgetState();
@@ -34,10 +35,13 @@ class _CreatePinCodeWidgetState extends State<CreatePinCodeWidget> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(widget.isChangePin ? context.trLogin(LoginText.changePinCode) : context.trCreatePinCode(LoginText.createPinCode), style: CustomTextStyle.regular(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+          Text(
+            widget.isChangePin ? context.trLogin(LoginText.changePinCode) : context.trCreatePinCode(LoginText.createPinCode),
+            style: CustomTextStyle.regular(fontSize: 20.sp, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 20),
           Container(
-            constraints: const BoxConstraints(maxWidth: 300),
+            constraints: const BoxConstraints(maxWidth: 350),
             child: AppPinCodeFields(
               key: widget.appPinCodeCreateKey,
               formKey: widget.formCreateKey,
@@ -50,7 +54,10 @@ class _CreatePinCodeWidgetState extends State<CreatePinCodeWidget> {
               },
               autoFocus: true,
               validator: (value) {
-                if (value!.length < 6) {
+                if (value == null || value.isEmpty) {
+                  return context.trSafe(LoginText.pinCodeRequired);
+                }
+                if (value.length < 6) {
                   return context.trSafe(LoginText.pinCodeRequired);
                 }
                 return null;
@@ -76,14 +83,16 @@ class _CreatePinCodeWidgetState extends State<CreatePinCodeWidget> {
     );
   }
 
-  _handleSubmit() {
+  void _handleSubmit() {
     widget.formCreateKey.currentState!.validate();
     if (pinCodeController.text.length < 6) {
       widget.appPinCodeCreateKey.currentState!.triggerErrorAnimation();
     }
     if (pinCodeController.text.isNotEmpty && context.mounted) {
       Provider.of<LocalAuthProvider>(context, listen: false).setPinCodeToConfirm(pinCodeController.text);
-      widget.pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+      widget.pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut).then((_) {
+        widget.appPinCodeConfirmKey?.currentState?.requestFocus();
+      });
     }
   }
 }

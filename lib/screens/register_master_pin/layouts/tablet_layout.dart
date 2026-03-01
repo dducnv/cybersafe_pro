@@ -10,15 +10,9 @@ class TabletLayout extends StatefulWidget {
   final GlobalKey<FormState> formCreateKey;
   final GlobalKey<FormState> formConfirmKey;
   final bool? isChangePin;
-  
-  const TabletLayout({
-    super.key, 
-    required this.appPinCodeCreateKey, 
-    required this.appPinCodeConfirmKey, 
-    required this.formCreateKey, 
-    required this.formConfirmKey, 
-    this.isChangePin
-  });
+  final String? oldPin;
+
+  const TabletLayout({super.key, required this.appPinCodeCreateKey, required this.appPinCodeConfirmKey, required this.formCreateKey, required this.formConfirmKey, this.isChangePin, this.oldPin});
 
   @override
   State<TabletLayout> createState() => _TabletLayoutState();
@@ -26,19 +20,13 @@ class TabletLayout extends StatefulWidget {
 
 class _TabletLayoutState extends State<TabletLayout> {
   final PageController pageController = PageController();
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.isChangePin == true 
-        ? AppBar(
-            elevation: 0,
-            backgroundColor: Theme.of(context).colorScheme.surface,
-            scrolledUnderElevation: 0,
-            title: const Text("Thay đổi mật khẩu chính"),
-            centerTitle: true,
-          ) 
-        : null,
+      appBar: widget.isChangePin == true
+          ? AppBar(elevation: 0, backgroundColor: Theme.of(context).colorScheme.surface, scrolledUnderElevation: 0, title: const Text("Thay đổi mật khẩu chính"), centerTitle: true)
+          : null,
       body: LayoutBuilder(
         builder: (context, constraints) {
           return Center(
@@ -52,14 +40,18 @@ class _TabletLayoutState extends State<TabletLayout> {
                     children: [
                       CreatePinCodeWidget(
                         appPinCodeCreateKey: widget.appPinCodeCreateKey,
+                        appPinCodeConfirmKey: widget.appPinCodeConfirmKey,
                         formCreateKey: widget.formCreateKey,
                         pageController: pageController,
                         isChangePin: widget.isChangePin ?? false,
                       ),
                       ConfirmPinCodeWidget(
+                        appPinCodeCreateKey: widget.appPinCodeCreateKey,
                         appPinCodeConfirmKey: widget.appPinCodeConfirmKey,
                         formConfirmKey: widget.formConfirmKey,
                         pageController: pageController,
+                        isChangePin: widget.isChangePin ?? false,
+                        oldPin: widget.oldPin,
                       ),
                     ],
                   ),

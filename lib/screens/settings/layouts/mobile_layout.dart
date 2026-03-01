@@ -34,10 +34,7 @@ class SettingMobileLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          context.appLocale.settingsLocale.getText(SettingsLocale.settings),
-          style: CustomTextStyle.regular(fontSize: 18.sp),
-        ),
+        title: Text(context.appLocale.settingsLocale.getText(SettingsLocale.settings), style: CustomTextStyle.regular(fontSize: 18.sp)),
         backgroundColor: Theme.of(context).colorScheme.surface,
         scrolledUnderElevation: 0,
         elevation: 0,
@@ -53,10 +50,7 @@ class SettingMobileLayout extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(left: 16),
-                  child: Text(
-                    context.appLocale.settingsLocale.getText(SettingsLocale.general),
-                    style: settingTitleCardStyle,
-                  ),
+                  child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.general), style: settingTitleCardStyle),
                 ),
                 const SizedBox(height: 5),
                 const SetThemeModeWidget(),
@@ -67,10 +61,7 @@ class SettingMobileLayout extends StatelessWidget {
                 const SizedBox(height: 16),
                 Padding(
                   padding: const EdgeInsets.only(left: 16),
-                  child: Text(
-                    context.appLocale.settingsLocale.getText(SettingsLocale.security),
-                    style: settingTitleCardStyle,
-                  ),
+                  child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.security), style: settingTitleCardStyle),
                 ),
                 const SizedBox(height: 5),
                 const UseBiometricLogin(),
@@ -85,20 +76,11 @@ class SettingMobileLayout extends StatelessWidget {
                           showBiometric: false,
                           isFromDeleteData: true,
                           title: context.trSafe(OtpText.enterOldPin),
-                          callBackLoginCallback:
-                              ({
-                                bool? isLoginSuccess,
-                                String? pin,
-                                GlobalKey<AppPinCodeFieldsState>? appPinCodeKey,
-                              }) async {
-                                if (isLoginSuccess == true && pin != null) {
-                                  AppRoutes.navigateToReplacement(
-                                    context,
-                                    AppRoutes.registerMasterPin,
-                                    arguments: {"isChangePin": true, "oldPin": pin},
-                                  );
-                                }
-                              },
+                          callBackLoginCallback: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
+                            if (isLoginSuccess == true && pin != null) {
+                              AppRoutes.navigateToReplacement(context, AppRoutes.registerMasterPin, arguments: {"isChangePin": true, "oldPin": pin});
+                            }
+                          },
                         ),
                       ),
                     );
@@ -111,10 +93,7 @@ class SettingMobileLayout extends StatelessWidget {
                     children: [
                       Consumer<AppProvider>(
                         builder: (context, provider, child) {
-                          return Text(
-                            provider.isOpenAutoLock ? "${provider.timeAutoLock}'" : "none",
-                            style: settingTitleItemStyle,
-                          );
+                          return Text(provider.isOpenAutoLock ? "${provider.timeAutoLock}'" : "none", style: settingTitleItemStyle);
                         },
                       ),
                       const SizedBox(width: 5),
@@ -128,16 +107,11 @@ class SettingMobileLayout extends StatelessWidget {
                 const SizedBox(height: 16),
                 Padding(
                   padding: const EdgeInsets.only(left: 16),
-                  child: Text(
-                    context.appLocale.settingsLocale.getText(SettingsLocale.backup),
-                    style: settingTitleCardStyle,
-                  ),
+                  child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.backup), style: settingTitleCardStyle),
                 ),
                 const SizedBox(height: 5),
                 SettingItemWidget(
-                  title: context.appLocale.settingsLocale.getText(
-                    SettingsLocale.importDataFromBrowser,
-                  ),
+                  title: context.appLocale.settingsLocale.getText(SettingsLocale.importDataFromBrowser),
                   icon: Icons.browser_updated_rounded,
                   onTap: () => _importDataFromBrowser(context),
                 ),
@@ -167,14 +141,8 @@ class SettingMobileLayout extends StatelessWidget {
                 const SizedBox(height: 5),
                 SettingItemWidget(
                   title: context.appLocale.settingsLocale.getText(SettingsLocale.deleteData),
-                  suffix: Icon(
-                    Icons.delete,
-                    color: Theme.of(context).colorScheme.error,
-                    size: 24.sp,
-                  ),
-                  titleStyle: settingTitleItemStyle.copyWith(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
+                  suffix: Icon(Icons.delete, color: Theme.of(context).colorScheme.error, size: 24.sp),
+                  titleStyle: settingTitleItemStyle.copyWith(color: Theme.of(context).colorScheme.error),
                   onTap: () async {
                     _deleteAllDataPopup(context);
                   },
@@ -206,22 +174,14 @@ class SettingMobileLayout extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
-                        child: Text(
-                          context.appLocale.settingsLocale.getText(SettingsLocale.autoLock),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: settingTitleCardStyle,
-                        ),
+                        child: Text(context.appLocale.settingsLocale.getText(SettingsLocale.autoLock), maxLines: 2, overflow: TextOverflow.ellipsis, style: settingTitleCardStyle),
                       ),
                       Consumer<AppProvider>(
                         builder: (context, provider, widget) {
                           return AppCustomSwitch(
                             value: provider.isOpenAutoLock,
                             onChanged: (value) {
-                              context.read<AppProvider>().setAutoLock(
-                                value,
-                                context.read<AppProvider>().timeAutoLock,
-                              );
+                              context.read<AppProvider>().setAutoLock(value, context.read<AppProvider>().timeAutoLock);
                             },
                           );
                         },
@@ -239,11 +199,7 @@ class SettingMobileLayout extends StatelessWidget {
                               haptics: true,
                               zeroPad: true,
                               value: provider.timeAutoLock < 1 ? 1 : provider.timeAutoLock,
-                              selectedTextStyle: CustomTextStyle.regular(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontSize: 25.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              selectedTextStyle: CustomTextStyle.regular(color: Theme.of(context).colorScheme.primary, fontSize: 25.sp, fontWeight: FontWeight.bold),
                               itemCount: 5,
                               minValue: 1,
                               maxValue: 30,
@@ -251,10 +207,7 @@ class SettingMobileLayout extends StatelessWidget {
                               itemHeight: 70.h,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  width: 2,
-                                ),
+                                border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2),
                               ),
                               axis: Axis.horizontal,
                               textMapper: (numberText) {
@@ -265,13 +218,7 @@ class SettingMobileLayout extends StatelessWidget {
                               },
                             ),
                           ),
-                          provider.isOpenAutoLock
-                              ? SizedBox(height: 70.h, width: double.infinity)
-                              : SizedBox(
-                                  height: 70.h,
-                                  width: double.infinity,
-                                  child: const ModalBarrier(dismissible: true),
-                                ),
+                          provider.isOpenAutoLock ? SizedBox(height: 70.h, width: double.infinity) : SizedBox(height: 70.h, width: double.infinity, child: const ModalBarrier(dismissible: true)),
                         ],
                       );
                     },
@@ -280,10 +227,7 @@ class SettingMobileLayout extends StatelessWidget {
                   CustomButtonWidget(
                     kMargin: 0,
                     onPressed: () {
-                      context.read<AppProvider>().setAutoLock(
-                        context.read<AppProvider>().isOpenAutoLock,
-                        context.read<AppProvider>().timeAutoLock,
-                      );
+                      context.read<AppProvider>().setAutoLock(context.read<AppProvider>().isOpenAutoLock, context.read<AppProvider>().timeAutoLock);
                       Navigator.pop(context);
                     },
                     text: context.appLocale.settingsLocale.getText(SettingsLocale.confirm),
@@ -308,53 +252,37 @@ class SettingMobileLayout extends StatelessWidget {
           return LoginMasterPassword(
             showBiometric: false,
             isFromRestore: true,
-            callBackLoginCallback:
-                ({
-                  bool? isLoginSuccess,
-                  String? pin,
-                  GlobalKey<AppPinCodeFieldsState>? appPinCodeKey,
-                }) async {
-                  if (isLoginSuccess == true &&
-                      pin != null &&
-                      GlobalKeys.appRootNavigatorKey.currentContext != null) {
-                    try {
-                      showLoadingDialog(
-                        context: GlobalKeys.appRootNavigatorKey.currentContext!,
-                        loadingText: ValueNotifier(
-                          context.trSafe(SettingsLocale.waitingNotification),
-                        ),
-                      );
-                      await Future.delayed(const Duration(milliseconds: 50));
-                      if (!context.mounted) return;
-                      final result = await DataManagerService.restoreBackup(
-                        context: context,
-                        pin: pin,
-                        filePath: filePath,
-                      );
-                      if (!context.mounted) return;
-                      if (result) {
-                        hideLoadingDialog();
-                        Navigator.of(context).pop(true);
-                        showToastSuccess("Data restore successfully", context: context);
-                        context.read<HomeProvider>().refreshData();
-                      }
-                    } catch (e) {
-                      if (!context.mounted) return;
-                      if (e.toString().contains("KEY_INVALID")) {
-                        showToastError("Data restore failed, pin is incorrect", context: context);
-                      } else {
-                        showToastError("Data restore failed, file is not valid", context: context);
-                      }
-                    } finally {
-                      hideLoadingDialog();
-                    }
-                  } else {
-                    // Trường hợp không nhập PIN hoặc hủy
-                    if (context.mounted) {
-                      showToastWarning("Data restore canceled", context: context);
-                    }
+            callBackLoginCallback: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
+              if (isLoginSuccess == true && pin != null && GlobalKeys.appRootNavigatorKey.currentContext != null) {
+                try {
+                  showLoadingDialog(context: GlobalKeys.appRootNavigatorKey.currentContext!, loadingText: ValueNotifier(context.trSafe(SettingsLocale.waitingNotification)));
+                  await Future.delayed(const Duration(milliseconds: 50));
+                  if (!context.mounted) return;
+                  final result = await DataManagerService.restoreBackup(context: context, pin: pin, filePath: filePath);
+                  if (!context.mounted) return;
+                  if (result) {
+                    hideLoadingDialog();
+                    Navigator.of(context).pop(true);
+                    showToastSuccess("Data restore successfully", context: context);
+                    context.read<HomeProvider>().refreshData();
                   }
-                },
+                } catch (e) {
+                  if (!context.mounted) return;
+                  if (e.toString().contains("KEY_INVALID")) {
+                    showToastError("Data restore failed, pin is incorrect", context: context);
+                  } else {
+                    showToastError("Data restore failed, file is not valid", context: context);
+                  }
+                } finally {
+                  hideLoadingDialog();
+                }
+              } else {
+                // Trường hợp không nhập PIN hoặc hủy
+                if (context.mounted) {
+                  showToastWarning("Data restore canceled", context: context);
+                }
+              }
+            },
           );
         },
       ),
@@ -372,17 +300,12 @@ class SettingMobileLayout extends StatelessWidget {
           return LoginMasterPassword(
             isFromBackup: true,
             showBiometric: false,
-            callBackLoginCallback:
-                ({
-                  bool? isLoginSuccess,
-                  String? pin,
-                  GlobalKey<AppPinCodeFieldsState>? appPinCodeKey,
-                }) async {
-                  if (isLoginSuccess == true && pin != null) {
-                    Navigator.of(context).pop();
-                    _onBackUp(context, pin);
-                  }
-                },
+            callBackLoginCallback: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
+              if (isLoginSuccess == true && pin != null) {
+                Navigator.of(context).pop();
+                _onBackUp(context, pin);
+              }
+            },
           );
         },
       ),
@@ -391,14 +314,8 @@ class SettingMobileLayout extends StatelessWidget {
 
   Future<void> _onBackUp(BuildContext context, String pin) async {
     try {
-      showLoadingDialog(
-        context: GlobalKeys.appRootNavigatorKey.currentContext!,
-        loadingText: ValueNotifier(context.trSafe(SettingsLocale.waitingNotification)),
-      );
-      final result = await DataManagerService.backupData(
-        GlobalKeys.appRootNavigatorKey.currentContext!,
-        pin,
-      );
+      showLoadingDialog(context: GlobalKeys.appRootNavigatorKey.currentContext!, loadingText: ValueNotifier(context.trSafe(SettingsLocale.waitingNotification)));
+      final result = await DataManagerService.backupData(GlobalKeys.appRootNavigatorKey.currentContext!, pin);
       if (!context.mounted) return;
       if (result) {
         showToastSuccess("Backup data success", context: context);
@@ -414,10 +331,7 @@ class SettingMobileLayout extends StatelessWidget {
 
   void _importDataFromBrowser(BuildContext context) async {
     try {
-      showLoadingDialog(
-        context: GlobalKeys.appRootNavigatorKey.currentContext!,
-        loadingText: ValueNotifier(context.trSafe(SettingsLocale.waitingNotification)),
-      );
+      showLoadingDialog(context: GlobalKeys.appRootNavigatorKey.currentContext!, loadingText: ValueNotifier(context.trSafe(SettingsLocale.waitingNotification)));
       final result = await DataManagerService.importDataFromBrowser();
       if (context.mounted) hideLoadingDialog();
       if (!context.mounted) return;
@@ -450,39 +364,34 @@ class SettingMobileLayout extends StatelessWidget {
           builder: (context) => LoginMasterPassword(
             showBiometric: false,
             isFromDeleteData: true,
-            callBackLoginCallback:
-                ({
-                  bool? isLoginSuccess,
-                  String? pin,
-                  GlobalKey<AppPinCodeFieldsState>? appPinCodeKey,
-                }) async {
-                  if (isLoginSuccess == true && pin != null) {
-                    try {
-                      final success = await DataManagerService.deleteAllData();
+            callBackLoginCallback: ({bool? isLoginSuccess, String? pin, GlobalKey<AppPinCodeFieldsState>? appPinCodeKey}) async {
+              if (isLoginSuccess == true && pin != null) {
+                try {
+                  final success = await DataManagerService.deleteAllData();
 
-                      if (success && context.mounted) {
-                        // Làm mới dữ liệu
-                        if (context.mounted) await context.read<HomeProvider>().refreshData();
-                        showToastSuccess("Delete data successfully", context: context);
-                      } else {
-                        if (context.mounted) {
-                          Navigator.of(context).pop(); // Đóng màn hình login
-                          showToastError("Delete data failed", context: context);
-                        }
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        Navigator.of(context).pop(); // Đóng màn hình login
-                        showToastError("Delete data failed", context: context);
-                      }
-                    }
+                  if (success && context.mounted) {
+                    // Làm mới dữ liệu
+                    if (context.mounted) await context.read<HomeProvider>().refreshData();
+                    showToastSuccess("Delete data successfully", context: context);
                   } else {
-                    // Trường hợp hủy hoặc login thất bại
                     if (context.mounted) {
                       Navigator.of(context).pop(); // Đóng màn hình login
+                      showToastError("Delete data failed", context: context);
                     }
                   }
-                },
+                } catch (e) {
+                  if (context.mounted) {
+                    Navigator.of(context).pop(); // Đóng màn hình login
+                    showToastError("Delete data failed", context: context);
+                  }
+                }
+              } else {
+                // Trường hợp hủy hoặc login thất bại
+                if (context.mounted) {
+                  Navigator.of(context).pop(); // Đóng màn hình login
+                }
+              }
+            },
           ),
         ),
       );

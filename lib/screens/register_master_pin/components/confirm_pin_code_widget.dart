@@ -21,6 +21,7 @@ import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:provider/provider.dart';
 
 class ConfirmPinCodeWidget extends StatefulWidget {
+  final GlobalKey<AppPinCodeFieldsState>? appPinCodeCreateKey;
   final GlobalKey<AppPinCodeFieldsState> appPinCodeConfirmKey;
   final GlobalKey<FormState> formConfirmKey;
   final PageController pageController;
@@ -28,6 +29,7 @@ class ConfirmPinCodeWidget extends StatefulWidget {
   final String? oldPin;
   const ConfirmPinCodeWidget({
     super.key,
+    this.appPinCodeCreateKey,
     required this.appPinCodeConfirmKey,
     required this.formConfirmKey,
     required this.pageController,
@@ -67,7 +69,7 @@ class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
           ),
           const SizedBox(height: 20),
           Container(
-            constraints: const BoxConstraints(maxWidth: 300),
+            constraints: const BoxConstraints(maxWidth: 350),
             child: AppPinCodeFields(
               key: widget.appPinCodeConfirmKey,
               formKey: widget.formConfirmKey,
@@ -106,24 +108,15 @@ class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
     );
   }
 
-  _handleSubmit() async {
+  Future<void> _handleSubmit() async {
     widget.formConfirmKey.currentState!.validate();
-    bool isVerified = Provider.of<LocalAuthProvider>(
-      context,
-      listen: false,
-    ).verifyRegisterPinCode(pinCodeController.text);
+    bool isVerified = Provider.of<LocalAuthProvider>(context, listen: false).verifyRegisterPinCode(pinCodeController.text);
     if (isVerified && pinCodeController.text.isNotEmpty && context.mounted) {
-      showLoadingDialog(
-        loadingText:
-            !widget.isChangePin ? ValueNotifier(context.trSafe(OnboardingText.initDatabase)) : null,
-      );
+      showLoadingDialog(loadingText: !widget.isChangePin ? ValueNotifier(context.trSafe(OnboardingText.initDatabase)) : null);
       if (!widget.isChangePin) {
         await Provider.of<LocalAuthProvider>(context, listen: false).savePinCode();
       } else {
-        await Provider.of<LocalAuthProvider>(
-          context,
-          listen: false,
-        ).changePinCode(widget.oldPin ?? "");
+        await Provider.of<LocalAuthProvider>(context, listen: false).changePinCode(widget.oldPin ?? "");
       }
 
       SecureApplicationUtil.instance.unpause();
@@ -141,18 +134,13 @@ class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
     } else {
       timeCorrect++;
       widget.appPinCodeConfirmKey.currentState!.triggerErrorAnimation();
-      showToastWarning(
-        context.trSafe(LoginText.pinCodeNotMatch),
-        context: context,
-        position: StyledToastPosition.top,
-      );
+      showToastWarning(context.trSafe(LoginText.pinCodeNotMatch), context: context, position: StyledToastPosition.top);
 
       if (timeCorrect >= 1) {
-        focusNode.dispose();
-        widget.pageController.previousPage(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
+        focusNode.unfocus();
+        widget.pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut).then((_) {
+          widget.appPinCodeCreateKey?.currentState?.requestFocus();
+        });
       }
     }
   }

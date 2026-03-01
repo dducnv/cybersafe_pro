@@ -35,8 +35,6 @@ class KeyManager {
   final Map<String, CachedKey> _keyCache = {};
   final Map<String, CachedKey> _derivedKeyCache = {};
   Timer? _cacheCleanupTimer;
-  int _failedAttempts = 0;
-  DateTime? _lockoutUntil;
 
   static Future<String> getKey(KeyType type) async {
     ArgumentError.checkNotNull(type, 'type');
@@ -47,12 +45,7 @@ class KeyManager {
     return await instance._getDerivedKey(type, context, purpose);
   }
 
-  static Future<Map<String, String>> getDerivedKeys(
-    KeyType type,
-    String context, {
-    final String? key,
-    List<String> purposes = const ['aes', 'hmac'],
-  }) async {
+  static Future<Map<String, String>> getDerivedKeys(KeyType type, String context, {final String? key, List<String> purposes = const ['aes', 'hmac']}) async {
     return await instance._getDerivedKeys(type, context, purposes, key);
   }
 
@@ -96,7 +89,7 @@ class KeyManager {
       final key = base64.encode(encryptionKey);
       _keyCache[cacheKey] = CachedKey(key);
       _monitorCache();
-      _failedAttempts = 0;
+      await _secureStorage.delete(key: SecureStorageKey.loginFailCount);
       return key;
     }, functionName: "_getEncryptionKey");
   }
@@ -113,10 +106,7 @@ class KeyManager {
       await _saveEncryptionKey(keyId, newKey, rootMasterKey);
       return newKey;
     } catch (e, stackTrace) {
-      logError(
-        '❌ Lỗi tạo/lấy encryption key: $e\n$stackTrace',
-        functionName: 'KeyManager._createOrGetEncryptionKey',
-      );
+      logError('❌ Lỗi tạo/lấy encryption key: $e\n$stackTrace', functionName: 'KeyManager._createOrGetEncryptionKey');
       return null;
     }
   }
@@ -124,8 +114,6 @@ class KeyManager {
   Future<Uint8List?> _getStoredEncryptionKey(String keyId, Uint8List rootMasterKey) async {
     try {
       final wrappedKeyData = await _secureStorage.read(key: keyId);
-
-      logInfo('wrappedKeyData $keyId ========= $wrappedKeyData');
       if (wrappedKeyData == null) {
         return null;
       }
@@ -135,10 +123,7 @@ class KeyManager {
         return base64.decode(wrappedKeyData);
       }
     } catch (e) {
-      logError(
-        'Lỗi lấy stored encryption key: $e',
-        functionName: 'KeyManager._getStoredEncryptionKey',
-      );
+      logError('Lỗi lấy stored encryption key: $e', functionName: 'KeyManager._getStoredEncryptionKey');
       return null;
     }
   }
@@ -148,10 +133,7 @@ class KeyManager {
       final wrappedKey = await _wrapKey(key, rootMasterKey);
       await _secureStorage.save(key: keyId, value: wrappedKey);
     } catch (e, stackTrace) {
-      logError(
-        '❌ Lỗi lưu encryption key: $e\n$stackTrace',
-        functionName: 'KeyManager._saveEncryptionKey',
-      );
+      logError('❌ Lỗi lưu encryption key: $e\n$stackTrace', functionName: 'KeyManager._saveEncryptionKey');
     }
   }
 
@@ -159,12 +141,7 @@ class KeyManager {
     try {
       final package = json.decode(keyData) as Map<String, dynamic>;
 
-      final hasRequiredFields =
-          package.containsKey('iv') &&
-          package.containsKey('data') &&
-          package.containsKey('algorithm') &&
-          package.containsKey('version') &&
-          package.containsKey('type');
+      final hasRequiredFields = package.containsKey('iv') && package.containsKey('data') && package.containsKey('algorithm') && package.containsKey('version') && package.containsKey('type');
 
       if (!hasRequiredFields) {
         return false;
@@ -196,12 +173,7 @@ class KeyManager {
   }
 
   /// Lấy nhiều derived keys
-  Future<Map<String, String>> _getDerivedKeys(
-    KeyType type,
-    String context,
-    List<String> purposes,
-    String? key,
-  ) async {
+  Future<Map<String, String>> _getDerivedKeys(KeyType type, String context, List<String> purposes, String? key) async {
     final masterKey = key ?? await _getEncryptionKey(type);
     final derivedKeys = <String, String>{};
 
@@ -212,12 +184,7 @@ class KeyManager {
     return derivedKeys;
   }
 
-  Future<String> _getDerivedKeyFromMaster(
-    String masterKey,
-    KeyType type,
-    String context,
-    String purpose,
-  ) async {
+  Future<String> _getDerivedKeyFromMaster(String masterKey, KeyType type, String context, String purpose) async {
     final cacheKey = '${type.name}_${context}_$purpose';
 
     if (_derivedKeyCache.containsKey(cacheKey) && !_derivedKeyCache[cacheKey]!.isExpired) {
@@ -226,16 +193,9 @@ class KeyManager {
 
     final masterKeyBytes = base64.decode(masterKey);
     final salt = _generateHkdfSalt(type, context);
-    final info = utf8.encode(
-      '${config.EncryptionConfig.KEY_PURPOSES[purpose] ?? purpose}_$context',
-    );
+    final info = utf8.encode('${config.EncryptionConfig.KEY_PURPOSES[purpose] ?? purpose}_$context');
 
-    final derivedKeyBytes = _hkdf(
-      inputKeyMaterial: masterKeyBytes,
-      salt: salt,
-      info: Uint8List.fromList(info),
-      length: config.EncryptionConfig.KEY_SIZE_BYTES,
-    );
+    final derivedKeyBytes = _hkdf(inputKeyMaterial: masterKeyBytes, salt: salt, info: Uint8List.fromList(info), length: config.EncryptionConfig.KEY_SIZE_BYTES);
 
     final derivedKey = base64.encode(derivedKeyBytes);
     _derivedKeyCache[cacheKey] = CachedKey(derivedKey, customDuration: DERIVED_KEY_CACHE_DURATION);
@@ -248,12 +208,7 @@ class KeyManager {
   }
 
   /// HKDF implementation
-  static Uint8List _hkdf({
-    required Uint8List inputKeyMaterial,
-    required Uint8List salt,
-    required Uint8List info,
-    required int length,
-  }) {
+  static Uint8List _hkdf({required Uint8List inputKeyMaterial, required Uint8List salt, required Uint8List info, required int length}) {
     if (length > 255 * 32) {
       throw ArgumentError('Output length too large for HKDF');
     }
@@ -295,16 +250,13 @@ class KeyManager {
   /// Xóa derived key cache
   Future<void> _clearDerivedKeyCache([String? specificContext]) async {
     if (specificContext != null) {
-      final keysToRemove =
-          _derivedKeyCache.keys.where((key) => key.contains('_${specificContext}_')).toList();
+      final keysToRemove = _derivedKeyCache.keys.where((key) => key.contains('_${specificContext}_')).toList();
       _derivedKeyCache.removeWhere((key, value) => keysToRemove.contains(key));
     } else {
       _derivedKeyCache.clear();
     }
 
-    logInfo(
-      'Derived key cache cleared${specificContext != null ? ' for context: $specificContext' : ''}',
-    );
+    logInfo('Derived key cache cleared${specificContext != null ? ' for context: $specificContext' : ''}');
   }
 
   /// Wrap key
@@ -315,14 +267,7 @@ class KeyManager {
 
       final encrypted = encrypter.encrypt(String.fromCharCodes(keyToWrap), iv: enc.IV(iv));
 
-      final package = {
-        'iv': base64.encode(iv),
-        'data': encrypted.base64,
-        'algorithm': 'AES-256-GCM',
-        'version': '2.0',
-        'type': "WRAP",
-        'timestamp': DateTime.now().toIso8601String(),
-      };
+      final package = {'iv': base64.encode(iv), 'data': encrypted.base64, 'algorithm': 'AES-256-GCM', 'version': '2.0', 'type': "WRAP", 'timestamp': DateTime.now().toIso8601String()};
 
       return json.encode(package);
     } catch (e) {
@@ -349,17 +294,23 @@ class KeyManager {
 
   /// Kiểm tra rate limit
   Future<void> _checkRateLimit() async {
-    if (_lockoutUntil != null && DateTime.now().isBefore(_lockoutUntil!)) {
-      final remaining = _lockoutUntil!.difference(DateTime.now());
-      throw Exception('Rate limited. Try again in ${remaining.inMinutes} minutes');
+    final lockoutStr = await _secureStorage.read(key: SecureStorageKey.lockUntil);
+    if (lockoutStr != null) {
+      final lockout = DateTime.tryParse(lockoutStr);
+      if (lockout != null && DateTime.now().isBefore(lockout)) {
+        final remaining = lockout.difference(DateTime.now());
+        throw Exception('Rate limited. Try again in ${remaining.inMinutes} minutes');
+      }
     }
 
-    if (_failedAttempts >= config.EncryptionConfig.MAX_FAILED_ATTEMPTS) {
-      _lockoutUntil = DateTime.now().add(config.EncryptionConfig.LOCKOUT_DURATION);
-      _failedAttempts = 0;
-      throw Exception(
-        'Too many failed attempts. Locked out for ${config.EncryptionConfig.LOCKOUT_DURATION.inMinutes} minutes',
-      );
+    final failedStr = await _secureStorage.read(key: SecureStorageKey.loginFailCount);
+    int failedAttempts = failedStr != null ? int.tryParse(failedStr) ?? 0 : 0;
+
+    if (failedAttempts >= config.EncryptionConfig.MAX_FAILED_ATTEMPTS) {
+      final newLockout = DateTime.now().add(config.EncryptionConfig.LOCKOUT_DURATION);
+      await _secureStorage.save(key: SecureStorageKey.lockUntil, value: newLockout.toIso8601String());
+      await _secureStorage.delete(key: SecureStorageKey.loginFailCount);
+      throw Exception('Too many failed attempts. Locked out for ${config.EncryptionConfig.LOCKOUT_DURATION.inMinutes} minutes');
     }
   }
 
@@ -377,8 +328,7 @@ class KeyManager {
   }
 
   void _clearOldestCacheItems() {
-    final sortedEntries =
-        _keyCache.entries.toList()..sort((a, b) => a.value.expiresAt.compareTo(b.value.expiresAt));
+    final sortedEntries = _keyCache.entries.toList()..sort((a, b) => a.value.expiresAt.compareTo(b.value.expiresAt));
     while (_keyCache.length > MAX_CACHE_ITEMS) {
       final oldest = sortedEntries.removeAt(0);
       _keyCache.remove(oldest.key);
@@ -386,9 +336,7 @@ class KeyManager {
   }
 
   void _clearOldestDerivedCacheItems() {
-    final sortedEntries =
-        _derivedKeyCache.entries.toList()
-          ..sort((a, b) => a.value.expiresAt.compareTo(b.value.expiresAt));
+    final sortedEntries = _derivedKeyCache.entries.toList()..sort((a, b) => a.value.expiresAt.compareTo(b.value.expiresAt));
     while (_derivedKeyCache.length > MAX_CACHE_ITEMS) {
       final oldest = sortedEntries.removeAt(0);
       _derivedKeyCache.remove(oldest.key);
@@ -401,20 +349,12 @@ class KeyManager {
   }
 
   void _clearExpiredCache() {
-    final expiredKeys =
-        _keyCache.entries
-            .where((entry) => entry.value.isExpired)
-            .map((entry) => entry.key)
-            .toList();
+    final expiredKeys = _keyCache.entries.where((entry) => entry.value.isExpired).map((entry) => entry.key).toList();
     for (final key in expiredKeys) {
       _keyCache.remove(key);
     }
 
-    final expiredDerivedKeys =
-        _derivedKeyCache.entries
-            .where((entry) => entry.value.isExpired)
-            .map((entry) => entry.key)
-            .toList();
+    final expiredDerivedKeys = _derivedKeyCache.entries.where((entry) => entry.value.isExpired).map((entry) => entry.key).toList();
     for (final key in expiredDerivedKeys) {
       _derivedKeyCache.remove(key);
     }
@@ -434,24 +374,11 @@ class KeyManager {
 
   /// Security operations
   Uint8List _generateSecureRandomBytes(int length) {
-    final entropy = <int>[];
-    entropy.addAll(utf8.encode(DateTime.now().toIso8601String()));
-    entropy.addAll(utf8.encode(DateTime.now().microsecondsSinceEpoch.toString()));
-    entropy.addAll(utf8.encode(hashCode.toString()));
-
-    final systemRandom = Random.secure();
-    for (int i = 0; i < config.EncryptionConfig.SECURE_RANDOM_SEED_LENGTH; i++) {
-      entropy.add(systemRandom.nextInt(256));
-    }
-
-    final entropyBytes = Uint8List.fromList(sha256.convert(Uint8List.fromList(entropy)).bytes);
-    final result = Uint8List(length);
     final random = Random.secure();
-
+    final result = Uint8List(length);
     for (int i = 0; i < length; i++) {
-      result[i] = (random.nextInt(256) ^ entropyBytes[i % entropyBytes.length]);
+      result[i] = random.nextInt(256);
     }
-
     return result;
   }
 
@@ -477,9 +404,12 @@ class KeyManager {
   }
 
   /// Error handling
-  void _logError(String message, Object error) {
+  Future<void> _logError(String message, Object error) async {
     logError('[KeyManager] ERROR: $message: $error');
-    _failedAttempts++;
+    final failedStr = await _secureStorage.read(key: SecureStorageKey.loginFailCount);
+    int failedAttempts = failedStr != null ? int.tryParse(failedStr) ?? 0 : 0;
+    failedAttempts++;
+    await _secureStorage.save(key: SecureStorageKey.loginFailCount, value: failedAttempts.toString());
   }
 
   Future<T> _withRetry<T>(Future<T> Function() operation, {required String functionName}) async {
@@ -489,7 +419,7 @@ class KeyManager {
         return await operation();
       } catch (e) {
         attempts++;
-        _logError('Retry attempt $attempts failed', e);
+        await _logError('Retry attempt $attempts failed', e);
         if (attempts == config.EncryptionConfig.MAX_RETRY_ATTEMPTS) {
           throwAppError(ErrorText.tooManyRetries, functionName: functionName);
         }

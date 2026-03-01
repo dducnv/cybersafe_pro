@@ -7,11 +7,10 @@ import 'package:cybersafe_pro/secure/encrypt/key_manager.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:encrypt/encrypt.dart' as enc;
 import 'package:flutter/foundation.dart';
-import 'package:pointycastle/export.dart' as pc;
 
-class EncryptV2 {
-  static final instance = EncryptV2._();
-  EncryptV2._();
+class EncryptStrong {
+  static final instance = EncryptStrong._();
+  EncryptStrong._();
 
   static const _ivLength = config.EncryptionConfig.IV_LENGTH_GCM;
   static const _saltLength = config.EncryptionConfig.SALT_SIZE_BYTES;
@@ -49,22 +48,18 @@ class EncryptV2 {
 
   // Constant time string comparison to prevent timing attacks
   static bool _constantTimeEquals(String a, String b) {
-    if (a.length != b.length) return false;
-
-    var result = 0;
-    for (int i = 0; i < a.length; i++) {
-      result |= a.codeUnitAt(i) ^ b.codeUnitAt(i);
+    final maxLen = a.length > b.length ? a.length : b.length;
+    var result = a.length ^ b.length;
+    for (int i = 0; i < maxLen; i++) {
+      final ca = i < a.length ? a.codeUnitAt(i) : 0;
+      final cb = i < b.length ? b.codeUnitAt(i) : 0;
+      result |= ca ^ cb;
     }
     return result == 0;
   }
 
   // Local HKDF (HMAC-SHA256)
-  static Uint8List _hkdf({
-    required Uint8List inputKeyMaterial,
-    required Uint8List salt,
-    required Uint8List info,
-    required int length,
-  }) {
+  static Uint8List _hkdf({required Uint8List inputKeyMaterial, required Uint8List salt, required Uint8List info, required int length}) {
     if (length > 255 * 32) {
       throw ArgumentError('Output length too large for HKDF');
     }
@@ -87,11 +82,7 @@ class EncryptV2 {
     return Uint8List.fromList(okm.take(length).toList());
   }
 
-  static Future<String> encrypt({
-    required String plainText,
-    required KeyType keyType,
-    String? associatedData,
-  }) async {
+  static Future<String> encrypt({required String plainText, required KeyType keyType, String? associatedData}) async {
     if (plainText.isEmpty) {
       throw ArgumentError('plainText không được rỗng');
     }
@@ -101,11 +92,7 @@ class EncryptV2 {
       final baseSecretB64 = await KeyManager.getKey(keyType);
 
       // Chạy trong isolate để tránh block UI
-      final result = await compute<Map<String, dynamic>, String>(_encryptHKDFInIsolate, {
-        'plainText': plainText,
-        'baseSecret': baseSecretB64,
-        'associatedData': associatedData,
-      });
+      final result = await compute<Map<String, dynamic>, String>(_encryptHKDFInIsolate, {'plainText': plainText, 'baseSecret': baseSecretB64, 'associatedData': associatedData});
 
       return result;
     } catch (e, stackTrace) {
@@ -114,12 +101,7 @@ class EncryptV2 {
     }
   }
 
-  static Future<String> decrypt({
-    required String value,
-    required KeyType keyType,
-    String? key,
-    String? associatedData,
-  }) async {
+  static Future<String> decrypt({required String value, required KeyType keyType, String? key, String? associatedData}) async {
     if (value.isEmpty) {
       throw ArgumentError('value không được rỗng');
     }
@@ -158,12 +140,7 @@ class EncryptV2 {
       } else {
         // Backward-compatible flow (old): KeyManager-derived AES/HMAC
         final stopwatch = Stopwatch()..start();
-        final derivedKeys = await KeyManager.getDerivedKeys(
-          keyType,
-          _encryptionContext,
-          purposes: ['aes', 'hmac'],
-          key: key,
-        );
+        final derivedKeys = await KeyManager.getDerivedKeys(keyType, _encryptionContext, purposes: ['aes', 'hmac'], key: key);
         final keyTime = stopwatch.elapsedMilliseconds;
         if (keyTime > 100) {
           logInfo("getDerivedKeys took $keyTime ms");
@@ -175,14 +152,10 @@ class EncryptV2 {
         aesKeyBytes = base64.decode(aesKey);
         final encKey = enc.Key(aesKeyBytes);
         final encrypter = _getEncrypter(encKey);
-        result =
-            associatedData != null
-                ? encrypter.decrypt(data, iv: iv, associatedData: utf8.encode(associatedData))
-                : encrypter.decrypt(data, iv: iv);
+        result = associatedData != null ? encrypter.decrypt(data, iv: iv, associatedData: utf8.encode(associatedData)) : encrypter.decrypt(data, iv: iv);
 
         if (package.containsKey('hmac')) {
-          final dataForHmac =
-              '$result|${base64.encode(salt)}|${base64.encode(iv.bytes)}|${associatedData ?? ''}';
+          final dataForHmac = '$result|${base64.encode(salt)}|${base64.encode(iv.bytes)}|${associatedData ?? ''}';
           final expectedHmac = package['hmac'];
 
           if (!_verifyHMAC(dataForHmac, expectedHmac, hmacKey)) {
@@ -213,20 +186,12 @@ class EncryptV2 {
       final iv = _generateIV();
 
       // HKDF → tách AES/HMAC key (HMAC không bắt buộc vì AES-GCM có tag, nhưng giữ để đồng bộ)
-      final okm = _hkdf(
-        inputKeyMaterial: baseSecretBytes,
-        salt: salt,
-        info: Uint8List.fromList(utf8.encode('aes_hmac_$_encryptionContext')),
-        length: 64,
-      );
+      final okm = _hkdf(inputKeyMaterial: baseSecretBytes, salt: salt, info: Uint8List.fromList(utf8.encode('aes_hmac_$_encryptionContext')), length: 64);
       final aesKey = Uint8List.fromList(okm.sublist(0, 32));
       final encKey = enc.Key(aesKey);
       final encrypter = _getEncrypter(encKey);
 
-      final encrypted =
-          associatedData != null
-              ? encrypter.encrypt(plainText, iv: iv, associatedData: utf8.encode(associatedData))
-              : encrypter.encrypt(plainText, iv: iv);
+      final encrypted = associatedData != null ? encrypter.encrypt(plainText, iv: iv, associatedData: utf8.encode(associatedData)) : encrypter.encrypt(plainText, iv: iv);
 
       final package = {
         'salt': base64.encode(salt),
@@ -270,19 +235,11 @@ class EncryptV2 {
       final iv = enc.IV(base64.decode(ivB64));
       final data = enc.Encrypted.fromBase64(encryptedDataB64);
 
-      final okm = _hkdf(
-        inputKeyMaterial: baseSecretBytes,
-        salt: salt,
-        info: Uint8List.fromList(utf8.encode('aes_hmac_$_encryptionContext')),
-        length: 64,
-      );
+      final okm = _hkdf(inputKeyMaterial: baseSecretBytes, salt: salt, info: Uint8List.fromList(utf8.encode('aes_hmac_$_encryptionContext')), length: 64);
       final aesKey = Uint8List.fromList(okm.sublist(0, 32));
       final encrypter = _getEncrypter(enc.Key(aesKey));
 
-      final result =
-          associatedData != null
-              ? encrypter.decrypt(data, iv: iv, associatedData: utf8.encode(associatedData))
-              : encrypter.decrypt(data, iv: iv);
+      final result = associatedData != null ? encrypter.decrypt(data, iv: iv, associatedData: utf8.encode(associatedData)) : encrypter.decrypt(data, iv: iv);
 
       _secureWipe(baseSecretBytes);
       _secureWipe(okm);
@@ -294,20 +251,13 @@ class EncryptV2 {
     }
   }
 
-  // Secure memory wipe
   static void _secureWipe(Uint8List data) {
     for (int pass = 0; pass < config.EncryptionConfig.MEMORY_WIPE_PASSES; pass++) {
-      final random = pc.SecureRandom('Fortuna');
-
-      // Seed with multiple entropy sources
-      final entropy = utf8.encode(DateTime.now().microsecondsSinceEpoch.toString());
-
-      // Ensure entropy is exactly 32 bytes (256 bits) for Fortuna
-      final entropyBytes = Uint8List.fromList(sha256.convert(Uint8List.fromList(entropy)).bytes);
-
-      random.seed(pc.KeyParameter(entropyBytes));
-
-      final randomBytes = random.nextBytes(data.length);
+      final random = Random.secure();
+      final randomBytes = Uint8List(data.length);
+      for (int i = 0; i < data.length; i++) {
+        randomBytes[i] = random.nextInt(256);
+      }
       for (int i = 0; i < data.length; i++) {
         data[i] = randomBytes[i];
       }

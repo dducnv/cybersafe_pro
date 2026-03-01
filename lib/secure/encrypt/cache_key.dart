@@ -3,13 +3,13 @@
 // This provides cryptographically secure in-memory protection for cached keys
 
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:cybersafe_pro/secure/encrypt/key_manager.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:encrypt/encrypt.dart' as enc;
-import 'package:pointycastle/export.dart' as pc;
 
 class CachedKey {
   final String _encryptedValue;
@@ -23,9 +23,7 @@ class CachedKey {
   static const String _cipherAlgorithm = 'AES-256-GCM'; // 🔐 Upgraded from XOR
   static const String _version = '1.0';
 
-  CachedKey(String value, {Duration? customDuration})
-    : expiresAt = DateTime.now().add(customDuration ?? KeyManager.MAX_CACHE_DURATION),
-      _encryptedValue = _encryptValueAES(value);
+  CachedKey(String value, {Duration? customDuration}) : expiresAt = DateTime.now().add(customDuration ?? KeyManager.MAX_CACHE_DURATION), _encryptedValue = _encryptValueAES(value);
 
   bool get isExpired => DateTime.now().isAfter(expiresAt);
 
@@ -102,9 +100,7 @@ class CachedKey {
       // Validate algorithm version
       final algorithm = package['algorithm'] as String?;
       if (algorithm != _cipherAlgorithm) {
-        throw Exception(
-          'Unsupported encryption algorithm: $algorithm (expected: $_cipherAlgorithm)',
-        );
+        throw Exception('Unsupported encryption algorithm: $algorithm (expected: $_cipherAlgorithm)');
       }
 
       // Extract components
@@ -151,16 +147,10 @@ class CachedKey {
     }
   }
 
-  /// Generate cryptographically secure random bytes
+  /// Generate cryptographically secure random bytes using OS CSPRNG
   static Uint8List _generateSecureRandomBytes(int length) {
-    final random = pc.SecureRandom('Fortuna');
-
-    // Seed with multiple entropy sources
-    final entropy = utf8.encode(DateTime.now().microsecondsSinceEpoch.toString());
-    final entropyBytes = Uint8List.fromList(sha256.convert(entropy).bytes);
-
-    random.seed(pc.KeyParameter(entropyBytes));
-    return random.nextBytes(length);
+    final random = Random.secure();
+    return Uint8List.fromList(List<int>.generate(length, (_) => random.nextInt(256)));
   }
 
   /// Derive per-session memory key using HKDF-SHA256
@@ -218,12 +208,7 @@ class CachedKey {
     try {
       final packageJson = utf8.decode(base64.decode(encryptedValue));
       final package = json.decode(packageJson) as Map<String, dynamic>;
-      return {
-        'algorithm': package['algorithm'],
-        'version': package['version'],
-        'timestamp': package['timestamp'],
-        'isValid': _isValidPackage(package),
-      };
+      return {'algorithm': package['algorithm'], 'version': package['version'], 'timestamp': package['timestamp'], 'isValid': _isValidPackage(package)};
     } catch (e) {
       return {'error': e.toString(), 'isValid': false};
     }
