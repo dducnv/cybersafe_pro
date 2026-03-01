@@ -3,13 +3,13 @@
 // This provides cryptographically secure in-memory protection for cached keys
 
 import 'dart:convert';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:cybersafe_pro/secure/encrypt/key_manager.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
 import 'package:encrypt/encrypt.dart' as enc;
+import 'package:pointycastle/export.dart' as pc;
 
 class CachedKey {
   final String _encryptedValue;
@@ -147,10 +147,16 @@ class CachedKey {
     }
   }
 
-  /// Generate cryptographically secure random bytes using OS CSPRNG
+  /// Generate cryptographically secure random bytes
   static Uint8List _generateSecureRandomBytes(int length) {
-    final random = Random.secure();
-    return Uint8List.fromList(List<int>.generate(length, (_) => random.nextInt(256)));
+    final random = pc.SecureRandom('Fortuna');
+
+    // Seed with multiple entropy sources
+    final entropy = utf8.encode(DateTime.now().microsecondsSinceEpoch.toString());
+    final entropyBytes = Uint8List.fromList(sha256.convert(entropy).bytes);
+
+    random.seed(pc.KeyParameter(entropyBytes));
+    return random.nextBytes(length);
   }
 
   /// Derive per-session memory key using HKDF-SHA256

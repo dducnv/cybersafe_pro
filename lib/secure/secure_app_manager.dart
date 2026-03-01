@@ -223,15 +223,13 @@ class SecureAppManager {
         logError('PIN chưa được thiết lập', functionName: 'SecureAppManager._verifyPIN');
         return false;
       }
-      final migrationVersion = await SecureStorage.instance.read(key: SecureStorageKey.argon2MigrationVersion);
-      final isArgon2V2 = migrationVersion == 'v2';
 
       final computedHash = await compute(_hashPINInIsolate, {
         'pin': pin,
         'salt': saltBase64,
-        'memoryPowerOf2': isArgon2V2 ? EncryptionConfig.memoryPowerOf2 : EncryptionConfig.oldMemoryPowerOf2,
-        'iterations': isArgon2V2 ? EncryptionConfig.iterations : EncryptionConfig.oldIterations,
-        'parallelism': isArgon2V2 ? EncryptionConfig.parallelism : EncryptionConfig.oldParallelism,
+        'memoryPowerOf2': EncryptionConfig.memoryPowerOf2,
+        'iterations': EncryptionConfig.iterations,
+        'parallelism': EncryptionConfig.parallelism,
         'desiredLength': EncryptionConfig.pinHashLength,
       });
 
@@ -526,9 +524,9 @@ class SecureAppManager {
     final argon2Output = await compute(_deriveKeyInIsolate, {
       'pin': pin,
       'salt': base64.encode(derivationSalt),
-      'memoryPowerOf2': useOldParams ? EncryptionConfig.oldMemoryPowerOf2 : EncryptionConfig.memoryPowerOf2,
-      'iterations': useOldParams ? EncryptionConfig.oldIterations : EncryptionConfig.iterations,
-      'parallelism': useOldParams ? EncryptionConfig.oldParallelism : EncryptionConfig.parallelism,
+      'memoryPowerOf2': EncryptionConfig.memoryPowerOf2,
+      'iterations': EncryptionConfig.iterations,
+      'parallelism': EncryptionConfig.parallelism,
       'desiredLength': 32,
     });
 

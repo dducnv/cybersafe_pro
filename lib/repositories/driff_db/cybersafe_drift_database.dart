@@ -1,9 +1,7 @@
 import 'dart:io';
 
-import 'package:cybersafe_pro/constants/secure_storage_key.dart';
 import 'package:cybersafe_pro/secure/encrypt/key_manager.dart';
 import 'package:cybersafe_pro/utils/logger.dart';
-import 'package:cybersafe_pro/utils/secure_storage.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
@@ -30,18 +28,6 @@ class DriftSqliteDatabase extends _$DriftSqliteDatabase {
 
         // Lấy password từ KeyManager
         final password = await KeyManager.getKey(KeyType.database);
-
-        // Kiểm tra trạng thái migration kdf_iter
-        final secureStorage = SecureStorage.instance;
-        final kdfMigrated = await secureStorage.read(key: SecureStorageKey.dbKdfMigrated);
-        final isKdfMigrated = kdfMigrated == 'true';
-        final isNewDatabase = !file.existsSync();
-
-        logInfo(
-          'Opening Drift database at: ${file.path} '
-          '(kdfMigrated=$isKdfMigrated, isNew=$isNewDatabase)',
-        );
-
         return NativeDatabase.createInBackground(
           file,
           setup: (database) {
@@ -51,25 +37,11 @@ class DriftSqliteDatabase extends _$DriftSqliteDatabase {
             // Cấu hình SQLCipher compatibility
             database.execute("PRAGMA cipher = 'sqlcipher'");
             database.execute('PRAGMA legacy = 4');
-
-            if (isNewDatabase || isKdfMigrated) {
-              // User mới hoặc đã migrate → dùng kdf_iter=256000
-              database.execute('PRAGMA kdf_iter = 256000');
-              database.execute('PRAGMA key = "$password"');
-            } else {
-              // User cũ chưa migrate → mở với 64000 rồi rekey sang 256000
-              database.execute('PRAGMA kdf_iter = 64000');
-              database.execute('PRAGMA key = "$password"');
-
-              // Verify mở được với key cũ
-              database.select('SELECT COUNT(*) FROM sqlite_master');
-
-              // Re-encrypt với kdf_iter=256000
-              database.execute('PRAGMA kdf_iter = 256000');
-              database.execute('PRAGMA rekey = "$password"');
-
-              logInfo('Database re-keyed with kdf_iter=256000');
-            }
+            database.execute('PRAGMA key = "$password"');
+            database.execute('PRAGMA cipher_page_size = 4096');
+            database.execute('PRAGMA kdf_iter = 64000');
+            database.execute('PRAGMA cipher_hmac_algorithm = HMAC_SHA512');
+            database.execute('PRAGMA cipher_kdf_algorithm = PBKDF2_HMAC_SHA512');
 
             // Cấu hình performance
             database.execute('PRAGMA journal_mode = WAL');
@@ -95,25 +67,10 @@ class DriftSqliteDatabase extends _$DriftSqliteDatabase {
     });
   }
 
-  /// Gọi sau khi database mở thành công để lưu trạng thái migration
-  static Future<void> markKdfMigrationComplete() async {
-    try {
-      final secureStorage = SecureStorage.instance;
-      final kdfMigrated = await secureStorage.read(key: SecureStorageKey.dbKdfMigrated);
-      if (kdfMigrated != 'true') {
-        await secureStorage.save(key: SecureStorageKey.dbKdfMigrated, value: 'true');
-        logInfo('KDF migration flag saved');
-      }
-    } catch (e) {
-      logError('Failed to save KDF migration flag: $e');
-    }
-  }
-
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
       await m.createAll();
-      await markKdfMigrationComplete();
     },
     onUpgrade: (Migrator m, int from, int to) async {
       if (from == 1) {
@@ -125,9 +82,6 @@ class DriftSqliteDatabase extends _$DriftSqliteDatabase {
       if (from <= 3) {
         await m.addColumn(textNotesDriftModel, textNotesDriftModel.previewContent);
       }
-    },
-    beforeOpen: (details) async {
-      await markKdfMigrationComplete();
     },
   );
 }
