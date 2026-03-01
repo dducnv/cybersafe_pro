@@ -84,9 +84,9 @@ class _CreatePinCodeWidgetState extends State<CreatePinCodeWidget> {
   }
 
   void _handleSubmit() {
-    widget.formCreateKey.currentState!.validate();
+    widget.formCreateKey.currentState?.validate();
     if (pinCodeController.text.length < 6) {
-      widget.appPinCodeCreateKey.currentState!.triggerErrorAnimation();
+      widget.appPinCodeCreateKey.currentState?.triggerErrorAnimation();
     }
     if (pinCodeController.text.isNotEmpty && context.mounted) {
       Provider.of<LocalAuthProvider>(context, listen: false).setPinCodeToConfirm(pinCodeController.text);

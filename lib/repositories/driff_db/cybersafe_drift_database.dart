@@ -18,7 +18,7 @@ class DriftSqliteDatabase extends _$DriftSqliteDatabase {
   DriftSqliteDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   /// Mở kết nối với SQLite3MultipleCiphers encryption
   /// Hỗ trợ migration kdf_iter từ 64000 → 256000
@@ -121,6 +121,9 @@ class DriftSqliteDatabase extends _$DriftSqliteDatabase {
       }
       if (from == 2) {
         await m.addColumn(accountDriftModel, accountDriftModel.openCount);
+      }
+      if (from <= 3) {
+        await m.addColumn(textNotesDriftModel, textNotesDriftModel.previewContent);
       }
     },
     beforeOpen: (details) async {

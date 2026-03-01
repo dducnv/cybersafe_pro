@@ -109,7 +109,9 @@ class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
   }
 
   Future<void> _handleSubmit() async {
-    widget.formConfirmKey.currentState!.validate();
+    widget.formConfirmKey.currentState?.validate();
+    if (!mounted) return;
+
     bool isVerified = Provider.of<LocalAuthProvider>(context, listen: false).verifyRegisterPinCode(pinCodeController.text);
     if (isVerified && pinCodeController.text.isNotEmpty && context.mounted) {
       showLoadingDialog(loadingText: !widget.isChangePin ? ValueNotifier(context.trSafe(OnboardingText.initDatabase)) : null);
@@ -133,7 +135,7 @@ class _ConfirmPinCodeWidgetState extends State<ConfirmPinCodeWidget> {
       }
     } else {
       timeCorrect++;
-      widget.appPinCodeConfirmKey.currentState!.triggerErrorAnimation();
+      widget.appPinCodeConfirmKey.currentState?.triggerErrorAnimation();
       showToastWarning(context.trSafe(LoginText.pinCodeNotMatch), context: context, position: StyledToastPosition.top);
 
       if (timeCorrect >= 1) {

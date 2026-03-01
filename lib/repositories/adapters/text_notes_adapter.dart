@@ -19,8 +19,7 @@ class TextNotesAdapter {
 
   Future<List<TextNotesDriftModelData>> getByYearAndMonth(int year, int month) async {
     try {
-      final query = _database.select(_database.textNotesDriftModel)
-        ..where((tbl) => tbl.updatedAt.year.equals(year) & tbl.updatedAt.month.equals(month));
+      final query = _database.select(_database.textNotesDriftModel)..where((tbl) => tbl.updatedAt.year.equals(year) & tbl.updatedAt.month.equals(month));
       return await query.get();
     } catch (e) {
       logError('Error getting notes by year and month: $e');
@@ -34,6 +33,7 @@ class TextNotesAdapter {
         final note = TextNotesDriftModelCompanion.insert(
           title: textNote.title,
           content: Value(textNote.content),
+          previewContent: Value(textNote.previewContent),
           isFavorite: Value(textNote.isFavorite),
           isPinned: Value(textNote.isPinned),
           indexPos: Value(textNote.indexPos),
@@ -51,6 +51,7 @@ class TextNotesAdapter {
     final note = TextNotesDriftModelCompanion.insert(
       title: data.title.value,
       content: data.content,
+      previewContent: data.previewContent,
       isFavorite: data.isFavorite,
       isPinned: data.isPinned,
       indexPos: Value(indexPos),
@@ -60,9 +61,7 @@ class TextNotesAdapter {
   }
 
   Future<int> update(TextNotesDriftModelData data) async {
-    return await (_database.update(
-      _database.textNotesDriftModel,
-    )..where((tbl) => tbl.id.equals(data.id))).write(data);
+    return await (_database.update(_database.textNotesDriftModel)..where((tbl) => tbl.id.equals(data.id))).write(data);
   }
 
   Future<int> _getNextIndexPos() async {
@@ -94,14 +93,11 @@ class TextNotesAdapter {
   }
 
   Future<void> updateColor(int id, String? color) async {
-    await (_database.update(_database.textNotesDriftModel)..where((tbl) => tbl.id.equals(id)))
-        .write(TextNotesDriftModelCompanion(color: Value(color), updatedAt: Value(DateTime.now())));
+    await (_database.update(_database.textNotesDriftModel)..where((tbl) => tbl.id.equals(id))).write(TextNotesDriftModelCompanion(color: Value(color), updatedAt: Value(DateTime.now())));
   }
 
   Future<int> delete(int id) async {
-    return await (_database.delete(
-      _database.textNotesDriftModel,
-    )..where((tbl) => tbl.id.equals(id))).go();
+    return await (_database.delete(_database.textNotesDriftModel)..where((tbl) => tbl.id.equals(id))).go();
   }
 
   Future<void> deleteAll() async {

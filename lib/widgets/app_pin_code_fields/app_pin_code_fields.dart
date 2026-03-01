@@ -91,11 +91,12 @@ class AppPinCodeFieldsState extends State<AppPinCodeFields> with SingleTickerPro
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.textEditingController?.clear();
-      HardwareKeyboard.instance.addHandler((event) => _keyboardCallback(event));
+      HardwareKeyboard.instance.addHandler(_keyboardCallback);
     });
   }
 
   bool _keyboardCallback(KeyEvent event) {
+    if (!mounted) return false;
     if (event.logicalKey == LogicalKeyboardKey.enter) {
       widget.onEnter();
       return true;

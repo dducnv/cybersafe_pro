@@ -7,13 +7,7 @@ class NoteCardData {
   final String time;
   final DateTime updatedAt;
   final Color? color;
+  final bool isPinned;
 
-  NoteCardData({
-    required this.id,
-    required this.title,
-    required this.content,
-    required this.time,
-    required this.updatedAt,
-    this.color,
-  });
+  NoteCardData({required this.id, required this.title, required this.content, required this.time, required this.updatedAt, this.color, this.isPinned = false});
 }
